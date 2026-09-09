@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+artifacts/**
+.env*
+*.key
+*.pem
+*.pfx
+runtime/
+logs/
+models/
+真实底稿/
