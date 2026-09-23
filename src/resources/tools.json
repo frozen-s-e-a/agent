@@ -1,0 +1,274 @@
+[
+  {
+    "id": "inspect",
+    "name": "查看数据结构",
+    "group": "文件与表格",
+    "description": "Excel 输出工作表结构与有限原始行样本，支持空白首行、标题和非规则底稿；CSV 保留规则表格导入。",
+    "fields": [],
+    "legacy": "finance_viewer",
+    "status": "implemented"
+  },
+  {
+    "id": "select_column",
+    "name": "选择列",
+    "group": "文件与表格",
+    "description": "按指定字段和顺序提取多文件数据。",
+    "fields": [
+      {
+        "key": "columns",
+        "label": "列名（逗号分隔）",
+        "required": true
+      }
+    ],
+    "legacy": "select_column",
+    "status": "implemented"
+  },
+  {
+    "id": "fill_column",
+    "name": "向下填充空值",
+    "group": "文件与表格",
+    "description": "逐文件、逐工作表向下填充选定字段。",
+    "fields": [
+      {
+        "key": "columns",
+        "label": "需要填充的列名",
+        "required": true
+      }
+    ],
+    "legacy": "fill_column",
+    "status": "implemented"
+  },
+  {
+    "id": "merge_files",
+    "name": "多表汇集",
+    "group": "文件与表格",
+    "description": "按列名对齐，保留全部输入行与来源；缺少字段保留空值。",
+    "fields": [],
+    "legacy": "multi_collect_file",
+    "status": "implemented"
+  },
+  {
+    "id": "merge_column",
+    "name": "多列合并",
+    "group": "文件与表格",
+    "description": "按顺序拼接选定列，输出为新列。",
+    "fields": [
+      {
+        "key": "columns",
+        "label": "要合并的列",
+        "required": true
+      },
+      {
+        "key": "target",
+        "label": "新列名",
+        "default": "合并列",
+        "required": true
+      },
+      {
+        "key": "separator",
+        "label": "分隔符",
+        "default": "_"
+      }
+    ],
+    "legacy": "merge_column",
+    "status": "implemented"
+  },
+  {
+    "id": "add_column",
+    "name": "新增固定值列",
+    "group": "文件与表格",
+    "description": "在输出副本追加新列，原文件不变。",
+    "fields": [
+      {
+        "key": "target",
+        "label": "新列名",
+        "required": true
+      },
+      {
+        "key": "value",
+        "label": "填充值"
+      }
+    ],
+    "legacy": "add_column",
+    "status": "implemented"
+  },
+  {
+    "id": "dropsummary",
+    "name": "删除合计行",
+    "group": "文件与表格",
+    "description": "按指定列中的完整文字匹配排除合计行，并记录排除数量。",
+    "fields": [
+      {
+        "key": "column",
+        "label": "判断列",
+        "required": true
+      },
+      {
+        "key": "values",
+        "label": "完整匹配值（逗号分隔）",
+        "default": "合计,小计,总计",
+        "required": true
+      }
+    ],
+    "legacy": "dropsummary",
+    "status": "implemented"
+  },
+  {
+    "id": "text_match",
+    "name": "文本筛选匹配",
+    "group": "文件与表格",
+    "description": "按文字包含关系筛选行，不把表达式作为程序执行。",
+    "fields": [
+      {
+        "key": "column",
+        "label": "匹配列",
+        "required": true
+      },
+      {
+        "key": "keyword",
+        "label": "包含文字",
+        "required": true
+      }
+    ],
+    "legacy": "text_match",
+    "status": "implemented"
+  },
+  {
+    "id": "subject_clean",
+    "name": "科目字段清理",
+    "group": "科目与账簿",
+    "description": "清理选定科目字段首尾空格，保持科目代码的文本类型。",
+    "fields": [
+      {
+        "key": "columns",
+        "label": "科目代码、名称列",
+        "required": true
+      }
+    ],
+    "legacy": "subject_clean",
+    "status": "implemented"
+  },
+  {
+    "id": "voucher_check",
+    "name": "凭证借贷核对",
+    "group": "科目与账簿",
+    "description": "按完整凭证键跨文件汇总借贷金额，输出绝对差额超限的凭证。",
+    "fields": [
+      {
+        "key": "keys",
+        "label": "凭证分组列（含主体、期间、凭证编号）",
+        "required": true
+      },
+      {
+        "key": "debit",
+        "label": "借方金额列",
+        "required": true
+      },
+      {
+        "key": "credit",
+        "label": "贷方金额列",
+        "required": true
+      },
+      {
+        "key": "tolerance",
+        "label": "允许差额",
+        "default": "0.01",
+        "required": true
+      }
+    ],
+    "legacy": "voucher_check",
+    "status": "implemented"
+  },
+  {
+    "id": "monthly_analysis",
+    "name": "月间分析",
+    "group": "分析与核查",
+    "description": "按用户选择的科目汇总每月借贷发生额；本实现尚不含上期同比与 AI 原因分析。",
+    "fields": [
+      {
+        "key": "date",
+        "label": "日期列",
+        "required": true
+      },
+      {
+        "key": "subject",
+        "label": "科目代码列",
+        "required": true
+      },
+      {
+        "key": "subjects",
+        "label": "需要分析的科目代码（精确匹配）",
+        "required": true
+      },
+      {
+        "key": "debit",
+        "label": "借方金额列",
+        "required": true
+      },
+      {
+        "key": "credit",
+        "label": "贷方金额列",
+        "required": true
+      }
+    ],
+    "legacy": "monthly_analysis",
+    "status": "implemented"
+  },
+  {
+    "id": "duplicates",
+    "name": "全局重复检查",
+    "group": "分析与核查",
+    "description": "按选定键跨全部文件检查重复项，列出每条原始记录。",
+    "fields": [
+      {
+        "key": "keys",
+        "label": "重复判断列",
+        "required": true
+      }
+    ],
+    "legacy": "jet_test",
+    "status": "implemented"
+  },
+  {
+    "id": "jet_test",
+    "name": "JET 会计分录测试",
+    "group": "分析与核查",
+    "description": "读取原 JET 模板的 33 条规则定义；执行前确认规则、字段映射和参数。新旧行为对照仍待完成。",
+    "fields": [
+      {
+        "key": "rules",
+        "label": "规则名称（逗号分隔；在下方选择）",
+        "required": true
+      }
+    ],
+    "legacy": "jet_test",
+    "status": "implemented"
+  },
+  {
+    "id": "file_inventory",
+    "name": "文件资料清单",
+    "group": "文件与表格",
+    "description": "为选中文件生成名称、大小、SHA-256 和相对路径清单。",
+    "fields": [],
+    "legacy": "info_extract",
+    "status": "implemented"
+  },
+  {
+    "id": "pdf_text",
+    "name": "PDF 文本提取",
+    "group": "文档资料",
+    "description": "逐页提取文本并记录页码；扫描页明确提示需要 OCR。",
+    "fields": [],
+    "legacy": "info_extract_multi",
+    "status": "implemented"
+  },
+  {
+    "id": "link_extract",
+    "name": "Excel 链接提取",
+    "group": "文档资料",
+    "description": "提取工作簿中的超链接与外部公式，记录工作表和单元格位置。",
+    "fields": [],
+    "legacy": "link_extractor",
+    "status": "implemented"
+  }
+]

@@ -1,0 +1,11 @@
+import {spawn} from 'node:child_process';
+export class McpStdioClient{
+ constructor({command,args=[],cwd,env={},timeoutMs=30000}={}){if(typeof command!=='string'||!command.trim())throw Error('MCP 服务命令不能为空');if(command.includes('&&')||command.includes('|')||command.includes('>'))throw Error('MCP 服务命令不得包含 Shell 运算符');this.command=command;this.args=args;this.cwd=cwd;this.env=env;this.timeoutMs=timeoutMs;this.id=0;this.pending=new Map();this.buffer='';}
+ async connect(){if(this.child)throw Error('MCP 服务已连接');this.child=spawn(this.command,this.args,{cwd:this.cwd,env:{...process.env,...this.env},shell:false,windowsHide:true,stdio:['pipe','pipe','pipe']});this.child.stdout.setEncoding('utf8');this.child.stdout.on('data',d=>this.#data(d));this.child.on('error',e=>this.#fail(e));this.child.on('exit',()=>this.#fail(Error('MCP 服务已退出')));await this.request('initialize',{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'audit-assistant',version:'0.1'}});await this.notify('notifications/initialized',{});return this;}
+ #data(chunk){this.buffer+=chunk;let i;while((i=this.buffer.indexOf('\n'))>=0){const line=this.buffer.slice(0,i).trim();this.buffer=this.buffer.slice(i+1);if(!line)continue;let msg;try{msg=JSON.parse(line);}catch{continue;}const p=this.pending.get(msg.id);if(p){this.pending.delete(msg.id);clearTimeout(p.timer);msg.error?p.reject(Error(msg.error.message||'MCP 请求失败')):p.resolve(msg.result);}}}
+ #fail(error){for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(error);}this.pending.clear();}
+ request(method,params){if(!this.child||this.child.killed)throw Error('MCP 服务未连接');const id=String(++this.id);return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{this.pending.delete(id);reject(Error('MCP 请求超时'));},this.timeoutMs);this.pending.set(id,{resolve,reject,timer});this.child.stdin.write(JSON.stringify({jsonrpc:'2.0',id,method,params})+'\n');});}
+ notify(method,params){if(!this.child||this.child.killed)throw Error('MCP 服务未连接');this.child.stdin.write(JSON.stringify({jsonrpc:'2.0',method,params})+'\n');}
+ listTools(){return this.request('tools/list',{});}callTool(name,args={}){return this.request('tools/call',{name,arguments:args});}
+ close(){this.#fail(Error('MCP 服务已关闭'));if(this.child?.pid)process.kill(this.child.pid);this.child=null;}
+}

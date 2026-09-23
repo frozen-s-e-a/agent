@@ -1,0 +1,26 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+import {bundleUiLicenses} from './bundle-ui-licenses.mjs';
+const version=JSON.parse(fs.readFileSync('package.json','utf8')).version;
+const output=path.resolve('artifacts/test/windows-x64',version,'AI助手');
+if(fs.existsSync(output))throw Error('测试包已存在；请先更新版本，避免覆盖正在使用的程序');
+for(const p of ['build/client/index.html','build/python/python.exe','build/python-packages/duckdb/__init__.py','build/runtime/node.exe','node_modules/electron/dist/electron.exe'])if(!fs.existsSync(p))throw Error('缺少构建输入：'+p);
+fs.mkdirSync(output,{recursive:true});fs.cpSync('node_modules/electron/dist',output,{recursive:true});fs.renameSync(path.join(output,'electron.exe'),path.join(output,'AI助手.exe'));
+const app=path.join(output,'resources/app');fs.mkdirSync(app,{recursive:true});
+fs.writeFileSync(path.join(app,'package.json'),JSON.stringify({name:'audit-assistant',version,main:'src/host/electron.cjs',type:'module'}));
+for(const p of ['host','file-ops','conversations','task-scheduler','harness-adapter','contracts','audit-worker','resources','mcp'])fs.cpSync(path.join('src',p),path.join(app,'src',p),{recursive:true,filter:p=>!p.includes('__pycache__')});
+fs.cpSync('build/client',path.join(app,'build/client'),{recursive:true});
+fs.cpSync('build/python',path.join(app,'runtime/python'),{recursive:true});fs.cpSync('build/python-packages',path.join(app,'runtime/python-packages'),{recursive:true,filter:p=>!p.includes('__pycache__')});
+fs.copyFileSync('build/runtime/node.exe',path.join(app,'runtime/node.exe'));
+fs.copyFileSync('build/runtime/NODE_LICENSE',path.join(app,'runtime/NODE_LICENSE'));
+const notices=path.join(app,'runtime/ui-licenses');fs.mkdirSync(notices,{recursive:true});
+bundleUiLicenses(notices);
+for(const dep of ['react','react-dom','lucide-react'])for(const name of ['LICENSE','LICENSE.txt'])if(fs.existsSync(path.join('node_modules',dep,name)))fs.copyFileSync(path.join('node_modules',dep,name),path.join(notices,dep+'-'+name));
+fs.copyFileSync('docs/使用说明.md',path.join(output,'使用说明.md'));fs.copyFileSync('docs/THIRD_PARTY_NOTICES.md',path.join(output,'THIRD_PARTY_NOTICES.md'));
+const hash=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+let git='uncommitted';try{git=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();}catch{}
+const pythonVersion=execFileSync('build/python/python.exe',['--version'],{encoding:'utf8'}).trim();
+const metadata={version,createdAt:new Date().toISOString(),sourceRevision:git,uncommitted:true,platform:'windows-x64',releaseStatus:'INTERNAL_NOT_FULL_MIGRATION',node:process.version,python:pythonVersion,dependenciesLock:hash('pnpm-lock.yaml'),pythonLock:hash('requirements.txt'),entrySha256:hash(path.join(output,'AI助手.exe'))};
+fs.writeFileSync(path.join(output,'build-manifest.json'),JSON.stringify(metadata,null,2));console.log(output);

@@ -10,3 +10,21 @@ runtime/
 logs/
 models/
 真实底稿/
+
+# Local research artifacts; reviewed findings belong in docs/research.
+/research/legacy/raw/
+/research/legacy/extracted/
+/research/legacy/runs/
+
+# Development caches and environments.
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage/
+.local/
+
+.legacy-home/

@@ -1,0 +1,6 @@
+import fs from 'node:fs';import path from 'node:path';import {createRequire} from 'node:module';
+export function bundleUiLicenses(destination){
+ const seen=new Set();fs.mkdirSync(destination,{recursive:true});
+ function visit(directory){const file=path.join(directory,'package.json'),pkg=JSON.parse(fs.readFileSync(file,'utf8')),key=pkg.name+'@'+pkg.version;if(seen.has(key))return;seen.add(key);const prefix=key.replace(/[^a-zA-Z0-9_.@-]/g,'_');for(const name of fs.readdirSync(directory))if(/^(license|licence|copying|notice)(\..*)?$/i.test(name)&&fs.statSync(path.join(directory,name)).isFile())fs.copyFileSync(path.join(directory,name),path.join(destination,prefix+'-'+name));const req=createRequire(file);for(const name of Object.keys(pkg.dependencies||{})){let entry;try{entry=req.resolve(name+'/package.json');}catch{entry=req.resolve(name);}let parent=path.dirname(entry);while(!fs.existsSync(path.join(parent,'package.json'))){const next=path.dirname(parent);if(next===parent)throw Error('找不到依赖许可证目录：'+name);parent=next;}visit(parent);}}
+ for(const dep of ['react-markdown','remark-gfm'])visit(fs.realpathSync(path.join('node_modules',dep)));fs.writeFileSync(path.join(destination,'markdown-dependencies.json'),JSON.stringify([...seen].sort(),null,2));
+}

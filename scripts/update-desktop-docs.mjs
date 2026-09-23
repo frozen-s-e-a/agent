@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+let text=fs.readFileSync('docs/使用说明.md','utf8');
+text=text.replace('# AI助手审计工具箱 · 0.1.0 内部测试版','# AI助手审计工具箱 · Windows 桌面版 0.1.0-internal.3');
+text=text.replace('打开测试包目录，双击 `AI助手.exe`。','双击桌面上的“AI助手桌面版”快捷方式，或打开测试包目录双击 `AI助手.exe`。界面在独立桌面窗口中打开，直接加载本地资源，不启动网页服务、不需要打开浏览器。');
+fs.writeFileSync('docs/使用说明.md',text);
+text=fs.readFileSync('docs/开发与验证.md','utf8').replaceAll('0.1.0-internal.2','0.1.0-internal.3');
+const start=text.indexOf('界面端到端：'),end=text.indexOf('\n\n## 构建测试包',start);
+text=text.slice(0,start)+'桌面端到端：执行 `node tests/e2e/desktop.mjs` 检查实际 Electron 窗口和 Python 工具。可额外传入打包 exe 路径，检查自带运行时。入口仅加载本地文件，后台使用管道通信，没有浏览器运行模式。'+text.slice(end);
+fs.writeFileSync('docs/开发与验证.md',text);
+fs.appendFileSync('docs/implementation-notes.md','\n\n## ADR-012：Windows 桌面专用通信\n\n0.1.0-internal.3 根据用户要求移除 HTTP 界面服务和浏览器回退。Electron 使用 loadFile 打开本地资源，主进程通过带请求编号的标准输入输出协议调用独立 Node 后台。保留 contextIsolation、sandbox、来源与主 frame 校验、限定动作和超时。renderer 的 connect-src 为 none，模型网络调用仅位于后台。此前的 localhost/bearer 记录只描述旧内部版本。\n');
+let test=fs.readFileSync('tests/e2e/desktop.mjs','utf8');
+test=test.replace("nodeIntegration:typeof window.require!=='undefined'","nodeIntegration:typeof window.require!=='undefined',protocol:location.protocol");
+test=test.replace('if(!security.desktop||security.nodeIntegration)','if(!security.desktop||security.nodeIntegration||security.protocol!==\'file:\')');
+fs.writeFileSync('tests/e2e/desktop.mjs',test);

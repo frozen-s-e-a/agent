@@ -1,0 +1,1868 @@
+[
+  {
+    "name": "add_column",
+    "description": "相同名称列合并工具 — 用于将 Excel 表中相同名称的列值合并为一个新列。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string",
+          "description": "文件或文件夹路径: 要处理的 Excel 文件路径或包含 Excel 文件的文件夹路径"
+        },
+        "keyword": {
+          "type": "string",
+          "description": "文件名关键词: 用于过滤文件名的关键词，留空则处理所有 Excel 文件"
+        },
+        "column_name": {
+          "type": "string",
+          "description": "待合并列名: 需要合并的列名（如：客户）"
+        },
+        "delimiter": {
+          "type": "string",
+          "description": "连接符: 用于连接多个值的分隔符（如：,或;），留空则直接拼接"
+        },
+        "max_column_num": {
+          "type": "number",
+          "description": "最大列数: 相同列名的最大数量，不足时自动插入空列"
+        }
+      },
+      "required": [
+        "file_path",
+        "keyword",
+        "column_name",
+        "delimiter",
+        "max_column_num"
+      ]
+    }
+  },
+  {
+    "name": "address_split",
+    "description": "函证地址拆分成省市区 — 基于 jionlp 库，批量解析地址信息。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "address_column": {
+          "type": "string",
+          "description": "Excel列名: Excel模式专用：指定地址所在的列名（默认为第一列）"
+        },
+        "address_list": {
+          "type": "string",
+          "description": "直接查询地址: 直接模式专用：一个地址字符串，或多个地址组成的列表"
+        }
+      },
+      "required": [
+        "address_column",
+        "address_list"
+      ]
+    }
+  },
+  {
+    "name": "ai_formula_filler",
+    "description": "AI 智能公式填充 🎯",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        },
+        "base_url": {
+          "type": "string",
+          "description": "AI API Base URL"
+        },
+        "api_key": {
+          "type": "string",
+          "description": "AI API Key"
+        },
+        "model_name": {
+          "type": "string",
+          "description": "模型名称"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "announcement",
+    "description": "公告下载 — 从巨潮资讯网下载上市公司的年报、半年报、审计报告等公告文件。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "stock_codes": {
+          "type": "array",
+          "description": "股票代码列表: 如 ['000002', '600519']",
+          "items": {
+            "type": "string"
+          }
+        },
+        "start_date": {
+          "type": "string",
+          "description": "开始日期: YYYY-MM-DD"
+        },
+        "end_date": {
+          "type": "string",
+          "description": "结束日期: YYYY-MM-DD"
+        },
+        "market_type": {
+          "type": "string",
+          "description": "市场板块: 默认为'京沪深'"
+        },
+        "category_name": {
+          "type": "string",
+          "description": "公告类型: 可选值: '年报', '半年报', '一季报', '三季报', '业绩预告', '中介报告', '首发', '增发' 等，为空则下载全部类型"
+        },
+        "keyword": {
+          "type": "string",
+          "description": "标题关键词: 筛选标题内容"
+        }
+      },
+      "required": [
+        "stock_codes",
+        "start_date",
+        "end_date",
+        "market_type",
+        "category_name",
+        "keyword"
+      ]
+    }
+  },
+  {
+    "name": "asist_split",
+    "description": "辅助项拆分工具 — 用于处理包含复杂键值对的辅助核算列。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string",
+          "description": "文件或文件夹路径: 对应 B1 单元格"
+        },
+        "keyword": {
+          "type": "string",
+          "description": "文件名关键词: 对应 B2 单元格"
+        },
+        "col_name": {
+          "type": "string",
+          "description": "辅助项列名: 对应 B3 单元格"
+        },
+        "kv_sep": {
+          "type": "string",
+          "description": "辅助项分隔符: 对应 B4 单元格 (如 :)"
+        },
+        "item_sep": {
+          "type": "string",
+          "description": "辅助项拆分符: 对应 B5。填 ';' 代表按分号切分；填 '【】' 代表提取括号内内容"
+        }
+      },
+      "required": [
+        "file_path",
+        "keyword",
+        "col_name",
+        "kv_sep",
+        "item_sep"
+      ]
+    }
+  },
+  {
+    "name": "auxiliary_selection",
+    "description": "辅助项智能选择 — 利用AI语义分析，自动判断科目余额方向（借/贷），并从辅助项中筛选出有用的标准维度。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        },
+        "base_url": {
+          "type": "string",
+          "description": "AI API Base URL"
+        },
+        "api_key": {
+          "type": "string",
+          "description": "AI API Key"
+        },
+        "output_dir": {
+          "type": "string",
+          "description": "输出目录路径。不传则使用默认目录。"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "bank_digit2",
+    "description": "银行函证表格生成-电子格式二 — 根据配置表批量生成银行函证（电子格式二）。支持多表合并、智能匹配、自动对齐。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        },
+        "output_path": {
+          "type": "string",
+          "description": "输出文件路径。不传则使用默认路径。"
+        }
+      },
+      "required": [
+        "config_file"
+      ]
+    }
+  },
+  {
+    "name": "bank_flow",
+    "description": "银行流水智能双向核对 — 基于会计逻辑和交易对手文本相似度分析，自动核对银行流水与财务序时账。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "gl_path": {
+          "type": "string",
+          "description": "序时账文件路径"
+        },
+        "gl_date_col": {
+          "type": "string",
+          "description": "序时账-日期列"
+        },
+        "gl_voucher_col": {
+          "type": "string",
+          "description": "序时账-凭证号列"
+        },
+        "gl_subject_col": {
+          "type": "string",
+          "description": "序时账-科目列"
+        },
+        "gl_bank_subject": {
+          "type": "string",
+          "description": "序时账-银行科目值"
+        },
+        "gl_summary_col": {
+          "type": "string",
+          "description": "序时账-摘要列"
+        },
+        "gl_partner_direct_col": {
+          "type": "string",
+          "description": "序时账-交易对手列名: 如果序时账中已有交易对手列（如'客户'、'供应商'等），直接填写该列名。填写此项后将忽略'客商辅助项列名'配置"
+        },
+        "gl_partner_col": {
+          "type": "string",
+          "description": "序时账-客商辅助项列名: 用于凭证拆分模式：从对方科目的辅助项中提取客商。如果同时存在多个列（如'客户－名称'和'供应商－名称'），请用英文逗号分隔填写所有列名，例如：客户－名称,供应商－名称。注意：如果已填写'交易对手列名'，此项将被忽略"
+        },
+        "gl_debit_col": {
+          "type": "string",
+          "description": "序时账-借方列"
+        },
+        "gl_credit_col": {
+          "type": "string",
+          "description": "序时账-贷方列"
+        },
+        "bank_path": {
+          "type": "string",
+          "description": "银行流水文件路径"
+        },
+        "bank_date_col": {
+          "type": "string",
+          "description": "流水-日期列"
+        },
+        "bank_income_col": {
+          "type": "string",
+          "description": "流水-收入列"
+        },
+        "bank_expense_col": {
+          "type": "string",
+          "description": "流水-支出列"
+        },
+        "bank_partner_col": {
+          "type": "string",
+          "description": "流水-对方户名列"
+        }
+      },
+      "required": [
+        "gl_path",
+        "gl_date_col",
+        "gl_voucher_col",
+        "gl_subject_col",
+        "gl_bank_subject",
+        "gl_summary_col",
+        "gl_partner_direct_col",
+        "gl_partner_col",
+        "gl_debit_col",
+        "gl_credit_col",
+        "bank_path",
+        "bank_date_col",
+        "bank_income_col",
+        "bank_expense_col",
+        "bank_partner_col"
+      ]
+    }
+  },
+  {
+    "name": "bank_paper1",
+    "description": "银行函证表格生成-纸质格式一 — 根据配置表批量生成银行函证（纸质格式一）。支持多表合并、智能匹配、自动对齐。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        },
+        "output_path": {
+          "type": "string",
+          "description": "输出文件路径。不传则使用默认路径。"
+        }
+      },
+      "required": [
+        "config_file"
+      ]
+    }
+  },
+  {
+    "name": "bank_paper2",
+    "description": "银行函证表格生成-纸质格式二 — 根据配置表批量生成银行函证（纸质格式二）。支持多表合并、智能匹配、自动对齐。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        },
+        "output_path": {
+          "type": "string",
+          "description": "输出文件路径。不传则使用默认路径。"
+        }
+      },
+      "required": [
+        "config_file"
+      ]
+    }
+  },
+  {
+    "name": "bankflowmerge",
+    "description": "银行流水合并 — 智能合并银行流水文件，支持两种模式：",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_paths": {
+          "type": "array",
+          "description": "文件路径列表: 银行流水文件的完整路径列表（必填，支持单个或多个文件）",
+          "items": {
+            "type": "string"
+          }
+        },
+        "header_start_cols": {
+          "type": "array",
+          "description": "表头起始列列表: 每个文件的表头起始列，如 ['A', 'A', 'B']（必填）",
+          "items": {
+            "type": "string"
+          }
+        },
+        "header_start_rows": {
+          "type": "array",
+          "description": "表头起始行列表: 每个文件的表头起始行，如 [5, 2, 7]（必填）",
+          "items": {
+            "type": "string"
+          }
+        },
+        "bank_names": {
+          "type": "array",
+          "description": "银行名称列表: 每个文件的银行简称列表，如 ['浦发银行', '工商银行', '民生银行']",
+          "items": {
+            "type": "string"
+          }
+        },
+        "account_names": {
+          "type": "array",
+          "description": "银行户名列表: 每个文件的账户名称列表",
+          "items": {
+            "type": "string"
+          }
+        },
+        "account_numbers": {
+          "type": "array",
+          "description": "银行账号列表: 每个文件的银行账号列表（必须是纯数字，如'83110154700000722'，不要填写账户名称）",
+          "items": {
+            "type": "string"
+          }
+        },
+        "transaction_date_cols": {
+          "type": "array",
+          "description": "交易日期列列表: 每个文件的交易日期列名列表",
+          "items": {
+            "type": "string"
+          }
+        },
+        "transaction_time_cols": {
+          "type": "array",
+          "description": "交易时间列列表: 每个文件的交易时间列名列表",
+          "items": {
+            "type": "string"
+          }
+        },
+        "counterparty_name_cols": {
+          "type": "array",
+          "description": "对方账户列列表: 每个文件的对方账户名称列名列表",
+          "items": {
+            "type": "string"
+          }
+        },
+        "counterparty_account_cols": {
+          "type": "array",
+          "description": "对方账号列列表: 每个文件的对方账号列名列表",
+          "items": {
+            "type": "string"
+          }
+        },
+        "summary_cols": {
+          "type": "array",
+          "description": "摘要列列表: 每个文件的摘要列名列表",
+          "items": {
+            "type": "string"
+          }
+        },
+        "income_cols": {
+          "type": "array",
+          "description": "收入金额列列表: 每个文件的收入金额列名列表",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expense_cols": {
+          "type": "array",
+          "description": "支出金额列列表: 每个文件的支出金额列名列表",
+          "items": {
+            "type": "string"
+          }
+        },
+        "balance_cols": {
+          "type": "array",
+          "description": "余额列列表: 每个文件的余额列名列表",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "file_paths",
+        "header_start_cols",
+        "header_start_rows",
+        "bank_names",
+        "account_names",
+        "account_numbers",
+        "transaction_date_cols",
+        "transaction_time_cols",
+        "counterparty_name_cols",
+        "counterparty_account_cols",
+        "summary_cols",
+        "income_cols",
+        "expense_cols",
+        "balance_cols"
+      ]
+    }
+  },
+  {
+    "name": "cicpa_query",
+    "description": "注协系统工商信息获取",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query_mode": {
+          "type": "string",
+          "description": "查询模式: search=轻量搜索, detail=企业详情, export=全维度导出, subsidiary=子公司发现, check_cookies=检查Cookie"
+        },
+        "company_name": {
+          "type": "string",
+          "description": "企业名称: 企业精确工商注册全称，多个用逗号分隔"
+        },
+        "org_id": {
+          "type": "string",
+          "description": "企业org_id: 中注协系统内部ID（detail模式可选，代替company_name）"
+        },
+        "output_path": {
+          "type": "string",
+          "description": "输出路径: 结果保存路径"
+        },
+        "subsidiary_threshold": {
+          "type": "integer",
+          "description": "子公司持股阈值: 持股比例阈值，默认50"
+        },
+        "cookie_json": {
+          "type": "string",
+          "description": "Cookie JSON: 手动粘贴的cookie（JSON字符串，AI模式使用）"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "currency",
+    "description": "外汇管理局汇率数据查询 — 从国家外汇管理局官网获取人民币汇率中间价。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "cutoff_sampling",
+    "description": "截止测试抽样 (Cut-off Testing) - 凭证去重版",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        },
+        "output_dir": {
+          "type": "string",
+          "description": "输出目录路径。不传则使用默认目录。"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "data_field_check",
+    "description": "资料字段检查 — 根据配置，检查指定文件夹内各Excel文件的表头字段是否满足要求。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        },
+        "output_dir": {
+          "type": "string",
+          "description": "输出目录路径。不传则使用默认目录。"
+        },
+        "base_url": {
+          "type": "string",
+          "description": "AI API Base URL"
+        },
+        "api_key": {
+          "type": "string",
+          "description": "AI API Key"
+        },
+        "model_name": {
+          "type": "string",
+          "description": "模型名称"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "detailed_table_generate",
+    "description": "明细表-执行生成 — 读取工作目录中已保存的配置（field_mapping、subject_mapping、template_assignment），批量生成明细表底稿。需要 64 位 Excel 环境。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "work_dir": {
+          "type": "string",
+          "description": "工作目录路径（包含 config/ 子目录下的 JSON 配置文件）"
+        },
+        "file_path": {
+          "type": "string",
+          "description": "数据源文件路径或文件夹路径"
+        },
+        "output_dir": {
+          "type": "string",
+          "description": "输出目录路径（优先级高于 paths 配置中的值）"
+        },
+        "confirmed": {
+          "type": "boolean",
+          "description": "确认覆盖已有输出文件（默认 false）"
+        }
+      },
+      "required": [
+        "work_dir",
+        "file_path"
+      ]
+    }
+  },
+  {
+    "name": "detailed_table_inspect",
+    "description": "明细表-检查数据源 — 读取 Excel 文件或文件夹，返回列名、行数、公司列表、科目列表和数据预览。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string",
+          "description": "数据源文件路径或文件夹路径"
+        },
+        "sheet_name": {
+          "type": "string",
+          "description": "指定读取的 Sheet 名称（不传则读取第一个 Sheet）"
+        },
+        "preview_rows": {
+          "type": "integer",
+          "description": "预览行数（默认5行）"
+        }
+      },
+      "required": [
+        "file_path"
+      ]
+    }
+  },
+  {
+    "name": "detailed_table_inspect_template",
+    "description": "明细表-检查模板 — 扫描底稿模板文件夹，返回每个模板 Excel 文件的 Sheet 列表和每个 Sheet 中的批注字段名。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "template_dir": {
+          "type": "string",
+          "description": "底稿模板文件夹路径"
+        }
+      },
+      "required": [
+        "template_dir"
+      ]
+    }
+  },
+  {
+    "name": "detailed_table_save_config",
+    "description": "明细表-保存配置 — 将 AI 分析后的配置决策保存到工作目录的 JSON 文件中。支持固定配置类型（paths、field_mapping、subject_mapping、template_assignment）和自定义映射配置（config_type 即为模板批注名，如\"披露\"、\"关联方\"等）。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "work_dir": {
+          "type": "string",
+          "description": "工作目录路径（配置文件将保存在其 config/ 子目录下）"
+        },
+        "config_type": {
+          "type": "string",
+          "description": "配置类型。固定类型：paths / field_mapping / subject_mapping / template_assignment。自定义映射类型：使用模板批注名（如 披露、关联方）"
+        },
+        "config_data": {
+          "type": "string",
+          "description": "配置内容（JSON 字符串）"
+        }
+      },
+      "required": [
+        "work_dir",
+        "config_type",
+        "config_data"
+      ]
+    }
+  },
+  {
+    "name": "detailed_table_validate",
+    "description": "明细表-校验配置 — 读取工作目录中的所有配置文件（field_mapping、subject_mapping、template_assignment），检查完整性和一致性，返回校验结果。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "work_dir": {
+          "type": "string",
+          "description": "工作目录路径（包含 config/ 子目录下的 JSON 配置文件）"
+        },
+        "file_path": {
+          "type": "string",
+          "description": "数据源文件路径（用于交叉验证列名）"
+        }
+      },
+      "required": [
+        "work_dir"
+      ]
+    }
+  },
+  {
+    "name": "dropsummary",
+    "description": "删除合计行工具 — 用于删除 Excel 表中的合计行和汇总行。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string",
+          "description": "文件路径: 要处理的 Excel 文件路径（配置表中每行一个文件）"
+        },
+        "keywords": {
+          "type": "string",
+          "description": "关键字: 用于匹配合计行的关键字，多个关键字用竖线分隔（如：合计|小计|总计）"
+        },
+        "column_name": {
+          "type": "string",
+          "description": "关键字所在列: 关键字所在的列名"
+        }
+      },
+      "required": [
+        "file_path",
+        "keywords",
+        "column_name"
+      ]
+    }
+  },
+  {
+    "name": "extract_disclosure_scope",
+    "description": "披露口径提取 📋",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        },
+        "output_dir": {
+          "type": "string",
+          "description": "输出目录路径。不传则使用默认目录。"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "extract_disclosure_tables",
+    "description": "披露表提取 📋",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        },
+        "output_dir": {
+          "type": "string",
+          "description": "输出目录路径。不传则使用默认目录。"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "file_classification",
+    "description": "文件自动分类 (支持多维输出模式)",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        },
+        "base_url": {
+          "type": "string",
+          "description": "AI API Base URL"
+        },
+        "api_key": {
+          "type": "string",
+          "description": "AI API Key"
+        },
+        "visual_model_name": {
+          "type": "string",
+          "description": "视觉模型名称"
+        },
+        "model_name": {
+          "type": "string",
+          "description": "语言模型名称"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "fill_column",
+    "description": "向下填充空值工具 — 用于将 Excel 表中某些列的空值向下填充。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string",
+          "description": "文件或文件夹路径: 要处理的 Excel 文件路径或包含 Excel 文件的文件夹路径"
+        },
+        "keyword": {
+          "type": "string",
+          "description": "文件名关键词: 用于过滤文件名的关键词，留空则处理所有 Excel 文件"
+        },
+        "column_names": {
+          "type": "string",
+          "description": "待填充列名: 需要向下填充的列名，多个列名用逗号分隔（如：客户,项目）"
+        }
+      },
+      "required": [
+        "file_path",
+        "keyword",
+        "column_names"
+      ]
+    }
+  },
+  {
+    "name": "gross_margin_analysis",
+    "description": "毛利率分析 (AI智能版)",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "preview",
+            "analyze"
+          ],
+          "description": "执行模式: auto=全自动（推荐，自动检测列映射和维度后执行分析），preview=只预览数据列信息不执行分析，analyze=手动指定配置执行分析"
+        },
+        "this_data_path": {
+          "type": "string",
+          "description": "本期数据路径: 本期收入成本明细 Excel 文件路径（相对于 input/ 目录或绝对路径）"
+        },
+        "this_data_sheet": {
+          "type": "string",
+          "description": "本期数据表名: 本期数据所在 Sheet 名称（preview 模式可省略，默认读第一个 Sheet）"
+        },
+        "last_data_path": {
+          "type": "string",
+          "description": "上期数据路径: 上期收入成本明细 Excel 文件路径（仅 analyze 模式，不填则不做两期对比）"
+        },
+        "last_data_sheet": {
+          "type": "string",
+          "description": "上期数据表名: 上期数据所在 Sheet 名称"
+        },
+        "field_mapping": {
+          "type": "string",
+          "description": "字段映射: 可选。不传则自动检测列名。JSON 对象，键为标准字段名，值为数据源列名。必填标准字段: 营业收入, 营业成本, 数量。可选标准字段: 材料费用, 人工费用, 制造费用, 日期, 会计主体。示例: {\"营业收入\":\"销售金额\",\"营业成本\":\"成本金额\",\"数量\":\"销量\",\"日期\":\"记账日期\"}"
+        },
+        "dimensions": {
+          "type": "string",
+          "description": "透视维度: 可选。不传则自动检测分类列作为维度。JSON 数组，每个元素指定一个分析维度。每个元素: {\"name\":\"维度名称\",\"column\":\"数据源列名\",\"threshold\":0.05,\"revenue_threshold\":0}。示例: [{\"name\":\"产品\",\"column\":\"产品类别\",\"threshold\":0.05}]"
+        },
+        "output_path": {
+          "type": "string",
+          "description": "输出路径: 分析结果输出路径（默认自动生成到 output/毛利率分析/ 目录）"
+        },
+        "thread_count": {
+          "type": "integer",
+          "description": "AI并发线程数: AI分析并发线程数，默认5"
+        },
+        "confirmed": {
+          "type": "boolean",
+          "description": "用户确认: 【重要】必须等待用户确认后才能设为 true。首次调用不传此参数，工具会返回自动检测的字段映射和维度供审查。你必须将检测结果展示给用户，等用户明确确认无误后，才能在下次调用时传 confirmed=true。绝对不要自行设置 confirmed=true。"
+        }
+      },
+      "required": [
+        "this_data_path"
+      ]
+    }
+  },
+  {
+    "name": "headers_process",
+    "description": "表头处理工具 — 用于处理 Excel 文件的多行表头，将其合并为单行表头。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string",
+          "description": "文件或文件夹路径: 要处理的 Excel 文件路径或包含 Excel 文件的文件夹路径"
+        },
+        "keyword": {
+          "type": "string",
+          "description": "文件名关键词: 用于过滤文件名的关键词，留空则处理所有 Excel 文件"
+        },
+        "header_rows": {
+          "type": "string",
+          "description": "表头行: 表头所在的行号，多行用逗号分隔（如：1,2 表示第1行和第2行）"
+        }
+      },
+      "required": [
+        "file_path",
+        "keyword",
+        "header_rows"
+      ]
+    }
+  },
+  {
+    "name": "id_card",
+    "description": "身份证信息解析 — 基于 jionlp 库，批量解析身份证号码。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id_column": {
+          "type": "string",
+          "description": "Excel列名: Excel模式专用：指定身份证号所在的列名（默认为'身份证号'）"
+        },
+        "id_list": {
+          "type": "string",
+          "description": "直接查询号码: 直接模式专用：一个身份证号字符串，或多个号码组成的列表/字符串"
+        }
+      },
+      "required": [
+        "id_column",
+        "id_list"
+      ]
+    }
+  },
+  {
+    "name": "info_extract",
+    "description": "文件关键信息提取",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "role_prompt": {
+          "type": "string",
+          "description": "用户提示词: 提取信息的具体指令"
+        },
+        "folder": {
+          "type": "string",
+          "description": "处理文件夹: 需要扫描的文件或文件夹路径"
+        },
+        "max_workers": {
+          "type": "integer",
+          "description": "并发线程数: 同时处理的任务数量，默认1（单线程），建议3-5"
+        }
+      },
+      "required": [
+        "role_prompt",
+        "folder",
+        "max_workers"
+      ]
+    }
+  },
+  {
+    "name": "info_extract_multi",
+    "description": "多公司多类型文件关键信息提取",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        },
+        "output_dir": {
+          "type": "string",
+          "description": "输出目录路径。不传则使用默认目录。"
+        },
+        "base_url": {
+          "type": "string",
+          "description": "AI API Base URL"
+        },
+        "api_key": {
+          "type": "string",
+          "description": "AI API Key"
+        },
+        "visual_model_name": {
+          "type": "string",
+          "description": "视觉模型名称"
+        },
+        "model_name": {
+          "type": "string",
+          "description": "语言模型名称"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "insert_column",
+    "description": "插入列工具 — 用于在 Excel 表中指定位置插入一列并填充固定值。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string",
+          "description": "文件路径: 要处理的 Excel 文件路径（配置表中每行一个文件）"
+        },
+        "insert_position": {
+          "type": "string",
+          "description": "插入列位置: 插入位置，可以是列字母（如 A）或数字索引（如 1）"
+        },
+        "column_name": {
+          "type": "string",
+          "description": "插入列名: 新列的列名"
+        },
+        "fill_value": {
+          "type": "string",
+          "description": "插入值: 填充到新列的固定值"
+        },
+        "sheet_name": {
+          "type": "string",
+          "description": "指定表: 工作表名称，留空则使用第一张表"
+        }
+      },
+      "required": [
+        "file_path",
+        "insert_position",
+        "column_name",
+        "fill_value",
+        "sheet_name"
+      ]
+    }
+  },
+  {
+    "name": "insert_footnote_comments",
+    "description": "插附注批注 (王建彬工具适配版) 🖊️",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "ipo_bj",
+    "description": "北交所IPO披露文件下载 — 爬取北京证券交易所项目动态，批量下载IPO披露文件（招股书、问询函等）。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "start_date": {
+          "type": "string",
+          "description": "开始日期: 格式 YYYY-MM-DD"
+        },
+        "end_date": {
+          "type": "string",
+          "description": "结束日期: 格式 YYYY-MM-DD"
+        },
+        "update_mode": {
+          "type": "string",
+          "description": "更新模式: 严格填写'项目'或'文件'"
+        }
+      },
+      "required": [
+        "start_date",
+        "end_date",
+        "update_mode"
+      ]
+    }
+  },
+  {
+    "name": "ipo_sh",
+    "description": "上交所IPO披露文件下载 — 爬取上海证券交易所科创板及主板项目动态，批量下载IPO披露文件（招股书、问询函等）。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "start_date": {
+          "type": "string",
+          "description": "开始日期: 格式 YYYY-MM-DD"
+        },
+        "end_date": {
+          "type": "string",
+          "description": "结束日期: 格式 YYYY-MM-DD"
+        },
+        "update_mode": {
+          "type": "string",
+          "description": "更新模式: 严格填写'项目'或'文件'"
+        }
+      },
+      "required": [
+        "start_date",
+        "end_date",
+        "update_mode"
+      ]
+    }
+  },
+  {
+    "name": "ipo_sz",
+    "description": "深交所IPO披露文件下载 — 爬取深圳证券交易所项目动态网站，批量下载IPO披露文件。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "start_date": {
+          "type": "string",
+          "description": "开始日期: 格式 YYYY-MM-DD"
+        },
+        "end_date": {
+          "type": "string",
+          "description": "结束日期: 格式 YYYY-MM-DD"
+        },
+        "update_mode": {
+          "type": "string",
+          "description": "更新模式: 必须严格填写'项目'或'文件'，不要填其他词"
+        }
+      },
+      "required": [
+        "start_date",
+        "end_date",
+        "update_mode"
+      ]
+    }
+  },
+  {
+    "name": "jet_test_execute",
+    "description": "JET-执行分录测试 — 根据特征定义和规则矩阵，对序时账执行会计分录测试，输出审计疑点结果。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string",
+          "description": "数据源文件路径或文件夹路径"
+        },
+        "features": {
+          "type": "string",
+          "description": "特征定义：'builtin'使用全部内置，或传入自定义特征列表，或两者混合"
+        },
+        "rules": {
+          "type": "string",
+          "description": "规则配置：'builtin'使用全部内置，或传入规则名称列表/自定义规则列表，或混合"
+        },
+        "column_mapping": {
+          "type": "string",
+          "description": "列名映射（JSON字符串），将模板列名映射到实际列名。如 {\"制单日期\":\"日期\"}"
+        },
+        "settings": {
+          "type": "string",
+          "description": "全局设置（JSON字符串）：company_col, output_empty, split_output"
+        },
+        "output_dir": {
+          "type": "string",
+          "description": "输出目录路径"
+        }
+      },
+      "required": [
+        "file_path"
+      ]
+    }
+  },
+  {
+    "name": "jet_test_inspect",
+    "description": "JET-检查数据源 — 读取序时账文件，返回列名、数据类型、样本值等信息，为后续规则配置提供依据。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string",
+          "description": "数据源文件路径或文件夹路径"
+        },
+        "preview_rows": {
+          "type": "integer",
+          "description": "预览行数（默认5行）"
+        },
+        "include_templates": {
+          "type": "boolean",
+          "description": "是否同时返回内置特征和规则模板（默认true）"
+        }
+      },
+      "required": [
+        "file_path"
+      ]
+    }
+  },
+  {
+    "name": "ledger_check",
+    "description": "小账套校验工具 — 批量校验小账套文件，检查借贷方一致性、总额与序时账一致性、一级与二级科目金额校验、金额平衡勾稽等。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "directory": {
+          "type": "string",
+          "description": "存放小账套文件的文件夹路径"
+        },
+        "output_dir": {
+          "type": "string",
+          "description": "输出目录路径。不传则使用默认目录。"
+        }
+      },
+      "required": [
+        "directory"
+      ]
+    }
+  },
+  {
+    "name": "link_extractor",
+    "description": "外部链接提取",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        },
+        "output_dir": {
+          "type": "string",
+          "description": "输出目录路径。不传则使用默认目录。"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "link_ref_replace",
+    "description": "链接替换-参考替换",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "target_path": {
+          "type": "string",
+          "description": "文件或文件夹"
+        },
+        "sheet_keywords": {
+          "type": "string",
+          "description": "工作表关键词"
+        },
+        "ref_axis": {
+          "type": "string",
+          "description": "参考列/行"
+        },
+        "target_axis": {
+          "type": "string",
+          "description": "处理列/行"
+        },
+        "example_cell": {
+          "type": "string",
+          "description": "处理示例单元格"
+        }
+      },
+      "required": [
+        "target_path",
+        "sheet_keywords",
+        "ref_axis",
+        "target_axis",
+        "example_cell"
+      ]
+    }
+  },
+  {
+    "name": "link_replace_range",
+    "description": "链接替换-单元格区域替换",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "link_replace_text",
+    "description": "链接替换-文件夹路径替换",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "link_replace_workbook",
+    "description": "链接替换-文件名替换",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "merge_column",
+    "description": "多列合并工具 — 用于将 Excel 表中多列值合并为一个新列。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string",
+          "description": "文件或文件夹路径: 要处理的 Excel 文件路径或包含 Excel 文件的文件夹路径"
+        },
+        "keyword": {
+          "type": "string",
+          "description": "文件名关键词: 用于过滤文件名的关键词，留空则处理所有 Excel 文件"
+        },
+        "column_names": {
+          "type": "string",
+          "description": "待合并列名: 需要合并的列名，多个列名用逗号分隔（如：客户,项目,\"固定值\"）"
+        },
+        "delimiter": {
+          "type": "string",
+          "description": "连接符: 用于连接多个值的分隔符（如：,或;）"
+        },
+        "insert_index": {
+          "type": "string",
+          "description": "插入位置: 新列插入位置，可以是列字母（如 A）或数字索引（如 1）"
+        },
+        "insert_name": {
+          "type": "string",
+          "description": "新列名称: 合并后的新列名称，留空则默认为'合并列'"
+        }
+      },
+      "required": [
+        "file_path",
+        "keyword",
+        "column_names",
+        "delimiter",
+        "insert_index",
+        "insert_name"
+      ]
+    }
+  },
+  {
+    "name": "monthly_ai_analysis",
+    "description": "月间分析-AI变动分析 — 读取已生成的月间分析结果表和原始序时账数据，对超出阈值的科目进行 AI 变动原因分析，",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "result_file": {
+          "type": "string",
+          "description": "已生成的月间分析结果文件路径（Excel）"
+        },
+        "this_year_file": {
+          "type": "string",
+          "description": "本期序时账原始数据文件路径（用于 AI 提取样本凭证）"
+        },
+        "last_year_file": {
+          "type": "string",
+          "description": "上期序时账原始数据文件路径"
+        },
+        "this_year_sheet": {
+          "type": "string",
+          "description": "本期数据 Sheet 名（默认第一个 Sheet）"
+        },
+        "last_year_sheet": {
+          "type": "string",
+          "description": "上期数据 Sheet 名（默认第一个 Sheet）"
+        },
+        "column_mapping": {
+          "type": "string",
+          "description": "序时账列名映射 JSON: {\"date\": \"日期列名\", \"subject_code\": \"科目代码列名\", \"subject_name\": \"科目名称列名\", \"debit\": \"借方列名\", \"credit\": \"贷方列名\", \"company\": \"公司名称列名\", \"desc\": \"摘要列名\", \"voucher\": \"凭证号列名\"}。desc 字段用于 AI 提取样本凭证摘要"
+        },
+        "threshold_amt": {
+          "type": "number",
+          "description": "变动额阈值（默认 100000），超过此金额的科目才做 AI 分析"
+        },
+        "threshold_rate": {
+          "type": "number",
+          "description": "变动率阈值（默认 0.3 即 30%），超过此比率的科目才做 AI 分析"
+        },
+        "month_conc_threshold": {
+          "type": "number",
+          "description": "月度集中度阈值（默认 0.8），单月占比超过此值时重点分析"
+        },
+        "max_sample_rows": {
+          "type": "integer",
+          "description": "每个科目最多提取的样本凭证行数（默认 50）"
+        },
+        "generate_procedure": {
+          "type": "string",
+          "description": "是否生成审计应对建议（默认 '是'）"
+        },
+        "output_path": {
+          "type": "string",
+          "description": "输出文件路径。不传则覆盖原结果文件"
+        }
+      },
+      "required": [
+        "result_file",
+        "this_year_file",
+        "column_mapping"
+      ]
+    }
+  },
+  {
+    "name": "monthly_detect_structure",
+    "description": "月间分析-编码结构分析 — 读取序时账数据，分析科目编码层级结构（分隔符、步长、初始位数等），",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string",
+          "description": "序时账数据文件路径（Excel 或 CSV）"
+        },
+        "column_mapping": {
+          "type": "string",
+          "description": "列名映射 JSON: {\"date\": \"日期列名\", \"subject_code\": \"科目代码列名\", \"subject_name\": \"科目名称列名\", \"debit\": \"借方列名\", \"credit\": \"贷方列名\", \"company\": \"公司列名\", \"desc\": \"摘要列名\", \"voucher\": \"凭证号列名\"}。date/subject_code/subject_name 必填"
+        },
+        "sheet_name": {
+          "type": "string",
+          "description": "Sheet 名称（不传则读取第一个 Sheet）"
+        },
+        "top_n": {
+          "type": "integer",
+          "description": "返回前 N 个一级科目（默认 30）"
+        }
+      },
+      "required": [
+        "file_path",
+        "column_mapping"
+      ]
+    }
+  },
+  {
+    "name": "monthly_execute",
+    "description": "月间分析-执行分析 — 接收已确认的字段映射、编码结构、科目列表等参数，执行月间分析表生成。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "this_year_file": {
+          "type": "string",
+          "description": "本期序时账数据文件路径（Excel/CSV）"
+        },
+        "last_year_file": {
+          "type": "string",
+          "description": "上期序时账数据文件路径，不传则仅做本期月度汇总"
+        },
+        "this_year_sheet": {
+          "type": "string",
+          "description": "本期数据 Sheet 名（默认第一个 Sheet）"
+        },
+        "last_year_sheet": {
+          "type": "string",
+          "description": "上期数据 Sheet 名（默认第一个 Sheet）"
+        },
+        "subjects": {
+          "type": "string",
+          "description": "要分析的科目列表 JSON: [{\"code\": \"6001\", \"direction\": \"贷\"}, ...]。direction 为借或贷"
+        },
+        "column_mapping": {
+          "type": "string",
+          "description": "序时账列名映射 JSON: {\"date\": \"日期列名\", \"subject_code\": \"科目代码列名\", \"subject_name\": \"科目名称列名\", \"debit\": \"借方列名\", \"credit\": \"贷方列名\", \"company\": \"公司名称列名\", \"desc\": \"摘要列名\", \"voucher\": \"凭证号列名\"}。date/subject_code/subject_name 必填，debit 和 credit 至少填一个"
+        },
+        "code_structure": {
+          "type": "string",
+          "description": "科目编码结构参数 JSON: {\"flag\": \"科目名称分隔符\", \"start\": 1, \"full_length\": 0, \"init_length\": 4, \"step\": 2, \"code_delimiter\": \"科目代码分隔符\"}"
+        },
+        "output_path": {
+          "type": "string",
+          "description": "输出文件路径。不传则使用默认路径 output/月间分析结果表.xlsx"
+        },
+        "threshold_amt": {
+          "type": "number",
+          "description": "AI变动分析-变动额阈值（默认100000），超过此金额的科目才做AI分析"
+        },
+        "threshold_rate": {
+          "type": "number",
+          "description": "AI变动分析-变动率阈值（默认0.3即30%），超过此比率的科目才做AI分析"
+        }
+      },
+      "required": [
+        "this_year_file",
+        "subjects",
+        "column_mapping"
+      ]
+    }
+  },
+  {
+    "name": "monthly_preview",
+    "description": "月间分析-数据预览 — 读取序时账数据文件，返回列名、数据类型、样本行和基础统计信息，供 AI 判断字段映射。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string",
+          "description": "序时账数据文件路径（Excel 或 CSV）"
+        },
+        "sheet_name": {
+          "type": "string",
+          "description": "Sheet 名称（不传则读取第一个 Sheet）"
+        },
+        "preview_rows": {
+          "type": "integer",
+          "description": "预览行数（默认 5）"
+        }
+      },
+      "required": [
+        "file_path"
+      ]
+    }
+  },
+  {
+    "name": "multi_collect_file",
+    "description": "多表汇集-文件",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "multi_collect_folder",
+    "description": "多表汇集-文件夹 — 根据关键词匹配文件夹下的多个文件，将其指定表复制到目标文件中。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "paper_verify",
+    "description": "纸质信息核对",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string",
+          "description": "文件或文件夹路径: 需要核对的PDF/图片文件或文件夹路径"
+        },
+        "match_keys": {
+          "type": "string",
+          "description": "匹配键: 用于关联提取数据与账面数据的字段名，支持中英文逗号分隔多个"
+        },
+        "max_workers": {
+          "type": "integer",
+          "description": "并发线程数: 同时处理的任务数量，默认1（单线程），建议3-5"
+        },
+        "extra_prompt": {
+          "type": "string",
+          "description": "补充指令: 追加到AI提示词末尾的补充指令，可选"
+        }
+      },
+      "required": [
+        "file_path",
+        "match_keys",
+        "max_workers",
+        "extra_prompt"
+      ]
+    }
+  },
+  {
+    "name": "photo_rename",
+    "description": "AI图片智能重命名 — 通过AI视觉模型识别图片中的关键信息（如单据号、名称、备注等），并以此信息重命名图片文件。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "directory": {
+          "type": "string",
+          "description": "包含图片的文件夹路径（绝对路径或相对路径）"
+        },
+        "user_prompt": {
+          "type": "string",
+          "description": "AI 提示词，描述如何从图片中提取文件名信息"
+        },
+        "base_url": {
+          "type": "string",
+          "description": "AI API Base URL"
+        },
+        "api_key": {
+          "type": "string",
+          "description": "AI API Key"
+        },
+        "visual_model_name": {
+          "type": "string",
+          "description": "视觉模型名称"
+        }
+      },
+      "required": [
+        "directory",
+        "user_prompt"
+      ]
+    }
+  },
+  {
+    "name": "pickup_value",
+    "description": "提取值工具 — 从指定文件夹（及其子文件夹）中的所有 Excel 文件中，根据配置表指定的单元格位置，提取相应的值，并汇总到一个新的 Excel 文件中。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "folder_path": {
+          "type": "string",
+          "description": "文件夹路径: 要处理的文件夹路径（会递归查找所有 Excel 文件）"
+        },
+        "field_mappings": {
+          "type": "string",
+          "description": "提取字段配置: 从第3行开始，A列为字段名，B列为单元格位置（如 A1, B2）"
+        }
+      },
+      "required": [
+        "folder_path",
+        "field_mappings"
+      ]
+    }
+  },
+  {
+    "name": "qcc_processor",
+    "description": "企查查信用报告处理工具（智能对齐版） — 用于处理企查查信用报告（DOCX格式），提取目录结构和统计信息。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "folder_path": {
+          "type": "string",
+          "description": "文件夹路径: 存放企查查信用报告（DOCX格式）的文件夹路径"
+        }
+      },
+      "required": [
+        "folder_path"
+      ]
+    }
+  },
+  {
+    "name": "related_party",
+    "description": "关联方核查 — 输入数据：input/关联方核查配置表.xlsx（配置表 + 客户名单/供应商名单/离任高管sheet）",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "audit_target": {
+          "type": "string",
+          "description": "被审计单位: 被审计单位名称（精确工商注册全称）"
+        },
+        "data_dir": {
+          "type": "string",
+          "description": "数据目录: 工商信息Excel所在目录（解压后的文件夹路径）"
+        },
+        "threshold": {
+          "type": "integer",
+          "description": "持股阈值(%): 持股比例>=该值识别为分子公司/继续穿透，默认50，设0禁用自动识别"
+        },
+        "equity_penetration": {
+          "type": "string",
+          "enum": [
+            "否",
+            "是"
+          ],
+          "description": "启用股权穿透: 是否启用CICPA股权穿透API，需要注协Cookie"
+        },
+        "equity_depth": {
+          "type": "integer",
+          "description": "穿透深度: 最大穿透层数，默认5"
+        },
+        "output_path": {
+          "type": "string",
+          "description": "输出路径: 报告输出路径（MCP模式使用，默认自动生成到output目录）"
+        },
+        "cookie_json": {
+          "type": "string",
+          "description": "Cookie JSON: 注协系统Cookie（AI模式使用）"
+        }
+      },
+      "required": [
+        "audit_target",
+        "data_dir"
+      ]
+    }
+  },
+  {
+    "name": "select_column",
+    "description": "Excel列提取与合并工具 — 用于从 Excel 文件中提取指定列，并支持合并多个文件。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "folder_path": {
+          "type": "string",
+          "description": "文件夹路径: 要处理的文件夹路径（会递归查找所有 Excel 文件）"
+        },
+        "should_merge": {
+          "type": "string",
+          "description": "是否合并: 填写'是'表示合并多个文件，否则原地替换"
+        },
+        "sheet_keywords": {
+          "type": "string",
+          "description": "表名（选填）: 表名关键词，多个关键词用中文或英文逗号分隔，仅处理包含关键词的工作表，留空则处理所有工作表"
+        },
+        "columns_to_keep": {
+          "type": "string",
+          "description": "选择列配置: 需要提取的列名（在'选择列配置'工作表中列出），留空则全量合并"
+        }
+      },
+      "required": [
+        "folder_path",
+        "should_merge",
+        "sheet_keywords",
+        "columns_to_keep"
+      ]
+    }
+  },
+  {
+    "name": "subject_allocation",
+    "description": "科目分配派工",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        },
+        "output_dir": {
+          "type": "string",
+          "description": "输出目录路径。不传则使用默认目录。"
+        },
+        "base_url": {
+          "type": "string",
+          "description": "AI API Base URL"
+        },
+        "api_key": {
+          "type": "string",
+          "description": "AI API Key"
+        },
+        "model_name": {
+          "type": "string",
+          "description": "模型名称"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "tool_execute",
+    "description": "科目余额表处理-执行处理 — 接收已确认的处理参数，执行科目余额表清洗：识别表头、拆分辅助核算、层级科目生成、导出结果文件。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string",
+          "description": "源 Excel 文件路径"
+        },
+        "code_column": {
+          "type": "string",
+          "description": "科目编码列名（如：科目编码）"
+        },
+        "code_name_column": {
+          "type": "string",
+          "description": "科目名称列名（如：科目名称）"
+        },
+        "header_row": {
+          "type": "integer",
+          "description": "表头所在行号（1-indexed，通常为 1 或 2）"
+        },
+        "code_name_split": {
+          "type": "string",
+          "description": "科目名称分隔符（如 '-' 或 '_'），留空则按编码层级推断"
+        },
+        "asist_column": {
+          "type": "string",
+          "description": "辅助核算列名，留空则跳过辅助处理"
+        },
+        "asist_name_split": {
+          "type": "string",
+          "description": "辅助项键值分隔符（如 ':' 或 '：'），必须填符号"
+        },
+        "asist_item_wrapper": {
+          "type": "string",
+          "description": "辅助项包裹符号（如 '[]' 或 '【】'）"
+        },
+        "beginning_balance": {
+          "type": "string",
+          "description": "期初余额公式（如 '期初余额-期末余额'），留空则不计算"
+        },
+        "company_name": {
+          "type": "string",
+          "description": "公司名称，用于输出文件名"
+        },
+        "grouping_column": {
+          "type": "string",
+          "description": "分组汇总列（如 '核算账簿' 或 '公司名称'），用于多账套分组"
+        },
+        "output_dir": {
+          "type": "string",
+          "description": "输出目录路径。不传则使用默认 output/科目余额表处理/"
+        }
+      },
+      "required": [
+        "file_path",
+        "code_column",
+        "code_name_column",
+        "header_row"
+      ]
+    }
+  },
+  {
+    "name": "tool_preview",
+    "description": "科目余额表处理-数据预览 — 读取科目余额表 Excel 文件，返回列名、样本行，并自动推断所有处理参数。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string",
+          "description": "源 Excel 文件路径"
+        },
+        "sheet_name": {
+          "type": "string",
+          "description": "Sheet 名称（不传则读取第一个 Sheet）"
+        },
+        "preview_rows": {
+          "type": "integer",
+          "description": "预览行数（默认 5）"
+        },
+        "header_row": {
+          "type": "integer",
+          "description": "表头所在行号（1-indexed）。不传则自动检测"
+        }
+      },
+      "required": [
+        "file_path"
+      ]
+    }
+  },
+  {
+    "name": "subject_clean_after",
+    "description": "科目余额表后处理",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        },
+        "output_dir": {
+          "type": "string",
+          "description": "输出目录路径。不传则使用默认目录 output/科目余额表后处理。"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "text_match",
+    "description": "文本提取匹配",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        },
+        "output_dir": {
+          "type": "string",
+          "description": "输出目录路径。不传则使用默认目录。"
+        },
+        "base_url": {
+          "type": "string",
+          "description": "AI API Base URL"
+        },
+        "api_key": {
+          "type": "string",
+          "description": "AI API Key"
+        },
+        "model_name": {
+          "type": "string",
+          "description": "模型名称"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "voucher_check",
+    "description": "凭证检查",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "source_paths": {
+          "type": "array",
+          "description": "数据源路径: 需要扫描的文件或文件夹路径列表",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "source_paths"
+      ]
+    }
+  },
+  {
+    "name": "xlsx_writer",
+    "description": "批量生成小账套",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "description": "配置表文件路径（绝对路径或相对路径）"
+        }
+      },
+      "required": []
+    }
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "source": "C:/Users/Install/Desktop/SW审计工具箱",
+  "legacyRegisteredTools": 63,
+  "serverLogEvidence": "原版 mcp_server.log：Frozen registry 63 modules；已注册 63 个 MCP Tool",
+  "transport": "original-bundled-python-binary",
+  "copiedBinary": false,
+  "reason": "原版 MCP 位于打包 pyd 二进制及旧运行时，直接复制会绑定旧 Python/Qt/数据库和外部凭据；新桌面端使用受控 Node stdio MCP 协议与兼容映射。",
+  "migrated": ["list_skills","load_skill","jet_test_inspect","jet_test_execute","monthly_preview","monthly_detect_structure","monthly_execute","detailed_table_inspect"],
+  "pendingExternal": ["cicpa_query","related_party"],
+  "pendingAlgorithms": ["monthly_ai_analysis","detailed_table_inspect_template","detailed_table_save_config","detailed_table_validate","detailed_table_generate"],
+  "security": ["no arbitrary shell","project and attachment scope checks","no original secret migration","external MCP requires explicit configured command"]
+}
