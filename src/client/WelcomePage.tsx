@@ -16,6 +16,14 @@ export function WelcomePage({
   toolCount, project, tools,
   onCreateProject, onOpenSearch, onOpenTool, onDemo,
 }: WelcomePageProps) {
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    (e.currentTarget as HTMLElement).style.setProperty('--x', `${x}%`);
+    (e.currentTarget as HTMLElement).style.setProperty('--y', `${y}%`);
+  };
+
   return (
     <div className="welcome">
       <div className="welcome-glow" aria-hidden="true"/>
@@ -25,14 +33,22 @@ export function WelcomePage({
           输入任务描述开始对话，或从 {toolCount} 个本地工具中选择
         </div>
         <div className="welcome-actions">
-          <button className="welcome-action" onClick={onCreateProject}>
+          <button
+            className="welcome-action"
+            onClick={onCreateProject}
+            onMouseMove={handleMouseMove}
+          >
             <span className="welcome-action-icon"><Folder size={20}/></span>
             <span>
               <strong>选择项目</strong>
               <small>划定资料范围</small>
             </span>
           </button>
-          <button className="welcome-action" onClick={onOpenSearch}>
+          <button
+            className="welcome-action"
+            onClick={onOpenSearch}
+            onMouseMove={handleMouseMove}
+          >
             <span className="welcome-action-icon"><FileText size={20}/></span>
             <span>
               <strong>浏览工具</strong>

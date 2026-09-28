@@ -28,3 +28,9 @@ coverage/
 .local/
 
 .legacy-home/
+
+# Local agent metadata, package caches, and desktop shortcuts.
+.claude/
+.pnpm-store/
+*.lnk
+nul

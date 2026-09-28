@@ -3,6 +3,7 @@ import {
   Loader2, CheckCircle2, AlertCircle, FileSpreadsheet, ExternalLink,
   ChevronRight, ChevronDown, RefreshCw, Folder, Clock, ShieldCheck,
 } from 'lucide-react';
+import { DataTable } from './components/DataTable';
 
 interface TaskCardProps {
   task: any;
@@ -14,22 +15,6 @@ const taskStatus: Record<string, string> = {
   queued: '排队中', running: '执行中', cancelling: '正在停止',
   cancelled: '已取消', failed: '执行失败', interrupted: '待恢复', succeeded: '已完成',
 };
-
-function DataTable({ columns, rows }: { columns: string[]; rows: any[][] }) {
-  return (
-    <div className="data-table">
-      <table>
-        <thead><tr>{columns.map((c, i) => <th key={i}>{c}</th>)}</tr></thead>
-        <tbody>
-          {rows.map((r, i) => (
-            <tr key={i}>{r.map((v, j) => <td key={j} title={String(v ?? '')}>{String(v ?? '')}</td>)}</tr>
-          ))}
-        </tbody>
-      </table>
-      {!rows.length && <div className="empty-small">没有符合条件的记录</div>}
-    </div>
-  );
-}
 
 export function TaskCard({ task: t, tools, onError }: TaskCardProps) {
   const [expanded, setExpanded] = useState(false);
