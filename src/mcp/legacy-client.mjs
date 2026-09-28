@@ -40,11 +40,14 @@ export function mcpToOpenAiTool(tool,prefix='legacy_') {
   return {type:'function',function:{name,description:`原版 MCP：${tool.description||tool.name}`,parameters:tool.inputSchema||{type:'object',properties:{},additionalProperties:true}}};
 }
 const pathKeys=/^(file|files|file_path|file_paths|config_file|config_files|work_dir|output_dir|output_path|template_dir|data_dir|result_file|this_year_file|last_year_file|gl_path|bank_path)$/i;
-export function constrainMcpArgs(value,root,key='') {
-  if(Array.isArray(value)) return value.map(v=>constrainMcpArgs(v,root,key));
-  if(value&&typeof value==='object') return Object.fromEntries(Object.entries(value).map(([k,v])=>[k,constrainMcpArgs(v,root,k)]));
+const outputPathKeys=/^(output_dir|output_path|result_file)$/i;
+export function constrainMcpArgs(value,root,key='',allowedFiles=null) {
+  if(Array.isArray(value)) return value.map(v=>constrainMcpArgs(v,root,key,allowedFiles));
+  if(value&&typeof value==='object') return Object.fromEntries(Object.entries(value).map(([k,v])=>[k,constrainMcpArgs(v,root,k,allowedFiles)]));
   if(typeof value==='string'&&pathKeys.test(key)) {
-    const resolved=path.resolve(root,value); if(!resolved.startsWith(root+path.sep)&&resolved!==root) throw new Error(`MCP 路径超出当前项目：${value}`); return resolved;
+    const resolved=path.resolve(root,value); if(!resolved.startsWith(root+path.sep)&&resolved!==root) throw new Error(`MCP 路径超出当前项目：${value}`);
+    if(allowedFiles && !outputPathKeys.test(key) && !allowedFiles.has(resolved)) throw new Error(`MCP 文件未在当前对话选择范围内：${value}`);
+    return resolved;
   }
   return value;
 }

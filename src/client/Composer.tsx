@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Paperclip, Command, Zap, ArrowUp, Square, Settings, Loader2,
+  Command, ArrowUp, Square, Settings,
   MoreVertical, Trash2,
 } from 'lucide-react';
 import type { Tool } from './types';
@@ -8,6 +8,7 @@ import { AttachmentList } from './Attachments';
 import { AttachmentPicker } from './Attachments';
 
 interface ComposerProps {
+  sessionId: string;
   text: string;
   onTextChange: (v: string) => void;
   onSend: () => void;
@@ -26,7 +27,11 @@ interface ComposerProps {
   onToolSelect: () => void;
   onSettingsClick: () => void;
   usageTotal: number;
-  onAddAttachment: () => void;
+  setAttachmentBusy: (busy: boolean) => void;
+  refreshSession: () => Promise<void>;
+  onError: (e: unknown) => void;
+  onNotice: (message: string) => void;
+  onStop: () => void;
   onDelete?: () => void;
   showDelete?: boolean;
 }
@@ -38,12 +43,13 @@ const modes: Record<string, string> = {
 };
 
 export function Composer({
-  text, onTextChange, onSend, busy, streaming,
+  sessionId, text, onTextChange, onSend, busy, streaming,
   attachments, attachmentBusy, onRemoveAttachment,
   mode, onModeChange,
   sessionModel, onModelChange, settingsModels, visionModel, settingsModel,
   onToolSelect, onSettingsClick, usageTotal,
-  onAddAttachment, onDelete, showDelete,
+  setAttachmentBusy, refreshSession, onError, onNotice, onStop,
+  onDelete, showDelete,
 }: ComposerProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
@@ -71,7 +77,7 @@ export function Composer({
       <div className="composer">
         <AttachmentList
           items={attachments}
-          sessionId=""
+          sessionId={sessionId}
           disabled={attachmentBusy || busy || streaming}
           onRemove={onRemoveAttachment}
         />
@@ -85,12 +91,12 @@ export function Composer({
         <div className="composer-toolbar">
           <div>
             <AttachmentPicker
-              sessionId=""
+              sessionId={sessionId}
               busy={attachmentBusy || busy || streaming}
-              setBusy={() => {}}
-              refresh={async () => {}}
-              onError={() => {}}
-              onNotice={() => {}}
+              setBusy={setAttachmentBusy}
+              refresh={refreshSession}
+              onError={onError}
+              onNotice={onNotice}
             />
             <button className="text-tool" onClick={onToolSelect}>
               <Command size={14}/>工具
@@ -156,7 +162,7 @@ export function Composer({
               )}
             </div>
             {streaming ? (
-              <button className="send stop" title="停止生成">
+              <button className="send stop" title="停止生成" aria-label="停止生成" onClick={onStop}>
                 <Square size={16}/>
               </button>
             ) : (

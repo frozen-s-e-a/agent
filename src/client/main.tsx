@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
-  Plus, Search, Settings, Folder, ChevronRight,
-  ArrowLeft, X, Check, FileSpreadsheet,
-  Loader2, RefreshCw, Database,
-  Layers, ShieldCheck, ArrowUpRight,
+  ChevronRight, X, Check,
+  Loader2, Layers, ShieldCheck,
   PanelRightClose, PanelRightOpen, AlertCircle, Trash2,
 } from 'lucide-react';
 import { api, desktop } from './api';
@@ -14,22 +12,13 @@ import { WelcomePage } from './WelcomePage';
 import { Composer } from './Composer';
 import { Messages } from './Messages';
 import { ContextPanel } from './ContextPanel';
-import { TaskCard } from './TaskCard';
 import { SettingsPage } from './SettingsPage';
 import { ProjectModal } from './ProjectModal';
 import { ToolSearchModal } from './ToolSearchModal';
 import { ToolParameterModal } from './ToolParameterModal';
 import { useTransientNotice } from './useTransientNotice';
 import { useFileSelection } from './hooks/useFileSelection';
-import type { Project, Session, Tool, Boot, AppSettings, ModalType } from './types';
-
-// ─── Constants ───
-
-const MODES: Record<string, string> = {
-  auto: '自动',
-  'local-light': '轻量本地',
-  'local-batch': '大批量',
-};
+import type { Project, Tool, Boot, AppSettings, ModalType } from './types';
 
 // ─── App ───
 
@@ -65,10 +54,13 @@ function App() {
   // ── Derived ──
   const session = boot?.sessions.find(s => s.id === sessionId);
   const project = boot?.projects.find(p => p.id === session?.projectId);
-  const allTools: Tool[] = useMemo(
-    () => [...(boot?.tools || []), ...(boot?.legacyTools || [])],
-    [boot],
-  );
+  const allTools: Tool[] = useMemo(() => {
+    const unique = new Map<string, Tool>();
+    for (const tool of [...(boot?.tools || []), ...(boot?.legacyTools || [])]) {
+      unique.set(tool.id, tool);
+    }
+    return [...unique.values()];
+  }, [boot]);
 
   // ── File selection ──
   const { selected: selectedFiles, toggle: toggleFile, clear: clearSelection } = useFileSelection();
@@ -81,10 +73,14 @@ function App() {
 
   const refresh = useCallback(async () => {
     const b = await api('bootstrap') as Boot;
-    const merged = { ...b, tools: [...(b.tools || []), ...(b.legacyTools || [])] } as Boot;
-    setBoot(merged);
-    return merged;
+    setBoot(b);
+    return b;
   }, []);
+
+  const refreshSession = useCallback(async () => {
+    if (!sessionId) return;
+    setTimeline(await api('session.get', { id: sessionId }) as any);
+  }, [sessionId]);
 
   // ── Boot ──
   useEffect(() => {
@@ -145,6 +141,17 @@ function App() {
       await refresh(); setSessionId(s.id); setPage('chat'); setTimeline({ events: [], tasks: [] });
     } catch (e) { report(e); }
   }, [refresh, report]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        void createSession(project?.id || null);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [createSession, project?.id]);
 
   const selectProject = useCallback(async (p: Project) => {
     const existing = boot?.sessions.filter(s => s.projectId === p.id).at(-1);
@@ -214,7 +221,7 @@ function App() {
     if (busy || attachmentBusy || timeline.streaming || (!text.trim() && !timeline.attachments?.length)) return;
     if (text.startsWith('/')) {
       const name = text.slice(1).trim();
-      const t = boot?.tools.find(t => t.id === name || t.name === name);
+      const t = allTools.find(t => t.id === name || t.name === name);
       if (t) { openTool(t); setText(''); return; }
       setSearch(name); setModalType('tools'); return;
     }
@@ -222,12 +229,13 @@ function App() {
     try {
       await api('chat.send', {
         sessionId, text, projectFiles: selectedFiles,
+        mode,
         model: session?.model || '',
         attachments: (timeline.attachments || []).map((a: any) => a.id),
       });
       setText(''); await refresh(); setTimeline(await api('session.get', { id: sessionId }) as any);
     } catch (e) { report(e); } finally { setBusy(false); }
-  }, [busy, attachmentBusy, timeline, text, selectedFiles, session, refresh, report, openTool]);
+  }, [allTools, busy, attachmentBusy, timeline, text, selectedFiles, mode, session, refresh, report, openTool, sessionId]);
 
   const saveSettings = useCallback(async () => {
     setBusy(true);
@@ -246,16 +254,28 @@ function App() {
   }, [report]);
 
   const deleteSession = useCallback(async (id: string) => {
+    setBusy(true);
     try {
+      const deleted = boot?.sessions.find(s => s.id === id);
       await api('session.delete', { id });
-      await refresh();
+      const nextBoot = await refresh();
       if (sessionId === id) {
-        const remaining = boot?.sessions.filter(s => s.id !== id) as Session[];
-        setSessionId(remaining?.at(-1)?.id || '');
+        const sameProject = nextBoot.sessions.filter(s => s.id !== id && s.projectId === deleted?.projectId);
+        const remaining = sameProject.length
+          ? sameProject
+          : nextBoot.sessions.filter(s => s.id !== id);
+        if (remaining.length) {
+          setSessionId(remaining.at(-1)!.id);
+        } else {
+          const replacement = await api('session.create', { projectId: deleted?.projectId || null }) as { id: string };
+          await refresh();
+          setSessionId(replacement.id);
+        }
         setTimeline({ events: [], tasks: [] });
       }
+      setDeleteConfirm(null);
       setNotice('对话已删除');
-    } catch (e) { report(e); }
+    } catch (e) { report(e); } finally { setBusy(false); }
   }, [sessionId, boot, refresh, setNotice, report]);
 
   const usage = useMemo(() => {
@@ -294,10 +314,10 @@ function App() {
         onNewStandalone={() => createSession()}
         onSelectProject={selectProject}
         onSelectSession={(id) => { setSessionId(id); setPage('chat'); }}
-        onDeleteSession={deleteSession}
+        onDeleteSession={(id) => setDeleteConfirm(id)}
         onOpenProjectModal={() => setModalType('project')}
         onOpenSearch={() => { setSearch(''); setModalType('tools'); }}
-        onOpenSettings={() => { setPage('settings'); setSettings(boot.settings); }}
+        onOpenSettings={() => { setPage('settings'); setSettingsTab('模型服务'); setSettings(boot.settings); }}
         onShowMigration={showMigration}
       />
 
@@ -309,9 +329,9 @@ function App() {
             <strong>{page === 'settings' ? settingsTab : session?.title || '新对话'}</strong>
           </div>
           <div className="top-actions">
-            <span className="local-pill"><ShieldCheck size={14} />数据处理在本机</span>
+            <span className="local-pill" title="本地工具在本机执行；对话内容按所选模型服务配置处理"><ShieldCheck size={14} />本地工具执行</span>
             {page === 'chat' && (
-              <button title="项目文件" className="icon-btn" onClick={() => setRightPanelOpen(!rightPanelOpen)}>
+              <button title="项目文件" aria-label="切换项目文件面板" className="icon-btn" onClick={() => setRightPanelOpen(!rightPanelOpen)}>
                 {rightPanelOpen ? <PanelRightClose size={18} /> : <PanelRightOpen size={18} />}
               </button>
             )}
@@ -338,18 +358,18 @@ function App() {
 
         {page === 'chat' ? (
           <div className="workspace">
-            {timeline.events.length === 0 ? (
-              <WelcomePage
-                toolCount={allTools.length}
-                project={project}
-                tools={allTools}
-                onCreateProject={() => setModalType('project')}
-                onOpenSearch={() => { setSearch(''); setModalType('tools'); }}
-                onOpenTool={openTool}
-                onDemo={demo}
-              />
-            ) : (
-              <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
+            <div className="workspace-content">
+              {timeline.events.length === 0 ? (
+                <WelcomePage
+                  toolCount={allTools.length}
+                  project={project}
+                  tools={allTools}
+                  onCreateProject={() => setModalType('project')}
+                  onOpenSearch={() => { setSearch(''); setModalType('tools'); }}
+                  onOpenTool={openTool}
+                  onDemo={demo}
+                />
+              ) : (
                 <Messages
                   events={timeline.events}
                   calls={timeline.calls}
@@ -361,27 +381,26 @@ function App() {
                   sessionId={sessionId}
                   onError={report}
                 />
-                {rightPanelOpen && (
-                  <ContextPanel
-                    project={project}
-                    files={files}
-                    folder={folder}
-                    selected={selectedFiles}
-                    right={rightPanelOpen}
-                    onToggleRight={() => setRightPanelOpen(!rightPanelOpen)}
-                    onFolderChange={setFolder}
-                    onSelectFile={toggleFile}
-                    onCreateProject={() => setModalType('project')}
-                    onRefresh={() => project && api('files.list', { projectId: project.id, path: folder }).then(setFiles).catch(report)}
-                    onClearSelection={clearSelection}
-                    onUseTools={() => setModalType('tools')}
-                  />
-                )}
-              </div>
-            )}
+              )}
+              {rightPanelOpen && (
+                <ContextPanel
+                  project={project}
+                  files={files}
+                  folder={folder}
+                  selected={selectedFiles}
+                  onFolderChange={setFolder}
+                  onSelectFile={toggleFile}
+                  onCreateProject={() => setModalType('project')}
+                  onRefresh={() => project && api('files.list', { projectId: project.id, path: folder }).then(setFiles).catch(report)}
+                  onClearSelection={clearSelection}
+                  onUseTools={() => setModalType('tools')}
+                />
+              )}
+            </div>
 
             {/* Composer */}
             <Composer
+              sessionId={sessionId}
               text={text} onTextChange={setText} onSend={send}
               busy={busy} streaming={timeline.streaming}
               attachments={timeline.attachments || []}
@@ -397,14 +416,20 @@ function App() {
               onToolSelect={() => { setSearch(''); setModalType('tools'); }}
               onSettingsClick={() => { setPage('settings'); setSettingsTab('模型服务'); setSettings(boot.settings); }}
               usageTotal={usage.total}
-              onAddAttachment={() => {}}
+              setAttachmentBusy={setAttachmentBusy}
+              refreshSession={refreshSession}
+              onError={report}
+              onNotice={setNotice}
+              onStop={() => api('chat.cancel', { sessionId }).catch(report)}
               showDelete={!!session && page === 'chat'}
-              onDelete={session ? () => deleteSession(session.id) : undefined}
+              onDelete={session ? () => setDeleteConfirm(session.id) : undefined}
             />
           </div>
         ) : (
           <SettingsPage
             boot={boot}
+            tab={settingsTab}
+            onTabChange={setSettingsTab}
             settings={settings}
             setSettings={setSettings}
             key={apiKey}
@@ -457,6 +482,7 @@ function App() {
           onRefresh={() => project && api('files.list', { projectId: project.id, path: folder }).then(setFiles).catch(report)}
           onRunTool={runTool}
           onCancel={() => setCurrentTool(null)}
+          onCreateProject={() => { setCurrentTool(null); setModalType('project'); }}
           onLoadPreview={loadPreview}
           onDemo={demo}
         />

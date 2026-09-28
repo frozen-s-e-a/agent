@@ -221,10 +221,10 @@ svg { flex-shrink: 0; }
   background: rgba(255,255,255,.15); width: 26px; height: 26px; border-radius: var(--radius-sm); font-size: 14px;
 }
 .local-state {
-  display: flex; align-items: center; font-size: 9px; color: var(--brand-white-muted);
+  display: flex; align-items: center; font-size: 9px; color: var(--ink-3);
   gap: 5px; padding: 12px 8px 0; border-top: 1px solid rgba(255,255,255,.12); margin-top: 8px;
 }
-.local-state span { margin-left: auto; font-size: 9px; color: var(--brand-white-muted); }
+.local-state span { margin-left: auto; font-size: 9px; color: var(--ink-3); }
 .local-state i, .status-dot {
   width: 6px; height: 6px; border-radius: 50%;
   background: #34d399; display: inline-block;
@@ -254,6 +254,7 @@ svg { flex-shrink: 0; }
 
 /* ---- Workspace ---- */
 .workspace { display: flex; flex-direction: column; flex: 1; min-height: 0; background: var(--bg); }
+.workspace-content { display: flex; flex: 1; min-height: 0; }
 
 /* ---- Welcome page ---- */
 .welcome {
@@ -298,7 +299,7 @@ svg { flex-shrink: 0; }
   margin-bottom: 32px; line-height: 1.7;
   animation: rise .5s ease .15s both;
 }
-.welcome-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; animation: rise .5s ease .25s both; }
+.welcome-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; animation: rise .5s ease .25s both; }
 .welcome-action {
   display: flex; align-items: center; gap: 16px; padding: 20px 22px;
   border: 1px solid var(--line-2); border-radius: var(--radius-md); background: var(--surface);
@@ -331,6 +332,11 @@ svg { flex-shrink: 0; }
 }
 .welcome-action strong { display: block; font-size: 14px; font-weight: 600; color: var(--ink); }
 .welcome-action small { display: block; font-size: 11px; color: var(--ink-3); margin-top: 4px; }
+.welcome-tools { margin-top: 24px; text-align: left; animation: rise .5s ease .3s both; }
+.welcome-tools-label { display: block; margin-bottom: 8px; color: var(--ink-3); font-size: 10.5px; font-weight: 600; }
+.welcome-tools > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.welcome-tools button { padding: 7px 10px; border: 1px solid var(--line-2); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink-2); font-size: 11px; }
+.welcome-tools button:hover { border-color: var(--brand-line); color: var(--brand); background: var(--brand-ink); }
 .work-scope {
   display: flex; align-items: center; gap: 8px; font-size: 10.5px;
   padding: 16px 0 0; color: var(--ink-3); justify-content: center;

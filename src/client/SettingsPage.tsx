@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Check, Database, ShieldCheck, FileSpreadsheet, Layers, Info, Folder } from 'lucide-react';
 import { ModelSettings } from './ModelSettings';
 
 interface SettingsPageProps {
   boot: any;
+  tab: string;
+  onTabChange: (tab: string) => void;
   settings: any;
   setSettings: (s: any) => void;
   key: string;
@@ -19,15 +21,13 @@ const modes: Record<string, string> = {
   auto: '自动', 'local-light': '轻量本地', 'local-batch': '大批量',
 };
 
-export function SettingsPage({ boot, settings, setSettings, key, setKey, busy, saveSettings, showMigration, usage, migration }: SettingsPageProps) {
-  const [tab, setTab] = useState('模型服务');
-
+export function SettingsPage({ boot, tab, onTabChange, settings, setSettings, key, setKey, busy, saveSettings, showMigration, usage, migration }: SettingsPageProps) {
   return (
     <div className="settings-layout">
       <nav className="settings-tabs">
         {['模型服务', '资源与权限', '用量统计', '扩展能力', '迁移与诊断'].map(t => (
           <button key={t} className={tab === t ? 'active' : ''}
-            onClick={() => { setTab(t); if (t === '迁移与诊断') showMigration(); }}>{t}</button>
+            onClick={() => { onTabChange(t); if (t === '迁移与诊断') void showMigration(); }}>{t}</button>
         ))}
       </nav>
       <div className="settings-content">

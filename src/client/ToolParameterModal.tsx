@@ -23,6 +23,7 @@ interface ToolParameterModalProps {
   onRefresh: () => void;
   onRunTool: () => void;
   onCancel: () => void;
+  onCreateProject: () => void;
   onLoadPreview: () => void;
   onDemo: () => Promise<void>;
 }
@@ -35,6 +36,7 @@ export function ToolParameterModal({
   tool, project, files, folder, selected, params, setParams, advanced, setAdvanced, preview,
   mode, onModeChange, boot, busy, onFolderChange, onSelectFile, onRefresh,
   onRunTool, onCancel, onLoadPreview, onDemo,
+  onCreateProject,
 }: ToolParameterModalProps) {
   if (!tool) return null;
 
@@ -163,7 +165,7 @@ export function ToolParameterModal({
               <Folder size={32}/>
               <h3>先选择项目文件夹</h3>
               <p>本地工具需要明确的文件工作范围。</p>
-              <button className="primary" onClick={onCancel}>创建项目</button>
+              <button className="primary" onClick={onCreateProject}>创建项目</button>
               <button className="text-tool" onClick={async () => { onCancel(); await onDemo(); }}>使用合成示例</button>
             </div>
           )}

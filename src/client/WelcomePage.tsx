@@ -1,5 +1,5 @@
 import React from 'react';
-import { Folder, ShieldCheck, FileText } from 'lucide-react';
+import { Folder, ShieldCheck, FileText, Sparkles } from 'lucide-react';
 import type { Tool, Project } from './types';
 
 interface WelcomePageProps {
@@ -55,7 +55,30 @@ export function WelcomePage({
               <small>从 {toolCount} 个工具中选择</small>
             </span>
           </button>
+          <button
+            className="welcome-action"
+            onClick={onDemo}
+            onMouseMove={handleMouseMove}
+          >
+            <span className="welcome-action-icon"><Sparkles size={20}/></span>
+            <span>
+              <strong>使用合成示例</strong>
+              <small>快速体验完整流程</small>
+            </span>
+          </button>
         </div>
+        {tools.length > 0 && (
+          <div className="welcome-tools">
+            <span className="welcome-tools-label">常用工具</span>
+            <div>
+              {tools.slice(0, 4).map(tool => (
+                <button key={tool.id} onClick={() => onOpenTool(tool)} title={tool.description}>
+                  {tool.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       {project && (
         <div className="work-scope">

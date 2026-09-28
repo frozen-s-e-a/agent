@@ -3,7 +3,6 @@ import { Layers, AlertCircle, Loader2 } from 'lucide-react';
 import { MarkdownMessage } from './MarkdownMessage';
 import { ToolCallCard } from './ToolCallCard';
 import { AttachmentList } from './Attachments';
-import type { TaskCard as TaskCardType } from './types';
 import { TaskCard } from './TaskCard';
 
 interface MessagesProps {
@@ -25,8 +24,8 @@ export function Messages({
   const endRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [events.length, streaming]);
+    endRef.current?.scrollIntoView({ behavior: streaming ? 'auto' : 'smooth' });
+  }, [events.length, streaming, turn]);
 
   return (
     <section className="conversation">

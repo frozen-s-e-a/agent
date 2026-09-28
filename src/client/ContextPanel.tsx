@@ -9,8 +9,6 @@ interface ContextPanelProps {
   files: any[];
   folder: string;
   selected: string[];
-  right: boolean;
-  onToggleRight: () => void;
   onFolderChange: (f: string) => void;
   onSelectFile: (path: string) => void;
   onCreateProject: () => void;
@@ -20,10 +18,15 @@ interface ContextPanelProps {
 }
 
 export function ContextPanel({
-  project, files, folder, selected, right,
-  onToggleRight, onFolderChange, onSelectFile, onCreateProject,
+  project, files, folder, selected,
+  onFolderChange, onSelectFile, onCreateProject,
   onRefresh, onClearSelection, onUseTools,
 }: ContextPanelProps) {
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
   if (!project) {
     return (
       <aside className="context-panel">
@@ -108,7 +111,7 @@ export function ContextPanel({
                   ? <FileSpreadsheet size={17}/>
                   : <FileText size={17}/>}
                 <span title={f.path}>{f.name}</span>
-                <small>{f.size < 1024 ? '1 KB' : Math.round(f.size / 1024) + ' KB'}</small>
+                <small>{formatSize(f.size || 0)}</small>
               </label>
             )}
           </div>

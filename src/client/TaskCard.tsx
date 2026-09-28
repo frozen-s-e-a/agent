@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Loader2, CheckCircle2, AlertCircle, FileSpreadsheet, ExternalLink,
-  ChevronRight, ChevronDown, RefreshCw, Folder, Clock, ShieldCheck,
+  ChevronRight, ChevronDown, RefreshCw, Folder, Clock, ShieldCheck, Square,
 } from 'lucide-react';
 import { DataTable } from './components/DataTable';
 
@@ -51,7 +51,7 @@ export function TaskCard({ task: t, tools, onError }: TaskCardProps) {
           <div className="indeterminate"/>
           <p>{t.phase}{t.rows !== undefined && ` · 已处理 ${t.rows.toLocaleString()} 行`}</p>
           <button onClick={() => (window as any).audit?.invoke('task.cancel', { id: t.id }).catch(onError)}>
-            <Folder size={12}/>取消任务
+            <Square size={12}/>取消任务
           </button>
         </div>
       )}
@@ -69,7 +69,7 @@ export function TaskCard({ task: t, tools, onError }: TaskCardProps) {
             <div className="task-error">{t.result.warningCount} 条提示：{t.result.warnings[0]}</div>
           )}
           <div className="output-files">
-            {t.result.outputs.filter((f: any) => !f.name.endsWith('.parquet')).map((f: any) => (
+            {t.result.outputs.map((f: any) => (
               <button key={f.name} onClick={() => open(f.name)}>
                 <FileSpreadsheet size={18}/><span>{f.name}</span><ExternalLink size={13}/>
               </button>

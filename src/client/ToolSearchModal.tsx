@@ -31,6 +31,9 @@ export function ToolSearchModal({ search, onSearchChange, allTools, onOpenTool, 
               <span>{t.group}</span><ChevronRight size={17}/>
             </button>
           ))}
+          {!allTools.some(t => (t.name + t.id + t.description).toLowerCase().includes(search.toLowerCase())) && (
+            <p className="empty-small">没有匹配的工具，试试名称、用途或原命令。</p>
+          )}
         </div>
         <div className="search-footer">
           <span>{allTools.length} 项本地工具 · 完整兼容验收尚未完成</span>
