@@ -86,6 +86,7 @@ export interface MessageEvent {
   taskId?: string;
   at: string;
   model?: string;
+  projectFiles?: string[];
   usage?: MessageUsage;
   attachments?: AttachmentItem[];
   attachmentNotes?: string[];

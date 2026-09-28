@@ -26,7 +26,6 @@ export function Sidebar({
   onOpenProjectModal, onOpenSearch, onOpenSettings, onShowMigration,
 }: SidebarProps) {
   const [hoveredSession, setHoveredSession] = useState<string | null>(null);
-  const [hoveredProject, setHoveredProject] = useState<string | null>(null);
 
   const projectSessions = (projectId: string) =>
     sessions.filter(s => s.projectId === projectId);
@@ -67,11 +66,12 @@ export function Sidebar({
           const pSessions = projectSessions(p.id);
           const isActive = activeProjectId === p.id;
           return (
-            <div key={p.id} onMouseEnter={() => setHoveredProject(p.id)} onMouseLeave={() => setHoveredProject(null)}>
+            <div key={p.id}>
               <button
                 className={'nav-item project-item' + (isActive ? ' active' : '')}
                 onClick={() => onSelectProject(p)}
                 title={p.name}
+                aria-current={isActive ? 'page' : undefined}
               >
                 <span className="project-dot" style={{ display: isActive ? 'block' : 'none' }} />
                 <Folder size={15} />
@@ -94,6 +94,7 @@ export function Sidebar({
                         className={'nav-item' + (activeSessionId === s.id ? ' selected' : '')}
                         onClick={() => onSelectSession(s.id)}
                         title={s.title}
+                          aria-current={activeSessionId === s.id ? 'page' : undefined}
                       >
                         <span className="session-dot" style={{ display: activeSessionId === s.id ? 'block' : 'none' }} />
                         <MessageSquare size={12} />
@@ -103,6 +104,7 @@ export function Sidebar({
                         <button
                           className="session-delete"
                           title="删除此对话"
+                          aria-label={`删除对话：${s.title}`}
                           onClick={e => { e.stopPropagation(); onDeleteSession(s.id); }}
                         >
                           <Trash2 size={11} />
@@ -147,6 +149,7 @@ export function Sidebar({
               className={'nav-item' + (activeSessionId === s.id && page === 'chat' ? ' selected' : '')}
               onClick={() => onSelectSession(s.id)}
               title={s.title}
+              aria-current={activeSessionId === s.id && page === 'chat' ? 'page' : undefined}
             >
               <span className="session-dot" style={{ display: activeSessionId === s.id ? 'block' : 'none' }} />
               <MessageSquare size={12} />
@@ -156,6 +159,7 @@ export function Sidebar({
               <button
                 className="session-delete"
                 title="删除此对话"
+                aria-label={`删除对话：${s.title}`}
                 onClick={e => { e.stopPropagation(); onDeleteSession(s.id); }}
               >
                 <Trash2 size={11} />
@@ -173,6 +177,7 @@ export function Sidebar({
         <button
           className={'nav-item settings-nav' + (page === 'settings' ? ' selected' : '')}
           onClick={onOpenSettings}
+          aria-current={page === 'settings' ? 'page' : undefined}
         >
           <Settings size={15} /><span>设置</span>
         </button>

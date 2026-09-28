@@ -27,13 +27,11 @@ export function ModelSettings({ settings: s, setSettings: set, keyValue, setKey,
       );
       if (kind === 'list') {
         const models = r.models || [];
-        // 自动推荐：优先识别带 vision/img/image 后缀的模型给视觉，其余给文本
+        // 只把名称明确表示支持视觉的模型推荐给视觉输入，避免误把普通模型当成视觉模型。
         const visionCandidate = models.find(
-          (m: string) => m.toLowerCase().includes('vision') || m.toLowerCase().includes('img') || m.toLowerCase().includes('image')
-        ) || models[0];
-        const textCandidate = visionCandidate
-          ? models.find((m: string) => m !== visionCandidate)
-          : models[0];
+          (m: string) => /vision|img|image/i.test(m)
+        ) || '';
+        const textCandidate = models.find((m: string) => m !== visionCandidate) || models[0];
         set({ ...s, baseUrl: r.baseUrl, models, model: textCandidate || '', visionModel: visionCandidate || '' });
         setResult({ ok: true, text: `已获取 ${r.count} 个模型。已自动推荐文本和视觉模型，请确认后保存。` });
       } else {

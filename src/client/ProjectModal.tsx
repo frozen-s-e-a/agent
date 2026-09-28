@@ -19,7 +19,7 @@ export function ProjectModal({ projectName, setProjectName, projectRoot, setProj
       <section className="modal" role="dialog" aria-modal="true" aria-label="创建项目">
         <div className="modal-header">
           <h2>创建项目</h2>
-          <button className="icon-btn" onClick={onCancel}><X size={20}/></button>
+          <button className="icon-btn" aria-label="关闭创建项目" onClick={onCancel}><X size={20}/></button>
         </div>
         <p className="muted">以一个文件夹为工作范围，保存相关对话与执行记录。</p>
         <label>项目名称

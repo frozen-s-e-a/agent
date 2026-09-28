@@ -75,6 +75,7 @@ export function TaskCard({ task: t, tools, onError }: TaskCardProps) {
               </button>
             ))}
           </div>
+          {!t.result.outputs.length && <p className="empty-small result-empty">此任务没有生成可下载文件，详细结果请查看下方预览。</p>}
           <button className="preview-toggle" onClick={() => setExpanded(!expanded)}>
             {expanded ? <ChevronDown size={14}/> : <ChevronRight size={14}/>}
             结果预览（前 {t.result.preview.length} 行 / 共 {t.result.rowCount} 行）

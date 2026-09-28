@@ -237,6 +237,23 @@ function App() {
     } catch (e) { report(e); } finally { setBusy(false); }
   }, [allTools, busy, attachmentBusy, timeline, text, selectedFiles, mode, session, refresh, report, openTool, sessionId]);
 
+  const retryMessage = useCallback(async (event: any) => {
+    if (busy || attachmentBusy || timeline.streaming || !event?.text) return;
+    setBusy(true);
+    try {
+      await api('chat.send', {
+        sessionId,
+        text: event.text,
+        projectFiles: event.projectFiles ?? selectedFiles,
+        mode,
+        model: session?.model || '',
+        attachments: (event.attachments || []).map((a: any) => a.id),
+      });
+      await refresh();
+      setTimeline(await api('session.get', { id: sessionId }) as any);
+    } catch (e) { report(e); } finally { setBusy(false); }
+  }, [busy, attachmentBusy, timeline.streaming, sessionId, selectedFiles, mode, session, refresh, report]);
+
   const saveSettings = useCallback(async () => {
     setBusy(true);
     try {
@@ -361,7 +378,8 @@ function App() {
             <div className="workspace-content">
               {timeline.events.length === 0 ? (
                 <WelcomePage
-                  toolCount={allTools.length}
+                  toolCount={boot.tools.length}
+                  legacyToolCount={boot.legacyTools?.length || 0}
                   project={project}
                   tools={allTools}
                   onCreateProject={() => setModalType('project')}
@@ -379,7 +397,9 @@ function App() {
                   turn={timeline.turn}
                   phase={timeline.phase || ''}
                   sessionId={sessionId}
+                  busy={busy}
                   onError={report}
+                  onRetry={retryMessage}
                 />
               )}
               {rightPanelOpen && (
@@ -432,7 +452,7 @@ function App() {
             onTabChange={setSettingsTab}
             settings={settings}
             setSettings={setSettings}
-            key={apiKey}
+            keyValue={apiKey}
             setKey={setApiKey}
             busy={busy}
             saveSettings={saveSettings}
@@ -493,7 +513,7 @@ function App() {
           <section className="modal" role="dialog" aria-modal="true" aria-label="删除对话">
             <div className="modal-header">
               <h2>删除对话</h2>
-              <button className="icon-btn" onClick={() => setDeleteConfirm(null)}><X size={20} /></button>
+              <button className="icon-btn" aria-label="关闭删除确认" onClick={() => setDeleteConfirm(null)}><X size={20} /></button>
             </div>
             <p className="muted">此对话及其所有消息和工具记录将被永久删除，无法恢复。</p>
             <div className="modal-footer">

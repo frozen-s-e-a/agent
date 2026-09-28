@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Database, ShieldCheck, FileSpreadsheet, Layers, Info, Folder } from 'lucide-react';
+import { Database, ShieldCheck, FileSpreadsheet, Layers, Info, Folder } from 'lucide-react';
 import { ModelSettings } from './ModelSettings';
 
 interface SettingsPageProps {
@@ -8,7 +8,7 @@ interface SettingsPageProps {
   onTabChange: (tab: string) => void;
   settings: any;
   setSettings: (s: any) => void;
-  key: string;
+  keyValue: string;
   setKey: (k: string) => void;
   busy: boolean;
   saveSettings: () => Promise<void>;
@@ -21,19 +21,19 @@ const modes: Record<string, string> = {
   auto: '自动', 'local-light': '轻量本地', 'local-batch': '大批量',
 };
 
-export function SettingsPage({ boot, tab, onTabChange, settings, setSettings, key, setKey, busy, saveSettings, showMigration, usage, migration }: SettingsPageProps) {
+export function SettingsPage({ boot, tab, onTabChange, settings, setSettings, keyValue, setKey, busy, saveSettings, showMigration, usage, migration }: SettingsPageProps) {
   return (
     <div className="settings-layout">
-      <nav className="settings-tabs">
+      <nav className="settings-tabs" aria-label="设置分类" role="tablist">
         {['模型服务', '资源与权限', '用量统计', '扩展能力', '迁移与诊断'].map(t => (
-          <button key={t} className={tab === t ? 'active' : ''}
+          <button key={t} role="tab" aria-selected={tab === t} className={tab === t ? 'active' : ''}
             onClick={() => { onTabChange(t); if (t === '迁移与诊断') void showMigration(); }}>{t}</button>
         ))}
       </nav>
       <div className="settings-content">
         {tab === '模型服务' && (
           <ModelSettings settings={settings} setSettings={setSettings}
-            keyValue={key} setKey={setKey} busy={busy} save={saveSettings} />
+            keyValue={keyValue} setKey={setKey} busy={busy} save={saveSettings} />
         )}
         {tab === '资源与权限' && (
           <>

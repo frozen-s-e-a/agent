@@ -14,12 +14,14 @@ interface MessagesProps {
   turn: string;
   phase: string;
   sessionId: string;
+  busy: boolean;
   onError: (e: any) => void;
+  onRetry: (event: any) => void;
 }
 
 export function Messages({
   events, calls, tasks, tools,
-  streaming, turn, phase, sessionId, onError,
+  streaming, turn, phase, sessionId, busy, onError, onRetry,
 }: MessagesProps) {
   const endRef = React.useRef<HTMLDivElement>(null);
 
@@ -28,7 +30,7 @@ export function Messages({
   }, [events.length, streaming, turn]);
 
   return (
-    <section className="conversation">
+    <section className="conversation" aria-label="对话记录">
       <div className="message-scroll">
         <div className="messages">
           {events.map(e => (
@@ -44,7 +46,7 @@ export function Messages({
                 />
               )}
               {e.type !== 'tool' && e.type !== 'task' && (
-                <div className={'message ' + e.type}>
+                <div className={'message ' + e.type} role={e.type === 'error' ? 'alert' : undefined}>
                   <div className="message-avatar">
                     {e.type === 'user' ? '你' :
                       e.type === 'error' ? <AlertCircle size={18}/> :
@@ -52,7 +54,7 @@ export function Messages({
                   </div>
                   <div className="message-body">
                     <div className="message-author">
-                      {e.type === 'user' ? '你' : e.type === 'error' ? '执行提示' : 'AI 助手'}
+                      {e.type === 'user' ? '你' : e.type === 'error' ? '回复失败' : 'AI 助手'}
                       <span>{new Date(e.at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                     {e.type === 'assistant' ? (
@@ -64,7 +66,18 @@ export function Messages({
                     ) : (
                       <div className="message-content">{e.text}</div>
                     )}
-                    {e.model && <small className="message-model">{e.model}</small>}
+                    {e.model && e.type === 'assistant' && <small className="message-model">{e.model}</small>}
+                    {e.type === 'error' && (() => {
+                      const failedUser = e.userEventId
+                        ? events.find((candidate: any) => candidate.id === e.userEventId && candidate.type === 'user')
+                        : undefined;
+                      return failedUser ? (
+                        <div className="message-error-actions">
+                          <span>本轮没有生成可用结果</span>
+                          <button disabled={busy || streaming} onClick={() => onRetry(failedUser)}>重新发送</button>
+                        </div>
+                      ) : null;
+                    })()}
                     <AttachmentList items={e.attachments} sessionId={sessionId} />
                     {e.attachmentNotes?.length > 0 && (
                       <details className="attachment-notes">

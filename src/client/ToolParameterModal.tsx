@@ -31,6 +31,11 @@ interface ToolParameterModalProps {
 const modes: Record<string, string> = {
   auto: '自动', 'local-light': '轻量本地', 'local-batch': '大批量',
 };
+const formatSize = (bytes: number) => bytes < 1024
+  ? `${bytes} B`
+  : bytes < 1024 * 1024
+    ? `${Math.round(bytes / 1024)} KB`
+    : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 
 export function ToolParameterModal({
   tool, project, files, folder, selected, params, setParams, advanced, setAdvanced, preview,
@@ -48,7 +53,7 @@ export function ToolParameterModal({
             <span className="eyebrow">LOCAL AUDIT TOOL</span>
             <h2>{tool.name}</h2>
           </div>
-          <button className="icon-btn" onClick={onCancel}><X size={20}/></button>
+          <button className="icon-btn" aria-label="关闭工具参数" onClick={onCancel}><X size={20}/></button>
         </div>
         <p className="muted">{tool.description}</p>
         <div className="parameter-scroll">
@@ -80,7 +85,7 @@ export function ToolParameterModal({
                             onChange={() => onSelectFile(f.path)}/>
                           {/\.(?:xlsx?|csv)$/i.test(f.name) ? <FileSpreadsheet size={17}/> : <FileText size={17}/>}
                           <span title={f.path}>{f.name}</span>
-                          <small>{f.size < 1024 ? '1 KB' : Math.round(f.size / 1024) + ' KB'}</small>
+                          <small>{formatSize(f.size || 0)}</small>
                         </label>
                       )}
                     </div>

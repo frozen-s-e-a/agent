@@ -12,11 +12,13 @@ interface ToolSearchModalProps {
 }
 
 export function ToolSearchModal({ search, onSearchChange, allTools, onOpenTool, onClose, showMigration }: ToolSearchModalProps) {
+  const localCount = allTools.filter(t => t.group !== '原版 MCP').length;
+  const legacyCount = allTools.length - localCount;
   return (
     <div className="modal-backdrop" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
       <section className="modal tool-search" role="dialog" aria-modal="true" aria-label="搜索工具">
         <div className="modal-header"><h2>工具与命令</h2>
-          <button className="icon-btn" onClick={onClose}><X size={20}/></button>
+          <button className="icon-btn" aria-label="关闭工具搜索" onClick={onClose}><X size={20}/></button>
         </div>
         <div className="search-input">
           <Search size={19}/><input autoFocus placeholder="搜索工具名称、用途或原命令…"
@@ -36,7 +38,7 @@ export function ToolSearchModal({ search, onSearchChange, allTools, onOpenTool, 
           )}
         </div>
         <div className="search-footer">
-          <span>{allTools.length} 项本地工具 · 完整兼容验收尚未完成</span>
+          <span>{localCount} 项本地工具{legacyCount ? ` · ${legacyCount} 项原版兼容工具` : ''} · 完整兼容验收尚未完成</span>
           <button onClick={() => { onClose(); showMigration(); }}>查看迁移总账</button>
         </div>
       </section>

@@ -4,6 +4,7 @@ import type { Tool, Project } from './types';
 
 interface WelcomePageProps {
   toolCount: number;
+  legacyToolCount: number;
   project: Project | undefined;
   tools: Tool[];
   onCreateProject: () => void;
@@ -13,7 +14,7 @@ interface WelcomePageProps {
 }
 
 export function WelcomePage({
-  toolCount, project, tools,
+  toolCount, legacyToolCount, project, tools,
   onCreateProject, onOpenSearch, onOpenTool, onDemo,
 }: WelcomePageProps) {
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -31,6 +32,7 @@ export function WelcomePage({
         <div className="welcome-title">你好，准备开始审计了吗？</div>
         <div className="welcome-desc">
           输入任务描述开始对话，或从 {toolCount} 个本地工具中选择
+          {legacyToolCount > 0 && <span className="welcome-legacy-count"> · 原版兼容工具 {legacyToolCount} 项</span>}
         </div>
         <div className="welcome-actions">
           <button
