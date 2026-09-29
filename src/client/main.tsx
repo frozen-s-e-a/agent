@@ -459,7 +459,7 @@ function App() {
                   selected={selectedFiles}
                   onFolderChange={setFolder}
                   onSelectFile={toggleFile}
-                  onCreateProject={() => setModalType('project')}
+                  onCreateProject={() => { setCurrentTool(null); setModalType('project'); }}
                   onRefresh={() => project && api('files.list', { projectId: project.id, path: folder }).then(setFiles).catch(report)}
                   onClearSelection={clearSelection}
                   onUseTools={() => setModalType('tools')}
