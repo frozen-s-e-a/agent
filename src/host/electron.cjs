@@ -30,7 +30,7 @@ if(!app.requestSingleInstanceLock())app.quit();else{
      win=new BrowserWindow({width:windowWidth,height:windowHeight,minWidth:1000,minHeight:700,show:false,backgroundColor:'#f8f9fc',title:'AI助手 · 桌面审计工作空间',autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
      win.webContents.setWindowOpenHandler(()=>({action:'deny'}));win.webContents.on('will-navigate',e=>e.preventDefault());
      win.webContents.session.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));
-     win.once('ready-to-show',()=>win.show());win.loadFile(path.join(root,'build/client/index.html')).catch(e=>dialog.showErrorBox('界面加载失败',e.message));
+     win.once('ready-to-show',()=>{win.maximize();win.show();});win.loadFile(path.join(root,'build/client/index.html')).catch(e=>dialog.showErrorBox('界面加载失败',e.message));
     }else if(v.id&&pending.has(v.id)){const r=pending.get(v.id);pending.delete(v.id);clearTimeout(r.timer);v.ok?r.resolve(v.result):r.reject(Error(v.error||'操作失败'));}
    }
   });
