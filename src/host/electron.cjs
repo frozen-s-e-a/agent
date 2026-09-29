@@ -39,7 +39,7 @@ if(!app.requestSingleInstanceLock())app.quit();else{
   });
   host.on('exit',()=>{clearTimeout(startup);rejectPending();if(!app.isQuitting)dialog.showErrorBox('后台已停止','请重新打开应用。已保存的项目和对话会保留，未完成任务可重试。');});
  });
- const allowed=new Set(['bootstrap','project.create','session.create','session.get','session.rename','session.model','models.list','connection.test','attachments.list','attachments.remove','files.list','files.preview','demo.create','settings.save','task.run','task.cancel','task.retry','chat.send','chat.cancel','migration.get']);
+ const allowed=new Set(['bootstrap','project.create','session.create','session.get','session.rename','session.model','session.delete','models.list','connection.test','attachments.list','attachments.remove','files.list','files.preview','demo.create','settings.save','task.run','task.cancel','task.retry','chat.send','chat.cancel','migration.get']);
  ipcMain.handle('audit:invoke',async(event,method,p={})=>{
   if(event.sender!==win?.webContents||event.senderFrame!==win.webContents.mainFrame||event.senderFrame.url!==pathToFileURL(path.join(root,'build/client/index.html')).href)throw Error('无效调用来源');
   if(method==='choose.directory'){const r=await dialog.showOpenDialog(win,{properties:['openDirectory','createDirectory']});return r.canceled?null:r.filePaths[0];}
