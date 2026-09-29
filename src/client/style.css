@@ -174,7 +174,7 @@ svg { flex-shrink: 0; }
   transition: background-color var(--motion-fast) var(--ease-out), color var(--motion-fast) var(--ease-out),
     transform var(--motion-fast) var(--ease-out);
 }
-.nav-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.nav-item > span:not([class]) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
 .nav-item:hover { background: var(--surface-3); color: var(--ink); }
 .nav-item.active { color: var(--brand); font-weight: 600; background: var(--brand-ink); }
 .nav-item.selected { background: var(--brand-ink); color: var(--brand); font-weight: 500; }
