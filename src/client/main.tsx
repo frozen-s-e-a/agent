@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   ChevronRight, X, Check,
-  Loader2, Layers, ShieldCheck,
+  Loader2, Layers,
   PanelRightClose, PanelRightOpen, AlertCircle, Trash2,
 } from 'lucide-react';
 import { api, desktop } from './api';
@@ -15,7 +15,6 @@ import { ContextPanel } from './ContextPanel';
 import { SettingsPage } from './SettingsPage';
 import { ProjectModal } from './ProjectModal';
 import { ToolSearchModal } from './ToolSearchModal';
-import { ToolParameterModal } from './ToolParameterModal';
 import { useTransientNotice } from './useTransientNotice';
 import { useFileSelection } from './hooks/useFileSelection';
 import type { Project, Tool, Boot, AppSettings, ModalType } from './types';
@@ -26,6 +25,7 @@ function App() {
   // ── State ──
   const [boot, setBoot] = useState<Boot | null>(null);
   const [sessionId, setSessionId] = useState('');
+  const [draftProjectId, setDraftProjectId] = useState<string | null>(null);
   const [timeline, setTimeline] = useState<any>({ events: [], tasks: [] });
   const [page, setPage] = useState<'chat' | 'settings'>('chat');
   const [error, setError] = useTransientNotice('', boot ? 3000 : 0);
@@ -53,7 +53,7 @@ function App() {
 
   // ── Derived ──
   const session = boot?.sessions.find(s => s.id === sessionId);
-  const project = boot?.projects.find(p => p.id === session?.projectId);
+  const project = boot?.projects.find(p => p.id === session?.projectId || p.id === draftProjectId);
   const allTools: Tool[] = useMemo(() => {
     const unique = new Map<string, Tool>();
     for (const tool of [...(boot?.tools || []), ...(boot?.legacyTools || [])]) {
@@ -61,6 +61,7 @@ function App() {
     }
     return [...unique.values()];
   }, [boot]);
+  const pollingActive = Boolean(timeline.streaming || timeline.tasks?.some((t: any) => t.status === 'running' || t.status === 'queued'));
 
   // ── File selection ──
   const { selected: selectedFiles, toggle: toggleFile, clear: clearSelection } = useFileSelection();
@@ -88,29 +89,29 @@ function App() {
       setSettings(b.settings);
       setMode(b.settings.defaultMode || 'auto');
       if (b.sessions.length) setSessionId(b.sessions.at(-1)!.id);
-      else {
-        const s = await api('session.create') as { id: string };
-        setSessionId(s.id);
-        await refresh();
-      }
+      else { setSessionId(''); setDraftProjectId(null); setTimeline({ events: [], tasks: [] }); }
     }).catch(report);
   }, [refresh, report]);
 
   // ── Session polling ──
   useEffect(() => {
     if (!sessionId) return;
-    let alive = true, lastError = '';
+    let alive = true, lastError = '', lastSignature = '';
     const tick = () => {
       api('session.get', { id: sessionId })
-        .then(r => { if (alive) setTimeline(r); })
+        .then(r => {
+          if (!alive) return;
+          const signature = JSON.stringify({ events: r.events, calls: r.calls, tasks: r.tasks, turn: r.turn, phase: r.phase, streaming: r.streaming, attachments: r.attachments });
+          if (signature !== lastSignature) { lastSignature = signature; setTimeline(r); }
+        })
         .catch(e => {
           if (alive && lastError !== e.message) { lastError = e.message; report(e); }
         });
     };
     tick();
-    const timer = setInterval(tick, 1000);
-    return () => { alive = false; clearInterval(timer); };
-  }, [sessionId, report]);
+    const timer = pollingActive ? setInterval(tick, 1000) : undefined;
+    return () => { alive = false; if (timer) clearInterval(timer); };
+  }, [sessionId, pollingActive, report]);
 
   // ── File listing ──
   useEffect(() => { setFolder(''); clearSelection(); setPreview(null); }, [project?.id, clearSelection]);
@@ -138,26 +139,37 @@ function App() {
   const createSession = useCallback(async (projectId: string | null = null) => {
     try {
       const s = await api('session.create', { projectId }) as { id: string };
-      await refresh(); setSessionId(s.id); setPage('chat'); setTimeline({ events: [], tasks: [] });
+      await refresh(); setSessionId(s.id); setDraftProjectId(null); setPage('chat'); setTimeline({ events: [], tasks: [] });
     } catch (e) { report(e); }
   }, [refresh, report]);
+
+  const beginDraft = useCallback((projectId: string | null = null) => {
+    setSessionId(''); setDraftProjectId(projectId); setPage('chat');
+    setTimeline({ events: [], tasks: [] }); setText('');
+  }, []);
+
+  const ensureSession = useCallback(async () => {
+    if (sessionId) return sessionId;
+    const s = await api('session.create', { projectId: project?.id || null }) as { id: string };
+    await refresh(); setSessionId(s.id); setDraftProjectId(null); return s.id;
+  }, [sessionId, project?.id, refresh]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'n') {
         e.preventDefault();
-        void createSession(project?.id || null);
+        beginDraft(project?.id || null);
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [createSession, project?.id]);
+  }, [beginDraft, project?.id]);
 
-  const selectProject = useCallback(async (p: Project) => {
+  const selectProject = useCallback((p: Project) => {
     const existing = boot?.sessions.filter(s => s.projectId === p.id).at(-1);
-    if (existing) { setSessionId(existing.id); setPage('chat'); }
-    else await createSession(p.id);
-  }, [boot, createSession]);
+    if (existing) { setSessionId(existing.id); setDraftProjectId(null); setPage('chat'); }
+    else beginDraft(p.id);
+  }, [boot, beginDraft]);
 
   const createProject = useCallback(async () => {
     setBusy(true);
@@ -178,6 +190,7 @@ function App() {
 
   const openTool = useCallback((t: Tool) => {
     setCurrentTool(t); setModalType(null);
+    setRightPanelOpen(true);
     setAdvanced('{}'); setPreview(null);
     setParams(Object.fromEntries(t.fields.map(f => [f.key, f.default || ''])));
   }, []);
@@ -206,16 +219,17 @@ function App() {
     if (!currentTool) return;
     setBusy(true);
     try {
+      const activeSessionId = await ensureSession();
       const extra = JSON.parse(advanced);
       if (!extra || Array.isArray(extra) || typeof extra !== 'object') throw Error('高级参数必须是 JSON 对象');
       await api('task.run', {
-        sessionId, tool: currentTool.id, files: selectedFiles, mode,
+        sessionId: activeSessionId, tool: currentTool.id, files: selectedFiles, mode,
         parameters: { ...params, ...extra },
       });
       setCurrentTool(null);
-      setTimeline(await api('session.get', { id: sessionId }) as any);
+      setTimeline(await api('session.get', { id: activeSessionId }) as any);
     } catch (e) { report(e); } finally { setBusy(false); }
-  }, [currentTool, sessionId, selectedFiles, mode, params, advanced, report]);
+  }, [currentTool, ensureSession, selectedFiles, mode, params, advanced, report]);
 
   const send = useCallback(async () => {
     if (busy || attachmentBusy || timeline.streaming || (!text.trim() && !timeline.attachments?.length)) return;
@@ -227,15 +241,16 @@ function App() {
     }
     setBusy(true);
     try {
+      const activeSessionId = await ensureSession();
       await api('chat.send', {
-        sessionId, text, projectFiles: selectedFiles,
+        sessionId: activeSessionId, text, projectFiles: selectedFiles,
         mode,
         model: session?.model || '',
         attachments: (timeline.attachments || []).map((a: any) => a.id),
       });
-      setText(''); await refresh(); setTimeline(await api('session.get', { id: sessionId }) as any);
+      setText(''); await refresh(); setTimeline(await api('session.get', { id: activeSessionId }) as any);
     } catch (e) { report(e); } finally { setBusy(false); }
-  }, [allTools, busy, attachmentBusy, timeline, text, selectedFiles, mode, session, refresh, report, openTool, sessionId]);
+  }, [allTools, busy, attachmentBusy, timeline, text, selectedFiles, mode, session, refresh, report, openTool, ensureSession]);
 
   const retryMessage = useCallback(async (event: any) => {
     if (busy || attachmentBusy || timeline.streaming || !event?.text) return;
@@ -284,9 +299,8 @@ function App() {
         if (remaining.length) {
           setSessionId(remaining.at(-1)!.id);
         } else {
-          const replacement = await api('session.create', { projectId: deleted?.projectId || null }) as { id: string };
-          await refresh();
-          setSessionId(replacement.id);
+          setSessionId('');
+          setDraftProjectId(deleted?.projectId || null);
         }
         setTimeline({ events: [], tasks: [] });
       }
@@ -327,13 +341,12 @@ function App() {
         activeSessionId={sessionId}
         page={page}
         boot={boot}
-        onNewChat={() => createSession(project?.id || null)}
-        onNewStandalone={() => createSession()}
+        onNewChat={() => beginDraft(project?.id || null)}
+        onNewStandalone={() => beginDraft()}
         onSelectProject={selectProject}
-        onSelectSession={(id) => { setSessionId(id); setPage('chat'); }}
+        onSelectSession={(id) => { setSessionId(id); setDraftProjectId(null); setPage('chat'); }}
         onDeleteSession={(id) => setDeleteConfirm(id)}
         onOpenProjectModal={() => setModalType('project')}
-        onOpenSearch={() => { setSearch(''); setModalType('tools'); }}
         onOpenSettings={() => { setPage('settings'); setSettingsTab('模型服务'); setSettings(boot.settings); }}
         onShowMigration={showMigration}
       />
@@ -346,7 +359,6 @@ function App() {
             <strong>{page === 'settings' ? settingsTab : session?.title || '新对话'}</strong>
           </div>
           <div className="top-actions">
-            <span className="local-pill" title="本地工具在本机执行；对话内容按所选模型服务配置处理"><ShieldCheck size={14} />本地工具执行</span>
             {page === 'chat' && (
               <button title="项目文件" aria-label="切换项目文件面板" className="icon-btn" onClick={() => setRightPanelOpen(!rightPanelOpen)}>
                 {rightPanelOpen ? <PanelRightClose size={18} /> : <PanelRightOpen size={18} />}
@@ -381,11 +393,7 @@ function App() {
                   <WelcomePage
                     toolCount={boot.tools.length}
                     legacyToolCount={boot.legacyTools?.length || 0}
-                    project={project}
-                    tools={allTools}
                     onCreateProject={() => setModalType('project')}
-                    onOpenSearch={() => { setSearch(''); setModalType('tools'); }}
-                    onOpenTool={openTool}
                     onDemo={demo}
                   />
                 ) : (
@@ -429,8 +437,22 @@ function App() {
                   onDelete={session ? () => setDeleteConfirm(session.id) : undefined}
                 />
               </div>
-              {rightPanelOpen && (
-                <ContextPanel
+              <ContextPanel
+                  open={rightPanelOpen}
+                  tool={currentTool}
+                  params={params}
+                  setParams={setParams}
+                  advanced={advanced}
+                  setAdvanced={setAdvanced}
+                  preview={preview}
+                  mode={mode}
+                  onModeChange={setMode}
+                  boot={boot}
+                  busy={busy}
+                  onRunTool={runTool}
+                  onCancelTool={() => setCurrentTool(null)}
+                  onLoadPreview={loadPreview}
+                  onDemo={demo}
                   project={project}
                   files={files}
                   folder={folder}
@@ -442,7 +464,6 @@ function App() {
                   onClearSelection={clearSelection}
                   onUseTools={() => setModalType('tools')}
                 />
-              )}
             </div>
           </div>
         ) : (
@@ -481,32 +502,6 @@ function App() {
         />
       )}
 
-      {currentTool && (
-        <ToolParameterModal
-          tool={currentTool}
-          project={project}
-          files={files}
-          folder={folder}
-          selected={selectedFiles}
-          params={params}
-          setParams={setParams}
-          advanced={advanced}
-          setAdvanced={setAdvanced}
-          preview={preview}
-          mode={mode}
-          onModeChange={setMode}
-          boot={boot}
-          busy={busy}
-          onFolderChange={setFolder}
-          onSelectFile={toggleFile}
-          onRefresh={() => project && api('files.list', { projectId: project.id, path: folder }).then(setFiles).catch(report)}
-          onRunTool={runTool}
-          onCancel={() => setCurrentTool(null)}
-          onCreateProject={() => { setCurrentTool(null); setModalType('project'); }}
-          onLoadPreview={loadPreview}
-          onDemo={demo}
-        />
-      )}
 
       {deleteConfirm && (
         <div className="modal-backdrop" onMouseDown={e => { if (e.target === e.currentTarget) setDeleteConfirm(null); }}>

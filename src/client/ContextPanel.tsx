@@ -1,10 +1,27 @@
 import React from 'react';
 import {
   Folder, ArrowLeft, RefreshCw, FileSpreadsheet, FileText,
-  ShieldCheck, Check, ArrowUpRight, Plus, ChevronRight,
+  ArrowUpRight, Plus, ChevronRight,
 } from 'lucide-react';
+import { ToolParameterModal } from './ToolParameterModal';
+import type { Tool } from './types';
 
 interface ContextPanelProps {
+  open: boolean;
+  tool?: Tool | null;
+  params?: Record<string, string>;
+  setParams?: (p: Record<string, string>) => void;
+  advanced?: string;
+  setAdvanced?: (a: string) => void;
+  preview?: any;
+  mode?: string;
+  onModeChange?: (m: string) => void;
+  boot?: any;
+  busy?: boolean;
+  onRunTool?: () => void;
+  onCancelTool?: () => void;
+  onLoadPreview?: () => void;
+  onDemo?: () => Promise<void>;
   project: { id: string; name: string; root: string } | undefined;
   files: any[];
   folder: string;
@@ -18,6 +35,8 @@ interface ContextPanelProps {
 }
 
 export function ContextPanel({
+  open, tool, params = {}, setParams = () => {}, advanced = '{}', setAdvanced = () => {}, preview,
+  mode = 'auto', onModeChange = () => {}, boot, busy = false, onRunTool = () => {}, onCancelTool = () => {}, onLoadPreview = () => {}, onDemo = async () => {},
   project, files, folder, selected,
   onFolderChange, onSelectFile, onCreateProject,
   onRefresh, onClearSelection, onUseTools,
@@ -27,9 +46,41 @@ export function ContextPanel({
     if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
+  const panelClass = 'context-panel ' + (open ? 'is-open' : 'is-closed');
+  if (tool) {
+    return (
+      <aside className={panelClass} aria-hidden={!open}>
+        <ToolParameterModal
+          embedded
+          tool={tool}
+          project={project}
+          files={files}
+          folder={folder}
+          selected={selected}
+          params={params}
+          setParams={setParams}
+          advanced={advanced}
+          setAdvanced={setAdvanced}
+          preview={preview}
+          mode={mode}
+          onModeChange={onModeChange}
+          boot={boot}
+          busy={busy}
+          onFolderChange={onFolderChange}
+          onSelectFile={onSelectFile}
+          onRefresh={onRefresh}
+          onRunTool={onRunTool}
+          onCancel={onCancelTool}
+          onCreateProject={onCreateProject}
+          onLoadPreview={onLoadPreview}
+          onDemo={onDemo}
+        />
+      </aside>
+    );
+  }
   if (!project) {
     return (
-      <aside className="context-panel">
+      <aside className={panelClass} aria-hidden={!open}>
         <div className="context-heading">
           <h3>项目资料</h3>
           <span>未选择</span>
@@ -42,23 +93,12 @@ export function ContextPanel({
             <Plus size={14}/>创建项目
           </button>
         </div>
-        <div className="scope-note">
-          <ShieldCheck size={17}/>
-          <div>
-            原始资料受到保护
-            <p>结果写入项目的 outputs 文件夹，每次执行生成独立结果与校验清单。</p>
-          </div>
-        </div>
-        <div className="context-footer">
-          <span className="status-dot"/>
-          本地计算引擎<small>任务在独立进程执行</small>
-        </div>
       </aside>
     );
   }
 
   return (
-    <aside className="context-panel">
+    <aside className={panelClass} aria-hidden={!open}>
       <div className="context-heading">
         <h3>项目资料</h3>
         <span>已授权</span>
@@ -127,20 +167,6 @@ export function ContextPanel({
         </div>
       )}
 
-      {/* Scope note */}
-      <div className="scope-note">
-        <ShieldCheck size={17}/>
-        <div>
-          原始资料受到保护
-          <p>结果写入项目的 outputs 文件夹，每次执行生成独立结果与校验清单。</p>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div className="context-footer">
-        <span className="status-dot"/>
-        本地计算引擎<small>任务在独立进程执行</small>
-      </div>
     </aside>
   );
 }

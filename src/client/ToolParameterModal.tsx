@@ -4,6 +4,7 @@ import { DataTable } from './components/DataTable';
 import type { Tool } from './types';
 
 interface ToolParameterModalProps {
+  embedded?: boolean;
   tool: Tool | null;
   project: { id: string; name: string; root: string } | undefined;
   files: any[];
@@ -38,7 +39,7 @@ const formatSize = (bytes: number) => bytes < 1024
     : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 
 export function ToolParameterModal({
-  tool, project, files, folder, selected, params, setParams, advanced, setAdvanced, preview,
+  embedded = false, tool, project, files, folder, selected, params, setParams, advanced, setAdvanced, preview,
   mode, onModeChange, boot, busy, onFolderChange, onSelectFile, onRefresh,
   onRunTool, onCancel, onLoadPreview, onDemo,
   onCreateProject,
@@ -46,8 +47,8 @@ export function ToolParameterModal({
   if (!tool) return null;
 
   return (
-    <div className="modal-backdrop" onMouseDown={e => { if (e.target === e.currentTarget) onCancel(); }}>
-      <section className="modal parameter-modal" role="dialog" aria-modal="true" aria-label={tool.name}>
+    <div className={embedded ? 'tool-parameter-embedded' : 'modal-backdrop'} onMouseDown={e => { if (!embedded && e.target === e.currentTarget) onCancel(); }}>
+      <section className={'modal parameter-modal' + (embedded ? ' embedded' : '')} role="dialog" aria-modal="true" aria-label={tool.name}>
         <div className="modal-header">
           <div>
             <span className="eyebrow">LOCAL AUDIT TOOL</span>
