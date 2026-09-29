@@ -343,7 +343,7 @@ svg { flex-shrink: 0; }
 }
 .welcome-action:hover .welcome-action-icon {
   background: var(--brand-grad); color: #fff;
-  box-shadow: 0 6px 20px rgba(91,91,214,.35); transform: scale(1.05) rotate(-2deg);
+  box-shadow: 0 6px 20px rgba(91,91,214,.35);
 }
 .welcome-action strong { display: block; font-size: 14px; font-weight: 600; color: var(--ink); }
 .welcome-action small { display: block; font-size: 11px; color: var(--ink-3); margin-top: 4px; }

@@ -1,6 +1,6 @@
 {
   "name": "audit-assistant",
-  "version": "0.1.0-internal.16",
+  "version": "0.1.0-internal.17",
   "private": true,
   "type": "module",
   "description": "本地审计 AI 助手",
