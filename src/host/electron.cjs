@@ -2,6 +2,9 @@ const {app,BrowserWindow,ipcMain,dialog,shell,safeStorage,nativeImage,screen}=re
 const {spawn,spawnSync}=require('node:child_process');const fs=require('node:fs');const path=require('node:path');const {pathToFileURL}=require('node:url');
 let win,host,requestId=0;const pending=new Map();const root=path.resolve(__dirname,'../..');
 const dataDir=process.env.AUDIT_DATA_DIR||path.join(process.env.LOCALAPPDATA,'AuditAssistant');
+// Keep Electron's profile beside the app data so the single-instance lock is
+// created in the same writable location as the backend data.
+app.setPath('userData',path.join(dataDir,'electron'));
 function invoke(method,payload={}){return new Promise((resolve,reject)=>{
  if(!host||host.killed||!host.stdin.writable)return reject(Error('后台进程不可用，请重启应用'));
  const id=String(++requestId);const frame=JSON.stringify({id,method,payload})+'\n';if(Buffer.byteLength(frame)>2_000_000)return reject(Error('请求超过大小限制'));
