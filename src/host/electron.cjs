@@ -1,4 +1,4 @@
-const {app,BrowserWindow,ipcMain,dialog,shell,safeStorage,nativeImage}=require('electron');
+const {app,BrowserWindow,ipcMain,dialog,shell,safeStorage,nativeImage,screen}=require('electron');
 const {spawn,spawnSync}=require('node:child_process');const fs=require('node:fs');const path=require('node:path');const {pathToFileURL}=require('node:url');
 let win,host,requestId=0;const pending=new Map();const root=path.resolve(__dirname,'../..');
 const dataDir=process.env.AUDIT_DATA_DIR||path.join(process.env.LOCALAPPDATA,'AuditAssistant');
@@ -24,7 +24,10 @@ if(!app.requestSingleInstanceLock())app.quit();else{
    while((i=buffer.indexOf('\n'))>=0){const line=buffer.slice(0,i);buffer=buffer.slice(i+1);let v;try{v=JSON.parse(line);}catch{continue;}
     if(v.type==='ready'){
      clearTimeout(startup);const secret=path.join(dataDir,'model-key.enc');if(fs.existsSync(secret)&&safeStorage.isEncryptionAvailable())try{await invoke('secret.set',{key:safeStorage.decryptString(fs.readFileSync(secret))});}catch{}
-     win=new BrowserWindow({width:1440,height:940,minWidth:1000,minHeight:700,show:false,backgroundColor:'#f8f9fc',title:'AI助手 · 桌面审计工作空间',autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
+     const workArea=screen.getPrimaryDisplay().workAreaSize;
+     const windowWidth=Math.min(1440,Math.max(1000,workArea.width-48));
+     const windowHeight=Math.min(940,Math.max(700,workArea.height-48));
+     win=new BrowserWindow({width:windowWidth,height:windowHeight,minWidth:1000,minHeight:700,show:false,backgroundColor:'#f8f9fc',title:'AI助手 · 桌面审计工作空间',autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
      win.webContents.setWindowOpenHandler(()=>({action:'deny'}));win.webContents.on('will-navigate',e=>e.preventDefault());
      win.webContents.session.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));
      win.once('ready-to-show',()=>win.show());win.loadFile(path.join(root,'build/client/index.html')).catch(e=>dialog.showErrorBox('界面加载失败',e.message));
