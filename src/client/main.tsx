@@ -376,32 +376,59 @@ function App() {
         {page === 'chat' ? (
           <div className="workspace">
             <div className="workspace-content">
-              {timeline.events.length === 0 ? (
-                <WelcomePage
-                  toolCount={boot.tools.length}
-                  legacyToolCount={boot.legacyTools?.length || 0}
-                  project={project}
-                  tools={allTools}
-                  onCreateProject={() => setModalType('project')}
-                  onOpenSearch={() => { setSearch(''); setModalType('tools'); }}
-                  onOpenTool={openTool}
-                  onDemo={demo}
-                />
-              ) : (
-                <Messages
-                  events={timeline.events}
-                  calls={timeline.calls}
-                  tasks={timeline.tasks}
-                  tools={allTools}
-                  streaming={timeline.streaming}
-                  turn={timeline.turn}
-                  phase={timeline.phase || ''}
+              <div className="chat-column">
+                {timeline.events.length === 0 ? (
+                  <WelcomePage
+                    toolCount={boot.tools.length}
+                    legacyToolCount={boot.legacyTools?.length || 0}
+                    project={project}
+                    tools={allTools}
+                    onCreateProject={() => setModalType('project')}
+                    onOpenSearch={() => { setSearch(''); setModalType('tools'); }}
+                    onOpenTool={openTool}
+                    onDemo={demo}
+                  />
+                ) : (
+                  <Messages
+                    events={timeline.events}
+                    calls={timeline.calls}
+                    tasks={timeline.tasks}
+                    tools={allTools}
+                    streaming={timeline.streaming}
+                    turn={timeline.turn}
+                    phase={timeline.phase || ''}
+                    sessionId={sessionId}
+                    busy={busy}
+                    onError={report}
+                    onRetry={retryMessage}
+                  />
+                )}
+                <Composer
                   sessionId={sessionId}
-                  busy={busy}
+                  text={text} onTextChange={setText} onSend={send}
+                  busy={busy} streaming={timeline.streaming}
+                  attachments={timeline.attachments || []}
+                  attachmentBusy={attachmentBusy}
+                  onRemoveAttachment={(id) => api('attachments.remove', { sessionId, id })
+                    .then(() => api('session.get', { id: sessionId })).then(setTimeline).catch(report)}
+                  mode={mode} onModeChange={setMode}
+                  sessionModel={session?.model || ''}
+                  onModelChange={(m) => api('session.model', { id: sessionId, model: m }).then(refresh).catch(report)}
+                  settingsModels={boot.settings?.models || []}
+                  visionModel={boot.settings?.visionModel || ''}
+                  settingsModel={boot.settings?.model || ''}
+                  onToolSelect={() => { setSearch(''); setModalType('tools'); }}
+                  onSettingsClick={() => { setPage('settings'); setSettingsTab('模型服务'); setSettings(boot.settings); }}
+                  usageTotal={usage.total}
+                  setAttachmentBusy={setAttachmentBusy}
+                  refreshSession={refreshSession}
                   onError={report}
-                  onRetry={retryMessage}
+                  onNotice={setNotice}
+                  onStop={() => api('chat.cancel', { sessionId }).catch(report)}
+                  showDelete={!!session && page === 'chat'}
+                  onDelete={session ? () => setDeleteConfirm(session.id) : undefined}
                 />
-              )}
+              </div>
               {rightPanelOpen && (
                 <ContextPanel
                   project={project}
@@ -417,33 +444,6 @@ function App() {
                 />
               )}
             </div>
-
-            {/* Composer */}
-            <Composer
-              sessionId={sessionId}
-              text={text} onTextChange={setText} onSend={send}
-              busy={busy} streaming={timeline.streaming}
-              attachments={timeline.attachments || []}
-              attachmentBusy={attachmentBusy}
-              onRemoveAttachment={(id) => api('attachments.remove', { sessionId, id })
-                .then(() => api('session.get', { id: sessionId })).then(setTimeline).catch(report)}
-              mode={mode} onModeChange={setMode}
-              sessionModel={session?.model || ''}
-              onModelChange={(m) => api('session.model', { id: sessionId, model: m }).then(refresh).catch(report)}
-              settingsModels={boot.settings?.models || []}
-              visionModel={boot.settings?.visionModel || ''}
-              settingsModel={boot.settings?.model || ''}
-              onToolSelect={() => { setSearch(''); setModalType('tools'); }}
-              onSettingsClick={() => { setPage('settings'); setSettingsTab('模型服务'); setSettings(boot.settings); }}
-              usageTotal={usage.total}
-              setAttachmentBusy={setAttachmentBusy}
-              refreshSession={refreshSession}
-              onError={report}
-              onNotice={setNotice}
-              onStop={() => api('chat.cancel', { sessionId }).catch(report)}
-              showDelete={!!session && page === 'chat'}
-              onDelete={session ? () => setDeleteConfirm(session.id) : undefined}
-            />
           </div>
         ) : (
           <SettingsPage
