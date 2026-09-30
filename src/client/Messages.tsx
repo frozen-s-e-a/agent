@@ -1,7 +1,6 @@
 import React from 'react';
 import { Layers, AlertCircle, Loader2 } from 'lucide-react';
 import { MarkdownMessage } from './MarkdownMessage';
-import { ToolCallCard } from './ToolCallCard';
 import { AttachmentList } from './Attachments';
 import { TaskCard } from './TaskCard';
 
@@ -35,9 +34,6 @@ export function Messages({
         <div className="messages">
           {events.map(e => (
             <React.Fragment key={e.id}>
-              {e.type === 'tool' && (
-                <ToolCallCard call={calls?.find((c: any) => c.id === e.callId)} />
-              )}
               {e.type === 'task' && (
                 <TaskCard
                   task={tasks.find((t: any) => t.id === e.taskId)}

@@ -11,6 +11,8 @@ export interface Session {
   projectId: string | null;
   title: string;
   model?: string;
+  parentSessionId?: string | null;
+  branchedFromEventId?: string | null;
 }
 
 // ─── 工具 ───

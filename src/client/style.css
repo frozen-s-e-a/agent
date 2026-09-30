@@ -54,6 +54,17 @@
   --motion-ui: 160ms;
   --motion-enter: 200ms;
 
+  /* 灵动岛通道 */
+  --rail-width: 268px;
+  --island-radius: 14px;
+  --island-glass: rgba(255,255,255,.78);
+  --island-border: rgba(91,91,214,.16);
+  --island-blur: 18px;
+  --sheen-duration: 700ms;
+  --ease-island: cubic-bezier(.22, .8, .2, 1);
+  --motion-island: 220ms;
+  --motion-flip: 260ms;
+
   --font: Inter, "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
   --mono: "SF Mono", "Cascadia Code", Consolas, monospace;
 
@@ -269,6 +280,19 @@ svg { flex-shrink: 0; }
 .workspace { display: flex; flex-direction: column; flex: 1; min-height: 0; background: var(--bg); }
 .workspace-content { display: flex; flex: 1; min-height: 0; min-width: 0; overflow: hidden; }
 .chat-column { display: flex; flex: 1; flex-direction: column; min-width: 0; min-height: 0; }
+
+/* ---- Right rail: resident tool channel + context ---- */
+.right-rail {
+  width: var(--rail-width); min-width: var(--rail-width); min-height: 0;
+  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--surface); border-left: 1px solid var(--line);
+  transition: width var(--motion-flip) var(--ease-island), min-width var(--motion-flip) var(--ease-island),
+    opacity var(--motion-island) var(--ease-out);
+}
+.right-rail.is-closed { width: 0; min-width: 0; opacity: 0; border-left-color: transparent; pointer-events: none; }
+.right-rail > .context-panel { width: 100%; min-width: 0; flex: 1; border-left: 0; min-height: 0; }
+.right-rail.is-open > .context-panel.is-open { width: 100%; min-width: 0; padding: 18px 14px 12px; }
+.right-rail.is-closed > .context-panel { width: 0; min-width: 0; padding-left: 0; padding-right: 0; }
 
 /* ---- Welcome page ---- */
 .welcome {
@@ -907,6 +931,70 @@ svg { flex-shrink: 0; }
   font-size: 12px !important; border: 1px solid var(--line-2) !important;
   background: var(--surface) !important; border-radius: var(--radius-sm) !important;
   color: var(--ink); cursor: pointer;
+}
+
+/* ---- 灵动岛工具通道 ---- */
+.island-rail {
+  flex: 0 0 224px; min-height: 0; display: flex; flex-direction: column;
+  padding: 12px 10px 10px; gap: 9px;
+  background: linear-gradient(180deg, rgba(247,248,250,.88), rgba(255,255,255,.98));
+  border-bottom: 1px solid var(--line);
+}
+.island-rail-header { display: flex; align-items: center; gap: 7px; min-height: 22px; color: var(--ink-2); }
+.island-rail-title { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 650; color: var(--ink); }
+.island-count { min-width: 18px; height: 17px; padding: 0 5px; display: inline-grid; place-items: center; border-radius: 9px; color: var(--brand); background: var(--brand-ink); font-size: 9px; }
+.island-rail-header .icon-btn { margin-left: auto; padding: 3px; }
+.island-rail-scroll { min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 8px; padding: 1px 2px 1px 0; }
+.island-empty { padding: 16px 8px; color: var(--ink-4); text-align: center; font-size: 10px; border: 1px dashed var(--line-2); border-radius: var(--island-radius); }
+.island-phase { display: flex; align-items: center; gap: 7px; padding: 7px 9px; border-radius: 10px; color: var(--ink-3); background: var(--surface); font-size: 10px; }
+.island-phase .status-dot { width: 6px; height: 6px; box-shadow: 0 0 0 3px rgba(91,91,214,.12); background: var(--brand); }
+.tool-island {
+  position: relative; overflow: hidden; border: 1px solid var(--island-border); border-radius: var(--island-radius);
+  background: var(--island-glass); box-shadow: 0 7px 18px rgba(30,35,90,.08);
+  backdrop-filter: blur(var(--island-blur)); -webkit-backdrop-filter: blur(var(--island-blur));
+  animation: island-in var(--motion-flip) var(--ease-island) both;
+  transition: border-color var(--motion-island) var(--ease-island), box-shadow var(--motion-island) var(--ease-island), background-color var(--motion-island) var(--ease-island);
+}
+.tool-island::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(105deg, transparent 15%, rgba(255,255,255,.55) 47%, transparent 67%); transform: translateX(-125%); opacity: 0; }
+.tool-island.island-active::after { animation: island-sheen var(--sheen-duration) var(--ease-island) both; }
+.tool-island:hover, .tool-island.is-expanded { border-color: var(--brand-line); box-shadow: 0 9px 22px rgba(45,42,130,.12); }
+.tool-island.island-success { --island-border: rgba(22,163,74,.22); }
+.tool-island.island-error { --island-border: rgba(220,38,38,.24); }
+.tool-island.island-cancelled, .tool-island.island-expired { --island-border: rgba(217,119,6,.24); }
+.island-main { position: relative; z-index: 1; width: 100%; display: flex; align-items: center; gap: 8px; padding: 9px 9px; color: var(--ink); background: transparent; border: 0; text-align: left; }
+.island-status-icon { width: 25px; height: 25px; display: grid; place-items: center; flex: 0 0 25px; border-radius: 9px; color: var(--brand); background: var(--brand-ink); }
+.island-success .island-status-icon { color: var(--success); background: var(--success-bg); }
+.island-error .island-status-icon { color: var(--danger); background: var(--danger-bg); }
+.island-cancelled .island-status-icon, .island-expired .island-status-icon { color: var(--warn); background: var(--warn-bg); }
+.island-copy { min-width: 0; display: flex; flex: 1; flex-direction: column; gap: 2px; }
+.island-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10.5px; font-weight: 650; }
+.island-copy span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-3); font-size: 9.5px; line-height: 1.35; }
+.island-chevron { color: var(--ink-4); transition: transform var(--motion-island) var(--ease-island); }
+.is-expanded .island-chevron { transform: rotate(180deg); }
+.island-detail { position: relative; z-index: 1; border-top: 1px solid var(--line); padding: 8px 10px 9px; color: var(--ink-3); font-size: 9.5px; line-height: 1.5; }
+.island-detail p { max-height: 64px; overflow: auto; white-space: pre-wrap; margin: 0; }
+.island-actions { display: flex; gap: 8px; margin-top: 7px; }
+.island-actions button { padding: 3px 7px; border: 1px solid var(--line-2); border-radius: 6px; background: var(--surface); color: var(--ink-2); font-size: 9px; }
+.island-actions button:hover { color: var(--brand); border-color: var(--brand-line); background: var(--brand-ink); }
+.island-summary { flex: 0 0 auto; padding: 7px 9px; color: var(--ink-3); border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); font-size: 9.5px; }
+@keyframes island-in { from { opacity: 0; transform: translateY(-5px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes island-sheen { 0% { opacity: 0; transform: translateX(-125%); } 20% { opacity: .65; } 100% { opacity: 0; transform: translateX(125%); } }
+@media (prefers-reduced-transparency: reduce) {
+  .tool-island { background: var(--surface); backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+@media (max-width: 1100px) {
+  .right-rail { width: 248px; min-width: 248px; }
+}
+@media (max-width: 860px) {
+  .right-rail { width: 44px; min-width: 44px; }
+  .right-rail .context-panel { display: none; }
+  .island-rail { flex: 1; padding: 10px 5px; }
+  .island-rail-title, .island-count, .island-rail-header .icon-btn, .island-copy, .island-chevron, .island-detail, .island-summary, .island-phase { display: none; }
+  .island-rail-header { justify-content: center; }
+  .island-rail-scroll { overflow: visible; }
+  .tool-island { border-radius: 12px; }
+  .island-main { padding: 7px; justify-content: center; }
+  .island-status-icon { width: 28px; height: 28px; }
 }
 
 /* ---- Attachments ---- */

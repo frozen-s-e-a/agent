@@ -12,6 +12,7 @@ import { WelcomePage } from './WelcomePage';
 import { Composer } from './Composer';
 import { Messages } from './Messages';
 import { ContextPanel } from './ContextPanel';
+import { IslandRail } from './island/IslandRail';
 import { SettingsPage } from './SettingsPage';
 import { ProjectModal } from './ProjectModal';
 import { ToolSearchModal } from './ToolSearchModal';
@@ -317,6 +318,21 @@ function App() {
     }), { input: 0, output: 0, total: 0 });
   }, [timeline.events]);
 
+  const cancelIsland = useCallback((call: any) => {
+    const taskId = call?.result?.taskId || call?.taskId;
+    (taskId ? api('task.cancel', { id: taskId }) : api('chat.cancel', { sessionId }))
+      .then(() => { if (sessionId) return api('session.get', { id: sessionId }).then(setTimeline); })
+      .catch(report);
+  }, [sessionId, report]);
+
+  const retryIsland = useCallback((call: any) => {
+    const taskId = call?.result?.taskId || call?.taskId;
+    if (!taskId) return;
+    api('task.retry', { id: taskId })
+      .then(() => { if (sessionId) return api('session.get', { id: sessionId }).then(setTimeline); })
+      .catch(report);
+  }, [sessionId, report]);
+
   // ── Loading ──
   if (!boot) {
     return (
@@ -437,33 +453,43 @@ function App() {
                   onDelete={session ? () => setDeleteConfirm(session.id) : undefined}
                 />
               </div>
-              <ContextPanel
-                  open={rightPanelOpen}
-                  tool={currentTool}
-                  params={params}
-                  setParams={setParams}
-                  advanced={advanced}
-                  setAdvanced={setAdvanced}
-                  preview={preview}
-                  mode={mode}
-                  onModeChange={setMode}
-                  boot={boot}
-                  busy={busy}
-                  onRunTool={runTool}
-                  onCancelTool={() => setCurrentTool(null)}
-                  onLoadPreview={loadPreview}
-                  onDemo={demo}
-                  project={project}
-                  files={files}
-                  folder={folder}
-                  selected={selectedFiles}
-                  onFolderChange={setFolder}
-                  onSelectFile={toggleFile}
-                  onCreateProject={() => { setCurrentTool(null); setModalType('project'); }}
-                  onRefresh={() => project && api('files.list', { projectId: project.id, path: folder }).then(setFiles).catch(report)}
-                  onClearSelection={clearSelection}
-                  onUseTools={() => setModalType('tools')}
+              <div className={'right-rail ' + (rightPanelOpen ? 'is-open' : 'is-closed')}>
+                <IslandRail
+                  calls={timeline.calls || []}
+                  tools={allTools}
+                  phase={timeline.phase || ''}
+                  streaming={timeline.streaming}
+                  onCancel={cancelIsland}
+                  onRetry={retryIsland}
                 />
+                <ContextPanel
+                    open={rightPanelOpen}
+                    tool={currentTool}
+                    params={params}
+                    setParams={setParams}
+                    advanced={advanced}
+                    setAdvanced={setAdvanced}
+                    preview={preview}
+                    mode={mode}
+                    onModeChange={setMode}
+                    boot={boot}
+                    busy={busy}
+                    onRunTool={runTool}
+                    onCancelTool={() => setCurrentTool(null)}
+                    onLoadPreview={loadPreview}
+                    onDemo={demo}
+                    project={project}
+                    files={files}
+                    folder={folder}
+                    selected={selectedFiles}
+                    onFolderChange={setFolder}
+                    onSelectFile={toggleFile}
+                    onCreateProject={() => { setCurrentTool(null); setModalType('project'); }}
+                    onRefresh={() => project && api('files.list', { projectId: project.id, path: folder }).then(setFiles).catch(report)}
+                    onClearSelection={clearSelection}
+                    onUseTools={() => setModalType('tools')}
+                  />
+              </div>
             </div>
           </div>
         ) : (
