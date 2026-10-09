@@ -18,6 +18,7 @@
 | [03 Agent Loop 伪代码](docs/03-agent-loop-pseudocode.md) | 规划 → 执行 → 验证循环的完整伪代码与客户端事件协议 |
 | [04 上下文预算策略](docs/04-context-budget.md) | 128k 是否够用、有效上下文测试、预算与裁剪规则 |
 | [05 审计 Agent 通用架构](docs/05-audit-agent-architecture.md) | 四层架构、高工作量板块、准确性保障、跨项目通用性 |
+| [06 Agent 层交互设计](docs/06-agent-interaction-design.md) | 需求理解、程序映射、参数确认、追问、下钻、复核反馈的完整交互 |
 
 ## 建议落地顺序
 
