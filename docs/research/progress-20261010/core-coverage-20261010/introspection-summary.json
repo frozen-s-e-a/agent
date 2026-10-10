@@ -1,0 +1,623 @@
+{
+  "summary": {
+    "nativeFiles": 68,
+    "loaded": 66,
+    "seconds": 29.61,
+    "calledBusinessRun": false,
+    "networkDisabled": true
+  },
+  "records": [
+    {
+      "file": "modules/add_column.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 14,
+      "classes": 0,
+      "record": "introspection/modules__add_column.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/address_split.pyd",
+      "loaded": false,
+      "error": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Install\\\\Desktop\\\\ai助手\\\\artifacts\\\\core-coverage-20261010\\\\frozen\\\\jionlp\\\\dictionary\\\\china_location.zip'",
+      "functions": 0,
+      "classes": 0,
+      "record": "introspection/modules__address_split.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/ai_formula_filler.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 21,
+      "classes": 0,
+      "record": "introspection/modules__ai_formula_filler.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/announcement.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 13,
+      "classes": 0,
+      "record": "introspection/modules__announcement.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/asist_split.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 12,
+      "classes": 0,
+      "record": "introspection/modules__asist_split.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/auxiliary_selection.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 9,
+      "classes": 0,
+      "record": "introspection/modules__auxiliary_selection.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/bank_digit2.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 5,
+      "classes": 0,
+      "record": "introspection/modules__bank_digit2.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/bank_flow.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 12,
+      "classes": 6,
+      "record": "introspection/modules__bank_flow.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/bank_paper1.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 5,
+      "classes": 0,
+      "record": "introspection/modules__bank_paper1.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/bank_paper2.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 5,
+      "classes": 0,
+      "record": "introspection/modules__bank_paper2.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/bankflowmerge.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 20,
+      "classes": 0,
+      "record": "introspection/modules__bankflowmerge.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/cicpa_query.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 29,
+      "classes": 0,
+      "record": "introspection/modules__cicpa_query.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/currency.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 10,
+      "classes": 0,
+      "record": "introspection/modules__currency.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/cutoff_sampling.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 8,
+      "classes": 0,
+      "record": "introspection/modules__cutoff_sampling.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/data_field_check.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 10,
+      "classes": 0,
+      "record": "introspection/modules__data_field_check.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/detailed_table/_core.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 53,
+      "classes": 0,
+      "record": "introspection/modules__detailed_table___core.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/detailed_table/detailed_table_generate.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 3,
+      "classes": 0,
+      "record": "introspection/modules__detailed_table__detailed_table_generate.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/detailed_table/detailed_table_inspect.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 3,
+      "classes": 0,
+      "record": "introspection/modules__detailed_table__detailed_table_inspect.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/detailed_table/detailed_table_inspect_template.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 3,
+      "classes": 0,
+      "record": "introspection/modules__detailed_table__detailed_table_inspect_template.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/detailed_table/detailed_table_save_config.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 5,
+      "classes": 0,
+      "record": "introspection/modules__detailed_table__detailed_table_save_config.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/detailed_table/detailed_table_validate.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 3,
+      "classes": 0,
+      "record": "introspection/modules__detailed_table__detailed_table_validate.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/dropsummary.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 11,
+      "classes": 0,
+      "record": "introspection/modules__dropsummary.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/extract_disclosure_scope.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 6,
+      "classes": 0,
+      "record": "introspection/modules__extract_disclosure_scope.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/extract_disclosure_tables.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 7,
+      "classes": 0,
+      "record": "introspection/modules__extract_disclosure_tables.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/file_classification.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 16,
+      "classes": 0,
+      "record": "introspection/modules__file_classification.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/fill_column.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 14,
+      "classes": 0,
+      "record": "introspection/modules__fill_column.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/gross_margin_analysis.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 29,
+      "classes": 1,
+      "record": "introspection/modules__gross_margin_analysis.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/headers_process.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 14,
+      "classes": 0,
+      "record": "introspection/modules__headers_process.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/id_card.pyd",
+      "loaded": false,
+      "error": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\Install\\\\Desktop\\\\ai助手\\\\artifacts\\\\core-coverage-20261010\\\\frozen\\\\jionlp\\\\dictionary\\\\china_location.zip'",
+      "functions": 0,
+      "classes": 0,
+      "record": "introspection/modules__id_card.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/info_extract.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 25,
+      "classes": 0,
+      "record": "introspection/modules__info_extract.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/info_extract_multi.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 20,
+      "classes": 0,
+      "record": "introspection/modules__info_extract_multi.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/insert_column.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 14,
+      "classes": 0,
+      "record": "introspection/modules__insert_column.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/insert_footnote_comments.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 11,
+      "classes": 0,
+      "record": "introspection/modules__insert_footnote_comments.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/ipo_bj.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 13,
+      "classes": 0,
+      "record": "introspection/modules__ipo_bj.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/ipo_sh.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 13,
+      "classes": 0,
+      "record": "introspection/modules__ipo_sh.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/ipo_sz.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 12,
+      "classes": 0,
+      "record": "introspection/modules__ipo_sz.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/jet_test/_builtin.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 0,
+      "classes": 0,
+      "record": "introspection/modules__jet_test___builtin.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/jet_test/_core.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 14,
+      "classes": 1,
+      "record": "introspection/modules__jet_test___core.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/jet_test/jet_test_execute.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 8,
+      "classes": 0,
+      "record": "introspection/modules__jet_test__jet_test_execute.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/jet_test/jet_test_inspect.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 3,
+      "classes": 0,
+      "record": "introspection/modules__jet_test__jet_test_inspect.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/ledger_check.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 13,
+      "classes": 0,
+      "record": "introspection/modules__ledger_check.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/link_extractor.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 6,
+      "classes": 0,
+      "record": "introspection/modules__link_extractor.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/link_ref_replace.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 15,
+      "classes": 0,
+      "record": "introspection/modules__link_ref_replace.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/link_replace_range.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 10,
+      "classes": 0,
+      "record": "introspection/modules__link_replace_range.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/link_replace_text.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 12,
+      "classes": 0,
+      "record": "introspection/modules__link_replace_text.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/link_replace_workbook.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 9,
+      "classes": 0,
+      "record": "introspection/modules__link_replace_workbook.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/merge_column.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 15,
+      "classes": 0,
+      "record": "introspection/modules__merge_column.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/monthly_analysis/_core.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 17,
+      "classes": 0,
+      "record": "introspection/modules__monthly_analysis___core.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/monthly_analysis/monthly_ai_analysis.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 3,
+      "classes": 0,
+      "record": "introspection/modules__monthly_analysis__monthly_ai_analysis.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/monthly_analysis/monthly_detect_structure.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 3,
+      "classes": 0,
+      "record": "introspection/modules__monthly_analysis__monthly_detect_structure.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/monthly_analysis/monthly_execute.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 3,
+      "classes": 0,
+      "record": "introspection/modules__monthly_analysis__monthly_execute.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/monthly_analysis/monthly_preview.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 3,
+      "classes": 0,
+      "record": "introspection/modules__monthly_analysis__monthly_preview.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/multi_collect_file.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 10,
+      "classes": 1,
+      "record": "introspection/modules__multi_collect_file.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/multi_collect_folder.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 10,
+      "classes": 1,
+      "record": "introspection/modules__multi_collect_folder.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/paper_verify.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 31,
+      "classes": 0,
+      "record": "introspection/modules__paper_verify.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/photo_rename.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 12,
+      "classes": 0,
+      "record": "introspection/modules__photo_rename.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/pickup_value.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 11,
+      "classes": 0,
+      "record": "introspection/modules__pickup_value.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/qcc_processor.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 14,
+      "classes": 0,
+      "record": "introspection/modules__qcc_processor.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/related_party.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 18,
+      "classes": 3,
+      "record": "introspection/modules__related_party.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/select_column.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 13,
+      "classes": 0,
+      "record": "introspection/modules__select_column.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/subject_allocation.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 12,
+      "classes": 0,
+      "record": "introspection/modules__subject_allocation.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/subject_clean/_core.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 30,
+      "classes": 0,
+      "record": "introspection/modules__subject_clean___core.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/subject_clean/tool_execute.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 3,
+      "classes": 0,
+      "record": "introspection/modules__subject_clean__tool_execute.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/subject_clean/tool_preview.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 3,
+      "classes": 0,
+      "record": "introspection/modules__subject_clean__tool_preview.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/subject_clean_after.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 5,
+      "classes": 0,
+      "record": "introspection/modules__subject_clean_after.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/text_match.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 10,
+      "classes": 0,
+      "record": "introspection/modules__text_match.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/voucher_check.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 41,
+      "classes": 1,
+      "record": "introspection/modules__voucher_check.pyd.json",
+      "exitCode": 0
+    },
+    {
+      "file": "modules/xlsx_writer.pyd",
+      "loaded": true,
+      "error": null,
+      "functions": 13,
+      "classes": 0,
+      "record": "introspection/modules__xlsx_writer.pyd.json",
+      "exitCode": 0
+    }
+  ]
+}

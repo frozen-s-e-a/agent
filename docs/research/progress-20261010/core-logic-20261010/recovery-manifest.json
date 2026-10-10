@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-10",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "pandas": "3.0.1",
+  "scope": "JET core reconstruction research",
+  "productionClientChanged": false,
+  "sourceBinaries": [
+    {
+      "path": "C:\\Users\\Install\\Desktop\\SW审计工具箱\\modules\\jet_test\\_core.pyd",
+      "sha256": "9df5a28ab7c23f675a9d6e1504247ad1a8528e0b3081a3909c5c2cc5354e0afe"
+    },
+    {
+      "path": "C:\\Users\\Install\\Desktop\\SW审计工具箱\\modules\\jet_test\\_builtin.pyd",
+      "sha256": "c88cf398732b9fe599f4704c3d31ad2c6f4c4dd27159dc995eeb2351c31f8c3a"
+    },
+    {
+      "path": "C:\\Users\\Install\\Desktop\\SW审计工具箱\\modules\\jet_test\\jet_test_execute.pyd",
+      "sha256": "cc6930894654ff40d2d366cb4040d7f8bfe52ba5e6574ef4a30f2b54f89b9383"
+    }
+  ],
+  "verificationSummary": {
+    "conditionCases": 260,
+    "featureCases": 13,
+    "mcpRuleCases": 4,
+    "featureEdgeCases": 7,
+    "rowChecks": 5185,
+    "failureCount": 0
+  }
+}

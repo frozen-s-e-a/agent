@@ -1,0 +1,6204 @@
+{
+  "date": "2026-10-10",
+  "projectVersion": "0.1.0-internal.28",
+  "sourceRoot": "C:\\Users\\Install\\Desktop\\SW审计工具箱",
+  "method": "static file/PE/ZIP/code-object inspection; no legacy business execution",
+  "python": "3.12.14",
+  "moduleExtensionCounts": {
+    ".pyd": 216,
+    ".json": 2
+  },
+  "sourceExtensionCounts": {
+    ".png": 1,
+    ".jpg": 2
+  },
+  "templateExtensionCounts": {
+    ".xlsx": 66,
+    ".xlsm": 9
+  },
+  "cythonMarkers": 107,
+  "builtinCount": 16,
+  "registeredMcpCount": 63,
+  "skillCount": 8,
+  "packages": [
+    {
+      "id": "P01_table",
+      "count": 14,
+      "operations": [
+        "add_column",
+        "asist_split",
+        "dropsummary",
+        "fill_column",
+        "headers_process",
+        "insert_column",
+        "merge_column",
+        "pickup_value",
+        "select_column",
+        "multi_collect_file",
+        "multi_collect_folder",
+        "data_field_check",
+        "text_match",
+        "auxiliary_selection"
+      ]
+    },
+    {
+      "id": "P02_subject",
+      "count": 4,
+      "operations": [
+        "tool_preview",
+        "tool_execute",
+        "subject_clean_after",
+        "subject_allocation"
+      ]
+    },
+    {
+      "id": "P03_checks_sampling",
+      "count": 5,
+      "operations": [
+        "jet_test_inspect",
+        "jet_test_execute",
+        "voucher_check",
+        "ledger_check",
+        "cutoff_sampling"
+      ]
+    },
+    {
+      "id": "P04_bank",
+      "count": 5,
+      "operations": [
+        "bank_digit2",
+        "bank_paper1",
+        "bank_paper2",
+        "bank_flow",
+        "bankflowmerge"
+      ]
+    },
+    {
+      "id": "P05_analysis",
+      "count": 5,
+      "operations": [
+        "monthly_preview",
+        "monthly_detect_structure",
+        "monthly_execute",
+        "monthly_ai_analysis",
+        "gross_margin_analysis"
+      ]
+    },
+    {
+      "id": "P06_workpapers",
+      "count": 6,
+      "operations": [
+        "detailed_table_inspect",
+        "detailed_table_inspect_template",
+        "detailed_table_save_config",
+        "detailed_table_validate",
+        "detailed_table_generate",
+        "xlsx_writer"
+      ]
+    },
+    {
+      "id": "P07_workbook_structure",
+      "count": 8,
+      "operations": [
+        "link_extractor",
+        "link_ref_replace",
+        "link_replace_range",
+        "link_replace_text",
+        "link_replace_workbook",
+        "extract_disclosure_scope",
+        "extract_disclosure_tables",
+        "insert_footnote_comments"
+      ]
+    },
+    {
+      "id": "P08_remote",
+      "count": 6,
+      "operations": [
+        "ipo_bj",
+        "ipo_sh",
+        "ipo_sz",
+        "announcement",
+        "cicpa_query",
+        "currency"
+      ]
+    },
+    {
+      "id": "P09_relationships",
+      "count": 2,
+      "operations": [
+        "qcc_processor",
+        "related_party"
+      ]
+    },
+    {
+      "id": "P10_documents_ai",
+      "count": 8,
+      "operations": [
+        "address_split",
+        "id_card",
+        "ai_formula_filler",
+        "file_classification",
+        "info_extract",
+        "info_extract_multi",
+        "paper_verify",
+        "photo_rename"
+      ]
+    }
+  ],
+  "operations": [
+    {
+      "id": "add_column",
+      "description": "相同名称列合并工具 — 用于将 Excel 表中相同名称的列值合并为一个新列。",
+      "parameters": [
+        "file_path",
+        "keyword",
+        "column_name",
+        "delimiter",
+        "max_column_num"
+      ],
+      "required": [
+        "file_path",
+        "keyword",
+        "column_name",
+        "delimiter",
+        "max_column_num"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "文件或文件夹路径: 要处理的 Excel 文件路径或包含 Excel 文件的文件夹路径"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "文件名关键词: 用于过滤文件名的关键词，留空则处理所有 Excel 文件"
+          },
+          "column_name": {
+            "type": "string",
+            "description": "待合并列名: 需要合并的列名（如：客户）"
+          },
+          "delimiter": {
+            "type": "string",
+            "description": "连接符: 用于连接多个值的分隔符（如：,或;），留空则直接拼接"
+          },
+          "max_column_num": {
+            "type": "number",
+            "description": "最大列数: 相同列名的最大数量，不足时自动插入空列"
+          }
+        },
+        "required": [
+          "file_path",
+          "keyword",
+          "column_name",
+          "delimiter",
+          "max_column_num"
+        ]
+      }
+    },
+    {
+      "id": "address_split",
+      "description": "函证地址拆分成省市区 — 基于 jionlp 库，批量解析地址信息。",
+      "parameters": [
+        "address_column",
+        "address_list"
+      ],
+      "required": [
+        "address_column",
+        "address_list"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "address_column": {
+            "type": "string",
+            "description": "Excel列名: Excel模式专用：指定地址所在的列名（默认为第一列）"
+          },
+          "address_list": {
+            "type": "string",
+            "description": "直接查询地址: 直接模式专用：一个地址字符串，或多个地址组成的列表"
+          }
+        },
+        "required": [
+          "address_column",
+          "address_list"
+        ]
+      }
+    },
+    {
+      "id": "ai_formula_filler",
+      "description": "AI 智能公式填充 🎯",
+      "parameters": [
+        "config_file",
+        "base_url",
+        "api_key",
+        "model_name"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "AI API Base URL"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "AI API Key"
+          },
+          "model_name": {
+            "type": "string",
+            "description": "模型名称"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "announcement",
+      "description": "公告下载 — 从巨潮资讯网下载上市公司的年报、半年报、审计报告等公告文件。",
+      "parameters": [
+        "stock_codes",
+        "start_date",
+        "end_date",
+        "market_type",
+        "category_name",
+        "keyword"
+      ],
+      "required": [
+        "stock_codes",
+        "start_date",
+        "end_date",
+        "market_type",
+        "category_name",
+        "keyword"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "stock_codes": {
+            "type": "array",
+            "description": "股票代码列表: 如 ['000002', '600519']",
+            "items": {
+              "type": "string"
+            }
+          },
+          "start_date": {
+            "type": "string",
+            "description": "开始日期: YYYY-MM-DD"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "结束日期: YYYY-MM-DD"
+          },
+          "market_type": {
+            "type": "string",
+            "description": "市场板块: 默认为'京沪深'"
+          },
+          "category_name": {
+            "type": "string",
+            "description": "公告类型: 可选值: '年报', '半年报', '一季报', '三季报', '业绩预告', '中介报告', '首发', '增发' 等，为空则下载全部类型"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "标题关键词: 筛选标题内容"
+          }
+        },
+        "required": [
+          "stock_codes",
+          "start_date",
+          "end_date",
+          "market_type",
+          "category_name",
+          "keyword"
+        ]
+      }
+    },
+    {
+      "id": "asist_split",
+      "description": "辅助项拆分工具 — 用于处理包含复杂键值对的辅助核算列。",
+      "parameters": [
+        "file_path",
+        "keyword",
+        "col_name",
+        "kv_sep",
+        "item_sep"
+      ],
+      "required": [
+        "file_path",
+        "keyword",
+        "col_name",
+        "kv_sep",
+        "item_sep"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "文件或文件夹路径: 对应 B1 单元格"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "文件名关键词: 对应 B2 单元格"
+          },
+          "col_name": {
+            "type": "string",
+            "description": "辅助项列名: 对应 B3 单元格"
+          },
+          "kv_sep": {
+            "type": "string",
+            "description": "辅助项分隔符: 对应 B4 单元格 (如 :)"
+          },
+          "item_sep": {
+            "type": "string",
+            "description": "辅助项拆分符: 对应 B5。填 ';' 代表按分号切分；填 '【】' 代表提取括号内内容"
+          }
+        },
+        "required": [
+          "file_path",
+          "keyword",
+          "col_name",
+          "kv_sep",
+          "item_sep"
+        ]
+      }
+    },
+    {
+      "id": "auxiliary_selection",
+      "description": "辅助项智能选择 — 利用AI语义分析，自动判断科目余额方向（借/贷），并从辅助项中筛选出有用的标准维度。",
+      "parameters": [
+        "config_file",
+        "base_url",
+        "api_key",
+        "output_dir"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "AI API Base URL"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "AI API Key"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "bank_digit2",
+      "description": "银行函证表格生成-电子格式二 — 根据配置表批量生成银行函证（电子格式二）。支持多表合并、智能匹配、自动对齐。",
+      "parameters": [
+        "config_file",
+        "output_path"
+      ],
+      "required": [
+        "config_file"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "输出文件路径。不传则使用默认路径。"
+          }
+        },
+        "required": [
+          "config_file"
+        ]
+      }
+    },
+    {
+      "id": "bank_flow",
+      "description": "银行流水智能双向核对 — 基于会计逻辑和交易对手文本相似度分析，自动核对银行流水与财务序时账。",
+      "parameters": [
+        "gl_path",
+        "gl_date_col",
+        "gl_voucher_col",
+        "gl_subject_col",
+        "gl_bank_subject",
+        "gl_summary_col",
+        "gl_partner_direct_col",
+        "gl_partner_col",
+        "gl_debit_col",
+        "gl_credit_col",
+        "bank_path",
+        "bank_date_col",
+        "bank_income_col",
+        "bank_expense_col",
+        "bank_partner_col"
+      ],
+      "required": [
+        "gl_path",
+        "gl_date_col",
+        "gl_voucher_col",
+        "gl_subject_col",
+        "gl_bank_subject",
+        "gl_summary_col",
+        "gl_partner_direct_col",
+        "gl_partner_col",
+        "gl_debit_col",
+        "gl_credit_col",
+        "bank_path",
+        "bank_date_col",
+        "bank_income_col",
+        "bank_expense_col",
+        "bank_partner_col"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "gl_path": {
+            "type": "string",
+            "description": "序时账文件路径"
+          },
+          "gl_date_col": {
+            "type": "string",
+            "description": "序时账-日期列"
+          },
+          "gl_voucher_col": {
+            "type": "string",
+            "description": "序时账-凭证号列"
+          },
+          "gl_subject_col": {
+            "type": "string",
+            "description": "序时账-科目列"
+          },
+          "gl_bank_subject": {
+            "type": "string",
+            "description": "序时账-银行科目值"
+          },
+          "gl_summary_col": {
+            "type": "string",
+            "description": "序时账-摘要列"
+          },
+          "gl_partner_direct_col": {
+            "type": "string",
+            "description": "序时账-交易对手列名: 如果序时账中已有交易对手列（如'客户'、'供应商'等），直接填写该列名。填写此项后将忽略'客商辅助项列名'配置"
+          },
+          "gl_partner_col": {
+            "type": "string",
+            "description": "序时账-客商辅助项列名: 用于凭证拆分模式：从对方科目的辅助项中提取客商。如果同时存在多个列（如'客户－名称'和'供应商－名称'），请用英文逗号分隔填写所有列名，例如：客户－名称,供应商－名称。注意：如果已填写'交易对手列名'，此项将被忽略"
+          },
+          "gl_debit_col": {
+            "type": "string",
+            "description": "序时账-借方列"
+          },
+          "gl_credit_col": {
+            "type": "string",
+            "description": "序时账-贷方列"
+          },
+          "bank_path": {
+            "type": "string",
+            "description": "银行流水文件路径"
+          },
+          "bank_date_col": {
+            "type": "string",
+            "description": "流水-日期列"
+          },
+          "bank_income_col": {
+            "type": "string",
+            "description": "流水-收入列"
+          },
+          "bank_expense_col": {
+            "type": "string",
+            "description": "流水-支出列"
+          },
+          "bank_partner_col": {
+            "type": "string",
+            "description": "流水-对方户名列"
+          }
+        },
+        "required": [
+          "gl_path",
+          "gl_date_col",
+          "gl_voucher_col",
+          "gl_subject_col",
+          "gl_bank_subject",
+          "gl_summary_col",
+          "gl_partner_direct_col",
+          "gl_partner_col",
+          "gl_debit_col",
+          "gl_credit_col",
+          "bank_path",
+          "bank_date_col",
+          "bank_income_col",
+          "bank_expense_col",
+          "bank_partner_col"
+        ]
+      }
+    },
+    {
+      "id": "bank_paper1",
+      "description": "银行函证表格生成-纸质格式一 — 根据配置表批量生成银行函证（纸质格式一）。支持多表合并、智能匹配、自动对齐。",
+      "parameters": [
+        "config_file",
+        "output_path"
+      ],
+      "required": [
+        "config_file"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "输出文件路径。不传则使用默认路径。"
+          }
+        },
+        "required": [
+          "config_file"
+        ]
+      }
+    },
+    {
+      "id": "bank_paper2",
+      "description": "银行函证表格生成-纸质格式二 — 根据配置表批量生成银行函证（纸质格式二）。支持多表合并、智能匹配、自动对齐。",
+      "parameters": [
+        "config_file",
+        "output_path"
+      ],
+      "required": [
+        "config_file"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "输出文件路径。不传则使用默认路径。"
+          }
+        },
+        "required": [
+          "config_file"
+        ]
+      }
+    },
+    {
+      "id": "bankflowmerge",
+      "description": "银行流水合并 — 智能合并银行流水文件，支持两种模式：",
+      "parameters": [
+        "file_paths",
+        "header_start_cols",
+        "header_start_rows",
+        "bank_names",
+        "account_names",
+        "account_numbers",
+        "transaction_date_cols",
+        "transaction_time_cols",
+        "counterparty_name_cols",
+        "counterparty_account_cols",
+        "summary_cols",
+        "income_cols",
+        "expense_cols",
+        "balance_cols"
+      ],
+      "required": [
+        "file_paths",
+        "header_start_cols",
+        "header_start_rows",
+        "bank_names",
+        "account_names",
+        "account_numbers",
+        "transaction_date_cols",
+        "transaction_time_cols",
+        "counterparty_name_cols",
+        "counterparty_account_cols",
+        "summary_cols",
+        "income_cols",
+        "expense_cols",
+        "balance_cols"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_paths": {
+            "type": "array",
+            "description": "文件路径列表: 银行流水文件的完整路径列表（必填，支持单个或多个文件）",
+            "items": {
+              "type": "string"
+            }
+          },
+          "header_start_cols": {
+            "type": "array",
+            "description": "表头起始列列表: 每个文件的表头起始列，如 ['A', 'A', 'B']（必填）",
+            "items": {
+              "type": "string"
+            }
+          },
+          "header_start_rows": {
+            "type": "array",
+            "description": "表头起始行列表: 每个文件的表头起始行，如 [5, 2, 7]（必填）",
+            "items": {
+              "type": "string"
+            }
+          },
+          "bank_names": {
+            "type": "array",
+            "description": "银行名称列表: 每个文件的银行简称列表，如 ['浦发银行', '工商银行', '民生银行']",
+            "items": {
+              "type": "string"
+            }
+          },
+          "account_names": {
+            "type": "array",
+            "description": "银行户名列表: 每个文件的账户名称列表",
+            "items": {
+              "type": "string"
+            }
+          },
+          "account_numbers": {
+            "type": "array",
+            "description": "银行账号列表: 每个文件的银行账号列表（必须是纯数字，如'83110154700000722'，不要填写账户名称）",
+            "items": {
+              "type": "string"
+            }
+          },
+          "transaction_date_cols": {
+            "type": "array",
+            "description": "交易日期列列表: 每个文件的交易日期列名列表",
+            "items": {
+              "type": "string"
+            }
+          },
+          "transaction_time_cols": {
+            "type": "array",
+            "description": "交易时间列列表: 每个文件的交易时间列名列表",
+            "items": {
+              "type": "string"
+            }
+          },
+          "counterparty_name_cols": {
+            "type": "array",
+            "description": "对方账户列列表: 每个文件的对方账户名称列名列表",
+            "items": {
+              "type": "string"
+            }
+          },
+          "counterparty_account_cols": {
+            "type": "array",
+            "description": "对方账号列列表: 每个文件的对方账号列名列表",
+            "items": {
+              "type": "string"
+            }
+          },
+          "summary_cols": {
+            "type": "array",
+            "description": "摘要列列表: 每个文件的摘要列名列表",
+            "items": {
+              "type": "string"
+            }
+          },
+          "income_cols": {
+            "type": "array",
+            "description": "收入金额列列表: 每个文件的收入金额列名列表",
+            "items": {
+              "type": "string"
+            }
+          },
+          "expense_cols": {
+            "type": "array",
+            "description": "支出金额列列表: 每个文件的支出金额列名列表",
+            "items": {
+              "type": "string"
+            }
+          },
+          "balance_cols": {
+            "type": "array",
+            "description": "余额列列表: 每个文件的余额列名列表",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "file_paths",
+          "header_start_cols",
+          "header_start_rows",
+          "bank_names",
+          "account_names",
+          "account_numbers",
+          "transaction_date_cols",
+          "transaction_time_cols",
+          "counterparty_name_cols",
+          "counterparty_account_cols",
+          "summary_cols",
+          "income_cols",
+          "expense_cols",
+          "balance_cols"
+        ]
+      }
+    },
+    {
+      "id": "cicpa_query",
+      "description": "注协系统工商信息获取",
+      "parameters": [
+        "query_mode",
+        "company_name",
+        "org_id",
+        "output_path",
+        "subsidiary_threshold",
+        "cookie_json"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "query_mode": {
+            "type": "string",
+            "description": "查询模式: search=轻量搜索, detail=企业详情, export=全维度导出, subsidiary=子公司发现, check_cookies=检查Cookie"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "企业名称: 企业精确工商注册全称，多个用逗号分隔"
+          },
+          "org_id": {
+            "type": "string",
+            "description": "企业org_id: 中注协系统内部ID（detail模式可选，代替company_name）"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "输出路径: 结果保存路径"
+          },
+          "subsidiary_threshold": {
+            "type": "integer",
+            "description": "子公司持股阈值: 持股比例阈值，默认50"
+          },
+          "cookie_json": {
+            "type": "string",
+            "description": "Cookie JSON: 手动粘贴的cookie（JSON字符串，AI模式使用）"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "currency",
+      "description": "外汇管理局汇率数据查询 — 从国家外汇管理局官网获取人民币汇率中间价。",
+      "parameters": [],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "id": "cutoff_sampling",
+      "description": "截止测试抽样 (Cut-off Testing) - 凭证去重版",
+      "parameters": [
+        "config_file",
+        "output_dir"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "data_field_check",
+      "description": "资料字段检查 — 根据配置，检查指定文件夹内各Excel文件的表头字段是否满足要求。",
+      "parameters": [
+        "config_file",
+        "output_dir",
+        "base_url",
+        "api_key",
+        "model_name"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "AI API Base URL"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "AI API Key"
+          },
+          "model_name": {
+            "type": "string",
+            "description": "模型名称"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "detailed_table_generate",
+      "description": "明细表-执行生成 — 读取工作目录中已保存的配置（field_mapping、subject_mapping、template_assignment），批量生成明细表底稿。需要 64 位 Excel 环境。",
+      "parameters": [
+        "work_dir",
+        "file_path",
+        "output_dir",
+        "confirmed"
+      ],
+      "required": [
+        "work_dir",
+        "file_path"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "work_dir": {
+            "type": "string",
+            "description": "工作目录路径（包含 config/ 子目录下的 JSON 配置文件）"
+          },
+          "file_path": {
+            "type": "string",
+            "description": "数据源文件路径或文件夹路径"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径（优先级高于 paths 配置中的值）"
+          },
+          "confirmed": {
+            "type": "boolean",
+            "description": "确认覆盖已有输出文件（默认 false）"
+          }
+        },
+        "required": [
+          "work_dir",
+          "file_path"
+        ]
+      }
+    },
+    {
+      "id": "detailed_table_inspect",
+      "description": "明细表-检查数据源 — 读取 Excel 文件或文件夹，返回列名、行数、公司列表、科目列表和数据预览。",
+      "parameters": [
+        "file_path",
+        "sheet_name",
+        "preview_rows"
+      ],
+      "required": [
+        "file_path"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "数据源文件路径或文件夹路径"
+          },
+          "sheet_name": {
+            "type": "string",
+            "description": "指定读取的 Sheet 名称（不传则读取第一个 Sheet）"
+          },
+          "preview_rows": {
+            "type": "integer",
+            "description": "预览行数（默认5行）"
+          }
+        },
+        "required": [
+          "file_path"
+        ]
+      }
+    },
+    {
+      "id": "detailed_table_inspect_template",
+      "description": "明细表-检查模板 — 扫描底稿模板文件夹，返回每个模板 Excel 文件的 Sheet 列表和每个 Sheet 中的批注字段名。",
+      "parameters": [
+        "template_dir"
+      ],
+      "required": [
+        "template_dir"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "template_dir": {
+            "type": "string",
+            "description": "底稿模板文件夹路径"
+          }
+        },
+        "required": [
+          "template_dir"
+        ]
+      }
+    },
+    {
+      "id": "detailed_table_save_config",
+      "description": "明细表-保存配置 — 将 AI 分析后的配置决策保存到工作目录的 JSON 文件中。支持固定配置类型（paths、field_mapping、subject_mapping、template_assignment）和自定义映射配置（config_type 即为模板批注名，如\"披露\"、\"关联方\"等）。",
+      "parameters": [
+        "work_dir",
+        "config_type",
+        "config_data"
+      ],
+      "required": [
+        "work_dir",
+        "config_type",
+        "config_data"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "work_dir": {
+            "type": "string",
+            "description": "工作目录路径（配置文件将保存在其 config/ 子目录下）"
+          },
+          "config_type": {
+            "type": "string",
+            "description": "配置类型。固定类型：paths / field_mapping / subject_mapping / template_assignment。自定义映射类型：使用模板批注名（如 披露、关联方）"
+          },
+          "config_data": {
+            "type": "string",
+            "description": "配置内容（JSON 字符串）"
+          }
+        },
+        "required": [
+          "work_dir",
+          "config_type",
+          "config_data"
+        ]
+      }
+    },
+    {
+      "id": "detailed_table_validate",
+      "description": "明细表-校验配置 — 读取工作目录中的所有配置文件（field_mapping、subject_mapping、template_assignment），检查完整性和一致性，返回校验结果。",
+      "parameters": [
+        "work_dir",
+        "file_path"
+      ],
+      "required": [
+        "work_dir"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "work_dir": {
+            "type": "string",
+            "description": "工作目录路径（包含 config/ 子目录下的 JSON 配置文件）"
+          },
+          "file_path": {
+            "type": "string",
+            "description": "数据源文件路径（用于交叉验证列名）"
+          }
+        },
+        "required": [
+          "work_dir"
+        ]
+      }
+    },
+    {
+      "id": "dropsummary",
+      "description": "删除合计行工具 — 用于删除 Excel 表中的合计行和汇总行。",
+      "parameters": [
+        "file_path",
+        "keywords",
+        "column_name"
+      ],
+      "required": [
+        "file_path",
+        "keywords",
+        "column_name"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "文件路径: 要处理的 Excel 文件路径（配置表中每行一个文件）"
+          },
+          "keywords": {
+            "type": "string",
+            "description": "关键字: 用于匹配合计行的关键字，多个关键字用竖线分隔（如：合计|小计|总计）"
+          },
+          "column_name": {
+            "type": "string",
+            "description": "关键字所在列: 关键字所在的列名"
+          }
+        },
+        "required": [
+          "file_path",
+          "keywords",
+          "column_name"
+        ]
+      }
+    },
+    {
+      "id": "extract_disclosure_scope",
+      "description": "披露口径提取 📋",
+      "parameters": [
+        "config_file",
+        "output_dir"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "extract_disclosure_tables",
+      "description": "披露表提取 📋",
+      "parameters": [
+        "config_file",
+        "output_dir"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "file_classification",
+      "description": "文件自动分类 (支持多维输出模式)",
+      "parameters": [
+        "config_file",
+        "base_url",
+        "api_key",
+        "visual_model_name",
+        "model_name"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "AI API Base URL"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "AI API Key"
+          },
+          "visual_model_name": {
+            "type": "string",
+            "description": "视觉模型名称"
+          },
+          "model_name": {
+            "type": "string",
+            "description": "语言模型名称"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "fill_column",
+      "description": "向下填充空值工具 — 用于将 Excel 表中某些列的空值向下填充。",
+      "parameters": [
+        "file_path",
+        "keyword",
+        "column_names"
+      ],
+      "required": [
+        "file_path",
+        "keyword",
+        "column_names"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "文件或文件夹路径: 要处理的 Excel 文件路径或包含 Excel 文件的文件夹路径"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "文件名关键词: 用于过滤文件名的关键词，留空则处理所有 Excel 文件"
+          },
+          "column_names": {
+            "type": "string",
+            "description": "待填充列名: 需要向下填充的列名，多个列名用逗号分隔（如：客户,项目）"
+          }
+        },
+        "required": [
+          "file_path",
+          "keyword",
+          "column_names"
+        ]
+      }
+    },
+    {
+      "id": "gross_margin_analysis",
+      "description": "毛利率分析 (AI智能版)",
+      "parameters": [
+        "mode",
+        "this_data_path",
+        "this_data_sheet",
+        "last_data_path",
+        "last_data_sheet",
+        "field_mapping",
+        "dimensions",
+        "output_path",
+        "thread_count",
+        "confirmed"
+      ],
+      "required": [
+        "this_data_path"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "preview",
+              "analyze"
+            ],
+            "description": "执行模式: auto=全自动（推荐，自动检测列映射和维度后执行分析），preview=只预览数据列信息不执行分析，analyze=手动指定配置执行分析"
+          },
+          "this_data_path": {
+            "type": "string",
+            "description": "本期数据路径: 本期收入成本明细 Excel 文件路径（相对于 input/ 目录或绝对路径）"
+          },
+          "this_data_sheet": {
+            "type": "string",
+            "description": "本期数据表名: 本期数据所在 Sheet 名称（preview 模式可省略，默认读第一个 Sheet）"
+          },
+          "last_data_path": {
+            "type": "string",
+            "description": "上期数据路径: 上期收入成本明细 Excel 文件路径（仅 analyze 模式，不填则不做两期对比）"
+          },
+          "last_data_sheet": {
+            "type": "string",
+            "description": "上期数据表名: 上期数据所在 Sheet 名称"
+          },
+          "field_mapping": {
+            "type": "string",
+            "description": "字段映射: 可选。不传则自动检测列名。JSON 对象，键为标准字段名，值为数据源列名。必填标准字段: 营业收入, 营业成本, 数量。可选标准字段: 材料费用, 人工费用, 制造费用, 日期, 会计主体。示例: {\"营业收入\":\"销售金额\",\"营业成本\":\"成本金额\",\"数量\":\"销量\",\"日期\":\"记账日期\"}"
+          },
+          "dimensions": {
+            "type": "string",
+            "description": "透视维度: 可选。不传则自动检测分类列作为维度。JSON 数组，每个元素指定一个分析维度。每个元素: {\"name\":\"维度名称\",\"column\":\"数据源列名\",\"threshold\":0.05,\"revenue_threshold\":0}。示例: [{\"name\":\"产品\",\"column\":\"产品类别\",\"threshold\":0.05}]"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "输出路径: 分析结果输出路径（默认自动生成到 output/毛利率分析/ 目录）"
+          },
+          "thread_count": {
+            "type": "integer",
+            "description": "AI并发线程数: AI分析并发线程数，默认5"
+          },
+          "confirmed": {
+            "type": "boolean",
+            "description": "用户确认: 【重要】必须等待用户确认后才能设为 true。首次调用不传此参数，工具会返回自动检测的字段映射和维度供审查。你必须将检测结果展示给用户，等用户明确确认无误后，才能在下次调用时传 confirmed=true。绝对不要自行设置 confirmed=true。"
+          }
+        },
+        "required": [
+          "this_data_path"
+        ]
+      }
+    },
+    {
+      "id": "headers_process",
+      "description": "表头处理工具 — 用于处理 Excel 文件的多行表头，将其合并为单行表头。",
+      "parameters": [
+        "file_path",
+        "keyword",
+        "header_rows"
+      ],
+      "required": [
+        "file_path",
+        "keyword",
+        "header_rows"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "文件或文件夹路径: 要处理的 Excel 文件路径或包含 Excel 文件的文件夹路径"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "文件名关键词: 用于过滤文件名的关键词，留空则处理所有 Excel 文件"
+          },
+          "header_rows": {
+            "type": "string",
+            "description": "表头行: 表头所在的行号，多行用逗号分隔（如：1,2 表示第1行和第2行）"
+          }
+        },
+        "required": [
+          "file_path",
+          "keyword",
+          "header_rows"
+        ]
+      }
+    },
+    {
+      "id": "id_card",
+      "description": "身份证信息解析 — 基于 jionlp 库，批量解析身份证号码。",
+      "parameters": [
+        "id_column",
+        "id_list"
+      ],
+      "required": [
+        "id_column",
+        "id_list"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id_column": {
+            "type": "string",
+            "description": "Excel列名: Excel模式专用：指定身份证号所在的列名（默认为'身份证号'）"
+          },
+          "id_list": {
+            "type": "string",
+            "description": "直接查询号码: 直接模式专用：一个身份证号字符串，或多个号码组成的列表/字符串"
+          }
+        },
+        "required": [
+          "id_column",
+          "id_list"
+        ]
+      }
+    },
+    {
+      "id": "info_extract",
+      "description": "文件关键信息提取",
+      "parameters": [
+        "role_prompt",
+        "folder",
+        "max_workers"
+      ],
+      "required": [
+        "role_prompt",
+        "folder",
+        "max_workers"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "role_prompt": {
+            "type": "string",
+            "description": "用户提示词: 提取信息的具体指令"
+          },
+          "folder": {
+            "type": "string",
+            "description": "处理文件夹: 需要扫描的文件或文件夹路径"
+          },
+          "max_workers": {
+            "type": "integer",
+            "description": "并发线程数: 同时处理的任务数量，默认1（单线程），建议3-5"
+          }
+        },
+        "required": [
+          "role_prompt",
+          "folder",
+          "max_workers"
+        ]
+      }
+    },
+    {
+      "id": "info_extract_multi",
+      "description": "多公司多类型文件关键信息提取",
+      "parameters": [
+        "config_file",
+        "output_dir",
+        "base_url",
+        "api_key",
+        "visual_model_name",
+        "model_name"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "AI API Base URL"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "AI API Key"
+          },
+          "visual_model_name": {
+            "type": "string",
+            "description": "视觉模型名称"
+          },
+          "model_name": {
+            "type": "string",
+            "description": "语言模型名称"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "insert_column",
+      "description": "插入列工具 — 用于在 Excel 表中指定位置插入一列并填充固定值。",
+      "parameters": [
+        "file_path",
+        "insert_position",
+        "column_name",
+        "fill_value",
+        "sheet_name"
+      ],
+      "required": [
+        "file_path",
+        "insert_position",
+        "column_name",
+        "fill_value",
+        "sheet_name"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "文件路径: 要处理的 Excel 文件路径（配置表中每行一个文件）"
+          },
+          "insert_position": {
+            "type": "string",
+            "description": "插入列位置: 插入位置，可以是列字母（如 A）或数字索引（如 1）"
+          },
+          "column_name": {
+            "type": "string",
+            "description": "插入列名: 新列的列名"
+          },
+          "fill_value": {
+            "type": "string",
+            "description": "插入值: 填充到新列的固定值"
+          },
+          "sheet_name": {
+            "type": "string",
+            "description": "指定表: 工作表名称，留空则使用第一张表"
+          }
+        },
+        "required": [
+          "file_path",
+          "insert_position",
+          "column_name",
+          "fill_value",
+          "sheet_name"
+        ]
+      }
+    },
+    {
+      "id": "insert_footnote_comments",
+      "description": "插附注批注 (王建彬工具适配版) 🖊️",
+      "parameters": [
+        "config_file"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "ipo_bj",
+      "description": "北交所IPO披露文件下载 — 爬取北京证券交易所项目动态，批量下载IPO披露文件（招股书、问询函等）。",
+      "parameters": [
+        "start_date",
+        "end_date",
+        "update_mode"
+      ],
+      "required": [
+        "start_date",
+        "end_date",
+        "update_mode"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "description": "开始日期: 格式 YYYY-MM-DD"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "结束日期: 格式 YYYY-MM-DD"
+          },
+          "update_mode": {
+            "type": "string",
+            "description": "更新模式: 严格填写'项目'或'文件'"
+          }
+        },
+        "required": [
+          "start_date",
+          "end_date",
+          "update_mode"
+        ]
+      }
+    },
+    {
+      "id": "ipo_sh",
+      "description": "上交所IPO披露文件下载 — 爬取上海证券交易所科创板及主板项目动态，批量下载IPO披露文件（招股书、问询函等）。",
+      "parameters": [
+        "start_date",
+        "end_date",
+        "update_mode"
+      ],
+      "required": [
+        "start_date",
+        "end_date",
+        "update_mode"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "description": "开始日期: 格式 YYYY-MM-DD"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "结束日期: 格式 YYYY-MM-DD"
+          },
+          "update_mode": {
+            "type": "string",
+            "description": "更新模式: 严格填写'项目'或'文件'"
+          }
+        },
+        "required": [
+          "start_date",
+          "end_date",
+          "update_mode"
+        ]
+      }
+    },
+    {
+      "id": "ipo_sz",
+      "description": "深交所IPO披露文件下载 — 爬取深圳证券交易所项目动态网站，批量下载IPO披露文件。",
+      "parameters": [
+        "start_date",
+        "end_date",
+        "update_mode"
+      ],
+      "required": [
+        "start_date",
+        "end_date",
+        "update_mode"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "description": "开始日期: 格式 YYYY-MM-DD"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "结束日期: 格式 YYYY-MM-DD"
+          },
+          "update_mode": {
+            "type": "string",
+            "description": "更新模式: 必须严格填写'项目'或'文件'，不要填其他词"
+          }
+        },
+        "required": [
+          "start_date",
+          "end_date",
+          "update_mode"
+        ]
+      }
+    },
+    {
+      "id": "jet_test_execute",
+      "description": "JET-执行分录测试 — 根据特征定义和规则矩阵，对序时账执行会计分录测试，输出审计疑点结果。",
+      "parameters": [
+        "file_path",
+        "features",
+        "rules",
+        "column_mapping",
+        "settings",
+        "output_dir"
+      ],
+      "required": [
+        "file_path"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "数据源文件路径或文件夹路径"
+          },
+          "features": {
+            "type": "string",
+            "description": "特征定义：'builtin'使用全部内置，或传入自定义特征列表，或两者混合"
+          },
+          "rules": {
+            "type": "string",
+            "description": "规则配置：'builtin'使用全部内置，或传入规则名称列表/自定义规则列表，或混合"
+          },
+          "column_mapping": {
+            "type": "string",
+            "description": "列名映射（JSON字符串），将模板列名映射到实际列名。如 {\"制单日期\":\"日期\"}"
+          },
+          "settings": {
+            "type": "string",
+            "description": "全局设置（JSON字符串）：company_col, output_empty, split_output"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径"
+          }
+        },
+        "required": [
+          "file_path"
+        ]
+      }
+    },
+    {
+      "id": "jet_test_inspect",
+      "description": "JET-检查数据源 — 读取序时账文件，返回列名、数据类型、样本值等信息，为后续规则配置提供依据。",
+      "parameters": [
+        "file_path",
+        "preview_rows",
+        "include_templates"
+      ],
+      "required": [
+        "file_path"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "数据源文件路径或文件夹路径"
+          },
+          "preview_rows": {
+            "type": "integer",
+            "description": "预览行数（默认5行）"
+          },
+          "include_templates": {
+            "type": "boolean",
+            "description": "是否同时返回内置特征和规则模板（默认true）"
+          }
+        },
+        "required": [
+          "file_path"
+        ]
+      }
+    },
+    {
+      "id": "ledger_check",
+      "description": "小账套校验工具 — 批量校验小账套文件，检查借贷方一致性、总额与序时账一致性、一级与二级科目金额校验、金额平衡勾稽等。",
+      "parameters": [
+        "directory",
+        "output_dir"
+      ],
+      "required": [
+        "directory"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "directory": {
+            "type": "string",
+            "description": "存放小账套文件的文件夹路径"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          }
+        },
+        "required": [
+          "directory"
+        ]
+      }
+    },
+    {
+      "id": "link_extractor",
+      "description": "外部链接提取",
+      "parameters": [
+        "config_file",
+        "output_dir"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "link_ref_replace",
+      "description": "链接替换-参考替换",
+      "parameters": [
+        "target_path",
+        "sheet_keywords",
+        "ref_axis",
+        "target_axis",
+        "example_cell"
+      ],
+      "required": [
+        "target_path",
+        "sheet_keywords",
+        "ref_axis",
+        "target_axis",
+        "example_cell"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target_path": {
+            "type": "string",
+            "description": "文件或文件夹"
+          },
+          "sheet_keywords": {
+            "type": "string",
+            "description": "工作表关键词"
+          },
+          "ref_axis": {
+            "type": "string",
+            "description": "参考列/行"
+          },
+          "target_axis": {
+            "type": "string",
+            "description": "处理列/行"
+          },
+          "example_cell": {
+            "type": "string",
+            "description": "处理示例单元格"
+          }
+        },
+        "required": [
+          "target_path",
+          "sheet_keywords",
+          "ref_axis",
+          "target_axis",
+          "example_cell"
+        ]
+      }
+    },
+    {
+      "id": "link_replace_range",
+      "description": "链接替换-单元格区域替换",
+      "parameters": [
+        "config_file"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "link_replace_text",
+      "description": "链接替换-文件夹路径替换",
+      "parameters": [
+        "config_file"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "link_replace_workbook",
+      "description": "链接替换-文件名替换",
+      "parameters": [
+        "config_file"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "merge_column",
+      "description": "多列合并工具 — 用于将 Excel 表中多列值合并为一个新列。",
+      "parameters": [
+        "file_path",
+        "keyword",
+        "column_names",
+        "delimiter",
+        "insert_index",
+        "insert_name"
+      ],
+      "required": [
+        "file_path",
+        "keyword",
+        "column_names",
+        "delimiter",
+        "insert_index",
+        "insert_name"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "文件或文件夹路径: 要处理的 Excel 文件路径或包含 Excel 文件的文件夹路径"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "文件名关键词: 用于过滤文件名的关键词，留空则处理所有 Excel 文件"
+          },
+          "column_names": {
+            "type": "string",
+            "description": "待合并列名: 需要合并的列名，多个列名用逗号分隔（如：客户,项目,\"固定值\"）"
+          },
+          "delimiter": {
+            "type": "string",
+            "description": "连接符: 用于连接多个值的分隔符（如：,或;）"
+          },
+          "insert_index": {
+            "type": "string",
+            "description": "插入位置: 新列插入位置，可以是列字母（如 A）或数字索引（如 1）"
+          },
+          "insert_name": {
+            "type": "string",
+            "description": "新列名称: 合并后的新列名称，留空则默认为'合并列'"
+          }
+        },
+        "required": [
+          "file_path",
+          "keyword",
+          "column_names",
+          "delimiter",
+          "insert_index",
+          "insert_name"
+        ]
+      }
+    },
+    {
+      "id": "monthly_ai_analysis",
+      "description": "月间分析-AI变动分析 — 读取已生成的月间分析结果表和原始序时账数据，对超出阈值的科目进行 AI 变动原因分析，",
+      "parameters": [
+        "result_file",
+        "this_year_file",
+        "last_year_file",
+        "this_year_sheet",
+        "last_year_sheet",
+        "column_mapping",
+        "threshold_amt",
+        "threshold_rate",
+        "month_conc_threshold",
+        "max_sample_rows",
+        "generate_procedure",
+        "output_path"
+      ],
+      "required": [
+        "result_file",
+        "this_year_file",
+        "column_mapping"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "result_file": {
+            "type": "string",
+            "description": "已生成的月间分析结果文件路径（Excel）"
+          },
+          "this_year_file": {
+            "type": "string",
+            "description": "本期序时账原始数据文件路径（用于 AI 提取样本凭证）"
+          },
+          "last_year_file": {
+            "type": "string",
+            "description": "上期序时账原始数据文件路径"
+          },
+          "this_year_sheet": {
+            "type": "string",
+            "description": "本期数据 Sheet 名（默认第一个 Sheet）"
+          },
+          "last_year_sheet": {
+            "type": "string",
+            "description": "上期数据 Sheet 名（默认第一个 Sheet）"
+          },
+          "column_mapping": {
+            "type": "string",
+            "description": "序时账列名映射 JSON: {\"date\": \"日期列名\", \"subject_code\": \"科目代码列名\", \"subject_name\": \"科目名称列名\", \"debit\": \"借方列名\", \"credit\": \"贷方列名\", \"company\": \"公司名称列名\", \"desc\": \"摘要列名\", \"voucher\": \"凭证号列名\"}。desc 字段用于 AI 提取样本凭证摘要"
+          },
+          "threshold_amt": {
+            "type": "number",
+            "description": "变动额阈值（默认 100000），超过此金额的科目才做 AI 分析"
+          },
+          "threshold_rate": {
+            "type": "number",
+            "description": "变动率阈值（默认 0.3 即 30%），超过此比率的科目才做 AI 分析"
+          },
+          "month_conc_threshold": {
+            "type": "number",
+            "description": "月度集中度阈值（默认 0.8），单月占比超过此值时重点分析"
+          },
+          "max_sample_rows": {
+            "type": "integer",
+            "description": "每个科目最多提取的样本凭证行数（默认 50）"
+          },
+          "generate_procedure": {
+            "type": "string",
+            "description": "是否生成审计应对建议（默认 '是'）"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "输出文件路径。不传则覆盖原结果文件"
+          }
+        },
+        "required": [
+          "result_file",
+          "this_year_file",
+          "column_mapping"
+        ]
+      }
+    },
+    {
+      "id": "monthly_detect_structure",
+      "description": "月间分析-编码结构分析 — 读取序时账数据，分析科目编码层级结构（分隔符、步长、初始位数等），",
+      "parameters": [
+        "file_path",
+        "column_mapping",
+        "sheet_name",
+        "top_n"
+      ],
+      "required": [
+        "file_path",
+        "column_mapping"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "序时账数据文件路径（Excel 或 CSV）"
+          },
+          "column_mapping": {
+            "type": "string",
+            "description": "列名映射 JSON: {\"date\": \"日期列名\", \"subject_code\": \"科目代码列名\", \"subject_name\": \"科目名称列名\", \"debit\": \"借方列名\", \"credit\": \"贷方列名\", \"company\": \"公司列名\", \"desc\": \"摘要列名\", \"voucher\": \"凭证号列名\"}。date/subject_code/subject_name 必填"
+          },
+          "sheet_name": {
+            "type": "string",
+            "description": "Sheet 名称（不传则读取第一个 Sheet）"
+          },
+          "top_n": {
+            "type": "integer",
+            "description": "返回前 N 个一级科目（默认 30）"
+          }
+        },
+        "required": [
+          "file_path",
+          "column_mapping"
+        ]
+      }
+    },
+    {
+      "id": "monthly_execute",
+      "description": "月间分析-执行分析 — 接收已确认的字段映射、编码结构、科目列表等参数，执行月间分析表生成。",
+      "parameters": [
+        "this_year_file",
+        "last_year_file",
+        "this_year_sheet",
+        "last_year_sheet",
+        "subjects",
+        "column_mapping",
+        "code_structure",
+        "output_path",
+        "threshold_amt",
+        "threshold_rate"
+      ],
+      "required": [
+        "this_year_file",
+        "subjects",
+        "column_mapping"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "this_year_file": {
+            "type": "string",
+            "description": "本期序时账数据文件路径（Excel/CSV）"
+          },
+          "last_year_file": {
+            "type": "string",
+            "description": "上期序时账数据文件路径，不传则仅做本期月度汇总"
+          },
+          "this_year_sheet": {
+            "type": "string",
+            "description": "本期数据 Sheet 名（默认第一个 Sheet）"
+          },
+          "last_year_sheet": {
+            "type": "string",
+            "description": "上期数据 Sheet 名（默认第一个 Sheet）"
+          },
+          "subjects": {
+            "type": "string",
+            "description": "要分析的科目列表 JSON: [{\"code\": \"6001\", \"direction\": \"贷\"}, ...]。direction 为借或贷"
+          },
+          "column_mapping": {
+            "type": "string",
+            "description": "序时账列名映射 JSON: {\"date\": \"日期列名\", \"subject_code\": \"科目代码列名\", \"subject_name\": \"科目名称列名\", \"debit\": \"借方列名\", \"credit\": \"贷方列名\", \"company\": \"公司名称列名\", \"desc\": \"摘要列名\", \"voucher\": \"凭证号列名\"}。date/subject_code/subject_name 必填，debit 和 credit 至少填一个"
+          },
+          "code_structure": {
+            "type": "string",
+            "description": "科目编码结构参数 JSON: {\"flag\": \"科目名称分隔符\", \"start\": 1, \"full_length\": 0, \"init_length\": 4, \"step\": 2, \"code_delimiter\": \"科目代码分隔符\"}"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "输出文件路径。不传则使用默认路径 output/月间分析结果表.xlsx"
+          },
+          "threshold_amt": {
+            "type": "number",
+            "description": "AI变动分析-变动额阈值（默认100000），超过此金额的科目才做AI分析"
+          },
+          "threshold_rate": {
+            "type": "number",
+            "description": "AI变动分析-变动率阈值（默认0.3即30%），超过此比率的科目才做AI分析"
+          }
+        },
+        "required": [
+          "this_year_file",
+          "subjects",
+          "column_mapping"
+        ]
+      }
+    },
+    {
+      "id": "monthly_preview",
+      "description": "月间分析-数据预览 — 读取序时账数据文件，返回列名、数据类型、样本行和基础统计信息，供 AI 判断字段映射。",
+      "parameters": [
+        "file_path",
+        "sheet_name",
+        "preview_rows"
+      ],
+      "required": [
+        "file_path"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "序时账数据文件路径（Excel 或 CSV）"
+          },
+          "sheet_name": {
+            "type": "string",
+            "description": "Sheet 名称（不传则读取第一个 Sheet）"
+          },
+          "preview_rows": {
+            "type": "integer",
+            "description": "预览行数（默认 5）"
+          }
+        },
+        "required": [
+          "file_path"
+        ]
+      }
+    },
+    {
+      "id": "multi_collect_file",
+      "description": "多表汇集-文件",
+      "parameters": [
+        "config_file"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "multi_collect_folder",
+      "description": "多表汇集-文件夹 — 根据关键词匹配文件夹下的多个文件，将其指定表复制到目标文件中。",
+      "parameters": [
+        "config_file"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "paper_verify",
+      "description": "纸质信息核对",
+      "parameters": [
+        "file_path",
+        "match_keys",
+        "max_workers",
+        "extra_prompt"
+      ],
+      "required": [
+        "file_path",
+        "match_keys",
+        "max_workers",
+        "extra_prompt"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "文件或文件夹路径: 需要核对的PDF/图片文件或文件夹路径"
+          },
+          "match_keys": {
+            "type": "string",
+            "description": "匹配键: 用于关联提取数据与账面数据的字段名，支持中英文逗号分隔多个"
+          },
+          "max_workers": {
+            "type": "integer",
+            "description": "并发线程数: 同时处理的任务数量，默认1（单线程），建议3-5"
+          },
+          "extra_prompt": {
+            "type": "string",
+            "description": "补充指令: 追加到AI提示词末尾的补充指令，可选"
+          }
+        },
+        "required": [
+          "file_path",
+          "match_keys",
+          "max_workers",
+          "extra_prompt"
+        ]
+      }
+    },
+    {
+      "id": "photo_rename",
+      "description": "AI图片智能重命名 — 通过AI视觉模型识别图片中的关键信息（如单据号、名称、备注等），并以此信息重命名图片文件。",
+      "parameters": [
+        "directory",
+        "user_prompt",
+        "base_url",
+        "api_key",
+        "visual_model_name"
+      ],
+      "required": [
+        "directory",
+        "user_prompt"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "directory": {
+            "type": "string",
+            "description": "包含图片的文件夹路径（绝对路径或相对路径）"
+          },
+          "user_prompt": {
+            "type": "string",
+            "description": "AI 提示词，描述如何从图片中提取文件名信息"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "AI API Base URL"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "AI API Key"
+          },
+          "visual_model_name": {
+            "type": "string",
+            "description": "视觉模型名称"
+          }
+        },
+        "required": [
+          "directory",
+          "user_prompt"
+        ]
+      }
+    },
+    {
+      "id": "pickup_value",
+      "description": "提取值工具 — 从指定文件夹（及其子文件夹）中的所有 Excel 文件中，根据配置表指定的单元格位置，提取相应的值，并汇总到一个新的 Excel 文件中。",
+      "parameters": [
+        "folder_path",
+        "field_mappings"
+      ],
+      "required": [
+        "folder_path",
+        "field_mappings"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "folder_path": {
+            "type": "string",
+            "description": "文件夹路径: 要处理的文件夹路径（会递归查找所有 Excel 文件）"
+          },
+          "field_mappings": {
+            "type": "string",
+            "description": "提取字段配置: 从第3行开始，A列为字段名，B列为单元格位置（如 A1, B2）"
+          }
+        },
+        "required": [
+          "folder_path",
+          "field_mappings"
+        ]
+      }
+    },
+    {
+      "id": "qcc_processor",
+      "description": "企查查信用报告处理工具（智能对齐版） — 用于处理企查查信用报告（DOCX格式），提取目录结构和统计信息。",
+      "parameters": [
+        "folder_path"
+      ],
+      "required": [
+        "folder_path"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "folder_path": {
+            "type": "string",
+            "description": "文件夹路径: 存放企查查信用报告（DOCX格式）的文件夹路径"
+          }
+        },
+        "required": [
+          "folder_path"
+        ]
+      }
+    },
+    {
+      "id": "related_party",
+      "description": "关联方核查 — 输入数据：input/关联方核查配置表.xlsx（配置表 + 客户名单/供应商名单/离任高管sheet）",
+      "parameters": [
+        "audit_target",
+        "data_dir",
+        "threshold",
+        "equity_penetration",
+        "equity_depth",
+        "output_path",
+        "cookie_json"
+      ],
+      "required": [
+        "audit_target",
+        "data_dir"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "audit_target": {
+            "type": "string",
+            "description": "被审计单位: 被审计单位名称（精确工商注册全称）"
+          },
+          "data_dir": {
+            "type": "string",
+            "description": "数据目录: 工商信息Excel所在目录（解压后的文件夹路径）"
+          },
+          "threshold": {
+            "type": "integer",
+            "description": "持股阈值(%): 持股比例>=该值识别为分子公司/继续穿透，默认50，设0禁用自动识别"
+          },
+          "equity_penetration": {
+            "type": "string",
+            "enum": [
+              "否",
+              "是"
+            ],
+            "description": "启用股权穿透: 是否启用CICPA股权穿透API，需要注协Cookie"
+          },
+          "equity_depth": {
+            "type": "integer",
+            "description": "穿透深度: 最大穿透层数，默认5"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "输出路径: 报告输出路径（MCP模式使用，默认自动生成到output目录）"
+          },
+          "cookie_json": {
+            "type": "string",
+            "description": "Cookie JSON: 注协系统Cookie（AI模式使用）"
+          }
+        },
+        "required": [
+          "audit_target",
+          "data_dir"
+        ]
+      }
+    },
+    {
+      "id": "select_column",
+      "description": "Excel列提取与合并工具 — 用于从 Excel 文件中提取指定列，并支持合并多个文件。",
+      "parameters": [
+        "folder_path",
+        "should_merge",
+        "sheet_keywords",
+        "columns_to_keep"
+      ],
+      "required": [
+        "folder_path",
+        "should_merge",
+        "sheet_keywords",
+        "columns_to_keep"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "folder_path": {
+            "type": "string",
+            "description": "文件夹路径: 要处理的文件夹路径（会递归查找所有 Excel 文件）"
+          },
+          "should_merge": {
+            "type": "string",
+            "description": "是否合并: 填写'是'表示合并多个文件，否则原地替换"
+          },
+          "sheet_keywords": {
+            "type": "string",
+            "description": "表名（选填）: 表名关键词，多个关键词用中文或英文逗号分隔，仅处理包含关键词的工作表，留空则处理所有工作表"
+          },
+          "columns_to_keep": {
+            "type": "string",
+            "description": "选择列配置: 需要提取的列名（在'选择列配置'工作表中列出），留空则全量合并"
+          }
+        },
+        "required": [
+          "folder_path",
+          "should_merge",
+          "sheet_keywords",
+          "columns_to_keep"
+        ]
+      }
+    },
+    {
+      "id": "subject_allocation",
+      "description": "科目分配派工",
+      "parameters": [
+        "config_file",
+        "output_dir",
+        "base_url",
+        "api_key",
+        "model_name"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "AI API Base URL"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "AI API Key"
+          },
+          "model_name": {
+            "type": "string",
+            "description": "模型名称"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "tool_execute",
+      "description": "科目余额表处理-执行处理 — 接收已确认的处理参数，执行科目余额表清洗：识别表头、拆分辅助核算、层级科目生成、导出结果文件。",
+      "parameters": [
+        "file_path",
+        "code_column",
+        "code_name_column",
+        "header_row",
+        "code_name_split",
+        "asist_column",
+        "asist_name_split",
+        "asist_item_wrapper",
+        "beginning_balance",
+        "company_name",
+        "grouping_column",
+        "output_dir"
+      ],
+      "required": [
+        "file_path",
+        "code_column",
+        "code_name_column",
+        "header_row"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "源 Excel 文件路径"
+          },
+          "code_column": {
+            "type": "string",
+            "description": "科目编码列名（如：科目编码）"
+          },
+          "code_name_column": {
+            "type": "string",
+            "description": "科目名称列名（如：科目名称）"
+          },
+          "header_row": {
+            "type": "integer",
+            "description": "表头所在行号（1-indexed，通常为 1 或 2）"
+          },
+          "code_name_split": {
+            "type": "string",
+            "description": "科目名称分隔符（如 '-' 或 '_'），留空则按编码层级推断"
+          },
+          "asist_column": {
+            "type": "string",
+            "description": "辅助核算列名，留空则跳过辅助处理"
+          },
+          "asist_name_split": {
+            "type": "string",
+            "description": "辅助项键值分隔符（如 ':' 或 '：'），必须填符号"
+          },
+          "asist_item_wrapper": {
+            "type": "string",
+            "description": "辅助项包裹符号（如 '[]' 或 '【】'）"
+          },
+          "beginning_balance": {
+            "type": "string",
+            "description": "期初余额公式（如 '期初余额-期末余额'），留空则不计算"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "公司名称，用于输出文件名"
+          },
+          "grouping_column": {
+            "type": "string",
+            "description": "分组汇总列（如 '核算账簿' 或 '公司名称'），用于多账套分组"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认 output/科目余额表处理/"
+          }
+        },
+        "required": [
+          "file_path",
+          "code_column",
+          "code_name_column",
+          "header_row"
+        ]
+      }
+    },
+    {
+      "id": "tool_preview",
+      "description": "科目余额表处理-数据预览 — 读取科目余额表 Excel 文件，返回列名、样本行，并自动推断所有处理参数。",
+      "parameters": [
+        "file_path",
+        "sheet_name",
+        "preview_rows",
+        "header_row"
+      ],
+      "required": [
+        "file_path"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "源 Excel 文件路径"
+          },
+          "sheet_name": {
+            "type": "string",
+            "description": "Sheet 名称（不传则读取第一个 Sheet）"
+          },
+          "preview_rows": {
+            "type": "integer",
+            "description": "预览行数（默认 5）"
+          },
+          "header_row": {
+            "type": "integer",
+            "description": "表头所在行号（1-indexed）。不传则自动检测"
+          }
+        },
+        "required": [
+          "file_path"
+        ]
+      }
+    },
+    {
+      "id": "subject_clean_after",
+      "description": "科目余额表后处理",
+      "parameters": [
+        "config_file",
+        "output_dir"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录 output/科目余额表后处理。"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "text_match",
+      "description": "文本提取匹配",
+      "parameters": [
+        "config_file",
+        "output_dir",
+        "base_url",
+        "api_key",
+        "model_name"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "AI API Base URL"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "AI API Key"
+          },
+          "model_name": {
+            "type": "string",
+            "description": "模型名称"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "id": "voucher_check",
+      "description": "凭证检查",
+      "parameters": [
+        "source_paths"
+      ],
+      "required": [
+        "source_paths"
+      ],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "source_paths": {
+            "type": "array",
+            "description": "数据源路径: 需要扫描的文件或文件夹路径列表",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "source_paths"
+        ]
+      }
+    },
+    {
+      "id": "xlsx_writer",
+      "description": "批量生成小账套",
+      "parameters": [
+        "config_file"
+      ],
+      "required": [],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          }
+        },
+        "required": []
+      }
+    }
+  ],
+  "builtinOperations": [
+    {
+      "id": "inspect",
+      "name": "查看数据结构"
+    },
+    {
+      "id": "select_column",
+      "name": "选择列"
+    },
+    {
+      "id": "fill_column",
+      "name": "向下填充空值"
+    },
+    {
+      "id": "merge_files",
+      "name": "多表汇集"
+    },
+    {
+      "id": "merge_column",
+      "name": "多列合并"
+    },
+    {
+      "id": "add_column",
+      "name": "新增固定值列"
+    },
+    {
+      "id": "dropsummary",
+      "name": "删除合计行"
+    },
+    {
+      "id": "text_match",
+      "name": "文本筛选匹配"
+    },
+    {
+      "id": "subject_clean",
+      "name": "科目字段清理"
+    },
+    {
+      "id": "voucher_check",
+      "name": "凭证借贷核对"
+    },
+    {
+      "id": "monthly_analysis",
+      "name": "月间分析"
+    },
+    {
+      "id": "duplicates",
+      "name": "全局重复检查"
+    },
+    {
+      "id": "jet_test",
+      "name": "JET 会计分录测试"
+    },
+    {
+      "id": "file_inventory",
+      "name": "文件资料清单"
+    },
+    {
+      "id": "pdf_text",
+      "name": "PDF 文本提取"
+    },
+    {
+      "id": "link_extract",
+      "name": "Excel 链接提取"
+    }
+  ],
+  "binaryEvidence": [
+    {
+      "file": "modules/__init__.pyd",
+      "size": 17408,
+      "sha256": "72fcc5f974a75a534f43b73d052cd9a207a3fda44430b847f385b081b9c18b4d",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/_link_replace_helpers.pyd",
+      "size": 47104,
+      "sha256": "49402e666dc5833b0c12b932d1038e2cfa9fae843e04c40d097d2e3207025e00",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/add_column.pyd",
+      "size": 108544,
+      "sha256": "81a4ded8553548cd47172bf974015f566bfbf27a27925d26164fa33df34db6de",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/address_split.pyd",
+      "size": 85504,
+      "sha256": "e384e282ad2b126369b1fff0b4500ad6dc2da973e107aa7d529c21fa42f68c02",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/address_verify/__init__.pyd",
+      "size": 275968,
+      "sha256": "2b3f6e67df0c75f5d17be946d0a6d19691f9550a45123dff92f928a8492946ff",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/address_verify/geocode.pyd",
+      "size": 116736,
+      "sha256": "54b5e4c95046dd46f165d60d517edd9fd35faa4ab9038ae14d4abcc4e57995f4",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/ai_assistant/__init__.pyd",
+      "size": 17408,
+      "sha256": "3820463bbcb04b0097642ba922d2c2c08d871f6226b99b8ef2c0d0324fc662b8",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/ai_assistant/backend.pyd",
+      "size": 117248,
+      "sha256": "8d13c0f310241a2abf6fb778c7b5df4acff30ef7999d9c3ae04aba160a2ff98b",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/ai_assistant/chat_ui.pyd",
+      "size": 310784,
+      "sha256": "1bc9329aac3851bf121859d584bba59ad87e9e9bbdb22bd7887227ea4548f9b5",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/ai_formula_filler.pyd",
+      "size": 224256,
+      "sha256": "111f3819fd334e9a2cfaa14f391386c511b433fafe3e4bf6ae498f34769b3b9a",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/ai_utils.pyd",
+      "size": 65024,
+      "sha256": "93184516452566aaa5b79cbefc696c012640b19379fb3bb6051ad88b5d1e6983",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/announcement.pyd",
+      "size": 104448,
+      "sha256": "02b82bd84394f0852bf26a9f3c250640f443a7d6b4589848cf71a50a1bd91e0a",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/asist_split.pyd",
+      "size": 114176,
+      "sha256": "08d44d7eb6e51f76928f55c20558143d70a02129a9b7b83bb43597da25296db8",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/asset_analysis.pyd",
+      "size": 315392,
+      "sha256": "b6031bf8111ff50a564b8a213fb0aa2932af509d09182cafa76212767853e7aa",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/auxiliary_selection.pyd",
+      "size": 102400,
+      "sha256": "3986f7d295103a2598518c99ed65dc2a3c5ca62298556cc1872f2ca6dbe2b6c8",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/bank_confirmation_core.pyd",
+      "size": 111104,
+      "sha256": "19c6bb499bc40b1294878d5d5af92cdfdbc9e9441a36c16401743c59887470c9",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/bank_digit2.pyd",
+      "size": 46592,
+      "sha256": "751bb97e86732442e8699fc4595b3f1e3db2d139c7bcb37b72f6fd03139b65df",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/bank_flow.pyd",
+      "size": 578048,
+      "sha256": "112b3f0850cff595d0f3f004d5d3216ead42fea67fcd62af9ff9cf2dd659607f",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/bank_paper1.pyd",
+      "size": 46592,
+      "sha256": "8e05f484c071dd7678d3a2168592cedeb3df8d3d9c7eebf76614fc949ba26d23",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/bank_paper2.pyd",
+      "size": 46592,
+      "sha256": "49104ad7da03a85c0890ce37712502aee7ba9a051ada33de70a8a35019cdbd17",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/bankflowmerge.pyd",
+      "size": 315392,
+      "sha256": "0ba9f9908465b166af6f29d39589d9761dfe4853aa8956adac50ff16dd30ef6a",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/base_window_module.pyd",
+      "size": 52736,
+      "sha256": "d402111de4f0021765ab1ec7bd772dd40b124f4aa7bfe2b54f0415a5d12ca300",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/basic.pyd",
+      "size": 48128,
+      "sha256": "4d37e92e8fbc4614f469f3196ad5f2014b010c6cd388023eec7f398b9ceceadb",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [
+        "xlwings"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/batch_vouching_sampling.pyd",
+      "size": 210944,
+      "sha256": "3c5b7451a1e8baa4267795130c8cd33af7757d90a1d3bcca0d6b15a84ad32039",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/build_merged_footnotes.pyd",
+      "size": 173568,
+      "sha256": "0f2765dc65aeb904c6cf7cdc6caf883d4c5513c0af8efecc4377e0a816c5d439",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/cicpa_query.pyd",
+      "size": 355328,
+      "sha256": "fea9b0ce8e427e6c7e8af4581dd0fe4c358624c50de7db8f746afbbb80c5a72a",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [
+        "requests",
+        "playwright"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/currency.pyd",
+      "size": 90112,
+      "sha256": "b13c5573fd59d47e629f43931a8d4e9c99d8a69cfe291bfca4b1db65223aecb0",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/cutoff_sampling.pyd",
+      "size": 142336,
+      "sha256": "bf3ce385f122b6c0b23d1e5ab8e9c1048fbb9d73aabb17025ffb8405ee1dd200",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/data_field_check.pyd",
+      "size": 148992,
+      "sha256": "b88514e0e2f719a4886aed4f381800ccf1a30324bda9df5026e393636fd53458",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/detailed_table/__init__.pyd",
+      "size": 18944,
+      "sha256": "590b1c8ad15e02c031036c274d49cbc7bc9367146fcc945b384a28d3f9b8d71b",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/detailed_table/_core.pyd",
+      "size": 435712,
+      "sha256": "a40925a4d244f2e401d9d12fc668587d440fc68c7b1d32768b9631e12a9eab4e",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [
+        "xlwings"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/detailed_table/detailed_table_generate.pyd",
+      "size": 90624,
+      "sha256": "1d7616d19909d4a95453715502e58dbfa88a70eb77584145768007baa0bb5ebe",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/detailed_table/detailed_table_inspect.pyd",
+      "size": 44032,
+      "sha256": "f1ac338f17c8ea759823316e7f0491cb80bfc5b28fb44e6f47af86b47718ec6b",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/detailed_table/detailed_table_inspect_template.pyd",
+      "size": 58880,
+      "sha256": "1c840384dc690a69574c9cc8ffe9b94b12093341ed9acea6576f8ab45621e262",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/detailed_table/detailed_table_save_config.pyd",
+      "size": 54272,
+      "sha256": "27f8f8713d39076f3ecff98c1433e45b9ed269e355453df51f9d4b436614029e",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/detailed_table/detailed_table_validate.pyd",
+      "size": 47104,
+      "sha256": "2508023237b1d59eb3f41e2d0f98a6d1950e099885f178b1eac9680232866f2b",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/detailed_table/run_legacy.pyd",
+      "size": 80896,
+      "sha256": "4ee66bb3b2d4c8fc1a74e279da069b2a5e04e491309310f030dbcb74f483a396",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/dropsummary.pyd",
+      "size": 86016,
+      "sha256": "891dc669c83e4aaba658cddc7548de2a68ac256181f8ca367cdabd15edb71bd9",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/excel_info_extract.pyd",
+      "size": 151552,
+      "sha256": "308dad97a419db7e22a82d267d480fc7e59763af431c73be24fcd670242edcaf",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/extract_disclosure_scope.pyd",
+      "size": 105472,
+      "sha256": "0a22f56a0c76d29fd8963edde9954c2899336980430c5ab6b8eeddd15bbcb37f",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/extract_disclosure_tables.pyd",
+      "size": 126464,
+      "sha256": "62d8c58e0c4d42f26feda120e221e5c54ec1f817a78eccc8ae02988f13c498e8",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/file_classification.pyd",
+      "size": 159744,
+      "sha256": "e6d042fda839d08c335f33647ec15dd6164b6b3d9b196e0c0fa32d9967775b50",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/file_open.pyd",
+      "size": 35840,
+      "sha256": "fbaf7aa0a75639fad6aafec01d741c5fb1592155a0a2cd0cd4753f55b15a9c6f",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/file_rename.pyd",
+      "size": 35840,
+      "sha256": "c53b30f1e5836fc6d1953a92feb6fa64712903c501bc446a715bf62451288412",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/fill_column.pyd",
+      "size": 107520,
+      "sha256": "1f6c7ac99c88483d8cc81799b8ec15ac7006c107dd7d50fd5dc36989b05e02d2",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/fill_disclosure_table.pyd",
+      "size": 169472,
+      "sha256": "e2cca44515b47d1a9a5fd0fc8bc348063c9b4dbd99c1339477a2752942550b3e",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/__init__.pyd",
+      "size": 35840,
+      "sha256": "c0dba2bdee3d5d2a5122ed33bc3d01c5764d57cef860f34c507958fa20696a01",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/account_hierarchy.pyd",
+      "size": 56320,
+      "sha256": "a2e8643f6bcbe40c41d3c6afa315abcfdf1112640956f9dfb496dfc82ca646bb",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/account_name_resolver.pyd",
+      "size": 72192,
+      "sha256": "e38fe3747b874310b8fcc307d7ea0948eb2efa2f1d52e515b17812ca6cceb874",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/account_panel.pyd",
+      "size": 273920,
+      "sha256": "969b92be786748fdcabaf2d5f129e5e89ff29fca4f78ea406d40c5e00df4a0be",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/account_summary_dialog.pyd",
+      "size": 168448,
+      "sha256": "0674514333b39c3503cc6f44aa713c968e2d09ebd437aa86af1fb49c52a98631",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/amount_converter.pyd",
+      "size": 48640,
+      "sha256": "9410358c31d65589dfd68ea3258ebdd842b42bdb4b872d29d8ba7665f15c787c",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [
+        "pandas"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/async_workers.pyd",
+      "size": 600576,
+      "sha256": "0623047b7552247b4782d5bccaade0322c4d63058a2a2a1e1c24bc455b47d8d5",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/aud_import/__init__.pyd",
+      "size": 25600,
+      "sha256": "e9f753fabe0ecf32741593758858593010f07eca9d836396323427a4bb51b299",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/aud_import/aud_extractor.pyd",
+      "size": 109056,
+      "sha256": "8226430a120dde48355cccc3ad53832e9dca8b89944c4dd7d29c9bda251e105e",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/aud_import/aud_transformer.pyd",
+      "size": 84992,
+      "sha256": "2eca9a3157c837265ee0c1c9c07a90b458303159a283679e7a3f369e87846b3a",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/aud_import/base_erp_adapter.pyd",
+      "size": 55296,
+      "sha256": "c544cf1555db3e0e12ce812c50e605d6f62dd41c987cfd2017a32296d99f3eaa",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/aud_import/exceptions.pyd",
+      "size": 42496,
+      "sha256": "c51e08e8b6b0254b747a7e48013325809d582a4af033fa97200fea473d9cbded",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/aud_import/kingdee_cloud_adapter.pyd",
+      "size": 281600,
+      "sha256": "00f527980e564883e0c055c79a2f00ce04a5e42f2f959e518374cda6a2fd34ef",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [
+        "pandas"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/aud_import/kingdee_k3_adapter.pyd",
+      "size": 249344,
+      "sha256": "342478ade0013fc58772c5bdb417d94e131f55ca7b17ade8db27dfb2c7fdd1b9",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/aud_import/yongyou_nc_adapter.pyd",
+      "size": 315904,
+      "sha256": "21e09f603b8922f56d38f7d9f97059dcf040a63541647bc78c3145b32cf0d01c",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/aud_import/yongyou_nc_v35_adapter.pyd",
+      "size": 245760,
+      "sha256": "39091a20804fe9c32caf6e0bb73bc88c08935f2a5bc47fa6b888b5f985190fa2",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/aud_import/yongyou_u8plus_adapter.pyd",
+      "size": 164864,
+      "sha256": "f95d82d5d5fff136fc744264bf0aaba2005d2bd64902348dfad7fd7be76ff93e",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/auxiliary_parser.pyd",
+      "size": 158208,
+      "sha256": "e602844241d9508c733c82a5391eb93fd181c584abef4fdaa71ea4496ef4fbfe",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/auxiliary_type_matcher.pyd",
+      "size": 56320,
+      "sha256": "954a1c0c26a4eb9429c89aaf72da626a3b92e3034dc30e708faf1d58824589e2",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/auxiliary_type_matching_dialog.pyd",
+      "size": 180736,
+      "sha256": "c86f5b0024c76fde579eccf7b4be49d45cbcd490b12f2874f04b0acd979d5a0d",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/balance_calculator.pyd",
+      "size": 116736,
+      "sha256": "6d08b01d48ae86f76c1998a547f43ee56d31d9a5082e2df365bf01e9442ced6b",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [
+        "pandas",
+        "numpy"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/balance_summary_bar.pyd",
+      "size": 109056,
+      "sha256": "efa512b0fc03065d7424a980e5dba0fe5bfb41900125df61fd44b830a87edb28",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/base_transformer.pyd",
+      "size": 54784,
+      "sha256": "ef3422eea2e872a7a43d88c808f89b90f93beb3abec8cccbebb536230ba7aa41",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/batch_folder_scan_dialog.pyd",
+      "size": 104448,
+      "sha256": "dc1caddf4722673f1843e36619dfdd9af289afbdb25066237b41b0cfacc76231",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/batch_result_dialog.pyd",
+      "size": 94720,
+      "sha256": "fbaf3e7ce98ee5ea556680feee02dcfb548f33313cc91312e5b5e10a59498e12",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/cleaning_preview.pyd",
+      "size": 87552,
+      "sha256": "36e853f8d8962494760e4923d48524254d5b038acf9524c25a2476d872381135",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/column_mapping_rules.pyd",
+      "size": 94720,
+      "sha256": "19cbf2298352b1d2a143b684ae799d58934c48281de40ff1a7a131f40ec32d0e",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/company_mapping_dialog.pyd",
+      "size": 111104,
+      "sha256": "4c26426b810effec3275b45f6c69eb732bfc4a290ee6d0fbac3b6380d1cbab07",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/counterpart_calculator.pyd",
+      "size": 165376,
+      "sha256": "176b9c099fba9f6352ab276aea28585b0d3cd2664825b57b9ad8094292045996",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/counterpart_dialog.pyd",
+      "size": 156672,
+      "sha256": "6fadbfc087b3f46cbd5862f4bcf380976bf045838c13770c414c9c2ac0a6714e",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/csv_preview_reader.pyd",
+      "size": 67072,
+      "sha256": "0514ce0adec25d3194ae7516836522be6058751e47ea890f74d4d06f5f26468e",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/data_cleaning.pyd",
+      "size": 313344,
+      "sha256": "bdf8bbba5409620775fd0806c76aa28b43563668cdc6903fe5496e11442cc056",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [
+        "PySide6"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/data_load_state.pyd",
+      "size": 78848,
+      "sha256": "de52a9f1708e3ef2ed443d6682e41614593ceac61001000762f1418f02620a65",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/data_model.pyd",
+      "size": 206848,
+      "sha256": "a7ea1f300a9b3c6d5a9467da472a7645909d63989d4ef07ce988cbcc6a6bc129",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [
+        "pandas",
+        "openpyxl"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/database.pyd",
+      "size": 663040,
+      "sha256": "5ee5b4fe86dd48b57a8901ce13fb7d8587d98abf824a074d1208d500828b938c",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/duckdb_csv_importer.pyd",
+      "size": 284160,
+      "sha256": "0bfff48bb396b3b961a680a02f334e27720cc25bf0b476da4daeecf84a7b12c2",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/excel_table_widget.pyd",
+      "size": 221696,
+      "sha256": "ec9f99bbfa65c77d0eb589950fbb3f040c004a43d2ae5cf71949ba7d3e71b36a",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/file_scanner.pyd",
+      "size": 45568,
+      "sha256": "74b1a86c48326f032cfbdf3bbaf4e3a4e8d5d505f9fbdfd36c3d52a41033b443",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/file_type_matcher.pyd",
+      "size": 74240,
+      "sha256": "cce554b88bed7cc69fe81aa4fa072acba72668447210efa424ce3c2ce5eda2fa",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/fuzzy_matcher.pyd",
+      "size": 52736,
+      "sha256": "5789779fe85ca59c572d87abee453b22c3b6fcb1b5b529ab26da440863472e7b",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [
+        "rapidfuzz"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/hierarchical_balance_model.pyd",
+      "size": 108544,
+      "sha256": "a9318647da931c1e3173bd823207f16064b67deebda6eb75759e2b2fd5d99401",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/hierarchy_restore_dialog.pyd",
+      "size": 195584,
+      "sha256": "831074dd108843ee63e9cd05fc35d47eb93445bd3405241c5f549f924ebb920f",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/hierarchy_restorer.pyd",
+      "size": 151040,
+      "sha256": "9560b3c147f7615355746687463c2e71de4a5fb9b2c21393dc28d03c83712462",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/import_dialog.pyd",
+      "size": 279552,
+      "sha256": "c91c701e715ba6fb270f1846e74fb9bec3422bd6fa3c63b39ac09194de65dac3",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/lazy_imports.pyd",
+      "size": 41984,
+      "sha256": "edc94452e02253483dbb450cf6e1007cd6491567ebb54a840b355fe4b4057839",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/main_window.pyd",
+      "size": 1423360,
+      "sha256": "f074598c53d055b1b44cdd0552c7f707c12482253f4ba15cc373e10d4e3b2034",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [
+        "duckdb"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/module_registry.pyd",
+      "size": 97792,
+      "sha256": "166a44813541db342a1a1674457421ee4d29bbd2fc579e1d00b779e0f17a6cf2",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [
+        "pandas",
+        "numpy",
+        "duckdb"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/monthly_analysis_dialog.pyd",
+      "size": 246272,
+      "sha256": "bb23e52673339a34bca42c7fe15a2a7c276ab13833773e61a234fb77e62f9301",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/monthly_analysis_engine.pyd",
+      "size": 78848,
+      "sha256": "51b1571b9dea0da203206b6c69d5f0426e8bb20f60ab24af3230de903381d845",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/multi_file_utils.pyd",
+      "size": 80896,
+      "sha256": "036e1dc788255d7f882188370d285f06251402aa5c1620b712fc68ca674bd04a",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/navigation_state.pyd",
+      "size": 114688,
+      "sha256": "77e9e3a3129bf778e0ea957d0587e322ca341dfd31cb03ecd8c9fd3d1bc05d4f",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/navigation_toolbar.pyd",
+      "size": 54784,
+      "sha256": "e880b2fb042efc31f667e2ef7b3f289651121f28d567b7c1cc8483ad0d260554",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/preload_thread.pyd",
+      "size": 65024,
+      "sha256": "1dee541c2e859bd8f45ddfb732b0d905f529e893ee566b844d75bffd33b7632a",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [
+        "pandas",
+        "duckdb"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/progress_reporter.pyd",
+      "size": 59904,
+      "sha256": "4ef535c388b7e0ab828b269c67a22c93b352f425c7ba80856b62bf35ece0fe74",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/staging_manager.pyd",
+      "size": 143872,
+      "sha256": "5a51c0e43341b9563a5c4e57e36b25946b190d2bd2b81e1d147dc602699fa7a8",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/summary_aggregator.pyd",
+      "size": 93696,
+      "sha256": "be3c03f0f7da61d0b49947811cff053d54e6b91ce4dec3bb0ea1cb4be716fe4b",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/third_party_import_dialog.pyd",
+      "size": 161792,
+      "sha256": "e4f946842e17a5ebedbf28c16e15dfb44cfbfa05df82684ef78d63b7ce8ad5b8",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/third_party_import_worker.pyd",
+      "size": 52224,
+      "sha256": "f724caf98a18c14fc7838b2935ac890bf780f0f4c02260c0d5ce4f0c8bc629c0",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/tianjian_oxt_transformer.pyd",
+      "size": 200192,
+      "sha256": "181f4358431dcfa8b3509cf7bcca3290f9c928c0f623fccd40dff8ac8ad1400f",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/transformer_registry.pyd",
+      "size": 48128,
+      "sha256": "0f20415f2984c973aa2d3d70588c15b55c77a729d0ed15e57c96554c9515ab6e",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/virtual_table_view.pyd",
+      "size": 431616,
+      "sha256": "792363b87684396895e41acea55528fb1a72f5dbd003532dde1c022005e35e14",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/finance_viewer/xinjiyuan_transformer.pyd",
+      "size": 242688,
+      "sha256": "b97219d3d693d79480a6340c4d370c4f33f123a6742da879b38db3318884f1fb",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/flowchart.pyd",
+      "size": 181248,
+      "sha256": "88215973f0ad81715e6fe970820aa3ec77f585320294ce09e65b8db3672b7f59",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/general_selection.pyd",
+      "size": 127488,
+      "sha256": "1280044b2c73b3fa3071add2bf2c5e28b2d6151493856e975ca3cef526b0b715",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/gross_margin_analysis.pyd",
+      "size": 491520,
+      "sha256": "e284fbc341ef57ae8386baf81f33f79a347d0e67c55a4ffa95f4449facfbf64f",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [
+        "openpyxl"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/headers_process.pyd",
+      "size": 102912,
+      "sha256": "640de88b0e6da2916e6b6c50ada0f831dbd9c96d5d20e7473a865e0dcba19174",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/id_card.pyd",
+      "size": 86528,
+      "sha256": "d6287f7174f52978ef26ab43181c87009443107807a4ab6f3cad7a59090b8643",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/info_extract.pyd",
+      "size": 362496,
+      "sha256": "257e3987582c2b92cfb1527d8ebc058681db2ab066a1e6114503f77b47850098",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/info_extract_multi.pyd",
+      "size": 234496,
+      "sha256": "df713a3cdcbbee44b74aa0ff1429997d13af2d518183e110b320d6cae0573bb0",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [
+        "docx"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/insert_column.pyd",
+      "size": 105472,
+      "sha256": "750a243e848a5a665777b7b15fc7e4674d6cf15caa1d216ac64ec79ba7daf808",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [
+        "xlwings"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/insert_footnote_comments.pyd",
+      "size": 112640,
+      "sha256": "92e4977b42360b1836abbcab93d33e62b1a74058c9512b54c8d74b6e76442f9d",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/ipo_bj.pyd",
+      "size": 122880,
+      "sha256": "c5852b60a37f97431cb7c6a6e793a6d29490a1820e39891fc021c61cb56087b5",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/ipo_sh.pyd",
+      "size": 124928,
+      "sha256": "27cda3d1b246caa7ae8766f5aaffd71320c504cd0e197acc6a41370b6b0ebdf0",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/ipo_sz.pyd",
+      "size": 112640,
+      "sha256": "03f6468cab01d9468b24e09787efbb25da57fb8064e73de517de1eb42c2a54ce",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/jet_test/__init__.pyd",
+      "size": 18944,
+      "sha256": "633b8587d0dcca28dfcf4745421d72a65788a317980b36381184ccfa315a5a88",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/jet_test/_builtin.pyd",
+      "size": 36352,
+      "sha256": "c88cf398732b9fe599f4704c3d31ad2c6f4c4dd27159dc995eeb2351c31f8c3a",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/jet_test/_core.pyd",
+      "size": 193536,
+      "sha256": "9df5a28ab7c23f675a9d6e1504247ad1a8528e0b3081a3909c5c2cc5354e0afe",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/jet_test/jet_test_execute.pyd",
+      "size": 115200,
+      "sha256": "cc6930894654ff40d2d366cb4040d7f8bfe52ba5e6574ef4a30f2b54f89b9383",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/jet_test/jet_test_inspect.pyd",
+      "size": 44544,
+      "sha256": "2d112741032e03750cfc0ccdd398490db733d958eccb12ca2ac913674d415a2e",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/jet_test/run_legacy.pyd",
+      "size": 76800,
+      "sha256": "8394e1d773575ed277bfa90a0bbd2d898654ff3795cb645c8aad6ddfb946527a",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/ledger_check.pyd",
+      "size": 110592,
+      "sha256": "12bd772362aedbb278774195870092cfe0f04defa579ab5d64b32bc8e86185f9",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/link_extractor.pyd",
+      "size": 101888,
+      "sha256": "c01c52ca65d032ead6e7619b72c6c839d56ce1e174330cb278b4fa922f3d857d",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [
+        "xlwings"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/link_ref_replace.pyd",
+      "size": 133632,
+      "sha256": "93cbd2e6941bb5a3e1405ac0af5fdc38c6a356b872babf09f4ecbaa4ca054997",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/link_replace.pyd",
+      "size": 35840,
+      "sha256": "dcd0448a9c6d1b62c31d559d141b8baaba0098309c5d0ffaeacedacaad4bd3f0",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/link_replace_range.pyd",
+      "size": 133632,
+      "sha256": "f4eaa323e5baeedead38f9204219328ac3c09be330f519c1a36578468c6d35fc",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/link_replace_simple_subject.pyd",
+      "size": 35840,
+      "sha256": "02868468813609d481afdff72da235ba8e06e022dd04faf75df69afb7cdec4f3",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/link_replace_text.pyd",
+      "size": 100864,
+      "sha256": "9a3dce36b27b98eccd0754fa2be498cc0fedc0796138ef7574883a6839adb58e",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/link_replace_workbook.pyd",
+      "size": 114688,
+      "sha256": "8a46ccd56ac5082d6ca1ffe713289bf0a7f7a2ae430555631d6ef84e8e83594b",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/mcp_context.pyd",
+      "size": 41472,
+      "sha256": "aff7b299c53c96321e76720f4e940647748b162822562e4987b7419c96eefba3",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [
+        "PySide6"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/merge_column.pyd",
+      "size": 116224,
+      "sha256": "6ec7282bf1951a9b2e42560392663a3a19e980e25b732d64ab62a2a314e54a60",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/merge_files.pyd",
+      "size": 565760,
+      "sha256": "fb660014eb76122502b2e8045f296701a50ad618a8a307e003479df65023c105",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [
+        "PySide6",
+        "openpyxl"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/moduleZ.pyd",
+      "size": 40960,
+      "sha256": "940b1e213524ddf98ae5dcafa5b1202a1d2c30b38a9be7e8bbb4c36e7356a724",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/monthly_analysis/__init__.pyd",
+      "size": 18944,
+      "sha256": "29c442082e2c5e4ead99152c56e0d62177cc99e764a474fd2b93205801ce0f9f",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/monthly_analysis/_core.pyd",
+      "size": 262144,
+      "sha256": "a9b78b8e9e048c3411baa1b79cdd216df3b7d73dc332ae6bce633da2dd0da109",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/monthly_analysis/monthly_ai_analysis.pyd",
+      "size": 68608,
+      "sha256": "8713d73358acf2068325dfa58bb180f383ff9bec02d22b1693c44391f98f6f33",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/monthly_analysis/monthly_detect_structure.pyd",
+      "size": 96768,
+      "sha256": "10d4896cb157e7f1d8537ac8fbc6a53361987c14a01474d86efb9c1273b5c245",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/monthly_analysis/monthly_execute.pyd",
+      "size": 104448,
+      "sha256": "ca70fe3e194ce2ec92e1a5433c4659f73998e412e6e32eb95d30b767edd70e55",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/monthly_analysis/monthly_preview.pyd",
+      "size": 78336,
+      "sha256": "de936548b383dbea59e9fcca983487c036b23088dc9d6ab0bc0b5196618e27af",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/monthly_analysis/run_legacy.pyd",
+      "size": 153088,
+      "sha256": "07e4fcac78eef6e1ebeb93f2fd2ee0734128fcbf3da88dca60b6aa2c209b5746",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/multi_collect_file.pyd",
+      "size": 128000,
+      "sha256": "33052cdd9e1d736bdd51b45a47949597ca5df54f6d9ef3aa742605a798f215f1",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/multi_collect_folder.pyd",
+      "size": 131584,
+      "sha256": "f6eaf78fd575997eb21959ceee772941a8b05f1eb08e9c134041da85f417ade1",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/nanobot_core/__init__.pyd",
+      "size": 17408,
+      "sha256": "a1c1b3f199a8c34f47dbbd14f3e90c2b578556cb548f60487c2f51a7d57e6ef7",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": [
+        "github.com"
+      ]
+    },
+    {
+      "file": "modules/nanobot_core/config.pyd",
+      "size": 74752,
+      "sha256": "e290f0be36a9955ec95244009ff6d4d31e5e004bfec900f7961e712f0a9f554a",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/nanobot_core/memory.pyd",
+      "size": 51712,
+      "sha256": "cf15c52d7e52eb1eca8431b4e7e7b23f7251703b57d195ea97e35747d7403dbd",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/nanobot_core/runner.pyd",
+      "size": 85504,
+      "sha256": "ef6704bfd7c5322774589246e5bc86176fde7662721c5de9c3b3768c4a51a814",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/nanobot_core/skills.pyd",
+      "size": 112640,
+      "sha256": "1fda861898ca07c28d6bdd1625ed5c8f2668a6def85015e5533c2cd009790fb1",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/nanobot_core/tools/__init__.pyd",
+      "size": 17408,
+      "sha256": "ab8b9363437bcc06f44ffe5a5decd9618bf5b0b0d0989fd427e8fb3d74f5aea5",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/nanobot_core/tools/_helpers.pyd",
+      "size": 43520,
+      "sha256": "33dbf44d705edf001df0b2bcb562379fd132591ebb7018b58aaae8f4335159e9",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/nanobot_core/tools/_paths.pyd",
+      "size": 35840,
+      "sha256": "4306d0a3b28246de3e9808fed81e0ce667cea692834c71a4e65d00b04109bd93",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/nanobot_core/tools/base.pyd",
+      "size": 142336,
+      "sha256": "bb02fb3359650ec4847f6693ffcb4584f9845863d2eebcad28416afd3f34e194",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/nanobot_core/tools/file_state.pyd",
+      "size": 62464,
+      "sha256": "e866fa4c63f452585963777b6da044826a3e3fb2647e7647f27dddae952eca40",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/nanobot_core/tools/filesystem.pyd",
+      "size": 306688,
+      "sha256": "6f083025b5ed2d502e10a642ea4e8f9bad248958ea2a163f6eee4c8fac8511a1",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/nanobot_core/tools/mcp.pyd",
+      "size": 210432,
+      "sha256": "4ae0f900b56940c7b1a567245f6d41d7921d80de0cc59fb5e33cdbc3951b43e9",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/nanobot_core/tools/registry.pyd",
+      "size": 85504,
+      "sha256": "86995042901eae2ef55f1378d833a44f43d116204ac9227e9cfbe23169235deb",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/nanobot_core/tools/schema.pyd",
+      "size": 90624,
+      "sha256": "5fbe78e63b509b2bbc2376560acb516a56e51b6d817a31e291a1d397ac268db2",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/nanobot_core/tools/search.pyd",
+      "size": 193536,
+      "sha256": "e50f03b752cfef90de657169a446f344259446034f4c03ce6fd5f3645df27ddf",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/nanobot_core/tools/shell.pyd",
+      "size": 143360,
+      "sha256": "54888e049f5050f71d64fa0b4bda002dc465009a654bb2693393bb375b55d860",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/nanobot_core/tools/web.pyd",
+      "size": 319488,
+      "sha256": "ab87e6df397f47763208fb5eb73ee2c7ba54354969fcbb2fa33b5724a4698a3c",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [
+        "lxml"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/notes_penetration.pyd",
+      "size": 137728,
+      "sha256": "cf42daf363b6bb191ab356943698063a6f8e05e4bbc8013e86fbce0f2c2cfede",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/paper_verify.pyd",
+      "size": 302080,
+      "sha256": "5812bc14600968f33a241ac05a76fd0be722716e4d91dac9b38e5319b8abf56b",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/photo_rename.pyd",
+      "size": 95232,
+      "sha256": "5e672bd0239979ced0014e5b95d226fe30dc7d2b858969538db77a7381592509",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/pickup_value.pyd",
+      "size": 103424,
+      "sha256": "951b5edf7ceb3052c83bf2692481ad423def6e12154b5ad1c64ef4c2deac6656",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/qcc_processor.pyd",
+      "size": 102400,
+      "sha256": "29488076b4347edbdf601c0ccda24c193c369364b3fdaa217cffbbda0fa7e1d9",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [
+        "docx"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/related_party.pyd",
+      "size": 514048,
+      "sha256": "18225929a0bd3dbc31b9ee367d8675d1ec26a10cda620c23ff2118c8c1d02b4c",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/__init__.pyd",
+      "size": 51200,
+      "sha256": "49e813e6482eacd7d035cd9369d776a0cdecec2d625731472f130866569d80a2",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/ai_helper.pyd",
+      "size": 93696,
+      "sha256": "90839f716124120db3f485d6a7df22183e7ff8c9ba75be458b523892b569abdc",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/cache.pyd",
+      "size": 187904,
+      "sha256": "a118dc644b6c5e53b774efc796f29c0515d19caa30854bba8dc1cffd4a4fe91b",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/checkers/__init__.pyd",
+      "size": 17408,
+      "sha256": "e9c726f1a208915e34d20d786de810b5c6995a6d64ec842a5bfde4af3021c881",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/checkers/auto_table_checker.pyd",
+      "size": 197120,
+      "sha256": "b287114ce13d361a61e46d4fbdb9a0f0c37fa6219a44a721636d3ddb75052a17",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/checkers/data_checker.pyd",
+      "size": 172032,
+      "sha256": "09586adca5a7bc4c654fddf767ab383cfbc3aedd003e15981c6c210a23045b93",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/checkers/format_checker.pyd",
+      "size": 112128,
+      "sha256": "e0772cfeacff1ba5b9a014b30d06405b1a799493733a7453a2a43ac17b046eb8",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/checkers/text_checker.pyd",
+      "size": 83456,
+      "sha256": "72614da2644fb982ca89714f4fad9342a6ac08f8177a2e794ad554407e948706",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/debug_timing.pyd",
+      "size": 54272,
+      "sha256": "0cfb56563203b5af4115113cd2eae97b7c4012cdfb4b7ec55227228f22f599f9",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/engine.pyd",
+      "size": 182272,
+      "sha256": "f3c5efb4caa086072485cb60781b85f79c01d4df62bf05a5b0720a12116b0579",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/extractors/__init__.pyd",
+      "size": 17408,
+      "sha256": "d34fb0871be9129fda27e14bee49b1f84d7646b7d3d1a4dafe6c2497360d5d31",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/extractors/note_indexer.pyd",
+      "size": 161792,
+      "sha256": "f8930f368e8f393b9dc3ec6f3252dff7c10931b35448b30df01b158fd657ef90",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/extractors/statement_extractor.pyd",
+      "size": 253952,
+      "sha256": "59f739f5167f7ad1558890cf3fa4300624c03e2834a1096c827086a22369e04d",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/models.pyd",
+      "size": 173056,
+      "sha256": "48036b9aaea29db461132731095e6181b14bb8c0dbb6dc0fb21b60d2e7325914",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/preset_manager.pyd",
+      "size": 140288,
+      "sha256": "01b9549b7077a7fd51f8b6971cfc2d36287aca727885696344e31b20d0fcd909",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/readers/__init__.pyd",
+      "size": 18944,
+      "sha256": "3ad6fc0334682f62aa3660b67d337258322e6024eb976f9b0a935e5e10fdba7c",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/readers/base.pyd",
+      "size": 44544,
+      "sha256": "b00e57b97efbf6c9937acf08a799a586df1ab3e078dbee016b1d39d6424b2456",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/readers/pdf_reader.pyd",
+      "size": 214016,
+      "sha256": "470abad4406ac32ff07518ed1e46dfd86bcca0826e354fa716e239907024c8b0",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [
+        "fitz"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/report_exporter.pyd",
+      "size": 80896,
+      "sha256": "3b4acfea442892bba000828876579b10ec559cb48122c5ae1ec5523f92e09765",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/ui/__init__.pyd",
+      "size": 17408,
+      "sha256": "95db630a1ef1b9b89a471b9c510550c3ebcd162409fe543505ff633bdb86b66d",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/ui/main_window.pyd",
+      "size": 224768,
+      "sha256": "ea4c3d034f598ccf4468044f0389f95b602044770862e30b2ecf46c3548f339f",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/ui/parse_viewer.pyd",
+      "size": 175104,
+      "sha256": "a5039a23b51e42c8418c1c3a2edb7bd3ac25bf9d5202e11c4c46c83f99aa3f79",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/ui/pdf_viewer.pyd",
+      "size": 144384,
+      "sha256": "5d659992f4f2f99c3397184e48f4d215493d35ceb3670a4b787458513195f3d5",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/ui/result_panel.pyd",
+      "size": 164352,
+      "sha256": "2fa87289496dd94ff0ce55aa53a385960c42e844d6226d767fd07e6370e64246",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/ui/rule_editor.pyd",
+      "size": 258048,
+      "sha256": "1ffda62406ebda9e238972ec36abb4509bf7ca7a398bb9bce1d1e804bab04bb2",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/utils/__init__.pyd",
+      "size": 19456,
+      "sha256": "8c5dc0a56ef897a43325db3efb7c2f921606d88d3ad4ecc66197f178c5a83a88",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/utils/concurrent_executor.pyd",
+      "size": 74240,
+      "sha256": "09bd5d5aa208d7edc545d999b42c4fffca276d5c3aabdc42aec56ef202f6a5bb",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/utils/cross_page_merger.pyd",
+      "size": 75264,
+      "sha256": "873f6e0a5ecddc032fec786b956ac482ebae4ea593ef663531046c30d06f93ef",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/report_note_checker/utils/image_preprocessor.pyd",
+      "size": 46080,
+      "sha256": "c52b38e1fe96899b69c0dbdb04b88ef8a86096548d426f8bf1863778e94c9f44",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/schema_converter.pyd",
+      "size": 45568,
+      "sha256": "4068077753202df1866b152fe9c45152222ff60fc968fc4febfa336307d26935",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/select_column.pyd",
+      "size": 112640,
+      "sha256": "5c14d6a2d8ab08a1e8b0c9b0e38ac4cc0ed84cc33f0d4cfa45433d6bee3e97a9",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/subject_allocation.pyd",
+      "size": 136192,
+      "sha256": "c9afb7258c403fa5cdbfe1081527b39ac1f412a0783f41352d726feb8bfe0a00",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [
+        "openpyxl"
+      ],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/subject_clean/__init__.pyd",
+      "size": 18944,
+      "sha256": "d630618a444ea28534d89253fc082a63cec1852b1b139ee582b737f510f2d294",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/subject_clean/_core.pyd",
+      "size": 305152,
+      "sha256": "df4f802d0331e9ba5efd2ede442103268d14b6ff71d65777f5a0b44281e234d7",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/subject_clean/run_legacy.pyd",
+      "size": 78848,
+      "sha256": "8a29eb3b553cd9ea6aa0806fe752f6ea68e4762e8bae3425c515e39cb22b764f",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/subject_clean/tool_execute.pyd",
+      "size": 56832,
+      "sha256": "e414fb773a0434ff44619472f4ef9acef85a69db971780bd67916807ff4f540b",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/subject_clean/tool_preview.pyd",
+      "size": 65024,
+      "sha256": "fa49db01791595533edd03848ab4d66f4d76db8347c91b2440c6562d1320a9c9",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/subject_clean_after.pyd",
+      "size": 121856,
+      "sha256": "4197bb5def9532d77534ec9b6f9832351dc8196bd052b871462e963247bcffba",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/subject_xinjiyuan.pyd",
+      "size": 277504,
+      "sha256": "78576785597faad522d496dc436f9c70357c364cf88f7eefe8aee3162ccc1bd4",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/tb_creator.pyd",
+      "size": 35840,
+      "sha256": "a4157266ccf893576d273ba5cd5419716773535d19d6d9863eb884e17585a14b",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/text_match.pyd",
+      "size": 124416,
+      "sha256": "8d7c639e05c94d7efed583f98eb43844b913982290420a6acbc15a9a3dd26718",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/transfer_previous_data.pyd",
+      "size": 161280,
+      "sha256": "ab1b44944107c2c791713e59d50de033f9ef317fb672496f445ff7b5ad0b04cd",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/voucher_check.pyd",
+      "size": 422400,
+      "sha256": "8668650fbd5f95992993a78e0b5c9400383fe605f1315313ea5415b1e4348cef",
+      "machine": "0x8664",
+      "cythonMarker": true,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/vouching.pyd",
+      "size": 35840,
+      "sha256": "a5612bba20569a01cef2a7bb8c17044e1400472def394bceaea9dce0251f2d04",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/xlsx_writer.pyd",
+      "size": 154112,
+      "sha256": "149b940dc81ec1a6fd02a9f8ad56b2f54b33a37e809b8487e709259a9463929c",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [],
+      "domainStringHints": []
+    },
+    {
+      "file": "modules/xlwings_safe.pyd",
+      "size": 88064,
+      "sha256": "0eb714cc7578b0976d5af5ddfb19cb7ba7d05775b4eb876d7625b48036d9a495",
+      "machine": "0x8664",
+      "cythonMarker": false,
+      "dependencyStringHints": [
+        "xlwings"
+      ],
+      "domainStringHints": []
+    }
+  ],
+  "templates": [
+    {
+      "file": "_template/Excel文本信息提取配置表.xlsx",
+      "size": 11679,
+      "sha256": "0a3098308f75e6d56bd05b0815a02b2eb4eb2ea12687750b697342e1ad259ec0",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/JET配置表.xlsx",
+      "size": 24651,
+      "sha256": "4fb11a671045fc8051e2e4fe09775f7967398c50512533a623fb5176f39769c5",
+      "sheets": [
+        "操作说明",
+        "全局设置",
+        "特征定义",
+        "规则筛选"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 1
+    },
+    {
+      "file": "_template/TB批量搭建器.xlsm",
+      "size": 48510,
+      "sha256": "30d7523280d9ba9de2c0a37ea12cb0b26b5802a9b575d2201d6fe0ea12fe3dc4",
+      "sheets": [
+        "批量生成分子公司TB",
+        "批量创建TB链接",
+        "TB更新与保存"
+      ],
+      "vbaProject": true,
+      "externalLinkParts": 0,
+      "drawingParts": 3,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/test.xlsx",
+      "size": 9339,
+      "sha256": "950b43a2b0e55d26028b5a08db71b883ec60c87fba4d4d2aa2b76722e004f79f",
+      "sheets": [
+        "Sheet1"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/上交所IPO披露下载.xlsx",
+      "size": 10626,
+      "sha256": "4e8e878c710c9df7c55230b4d5664f0447a09689b8bd8507557fd165c6359d25",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/上期数据搬运.xlsx",
+      "size": 17994,
+      "sha256": "3dc98b856896ab99319ec6c625f74a9ad8c96359a3b898af6b2b0fede71a8eb4",
+      "sheets": [
+        "操作说明",
+        "本期表头",
+        "上期表头",
+        "尾行特征",
+        "聚合字段映射",
+        "表映射"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 1,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/公告下载.xlsx",
+      "size": 151486,
+      "sha256": "5f7240d2a6235460a4d0b25826473ff0becbc9a3d453b56abebae3d53ab8096e",
+      "sheets": [
+        "配置表",
+        "股票代码参考（截止20250425）"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/公式填充配置表.xlsx",
+      "size": 18452,
+      "sha256": "ea1ed613b4e9ee64e8ef48f53b5dda553e17c164d80070627f28e569dc942f4c",
+      "sheets": [
+        "操作说明",
+        "配置表",
+        "提示词"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/共享抽凭信息.xlsm",
+      "size": 21569,
+      "sha256": "ced81e2f41c522cbfd5eb5428136151c00be7c9b9b3ac07ef09a0b7ffb303492",
+      "sheets": [
+        "汇总表",
+        "Sheet2",
+        "Sheet3"
+      ],
+      "vbaProject": true,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/关联方核查配置表.xlsx",
+      "size": 11977,
+      "sha256": "0e04cf34089495844ac204cd0dc164a86f8d7b0064e52275582fd18c1f59edfc",
+      "sheets": [
+        "操作说明",
+        "配置表",
+        "客户名单",
+        "供应商名单",
+        "离任高管"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/凭证检查配置表.xlsx",
+      "size": 20281,
+      "sha256": "59d71edf693a4e354b5be47903275e7d236f554d83a03ce6576c8ed18c657f06",
+      "sheets": [
+        "操作说明",
+        "数据源",
+        "核查要点",
+        "凭证信息"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/函证地址核查配置表.xlsx",
+      "size": 12171,
+      "sha256": "2f8fdb4f296377c19e891bdd2670dee378dbba5f785163ee3164df8efcaa7e75",
+      "sheets": [
+        "配置表",
+        "待核查地址",
+        "操作说明"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/删除合计行配置表.xlsx",
+      "size": 77766,
+      "sha256": "20c43a02cb578f63b1b31cac542beab5a67751364e00c58be4cb121a952d80a6",
+      "sheets": [
+        "操作说明",
+        "配置"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 1,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/北交所IPO披露下载.xlsx",
+      "size": 10623,
+      "sha256": "509edc23aac5d1d805b3b70faabd3349cfc38b5bd5e77c71b6b751c939a39a62",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/单科目合并附注链接替换工具.xlsm",
+      "size": 1655684,
+      "sha256": "41ac9bdff683e6b118f5eb65b2cf3a72ce9592c6bc7861f7876db136fcbc3052",
+      "sheets": [
+        "操作说明",
+        "数据项"
+      ],
+      "vbaProject": true,
+      "externalLinkParts": 0,
+      "drawingParts": 2,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/合并附注搭建配置表.xlsx",
+      "size": 16282,
+      "sha256": "5067030fbb9dc90117a729a3b2cf0b14f9e9be011b909bbd420a9c22a1d96344",
+      "sheets": [
+        "操作说明",
+        "路径配置",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/向下填充空值.xlsx",
+      "size": 9638,
+      "sha256": "e9feae892d8dcec50cd3937c51b51bdee7fb248754ea19117d9714934b436a2c",
+      "sheets": [
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/图片重命名配置表.xlsx",
+      "size": 572298,
+      "sha256": "c91958a01c62c06fbe82ab7a39cda80b4ce90805ed8100c001333fa62374c855",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 1,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/地址拆分为省市区.xlsx",
+      "size": 9709,
+      "sha256": "67f6c299b7c031188a8234ce5bdb567734c1b0523dc2ef2545f059f3c18235d7",
+      "sheets": [
+        "Sheet1"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/多列合并.xlsx",
+      "size": 11524,
+      "sha256": "993ead2043e53fbcff62541dc66bc7fd7e2eaa8af5b4683f07198fc31a8ae457",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/多类型文件信息提取配置表.xlsx",
+      "size": 14433,
+      "sha256": "b6194496cc58f2708fc856e1af7860e11ebb35891e8f4379dc7063177413aa6f",
+      "sheets": [
+        "操作说明",
+        "基础配置",
+        "文件夹配置"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/多表汇集-来源文件.xlsx",
+      "size": 12665,
+      "sha256": "407838c4bdbb90aa6ed0680fede2476f8fbac7936fad79925d1cb4ebe3d38ebb",
+      "sheets": [
+        "操作说明",
+        "路径匹配",
+        "表匹配关系"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/多表汇集-来源文件夹.xlsx",
+      "size": 1350458,
+      "sha256": "1b15fe5f1419d92f5928cf9360d87e1e90ba38d0f7b2313c21ef24a3f4ad5252",
+      "sheets": [
+        "操作说明",
+        "路径匹配",
+        "表匹配关系"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 1,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/小账套-模板.xlsm",
+      "size": 303343,
+      "sha256": "e374c6d25fe710debed2720e5c7e99bf9d2f8e062063b885d5ecc800e986e77c",
+      "sheets": [
+        "导入数据",
+        "启用宏",
+        "科目余额表",
+        "辅助余额表",
+        "凭证抽查",
+        "序时账",
+        "月间分析",
+        "分析",
+        "抽凭模板",
+        "试算平衡表",
+        "杜邦分析",
+        "选项表",
+        "帮助"
+      ],
+      "vbaProject": true,
+      "externalLinkParts": 0,
+      "drawingParts": 2,
+      "commentParts": 0,
+      "formulaCells": 789
+    },
+    {
+      "file": "_template/工商信息获取配置表.xlsx",
+      "size": 10448,
+      "sha256": "00797ee3f9343ecfe30514cb26269d79e803520b8d4c2fd23d0f157136598028",
+      "sheets": [
+        "操作说明",
+        "公司列表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/总体选择配置表.xlsx",
+      "size": 15692,
+      "sha256": "38973307b909f694b5b0ad12ec9b66fafe1400217d96d736d6bd2044fcb4957c",
+      "sheets": [
+        "操作说明",
+        "数据源",
+        "剔除数据配置"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/截止测试配置表.xlsx",
+      "size": 15424,
+      "sha256": "dfd784aa0bc70b87ce24cfc8a119001ccc8d975b3d27b36d0fe9d2d76a46fa0f",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/批量抽凭配置表.xlsx",
+      "size": 17992,
+      "sha256": "64cd3c39703ba19ead39f40ef824f8434240c95ce3443e8f672f9b9e899f6bbd",
+      "sheets": [
+        "操作说明",
+        "重要性水平",
+        "基础配置",
+        "保证系统表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 21
+    },
+    {
+      "file": "_template/批量生成小账套.xlsx",
+      "size": 454035,
+      "sha256": "e9b3f260cfbfeb6d0c8e8038deab907bbb3c0b0c123fcdb68f092e47e034f78b",
+      "sheets": [
+        "操作说明",
+        "文件储存",
+        "科目余额表映射",
+        "辅助科目余额表映射",
+        "序时账映射"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 1,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/披露口径提取配置表.xlsx",
+      "size": 14200,
+      "sha256": "d04ce20ce855aa593d05a555f75fc2937960a06905ea683a0922b577f2a20b78",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/披露表提取配置表.xlsx",
+      "size": 13515,
+      "sha256": "ec14f61f0034eb19ea72ac2bb1bf225b846946b9318e2833e2c45ddd410e2f50",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/抽凭模板3.7.xlsm",
+      "size": 1061883,
+      "sha256": "8c628d9515c6cd970bede76634ecc5b52e1a3d3fbd32068dbf8bc8867afcfb11",
+      "sheets": [
+        "汇总表",
+        "PPS抽样",
+        "分层抽样",
+        "属性统计抽样",
+        "Sheet1"
+      ],
+      "vbaProject": true,
+      "externalLinkParts": 0,
+      "drawingParts": 4,
+      "commentParts": 1,
+      "formulaCells": 8
+    },
+    {
+      "file": "_template/提取值配置表.xlsx",
+      "size": 11929,
+      "sha256": "5c2f194b5212b415366e878b8b5c4c719891b50002d2670af052a836e499e405",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/插入列.xlsx",
+      "size": 9904,
+      "sha256": "c0474b4c73d93ba6dd5161e4ecdd1c07b6e3b567eabbbe9b3ddb4574788c0396",
+      "sheets": [
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/插附注批注配置表.xlsx",
+      "size": 14547,
+      "sha256": "cbd27f9e760cc026e4e2a3c323dacd65e21043b9aef00f0abd7e79959dad4d53",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/数据处理配置表.xlsx",
+      "size": 721507,
+      "sha256": "2c26b7f6b00352880272a04a0f45cca35f3761e6b3cbc2a9464e7c316260518a",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 1,
+      "commentParts": 1,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/文件信息提取配置表.xlsx",
+      "size": 2950118,
+      "sha256": "a6fba3a5144cebabe9f12b59a8d4ea636eaa24aa797a1a35aa21515fdabce44e",
+      "sheets": [
+        "操作说明",
+        "配置表",
+        "常用模型"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 1,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/文件分类配置表.xlsx",
+      "size": 13856,
+      "sha256": "faf516abbe22ca19ae42bd33aeab7f6c6ad0c64623738c3e1830458936afd08e",
+      "sheets": [
+        "操作说明",
+        "基础配置",
+        "类型配置"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/文件名批量替换.xlsm",
+      "size": 43989,
+      "sha256": "1f7c9489a927c8882cf6353184d61c748ff1f976f89e754e5c51a91750cb15ef",
+      "sheets": [
+        "重命名",
+        "路径获取",
+        "全层级路径获取",
+        "文件移动"
+      ],
+      "vbaProject": true,
+      "externalLinkParts": 0,
+      "drawingParts": 4,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/文件打开器.xlsm",
+      "size": 17888,
+      "sha256": "1077658e518301f73ac84b922c629b6cc2855b260fef6a9dafd03a5c1851c4cb",
+      "sheets": [
+        "操作说明",
+        "文件路径列表"
+      ],
+      "vbaProject": true,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/文本提取匹配配置表.xlsx",
+      "size": 18215,
+      "sha256": "e707bdec907e353caef3a21ce196879006d99f1b73600cb585f90ee0fef6d57b",
+      "sheets": [
+        "操作说明",
+        "配置表",
+        "待匹配数据",
+        "分类项"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/新纪元数据处理.xlsx",
+      "size": 738213,
+      "sha256": "cb3a910ce9261ee13e3c146e524f843fbba1c1c0976eab6d9a12e553179fe592",
+      "sheets": [
+        "新纪元导数说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 1,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/明细表配置表.xlsm",
+      "size": 660958,
+      "sha256": "a07040e54defa2864c08c0a1ba0e64348270b4cb5f96a4ce325bd993eb2536be",
+      "sheets": [
+        "操作说明",
+        "路径",
+        "科目与报表科目对应",
+        "字段名称映射",
+        "科目与底稿模板",
+        "披露",
+        "关联方"
+      ],
+      "vbaProject": true,
+      "externalLinkParts": 0,
+      "drawingParts": 2,
+      "commentParts": 1,
+      "formulaCells": 74
+    },
+    {
+      "file": "_template/月间分析配置表.xlsx",
+      "size": 19854,
+      "sha256": "e9a50cd4661b80439c0474741fa69cc6285d6b59e440a14f6eb59b7bc21ddc4c",
+      "sheets": [
+        "操作说明",
+        "科目信息",
+        "字段映射",
+        "数据源",
+        "科目识别",
+        "变动分析"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/毛利率分析配置表.xlsx",
+      "size": 16142,
+      "sha256": "6547ba55d38a214907b89f2b439ebe6c8d2535a3691208bb8eb0266b2368f811",
+      "sheets": [
+        "操作说明",
+        "数据源",
+        "字段映射",
+        "透视维度"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/流程图生成配置表.xlsx",
+      "size": 17519,
+      "sha256": "74c950241703aa2b313bb2951cff6e647dc53695d3b3237c710c92eb29d9e904",
+      "sheets": [
+        "操作说明",
+        "配置表",
+        "FIM.01.01 资金计划编制与下达"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/深交所IPO披露下载.xlsx",
+      "size": 10626,
+      "sha256": "9866bffa38afbe5fe159d6ac1344f38991c88e2834e3f46ccca322c397cddd14",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/相同名称列合并配置表.xlsx",
+      "size": 12018,
+      "sha256": "189f47d89cd2eb2f9c9d29692e7844dcaa0d335fcfd9902d128bd0b0987adb85",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/科目余额表后处理配置表.xlsx",
+      "size": 25843,
+      "sha256": "33b76fc071ea90e5c5cebe9ff99fa1bbf6b270156e6ca22c5c6db80747238640",
+      "sheets": [
+        "操作说明",
+        "数据源",
+        "辅助核算配置",
+        "余额配置"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 1,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/科目分配派工.xlsx",
+      "size": 71622,
+      "sha256": "abbd0d12d0f80dd90938fc1cf40dd1ce7804fc2aad1564dd0a6f35afb27a0d88",
+      "sheets": [
+        "操作说明",
+        "配置表",
+        "基础代码",
+        "其它项"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 1,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/纸质信息核对配置表.xlsx",
+      "size": 14422,
+      "sha256": "0aeac39174dbe3a25f375900e200d205fb6bcd0fb1c4ba1912d62b9597e0148c",
+      "sheets": [
+        "操作说明",
+        "配置表",
+        "待核对信息"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/表头处理配置表.xlsx",
+      "size": 10981,
+      "sha256": "4ade01db32a917dad5e04c32d0fcf9b5c94b9977ac036150691beb887902cfe2",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/询证函模板-电子格式二.xlsx",
+      "size": 165069,
+      "sha256": "865e6117035d398d60157ce0acfa776880434e42163ca0e4e7e0d6af2e801bfd",
+      "sheets": [
+        "主信息",
+        "被询证者信息",
+        "函证信息",
+        "电子函证验资类",
+        "Sheet2",
+        "bank"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 1,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/询证函模板-纸质格式一.xlsx",
+      "size": 139341,
+      "sha256": "553fec18d06b0599e18cf8aecdd8ce5aed1a382e129af6c6888dede35fb41842",
+      "sheets": [
+        "主信息",
+        "被询证者信息",
+        "函证信息",
+        "电子函证验资类",
+        "Sheet2",
+        "bank"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 1,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/询证函模板-纸质格式二.xlsx",
+      "size": 139330,
+      "sha256": "48591ef34e563935f01dd880944875a2636ef4994c21ca2200c452dd95181326",
+      "sheets": [
+        "主信息",
+        "被询证者信息",
+        "函证信息",
+        "电子函证验资类",
+        "Sheet2",
+        "bank"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 1,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/资料字段检查配置表.xlsx",
+      "size": 14360,
+      "sha256": "5c368c00d5403fc8e32bb2afd3a21bc245860fcedb5c6408563c6116a9479c0d",
+      "sheets": [
+        "操作说明",
+        "配置表",
+        "固定资产",
+        "无形资产",
+        "长期待摊费用"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/身份证号码.xlsx",
+      "size": 9500,
+      "sha256": "a63ecc58f26c6242ebcb2a9d5538e771b94289293d40fbb4d49bc1b6574eedd1",
+      "sheets": [
+        "Sheet1"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/辅助项拆分配置表.xlsx",
+      "size": 14286,
+      "sha256": "ea52203faa58ac17b58a885fa1a81657d5bcb6cc35728c743d9adf7b4dd934ac",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/辅助项选择配置表.xlsx",
+      "size": 18190,
+      "sha256": "1aae2b02bf42f0d49e97ab52cd2e09080c865d6cbff130d06b014a3adeff7eb9",
+      "sheets": [
+        "操作说明",
+        "辅助核算配置",
+        "基础配置"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/选择列配置表.xlsx",
+      "size": 12270,
+      "sha256": "c97dece259dea487f2364ed273080d7f8e849d3470c5d0ce33ee24a1720ffc14",
+      "sheets": [
+        "操作说明",
+        "数据源配置",
+        "选择列配置"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/银行函证表格生成-格式二.xlsx",
+      "size": 18781,
+      "sha256": "6b3819dccb686cad3b421ac0493740f36f4965627db3d523859062414fa02c08",
+      "sheets": [
+        "操作说明",
+        "基础信息",
+        "固定信息"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 1,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 12
+    },
+    {
+      "file": "_template/银行函证表格生成-电子格式二配置表.xlsx",
+      "size": 22250,
+      "sha256": "c83a54675cd6647eacfd750b7dc639a58e111db3d67701a5ac4dcf8ae4814ea4",
+      "sheets": [
+        "操作说明",
+        "主信息-基础信息",
+        "主信息-固定信息"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 3,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 12
+    },
+    {
+      "file": "_template/银行函证表格生成-纸质格式一配置表.xlsx",
+      "size": 30210,
+      "sha256": "ccfb8b02bf36db45dd50ce9fc20fe5abe458b9c761e6be0d27af58ffe38f51f5",
+      "sheets": [
+        "操作说明",
+        "信息库",
+        "主信息",
+        "被询证者信息",
+        "函证信息-银行存款",
+        "函证信息-银行借款",
+        "函证信息-期间内注销的银行存款账户",
+        "函证信息-本公司为其他单位提供的、以贵行为担保受益人的担保",
+        "函证信息-空值"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 2,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/银行函证表格生成-纸质格式二配置表.xlsx",
+      "size": 24286,
+      "sha256": "00b6c4c8931503881c78f6cd3e5976eb099f632b04d8961c8fbec8c448f490c4",
+      "sheets": [
+        "操作说明",
+        "主信息-变动信息",
+        "主信息-相对固定信息",
+        "被询证者信息",
+        "信息库"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 4,
+      "drawingParts": 0,
+      "commentParts": 1,
+      "formulaCells": 12
+    },
+    {
+      "file": "_template/银行流水合并.xlsx",
+      "size": 10997,
+      "sha256": "9179cdd15ce5bb5f662fb8f88aefac5307313410b2f6504462adb2cf4f493b8c",
+      "sheets": [
+        "配置表",
+        "操作说明"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/银行流水核对配置表.xlsx",
+      "size": 18997,
+      "sha256": "94fddeaf2d3a95262fb423cae970b392001dda6f89ccea4114ac5c8bcf9775c1",
+      "sheets": [
+        "操作说明",
+        "序时账配置表",
+        "银行流水配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/链接提取配置表.xlsx",
+      "size": 13568,
+      "sha256": "dc24c55163771b8326ee717e400170f9046daee9430ec46869be0abb1705c6eb",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 1,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/链接替换-单元格区域替换.xlsx",
+      "size": 409511,
+      "sha256": "f45d0e06d8a7b523c6d98fdf32b5cb9f519e380d779b63335416e5a8891156fb",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 1,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/链接替换-参考替换配置表.xlsx",
+      "size": 13730,
+      "sha256": "afe227f6f459e91fd6fb5694be1d31e06e4f55b6f58b5dd8feb69d0d3d6edc2e",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/链接替换-文件名替换.xlsx",
+      "size": 13549,
+      "sha256": "4c03857432178ab3a78d3fb4321507d4d00ffe101b674bf95d469b979b03c0a3",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/链接替换-文件夹路径替换.xlsx",
+      "size": 12237,
+      "sha256": "d0591d0578da96cd9736632e9456748bbbbbd988d04bbc9fa0d0551e37051d52",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/长期资产测算配置表.xlsx",
+      "size": 12522,
+      "sha256": "a275cfb22a10c97fe09f8629c9c8b84ed5b32c44dc0b1e0f45d9425a70dbaf0e",
+      "sheets": [
+        "操作说明",
+        "数据源配置"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/附注穿透配置表.xlsx",
+      "size": 15554,
+      "sha256": "9b5a1e2d7bed80daa883987c4ab3f4dfbc52758d11a29cf4377baae99a5d6c7b",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/附注链接批量替换工具.xlsm",
+      "size": 189059,
+      "sha256": "461e6020ce6d33bbd53b00089cca2a69844b4b35b5fdb6ae0c8926d709fc1176",
+      "sheets": [
+        "操作说明",
+        "数据项",
+        "链接规则",
+        "结果"
+      ],
+      "vbaProject": true,
+      "externalLinkParts": 0,
+      "drawingParts": 2,
+      "commentParts": 0,
+      "formulaCells": 0
+    },
+    {
+      "file": "_template/附注链接模板披露表配置表.xlsx",
+      "size": 14349,
+      "sha256": "e124f00cbf680564217c519a99dff634bedf9576e61f39e49d30a3f3eb2fc55b",
+      "sheets": [
+        "操作说明",
+        "配置表"
+      ],
+      "vbaProject": false,
+      "externalLinkParts": 0,
+      "drawingParts": 0,
+      "commentParts": 0,
+      "formulaCells": 0
+    }
+  ],
+  "skills": [
+    {
+      "id": "cicpa-query",
+      "file": "src/skills/cicpa-query/SKILL.md",
+      "sha256": "4e449c76cbcaeac1e16b4670e93c3266cc26d17193c5138fc3ee527ae309a9aa",
+      "mentionsRegisteredTools": [
+        "cicpa_query"
+      ]
+    },
+    {
+      "id": "detailed-table-generation",
+      "file": "src/skills/detailed-table-generation/SKILL.md",
+      "sha256": "71125c135605c182cd7743ca6be4f812fa9948bf89b69fd3a95156c82dd4713f",
+      "mentionsRegisteredTools": [
+        "detailed_table_generate",
+        "detailed_table_inspect",
+        "detailed_table_inspect_template",
+        "detailed_table_save_config",
+        "detailed_table_validate"
+      ]
+    },
+    {
+      "id": "find-skills",
+      "file": "src/skills/find-skills/SKILL.md",
+      "sha256": "2e4d1428b021daf1f4013d204662f3865e483b9a8b87b5b445ea3b14f154f6f9",
+      "mentionsRegisteredTools": []
+    },
+    {
+      "id": "jet-test",
+      "file": "src/skills/jet-test/SKILL.md",
+      "sha256": "a1f0559aa8fc22ec0162568a7c46b7b2dbf66eaf9903bc42582ff42b80e7f4e7",
+      "mentionsRegisteredTools": [
+        "jet_test_execute",
+        "jet_test_inspect"
+      ]
+    },
+    {
+      "id": "monthly-analysis-mcp",
+      "file": "src/skills/monthly-analysis-mcp/SKILL.md",
+      "sha256": "f7d2e30712d85840ec7315c9e143a33d72c2ec7ff59bde4b2699a5e52b23be98",
+      "mentionsRegisteredTools": [
+        "monthly_ai_analysis",
+        "monthly_detect_structure",
+        "monthly_execute",
+        "monthly_preview"
+      ]
+    },
+    {
+      "id": "related-party-identification",
+      "file": "src/skills/related-party-identification/SKILL.md",
+      "sha256": "5767189d4ddbccc062bf66fb195d43d6a88308bb20e8cae2aad16f0f4fc9e689",
+      "mentionsRegisteredTools": [
+        "cicpa_query",
+        "related_party"
+      ]
+    },
+    {
+      "id": "skill-creator",
+      "file": "src/skills/skill-creator/SKILL.md",
+      "sha256": "a9b0591ae141078bdd033e42a9306b93e62603c31c8d4ed9c65d79afd7a56825",
+      "mentionsRegisteredTools": []
+    },
+    {
+      "id": "skill-vetter",
+      "file": "src/skills/skill-vetter/SKILL.md",
+      "sha256": "5f24e227eed6191ce49d43b90f2688871494ba3fd6fa26680eb954aa5343d84e",
+      "mentionsRegisteredTools": []
+    }
+  ],
+  "frozenBytecode": [
+    {
+      "file": "src/legacy-mcp/registry.bin",
+      "sha256": "3549fa501c80737f27a250893442536ee0ba3a09aecb5e2dec16ed2fa7cecf87",
+      "type": "code",
+      "codeObjects": [
+        {
+          "name": "<module>",
+          "filename": "_mcp_module_registry.py",
+          "firstLine": 1
+        }
+      ],
+      "moduleStrings": [
+        "modules.add_column",
+        "modules.address_split",
+        "modules.ai_formula_filler",
+        "modules.announcement",
+        "modules.asist_split",
+        "modules.auxiliary_selection",
+        "modules.bank_digit2",
+        "modules.bank_flow",
+        "modules.bank_paper1",
+        "modules.bank_paper2",
+        "modules.bankflowmerge",
+        "modules.cicpa_query",
+        "modules.currency",
+        "modules.cutoff_sampling",
+        "modules.data_field_check",
+        "modules.detailed_table.detailed_table_generate",
+        "modules.detailed_table.detailed_table_inspect",
+        "modules.detailed_table.detailed_table_inspect_template",
+        "modules.detailed_table.detailed_table_save_config",
+        "modules.detailed_table.detailed_table_validate",
+        "modules.dropsummary",
+        "modules.extract_disclosure_scope",
+        "modules.extract_disclosure_tables",
+        "modules.file_classification",
+        "modules.fill_column",
+        "modules.gross_margin_analysis",
+        "modules.headers_process",
+        "modules.id_card",
+        "modules.info_extract",
+        "modules.info_extract_multi",
+        "modules.insert_column",
+        "modules.insert_footnote_comments",
+        "modules.ipo_bj",
+        "modules.ipo_sh",
+        "modules.ipo_sz",
+        "modules.jet_test.jet_test_execute",
+        "modules.jet_test.jet_test_inspect",
+        "modules.ledger_check",
+        "modules.link_extractor",
+        "modules.link_ref_replace",
+        "modules.link_replace_range",
+        "modules.link_replace_text",
+        "modules.link_replace_workbook",
+        "modules.merge_column",
+        "modules.monthly_analysis.monthly_ai_analysis",
+        "modules.monthly_analysis.monthly_detect_structure",
+        "modules.monthly_analysis.monthly_execute",
+        "modules.monthly_analysis.monthly_preview",
+        "modules.multi_collect_file",
+        "modules.multi_collect_folder",
+        "modules.paper_verify",
+        "modules.photo_rename",
+        "modules.pickup_value",
+        "modules.qcc_processor",
+        "modules.related_party",
+        "modules.select_column",
+        "modules.subject_allocation",
+        "modules.subject_clean.tool_execute",
+        "modules.subject_clean.tool_preview",
+        "modules.subject_clean_after",
+        "modules.text_match",
+        "modules.voucher_check",
+        "modules.xlsx_writer"
+      ],
+      "registeredNameStrings": [],
+      "registryEntries": [
+        [
+          "modules.add_column",
+          "modules.address_split",
+          "modules.ai_formula_filler",
+          "modules.announcement",
+          "modules.asist_split",
+          "modules.auxiliary_selection",
+          "modules.bank_digit2",
+          "modules.bank_flow",
+          "modules.bank_paper1",
+          "modules.bank_paper2",
+          "modules.bankflowmerge",
+          "modules.cicpa_query",
+          "modules.currency",
+          "modules.cutoff_sampling",
+          "modules.data_field_check",
+          "modules.detailed_table.detailed_table_generate",
+          "modules.detailed_table.detailed_table_inspect",
+          "modules.detailed_table.detailed_table_inspect_template",
+          "modules.detailed_table.detailed_table_save_config",
+          "modules.detailed_table.detailed_table_validate",
+          "modules.dropsummary",
+          "modules.extract_disclosure_scope",
+          "modules.extract_disclosure_tables",
+          "modules.file_classification",
+          "modules.fill_column",
+          "modules.gross_margin_analysis",
+          "modules.headers_process",
+          "modules.id_card",
+          "modules.info_extract",
+          "modules.info_extract_multi",
+          "modules.insert_column",
+          "modules.insert_footnote_comments",
+          "modules.ipo_bj",
+          "modules.ipo_sh",
+          "modules.ipo_sz",
+          "modules.jet_test.jet_test_execute",
+          "modules.jet_test.jet_test_inspect",
+          "modules.ledger_check",
+          "modules.link_extractor",
+          "modules.link_ref_replace",
+          "modules.link_replace_range",
+          "modules.link_replace_text",
+          "modules.link_replace_workbook",
+          "modules.merge_column",
+          "modules.monthly_analysis.monthly_ai_analysis",
+          "modules.monthly_analysis.monthly_detect_structure",
+          "modules.monthly_analysis.monthly_execute",
+          "modules.monthly_analysis.monthly_preview",
+          "modules.multi_collect_file",
+          "modules.multi_collect_folder",
+          "modules.paper_verify",
+          "modules.photo_rename",
+          "modules.pickup_value",
+          "modules.qcc_processor",
+          "modules.related_party",
+          "modules.select_column",
+          "modules.subject_allocation",
+          "modules.subject_clean.tool_execute",
+          "modules.subject_clean.tool_preview",
+          "modules.subject_clean_after",
+          "modules.text_match",
+          "modules.voucher_check",
+          "modules.xlsx_writer"
+        ]
+      ],
+      "topLevelNames": [
+        "__doc__",
+        "MCP_MODULE_NAMES"
+      ]
+    },
+    {
+      "file": "src/legacy-mcp/mcp_server.bin",
+      "sha256": "3142c2583a7c98a21f5dc53872559b4de6b9fc5b9f8cd5946f60a9e093372eca",
+      "type": "code",
+      "codeObjects": [
+        {
+          "name": "<module>",
+          "filename": "mcp_server.py",
+          "firstLine": 1
+        },
+        {
+          "name": "_is_valid_tool_module",
+          "filename": "mcp_server.py",
+          "firstLine": 80
+        },
+        {
+          "name": "_clean_description",
+          "filename": "mcp_server.py",
+          "firstLine": 97
+        },
+        {
+          "name": "_discover_and_register",
+          "filename": "mcp_server.py",
+          "firstLine": 122
+        },
+        {
+          "name": "handle_list_tools",
+          "filename": "mcp_server.py",
+          "firstLine": 237
+        },
+        {
+          "name": "handle_call_tool",
+          "filename": "mcp_server.py",
+          "firstLine": 249
+        },
+        {
+          "name": "main",
+          "filename": "mcp_server.py",
+          "firstLine": 310
+        },
+        {
+          "name": "run_server",
+          "filename": "mcp_server.py",
+          "firstLine": 335
+        }
+      ],
+      "moduleStrings": [],
+      "registeredNameStrings": [],
+      "registryEntries": [],
+      "topLevelNames": [
+        "__doc__",
+        "sys",
+        "os",
+        "platform",
+        "environ",
+        "setdefault",
+        "hasattr",
+        "stdout",
+        "reconfigure",
+        "stderr",
+        "getattr",
+        "_meipass",
+        "path",
+        "dirname",
+        "executable",
+        "_app_dir",
+        "join",
+        "_internal",
+        "isdir",
+        "insert",
+        "json",
+        "importlib",
+        "importlib.util",
+        "pkgutil",
+        "inspect",
+        "contextlib",
+        "logging",
+        "asyncio",
+        "re",
+        "_re",
+        "mcp.server",
+        "Server",
+        "mcp.server.stdio",
+        "stdio_server",
+        "mcp.types",
+        "Tool",
+        "TextContent",
+        "basicConfig",
+        "INFO",
+        "getLogger",
+        "logger",
+        "_log_dir",
+        "abspath",
+        "__file__",
+        "makedirs",
+        "FileHandler",
+        "_fh",
+        "setLevel",
+        "DEBUG",
+        "setFormatter",
+        "Formatter",
+        "addHandler",
+        "Exception",
+        "bool",
+        "_is_valid_tool_module",
+        "str",
+        "_clean_description",
+        "list",
+        "_discover_and_register",
+        "_tool_registry",
+        "dict",
+        "__annotations__",
+        "_work_dir",
+        "server",
+        "list_tools",
+        "handle_list_tools",
+        "call_tool",
+        "handle_call_tool",
+        "main",
+        "__name__"
+      ]
+    }
+  ],
+  "workerFunctions": [
+    "emit",
+    "digest",
+    "inside",
+    "qi",
+    "lit",
+    "names",
+    "val",
+    "tables",
+    "import_tables",
+    "require",
+    "decimal_column",
+    "numeric_param",
+    "date_expr",
+    "run_sql",
+    "condition",
+    "jet_query",
+    "export_result",
+    "run"
+  ],
+  "limitations": [
+    "String hints are observations, not verified dependency graphs or algorithms.",
+    "No real credentials, user configuration, databases, projects, or outputs were read.",
+    "No dynamic legacy execution or independent migration verification occurred in this analysis."
+  ]
+}

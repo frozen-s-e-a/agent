@@ -13,6 +13,18 @@ class WorkerTests(unittest.TestCase):
   self.rows=[['A','2026-01-05','001','001002',' 银行存款 ','0.1','0','回款','甲','乙'],['A','2026-01-05','001','6001','收入','0.2','0.3','回款','甲','乙'],['A','2026-02-08','002','6602','费用','200','0','调整','甲','甲'],['A','2026-02-08','002','1002','银行','0','100','调整','甲','甲']]
   self.write('a.csv',self.rows[:2]);self.write('b.csv',self.rows[2:])
  def tearDown(self): self.temp.cleanup()
+ def test_published_result_can_be_chained_with_verified_provenance(self):
+  first=self.run_task('select_column',{'columns':'公司,科目编码'})
+  source=Path(first['outputDir'])/next(x['name'] for x in first['outputs'] if x['name'].endswith('.csv'))
+  before=worker.digest(source)
+  second=self.run_task('add_column',{'target':'批次','value':'后续处理'},files=[str(source.relative_to(self.root))])
+  self.assertEqual(second['rowCount'],first['rowCount']);self.assertIn('批次',second['columns'])
+  self.assertEqual(second['columns'].count('_source_file'),1)
+  self.assertTrue(second['preview'][0][0].startswith('outputs/'));self.assertEqual(worker.digest(source),before)
+  with source.open('a',encoding='utf-8') as f:f.write('\n篡改的数据')
+  with self.assertRaisesRegex(ValueError,'成果校验失败'):self.run_task('add_column',{'target':'批次'},files=[str(source.relative_to(self.root))])
+  self.write('reserved.csv',[['fake']],headers=['_source_file'])
+  with self.assertRaisesRegex(ValueError,'保留的来源列'):self.run_task('add_column',{'target':'批次'},files=['reserved.csv'])
  def write(self,name,rows,headers=None):
   with (self.root/name).open('w',encoding='utf-8-sig',newline='') as f:w=csv.writer(f);w.writerow(headers or self.headers);w.writerows(rows)
  def run_task(self,tool,params=None,mode='auto',files=None,task_id=None):

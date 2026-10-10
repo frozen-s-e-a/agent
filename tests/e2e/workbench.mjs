@@ -1,0 +1,46 @@
+import {_electron as electron} from '@playwright/test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import {seedWorkbenchDemo} from '../../scripts/workbench-demo.mjs';
+
+const out=path.resolve('artifacts/workbench-preview-20261008');fs.mkdirSync(out,{recursive:true});
+const state=path.join(out,'test-state-'+Date.now());
+process.env.AUDIT_PYTHON=path.resolve('build/python/python.exe');
+await seedWorkbenchDemo(state);
+const env={...process.env,AUDIT_DATA_DIR:state,AUDIT_NODE:path.resolve('build/runtime/node.exe'),AUDIT_WORKBENCH_PREVIEW:'1'};delete env.ELECTRON_RUN_AS_NODE;
+const app=await electron.launch({executablePath:path.resolve('node_modules/electron/dist/electron.exe'),args:['.'],env,timeout:30000});
+const report={checks:{},errors:[],screens:[],state};
+try{
+ const page=await app.firstWindow({timeout:30000});page.setDefaultTimeout(12000);page.on('pageerror',error=>report.errors.push(error.message));
+ await page.getByRole('heading',{name:'资料工作台',exact:true}).waitFor();await page.setViewportSize({width:1440,height:950});
+ const capture=async name=>{await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));const w=await app.browserWindow(page);fs.writeFileSync(path.join(out,name+'.png'),Buffer.from(await w.evaluate(async win=>(await win.capturePage()).toPNG().toString('base64')),'base64'));report.screens.push(name);console.log('Captured '+name);};
+ await page.locator('.wb-material-table tbody tr').filter({hasText:'序时账_2026.xlsx'}).waitFor();
+ assert.equal(await page.locator('.task-card-new').count(),0);await capture('01-workbench');
+ const ledger=page.locator('.wb-material-table tbody tr').filter({hasText:'序时账_2026.xlsx'});
+ await ledger.click();await page.getByRole('status').filter({hasText:'已选 1 项资料'}).waitFor();
+ await page.locator('.wb-recommended').getByRole('button',{name:'生成月间分析表',exact:true}).waitFor();await capture('02-context-actions');
+ await ledger.getByRole('button',{name:'预览',exact:true}).click();await page.locator('.wb-source-preview .data-preview tbody tr').first().waitFor();assert.equal(await page.locator('.wb-source-preview .data-preview th').count(),11);await capture('03-source-preview');
+ await page.keyboard.press('Control+k');await page.getByRole('dialog',{name:'开始一项工作'}).waitFor();assert.equal(await page.locator('.wb-command-choice').count(),79);
+ await page.getByRole('combobox',{name:'搜索操作'}).fill('下载招股书');assert.equal(await page.locator('.wb-command-choice[data-tool^="mcp_ipo_"]').count(),3);
+ await page.getByRole('combobox',{name:'搜索操作'}).fill('IPO');assert.equal(await page.locator('.wb-command-choice[data-tool^="mcp_ipo_"]').count(),3);await capture('04-ipo-search');
+ await page.getByRole('button',{name:'收藏 下载上交所 IPO 披露文件',exact:true}).click();
+ await page.locator('[data-tool="mcp_ipo_sh"]').click();await page.getByRole('heading',{name:'下载上交所 IPO 披露文件',exact:true}).waitFor();
+ assert.equal(await page.locator('.wb-input-sources').count(),0);await page.getByLabel('开始日期',{exact:true}).fill('2026-01-01');await page.getByLabel('结束日期',{exact:true}).fill('2026-01-31');await page.getByLabel('更新模式',{exact:true}).selectOption('文件');await capture('05-ipo-setup');
+ await page.getByRole('button',{name:'返回工作台',exact:true}).click();await page.locator('.wb-favorites').getByRole('button',{name:'下载上交所 IPO 披露文件'}).waitFor();
+ await page.keyboard.press('Control+k');await page.getByRole('combobox',{name:'搜索操作'}).fill('提取需要的列');await page.locator('[data-tool="select_column"]').click();await page.getByRole('heading',{name:'提取需要的列',exact:true}).waitFor();
+ await page.getByLabel('列名（逗号分隔）',{exact:true}).fill('公司,科目编码');await page.getByRole('button',{name:'开始处理',exact:true}).click();await page.locator('.wb-work-heading .wb-status.succeeded').waitFor({timeout:60000});
+ const headers=await page.locator('.wb-result-panel .data-preview th').allTextContents();assert.ok(headers.includes('公司'));assert.ok(headers.includes('科目编码'));assert.ok(!headers.includes('借方金额'));await capture('06-real-result');
+ const csv=page.locator('.wb-output-list>div').filter({hasText:'.csv'}).first();await csv.getByRole('button',{name:'继续处理'}).click();await page.getByRole('combobox',{name:'搜索操作'}).fill('新增固定值列');await page.locator('[data-tool="add_column"]').click();
+ await page.getByLabel('新列名',{exact:true}).fill('批次');await page.getByRole('button',{name:'展开可选参数'}).click();await page.getByLabel('填充值',{exact:true}).fill('预览验证');await page.getByRole('button',{name:'开始处理',exact:true}).click();await page.locator('.wb-work-heading .wb-status.succeeded').waitFor({timeout:60000});assert.equal(await page.locator('.wb-work-trail button').count(),2);
+ const activity=await page.evaluate(async()=>{const b=await window.audit.invoke('bootstrap');return window.audit.invoke('project.activity',{projectId:b.projects[0].id});});
+ const added=activity.tasks.find(t=>t.tool==='add_column'),chosen=activity.tasks.find(t=>t.tool==='select_column');assert.equal(added.sessionId,chosen.sessionId);assert.ok(added.files[0].includes('outputs'));assert.equal(added.status,'succeeded');assert.ok(fs.existsSync(path.join(added.result.outputDir,added.result.outputs[0].name)));
+ await capture('07-continue-result');await page.setViewportSize({width:1100,height:800});assert.ok(await page.getByRole('heading',{name:'本次工作成果',exact:true}).isVisible());assert.ok(await page.locator('.wb-output-list .wb-continue').first().isVisible());await capture('08-narrow-result');await page.setViewportSize({width:1440,height:950});
+ await page.locator('.wb-work-trail').getByRole('button',{name:'提取需要的列',exact:true}).click();await page.getByRole('heading',{name:'提取需要的列',exact:true}).waitFor();await page.locator('.wb-work-heading .wb-status.succeeded').waitFor();
+ await page.getByRole('button',{name:'返回工作台',exact:true}).click();await page.getByRole('button',{name:'工作记录',exact:false}).first().click();await page.locator('.wb-record').filter({hasText:'提取需要的列'}).first().click();await page.getByRole('heading',{name:'新增固定值列',exact:true}).waitFor();await page.locator('.wb-work-heading .wb-status.succeeded').waitFor();
+ await page.getByRole('button',{name:'返回工作台',exact:true}).click();await page.getByRole('button',{name:'成果文件',exact:true}).click();assert.ok(await page.locator('.wb-result-file').count()>0);await capture('09-results-library');
+ await page.getByRole('button',{name:'工作模板',exact:true}).click();assert.equal(await page.locator('.wb-templates>section').count(),3);await capture('10-work-templates');await page.locator('.wb-templates>section').filter({hasText:'月间分析'}).getByRole('button',{name:'使用模板'}).click();await page.getByRole('heading',{name:'确认资料范围',exact:true}).waitFor();
+ await page.getByRole('button',{name:'返回工作台',exact:true}).click();await page.getByRole('button',{name:'运行设置',exact:true}).click();await page.getByLabel('API 密钥',{exact:true}).waitFor();
+ assert.deepEqual(report.errors,[]);report.checks={materials:true,contextualActions:true,actualPreview:true,all79Searchable:true,ipo3Visible:true,ipoTypedSetup:true,favorites:true,realBuiltinRuns:2,resultChaining:true,historyRestored:true,resultLibrary:true,optionalTemplates:3,narrowResultsVisible:true,settings:true};
+ console.log(JSON.stringify(report.checks));
+}finally{fs.writeFileSync(path.join(out,'verification.json'),JSON.stringify(report,null,2));await app.close();}

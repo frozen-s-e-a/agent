@@ -47,18 +47,35 @@ def tables(p,params):
 def import_tables(db,files,root,params):
     columns=[];count=0;db.execute('CREATE TABLE data (_source_file VARCHAR,_source_sheet VARCHAR,_source_row BIGINT,_row_id BIGINT)')
     for p in files:
+        published=False
+        manifest_path=p.parent/'manifest.json'
+        if p.is_relative_to(root/'outputs') and manifest_path.is_file():
+            manifest=json.loads(manifest_path.read_text(encoding='utf-8'))
+            output=next((x for x in manifest.get('outputs',[]) if x.get('name')==p.name),None)
+            if output and manifest.get('status')=='succeeded':
+                if digest(p)!=output.get('sha256'):raise ValueError('已发布成果校验失败，不能继续处理被修改的结果')
+                published=True
         for sheet,rows in tables(p,params):
             header=next(rows,None)
             if header is None:continue
             header=[str(v).strip() if v is not None else f'未命名列{i+1}' for i,v in enumerate(header)]
+            original_header=header[:]
+            indices=list(range(len(header)))
+            reserved=any(x in META for x in header)
+            if len(set(header))!=len(header) or any(x.startswith('__f') for x in header):raise ValueError('存在重名表头或保留的来源列，请先确认表头行')
+            if reserved:
+                if not published or not set(META).issubset(header):raise ValueError('存在保留的来源列；只有校验通过的已发布成果可以继续处理')
+                # Recreate provenance against the immediate input. The parent result's
+                # manifest and table preserve the preceding step of the lineage.
+                indices=[i for i,name in enumerate(header) if name not in META]
+                header=[original_header[i] for i in indices]
             if len(header)>512:raise ValueError('工作表超过 512 列，当前适配器拒绝超宽输入')
-            if len(set(header))!=len(header) or any(x in META or x.startswith('__f') for x in header):raise ValueError('存在重名表头或保留的来源列，请先确认表头行')
             for col in header:
                 if col not in columns:db.execute(f'ALTER TABLE data ADD COLUMN {qi(col)} VARCHAR');columns.append(col)
             cols=META+header;sql='INSERT INTO data ('+','.join(map(qi,cols))+') VALUES ('+','.join('?' for _ in cols)+')';batch=[];batch_rows=max(10,min(1000,12000//len(cols)))
             for rownum,row in enumerate(rows,start=int(params.get('headerRow',1))+1):
-                if len(row)>len(header) and any(v is not None and str(v)!='' for v in row[len(header):]):raise ValueError(f'{p.name}/{sheet}/{rownum}：数据列超出表头，未截断')
-                values=[val(v) for v in row[:len(header)]];values += [None]*(len(header)-len(values))
+                if len(row)>len(original_header) and any(v is not None and str(v)!='' for v in row[len(original_header):]):raise ValueError(f'{p.name}/{sheet}/{rownum}：数据列超出表头，未截断')
+                values=[val(row[i]) if i<len(row) else None for i in indices]
                 count+=1;batch.append([p.relative_to(root).as_posix(),sheet,rownum,count]+values)
                 if len(batch)>=batch_rows:
                     prefix,_=sql.rsplit(' VALUES ',1)
@@ -251,6 +268,17 @@ def run(request):
         from attachment_extract import extract_attachment
         return extract_attachment(files[0])
     if tool=='__preview':
+        if files[0].suffix.lower()=='.parquet':
+            connection=duckdb.connect(':memory:')
+            try:
+                connection.execute("SET memory_limit='128MB'")
+                cursor=connection.execute('SELECT * FROM read_parquet(?) LIMIT 10',[str(files[0])])
+                if len(cursor.description)>512:raise ValueError('结果超过预览列数预算')
+                return {'columns':[str(c[0]) for c in cursor.description],'preview':[[val(x)[:200] if x is not None else None for x in row] for row in cursor.fetchall()],'previewOnly':True}
+            finally:connection.close()
+        if files[0].suffix.lower() in ['.pdf','.docx']:
+            from attachment_extract import extract_attachment
+            return {**extract_attachment(files[0]),'previewOnly':True}
         for sheet,rows in tables(files[0],p):
             header=next(rows,None)
             if header is None:continue

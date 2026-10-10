@@ -29,7 +29,7 @@ export class LegacyMcpClient {
   }
   async listTools(){await this.start(); return this.tools;}
   async call(name,args={}) { await this.start(); if(!this.tools.some(t=>t.name===name)) throw new Error(`原版 MCP 工具不存在：${name}`); return this.#request('tools/call',{name,arguments:args}); }
-  async close(){if(this.child){this.child.kill();this.child=null;}for(const [,p] of this.pending)p.reject(new Error('MCP 服务已关闭'));this.pending.clear();}
+  async close(){if(this.child){this.child.kill();this.child=null;}for(const [,p] of this.pending){clearTimeout(p.timer);p.reject(new Error('MCP 服务已关闭'));}this.pending.clear();}
   #notify(method,params){this.child?.stdin.write(JSON.stringify({jsonrpc:'2.0',method,params})+'\n');}
   #request(method,params){return new Promise((resolve,reject)=>{const id=this.nextId++;this.pending.set(id,{resolve,reject,timer:setTimeout(()=>{this.pending.delete(id);reject(new Error(`MCP 请求超时：${method}`));},120000)});try{this.child.stdin.write(JSON.stringify({jsonrpc:'2.0',id,method,params})+'\n')}catch(e){this.pending.delete(id);reject(e)}})}
   #onData(data){this.buffer+=data;let i;while((i=this.buffer.indexOf('\n'))>=0){const line=this.buffer.slice(0,i).trim();this.buffer=this.buffer.slice(i+1);if(!line)continue;let msg;try{msg=JSON.parse(line)}catch{continue}if(msg.id===undefined)continue;const p=this.pending.get(msg.id);if(!p)continue;clearTimeout(p.timer);this.pending.delete(msg.id);if(msg.error)p.reject(new Error(msg.error.message||'MCP 调用失败'));else p.resolve(msg.result)}}
@@ -39,14 +39,18 @@ export function mcpToOpenAiTool(tool,prefix='legacy_') {
   const name=prefix+String(tool.name||'').replace(/[^A-Za-z0-9_-]/g,'_');
   return {type:'function',function:{name,description:`原版 MCP：${tool.description||tool.name}`,parameters:tool.inputSchema||{type:'object',properties:{},additionalProperties:true}}};
 }
-const pathKeys=/^(file|files|file_path|file_paths|config_file|config_files|work_dir|output_dir|output_path|template_dir|data_dir|result_file|this_year_file|last_year_file|gl_path|bank_path)$/i;
-const outputPathKeys=/^(output_dir|output_path|result_file)$/i;
+const pathKeys=/^(file|files|file_path|file_paths|config_file|config_files|work_dir|output_dir|output_path|template_dir|data_dir|result_file|this_year_file|last_year_file|gl_path|bank_path|folder|folder_path|directory|target_path|source_paths|this_data_path|last_data_path)$/i;
+const outputPathKeys=/^(output_dir|output_path)$/i;
+function within(root,candidate){const relative=path.relative(root,candidate);return relative!=='..'&&!relative.startsWith('..'+path.sep)&&!path.isAbsolute(relative);}
 export function constrainMcpArgs(value,root,key='',allowedFiles=null) {
   if(Array.isArray(value)) return value.map(v=>constrainMcpArgs(v,root,key,allowedFiles));
   if(value&&typeof value==='object') return Object.fromEntries(Object.entries(value).map(([k,v])=>[k,constrainMcpArgs(v,root,k,allowedFiles)]));
-  if(typeof value==='string'&&pathKeys.test(key)) {
-    const resolved=path.resolve(root,value); if(!resolved.startsWith(root+path.sep)&&resolved!==root) throw new Error(`MCP 路径超出当前项目：${value}`);
-    if(allowedFiles && !outputPathKeys.test(key) && !allowedFiles.has(resolved)) throw new Error(`MCP 文件未在当前对话选择范围内：${value}`);
+  if(typeof value==='string'&&value.trim()&&pathKeys.test(key)) {
+    const realRoot=fs.realpathSync(root),resolved=path.resolve(realRoot,value);if(!within(realRoot,resolved))throw new Error(`MCP 路径超出当前项目：${value}`);
+    let ancestor=resolved;while(!fs.existsSync(ancestor)&&path.dirname(ancestor)!==ancestor)ancestor=path.dirname(ancestor);
+    if(!within(realRoot,fs.realpathSync(ancestor)))throw new Error(`MCP 路径超出当前项目：${value}`);
+    if(!outputPathKeys.test(key)&&!fs.existsSync(resolved))throw new Error(`输入不存在：${value}`);
+    if(allowedFiles && !outputPathKeys.test(key) && ![...allowedFiles].some(p=>{const permitted=path.resolve(realRoot,p);return permitted===resolved||(fs.existsSync(permitted)&&fs.statSync(permitted).isDirectory()&&within(permitted,resolved));})) throw new Error(`MCP 文件未在当前资料范围内：${value}`);
     return resolved;
   }
   return value;

@@ -1,0 +1,152 @@
+{
+  "cases": 7,
+  "rowChecks": 41,
+  "failureCount": 0,
+  "records": [
+    {
+      "name": "all_columns_duplicate",
+      "tool": "逻辑_行内容重复",
+      "native": [
+        "是",
+        "是",
+        "否",
+        "是",
+        "是"
+      ],
+      "reference": [
+        "是",
+        "是",
+        "否",
+        "是",
+        "是"
+      ],
+      "equal": true
+    },
+    {
+      "name": "subset_duplicate",
+      "tool": "逻辑_行内容重复",
+      "native": [
+        "是",
+        "是",
+        "是",
+        "是",
+        "是"
+      ],
+      "reference": [
+        "是",
+        "是",
+        "是",
+        "是",
+        "是"
+      ],
+      "equal": true
+    },
+    {
+      "name": "tail_decimal_and_overlap",
+      "tool": "文本_提取后几位",
+      "native": [
+        "0",
+        "0|10",
+        "123|999",
+        "123|123",
+        "999|999",
+        "000",
+        "000|111",
+        ""
+      ],
+      "reference": [
+        "0",
+        "0|10",
+        "123|999",
+        "123|123",
+        "999|999",
+        "000",
+        "000|111",
+        ""
+      ],
+      "equal": true
+    },
+    {
+      "name": "modulus_negative",
+      "tool": "数值_求余数",
+      "native": [
+        0.01,
+        9.99,
+        3.0,
+        7.0,
+        9.0,
+        0.0,
+        0.009999999999990905,
+        null
+      ],
+      "reference": [
+        0.01,
+        9.99,
+        3.0,
+        7.0,
+        9.0,
+        0.0,
+        0.009999999999990905,
+        null
+      ],
+      "equal": true
+    },
+    {
+      "name": "equality_empty_and_type",
+      "tool": "逻辑_对比两列相同",
+      "native": [
+        "是",
+        "是",
+        "否",
+        "是",
+        "否",
+        "是",
+        "否"
+      ],
+      "reference": [
+        "是",
+        "是",
+        "否",
+        "是",
+        "否",
+        "是",
+        "否"
+      ],
+      "equal": true
+    },
+    {
+      "name": "invalid_date_month",
+      "tool": "日期_提取月份",
+      "native": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "reference": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "equal": true
+    },
+    {
+      "name": "invalid_date_weekend",
+      "tool": "日期_判断周末",
+      "native": [
+        "否",
+        "否",
+        "否",
+        "否"
+      ],
+      "reference": [
+        "否",
+        "否",
+        "否",
+        "否"
+      ],
+      "equal": true
+    }
+  ]
+}

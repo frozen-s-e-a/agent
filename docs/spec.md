@@ -1,50 +1,45 @@
-# 审计助手 — 前端规范
+# AI 审计助手客户端规范
 
-## 一句话定位
+## 产品骨架
 
-桌面审计助手：在本地电脑上处理 Excel/CSV 文件，结合大语言模型辅助财务审计。
+这是一个以审计任务为入口的 Windows 桌面工作台。用户先选任务，再按阶段选择资料、调用已注册能力、确认口径并查看阶段成果。客户端不以聊天窗口、工具搜索或常驻文件栏作为主导航。
 
-## 核心页面
+## 一级导航
 
-1. **聊天页** — 主工作区，消息流 + 工具调用 + 文件选择侧栏
-2. **设置页** — 模型配置、资源权限、用量统计、迁移信息
-3. **欢迎页** — 空聊天时的引导页面
-4. **模态框** — 创建项目、工具搜索、工具参数填写
+- **任务中心**：按九类真实审计任务展示任务卡。
+- **处理记录**：按当前项目查看已创建的审计任务记录，并进入对应流程。
+- **运行设置**：配置模型地址、文本模型和本地默认处理模式。
 
-## 布局结构
+项目切换位于任务上下文顶部；项目文件只在具体任务阶段选择，文件浏览器支持进入子目录。
 
-```
-App Shell (flex row, 100vh)
-├── Sidebar (264px, left brand border)
-│   ├── Brand mark + title
-│   ├── New Chat button
-│   ├── Search button (Ctrl+K)
-│   ├── Projects list (collapsible sessions)
-│   ├── Standalone sessions
-│   └── Bottom: migration + settings + local badge
-├── Main (flex 1, flex column)
-│   ├── Topbar (breadcrumb + local pill + panel toggle)
-│   ├── Notification stack (top-right banners)
-│   └── Workspace (flex 1)
-│       ├── Chat page
-│       │   ├── WelcomePage (empty) or Messages + ContextPanel
-│       │   └── Composer (text + attachments + send)
-│       └── Settings page (tabbed content)
-└── Modals (full-screen backdrop, centered)
-```
+## 任务流程
 
-## 设计原则
+每个任务由 `src/workflows/definitions.mjs` 定义阶段。阶段类型只有三种：
 
-1. **清爽专业 2.0** — 白色背景 + 品牌紫 (#5b5bd6)，无花哨渐变，无 emoji
-2. **功能优先** — 工具面板 > 聊天 > 设置；先解决问题再美化
-3. **本地运行** — 所有数据处理在本机，不在云端；全局 badge 始终可见
-4. **中文优先** — 所有 UI 文本用中文，注释除外
+1. `input`：选择文件并确认输入范围。
+2. `execute`：选择该阶段已注册的内置工具或 Legacy MCP 工具，填写必要参数后执行。
+3. `review`：查看成果、记录阶段完成状态并归档。
 
-## 不做
+任务流程页面固定使用“阶段轨道 + 当前阶段工作区 + 阶段成果”三段结构。执行结果必须来自真实任务返回；没有注册能力的阶段显示为人工确认或不可执行状态，不能伪造结果。
 
-- 不要加用户登录/注册
-- 不要加实时协作
-- 不要改品牌主色（#5b5bd6）
-- 不要改 sidebar 宽度（264px）
-- 不要引入新的 UI 库（只用 lucide-react 图标）
-- 不要修改 electron 宿主代码（只改 src/client/）
+## 视觉与交互
+
+- 浅色工作区背景、白色内容卡片和蓝绿色状态色，服务于长时间审计工作。
+- 左侧导航使用窄幅深蓝轨道，只承载任务中心、处理记录和运行设置，不承载旧版项目树或聊天列表。
+- 阶段成果固定在流程右侧，展示状态、处理行数、警告、输出文件和结果原文。
+- 任务完成、错误、重试和项目创建使用明确的状态通知；动画只用于加载、执行进度和轻量反馈。
+- 所有按钮和输入支持键盘焦点、禁用态和窄窗口布局；减少动效时不依赖动画传达信息。
+
+## 代码边界
+
+- `src/client/main.tsx` 只负责启动、Bootstrap、项目切换和全局通知。
+- `src/client/RedesignedApp.tsx` 提供任务中心、记录、设置和任务流程。
+- `src/client/taskDefinitions.ts` 提供类型和任务图标；实际阶段映射来自 `src/workflows/definitions.mjs`。
+- `src/client/style.css` 是新客户端唯一样式入口。
+- 旧版聊天、消息、侧栏、工具搜索、参数弹窗和灵动岛组件不再属于客户端入口。
+
+## 验收基线
+
+- 启动后可看到 9 张任务卡，且页面不存在旧版 `.app-shell`、`.sidebar`、`.chat-column`、`.right-rail` 或 `.composer`。
+- 每个任务均能进入自己的阶段流程；示例项目可完成“检查数据结构”阶段并在右侧显示成果。
+- `pnpm run typecheck`、`pnpm run build`、`pnpm test` 和 `node tests/e2e/desktop.mjs` 全部通过。

@@ -1,0 +1,6 @@
+[
+  {"name":"basic_positive","conditions":{"摘要":"调整"}},
+  {"name":"basic_numeric","conditions":{"借方金额":">7"}},
+  {"name":"combined","conditions":{"借方金额":">7","科目编码":"^6001"}},
+  {"name":"excluded","conditions":{"摘要":"调整,回款,!回款"}}
+]

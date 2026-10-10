@@ -1,0 +1,227 @@
+[
+  {
+    "originalVa": "0x180030778",
+    "value": "",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x1800307b0",
+    "value": "=",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x1800307b8",
+    "value": ">",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x1800307c0",
+    "value": "<",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x1800307c8",
+    "value": ">=",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x1800307d0",
+    "value": "<=",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x1800307d8",
+    "value": "!=",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x1800307e0",
+    "value": "!^",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x1800307e8",
+    "value": "!",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x1800307f0",
+    "value": "^",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x1800307f8",
+    "value": "#",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030880",
+    "value": "^(-?\\d+\\.?\\d*)$",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x1800308b8",
+    "value": "^(>=|<=|!=|>|<|=)\\s*(-?\\d+\\.?\\d*)$",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030928",
+    "value": "Series",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030aa0",
+    "value": "astype",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030af0",
+    "value": "case",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030b70",
+    "value": "contains",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030c38",
+    "value": "escape",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030ca8",
+    "value": "fillna",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030cb8",
+    "value": "_force_numeric",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030cf8",
+    "value": "group",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030d58",
+    "value": "index",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030e08",
+    "value": "match",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030f20",
+    "value": "pd",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030f78",
+    "value": "re",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x1800310c8",
+    "value": "startswith",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x1800310e0",
+    "value": "str",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x1800310e8",
+    "value": "strip",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180031328",
+    "value": 1,
+    "type": "int"
+  },
+  {
+    "originalVa": "0x180031330",
+    "value": 2,
+    "type": "int"
+  },
+  {
+    "originalVa": "0x180030720",
+    "value": ",",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030760",
+    "value": "，",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030800",
+    "value": "[空]",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030808",
+    "value": "![空]",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030810",
+    "value": "^!=",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x1800308b0",
+    "value": "^\\s*$",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030960",
+    "value": "是",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030990",
+    "value": "否",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030b00",
+    "value": "_check_single_item",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030d98",
+    "value": "isna",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030e68",
+    "value": "nan",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030e80",
+    "value": "notna",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030e88",
+    "value": "np",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030fa8",
+    "value": "regex",
+    "type": "str"
+  },
+  {
+    "originalVa": "0x180030fb8",
+    "value": "replace",
+    "type": "str"
+  }
+]

@@ -1,0 +1,35 @@
+{
+  "features": {
+    "type": "DataFrame",
+    "columns": [],
+    "rows": []
+  },
+  "matrix": {
+    "type": "DataFrame",
+    "columns": [
+      "规则名称",
+      "是否执行",
+      "测试文本",
+      "测试数值"
+    ],
+    "rows": [
+      {
+        "规则名称": "basic_positive",
+        "是否执行": "是",
+        "测试文本": "调整",
+        "测试数值": ""
+      },
+      {
+        "规则名称": "basic_numeric",
+        "是否执行": "是",
+        "测试文本": "",
+        "测试数值": ">7"
+      }
+    ]
+  },
+  "validation": [
+    true,
+    []
+  ],
+  "result": []
+}

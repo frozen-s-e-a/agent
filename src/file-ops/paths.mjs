@@ -8,7 +8,7 @@ export function inside(root, candidate) {
 }
 export function listFiles(root, sub='') {
   const dir=inside(root,sub);
-  return fs.readdirSync(dir,{withFileTypes:true}).filter(e=>!e.name.startsWith('.')&&!['node_modules','outputs'].includes(e.name)).slice(0,500).flatMap(e=>{
+  return fs.readdirSync(dir,{withFileTypes:true}).filter(e=>!e.name.startsWith('.')&&!['node_modules'].includes(e.name)).slice(0,500).flatMap(e=>{
     try { const p=inside(root,path.join(dir,e.name)); const s=fs.statSync(p);return [{name:e.name,path:path.relative(root,p),directory:s.isDirectory(),size:s.size}]; } catch{return [];}
   });
 }

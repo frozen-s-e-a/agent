@@ -1,0 +1,160 @@
+{
+  "totalCases": 934,
+  "functions": {
+    "asist_split._parse_auxiliary_item": {
+      "cases": 312,
+      "succeeded": 258,
+      "errors": 54
+    },
+    "select_column._parse_sheet_keywords": {
+      "cases": 9,
+      "succeeded": 9,
+      "errors": 0
+    },
+    "select_column._filter_sheets_by_keywords": {
+      "cases": 6,
+      "succeeded": 6,
+      "errors": 0
+    },
+    "merge_column._letter_to_number": {
+      "cases": 11,
+      "succeeded": 10,
+      "errors": 1
+    },
+    "bankflowmerge._get_renamed_columns_list": {
+      "cases": 4,
+      "succeeded": 4,
+      "errors": 0
+    },
+    "subject_clean/_core._get_renamed_columns_list": {
+      "cases": 4,
+      "succeeded": 4,
+      "errors": 0
+    },
+    "bankflowmerge.increment_column": {
+      "cases": 8,
+      "succeeded": 6,
+      "errors": 2
+    },
+    "monthly_analysis/_core.calc_sub_code": {
+      "cases": 240,
+      "succeeded": 144,
+      "errors": 96
+    },
+    "monthly_analysis/_core.calc_level": {
+      "cases": 28,
+      "succeeded": 20,
+      "errors": 8
+    },
+    "monthly_analysis/_core.calc_sub_name": {
+      "cases": 144,
+      "succeeded": 144,
+      "errors": 0
+    },
+    "monthly_analysis/_core.find_parent_codes": {
+      "cases": 7,
+      "succeeded": 5,
+      "errors": 2
+    },
+    "monthly_analysis/_core.remove_parent_code": {
+      "cases": 7,
+      "succeeded": 5,
+      "errors": 2
+    },
+    "subject_clean/_core._filter_leaf_accounts": {
+      "cases": 7,
+      "succeeded": 6,
+      "errors": 1
+    },
+    "subject_clean/_core._clean_numeric_prefix": {
+      "cases": 4,
+      "succeeded": 4,
+      "errors": 0
+    },
+    "bank_flow.safe_float": {
+      "cases": 11,
+      "succeeded": 11,
+      "errors": 0
+    },
+    "bank_flow.clean_name": {
+      "cases": 11,
+      "succeeded": 11,
+      "errors": 0
+    },
+    "paper_verify.normalize_value": {
+      "cases": 11,
+      "succeeded": 11,
+      "errors": 0
+    },
+    "paper_verify._parse_match_keys": {
+      "cases": 7,
+      "succeeded": 5,
+      "errors": 2
+    },
+    "related_party.normalize_name": {
+      "cases": 6,
+      "succeeded": 4,
+      "errors": 2
+    },
+    "qcc_processor._clean_toc_line": {
+      "cases": 5,
+      "succeeded": 5,
+      "errors": 0
+    },
+    "qcc_processor._get_sort_tuple": {
+      "cases": 5,
+      "succeeded": 5,
+      "errors": 0
+    },
+    "qcc_processor._extract_company_name": {
+      "cases": 5,
+      "succeeded": 5,
+      "errors": 0
+    },
+    "ipo_bj.sanitize_filename": {
+      "cases": 7,
+      "succeeded": 7,
+      "errors": 0
+    },
+    "ipo_sh.sanitize_filename": {
+      "cases": 7,
+      "succeeded": 7,
+      "errors": 0
+    },
+    "ipo_sz.sanitize_filename": {
+      "cases": 7,
+      "succeeded": 7,
+      "errors": 0
+    },
+    "ipo_bj.process_jsonp": {
+      "cases": 7,
+      "succeeded": 7,
+      "errors": 0
+    },
+    "ipo_sh.process_jsonp": {
+      "cases": 7,
+      "succeeded": 7,
+      "errors": 0
+    },
+    "link_replace_range.parse_range": {
+      "cases": 10,
+      "succeeded": 5,
+      "errors": 5
+    },
+    "gross_margin_analysis._clean_illegal_chars": {
+      "cases": 5,
+      "succeeded": 5,
+      "errors": 0
+    },
+    "gross_margin_analysis.pvm_decompose": {
+      "cases": 8,
+      "succeeded": 8,
+      "errors": 0
+    },
+    "gross_margin_analysis.mark_threshold": {
+      "cases": 24,
+      "succeeded": 0,
+      "errors": 24
+    }
+  }
+}

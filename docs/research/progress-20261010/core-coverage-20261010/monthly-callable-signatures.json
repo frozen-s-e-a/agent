@@ -1,0 +1,11 @@
+{
+  "module": "modules/monthly_analysis/_core.pyd",
+  "sha256": "a9b78b8e9e048c3411baa1b79cdd216df3b7d73dc332ae6bce633da2dd0da109",
+  "calledBusinessRun": false,
+  "calledRemoteApi": false,
+  "functions": [],
+  "unavailableDependency": "openai",
+  "researchDependencyIsolation": "OpenAI constructor replaced by a function that always fails; no API implementation",
+  "loaded": false,
+  "error": "ModuleNotFoundError: No module named 'ai_utils'"
+}

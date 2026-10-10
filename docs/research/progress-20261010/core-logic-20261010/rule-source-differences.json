@@ -1,0 +1,92 @@
+{
+  "nativeRuleRows": 33,
+  "templateRuleRows": 33,
+  "nativeDistinctNames": 33,
+  "templateDistinctNames": 31,
+  "templateRepeatedNames": [
+    {
+      "name": "期末费用调整",
+      "count": 2,
+      "entries": [
+        {
+          "name": "期末费用调整",
+          "enabled": true,
+          "conditions": {
+            "凭证月份": "12",
+            "借方金额": "<=-50000",
+            "科目编码": "^6601,^6602,^6603"
+          }
+        },
+        {
+          "name": "期末费用调整",
+          "enabled": true,
+          "conditions": {
+            "凭证月份": "12",
+            "贷方金额": ">=50000",
+            "科目编码": "^6601,^6602,^6603",
+            "摘要": "调整"
+          }
+        }
+      ]
+    },
+    {
+      "name": "重大估计调整",
+      "count": 2,
+      "entries": [
+        {
+          "name": "重大估计调整",
+          "enabled": true,
+          "conditions": {
+            "借方金额": ">1000000",
+            "摘要": "估计,暂估"
+          }
+        },
+        {
+          "name": "重大估计调整",
+          "enabled": true,
+          "conditions": {
+            "贷方金额": ">1000000",
+            "摘要": "估计,暂估"
+          }
+        }
+      ]
+    }
+  ],
+  "conditionDifferences": [
+    {
+      "name": "准备类借方异常",
+      "nativeMcp": {
+        "借方金额": ">0",
+        "科目编码": "^1231"
+      },
+      "excelTemplate": {
+        "借方金额": ">0",
+        "科目编码": "^1231",
+        "科目名称": "坏账准备"
+      }
+    },
+    {
+      "name": "期末收入突击",
+      "nativeMcp": {
+        "凭证月份": "12",
+        "借方金额": ">1000000",
+        "科目编码": "^6001,^6051"
+      },
+      "excelTemplate": {
+        "凭证月份": "12",
+        "贷方金额": ">1000000",
+        "科目编码": "^6001,^6051"
+      }
+    }
+  ],
+  "nativeOnlyNames": [
+    "期末费用调整(借)",
+    "期末费用调整(贷)",
+    "重大估计调整(借)",
+    "重大估计调整(贷)"
+  ],
+  "templateOnlyNames": [
+    "期末费用调整",
+    "重大估计调整"
+  ]
+}

@@ -1,0 +1,3641 @@
+[
+  {
+    "module": "ledger_check",
+    "functions": [
+      {
+        "name": "get_all_file_paths",
+        "signature": "(directory)",
+        "locals": [
+          "directory",
+          "file_paths",
+          "root",
+          "_",
+          "files",
+          "file"
+        ],
+        "doc": null
+      },
+      {
+        "name": "read_visible_cells_from_excel",
+        "signature": "(file_path, sheet_name)",
+        "locals": [
+          "file_path",
+          "sheet_name",
+          "workbook",
+          "sheet",
+          "data",
+          "row",
+          "df",
+          "cell"
+        ],
+        "doc": null
+      },
+      {
+        "name": "sum_amounts_by_code",
+        "signature": "(df, code)",
+        "locals": [
+          "df",
+          "code",
+          "filtered_df",
+          "debit_sum",
+          "credit_sum"
+        ],
+        "doc": null
+      },
+      {
+        "name": "judge_balance",
+        "signature": "(df)",
+        "locals": [
+          "df",
+          "debit",
+          "credit"
+        ],
+        "doc": null
+      },
+      {
+        "name": "convert_columns_to_numeric",
+        "signature": "(df, columns)",
+        "locals": [
+          "df",
+          "columns",
+          "column"
+        ],
+        "doc": null
+      },
+      {
+        "name": "filter_and_sum",
+        "signature": "(df, code)",
+        "locals": [
+          "df",
+          "code",
+          "filtered_df",
+          "initial_balance_sum",
+          "debit_amount_sum",
+          "credit_amount_sum",
+          "final_balance_sum",
+          "result"
+        ],
+        "doc": null
+      },
+      {
+        "name": "judge_father_equal_children",
+        "signature": "(df, code)",
+        "locals": [
+          "df",
+          "code",
+          "result",
+          "initial_balance_sum",
+          "debit_amount_sum",
+          "credit_amount_sum",
+          "final_balance_sum",
+          "df_filter",
+          "direction_init",
+          "direction_final",
+          "init",
+          "final",
+          "debit",
+          "credit"
+        ],
+        "doc": null
+      },
+      {
+        "name": "judge_calc",
+        "signature": "(df)",
+        "locals": [
+          "df",
+          "judge",
+          "subject",
+          "index",
+          "row",
+          "direction_init",
+          "direction_final",
+          "code_name",
+          "init",
+          "final",
+          "debit",
+          "credit",
+          "value",
+          "subjects"
+        ],
+        "doc": null
+      },
+      {
+        "name": "calc",
+        "signature": "(path)",
+        "locals": [
+          "path",
+          "df_balance",
+          "df_balance_full",
+          "df_journal",
+          "subject",
+          "father_subject",
+          "judge_table",
+          "judge_father",
+          "index",
+          "row",
+          "judge_father_and_children",
+          "code",
+          "code_name",
+          "balance_init",
+          "balance_debit",
+          "balance_credit",
+          "balance_final",
+          "journal_debit",
+          "journal_credit",
+          "diff_debit",
+          "diff_credit",
+          "judge_debit_credit",
+          "judge_logic",
+          "not_balance_subject",
+          "result",
+          "subjects",
+          "father_subjects"
+        ],
+        "doc": null
+      },
+      {
+        "name": "run",
+        "signature": "(ctx, config_mode='excel', config_data=None)",
+        "locals": [
+          "ctx",
+          "config_mode",
+          "config_data",
+          "directory",
+          "work_dir",
+          "output_dir",
+          "paths",
+          "data",
+          "path",
+          "file",
+          "result",
+          "judge_debit_credit",
+          "judge_table",
+          "subject",
+          "judge_father",
+          "father_subject",
+          "judge_logic",
+          "not_balance_subject",
+          "row",
+          "e",
+          "output_path",
+          "df"
+        ],
+        "doc": null
+      }
+    ],
+    "classes": []
+  },
+  {
+    "module": "currency",
+    "functions": [
+      {
+        "name": "currency_boc_safe",
+        "signature": "(core) -> 'pd.DataFrame'",
+        "locals": [
+          "core",
+          "url",
+          "r",
+          "soup",
+          "content",
+          "history_excel_url",
+          "e",
+          "temp_df",
+          "last_date",
+          "start_date",
+          "end_date",
+          "query_url",
+          "payload",
+          "current_temp_df",
+          "dfs",
+          "big_df",
+          "column_name_list",
+          "item"
+        ],
+        "doc": "\n    核心爬虫逻辑\n    增加 core 参数用于检测中断信号\n    "
+      },
+      {
+        "name": "save_pretty_excel",
+        "signature": "(df, output_path)",
+        "locals": [
+          "df",
+          "output_path",
+          "wb",
+          "ws",
+          "r",
+          "cell",
+          "i",
+          "col_letter"
+        ],
+        "doc": null
+      },
+      {
+        "name": "run",
+        "signature": "(core, config_mode='excel', config_data=None)",
+        "locals": [
+          "core",
+          "config_mode",
+          "config_data",
+          "start_time",
+          "work_dir",
+          "output_dir",
+          "output_excel_path",
+          "df_result",
+          "e",
+          "last_row",
+          "last_date",
+          "usd_rate"
+        ],
+        "doc": null
+      }
+    ],
+    "classes": []
+  },
+  {
+    "module": "fill_column",
+    "functions": [
+      {
+        "name": "_find_excel_files",
+        "signature": "(folder_path)",
+        "locals": [
+          "folder_path",
+          "excel_files",
+          "root",
+          "dirs",
+          "files",
+          "file"
+        ],
+        "doc": "递归查找文件夹中的所有 Excel 文件"
+      },
+      {
+        "name": "_filter_paths_by_keyword",
+        "signature": "(paths, keyword)",
+        "locals": [
+          "paths",
+          "keyword",
+          "filtered",
+          "path",
+          "filename"
+        ],
+        "doc": "根据关键词过滤文件路径"
+      },
+      {
+        "name": "_fill_columns_in_file",
+        "signature": "(file_path, column_names)",
+        "locals": [
+          "file_path",
+          "column_names",
+          "file_extension",
+          "engine",
+          "df_dict",
+          "sheet_name",
+          "sheet_df",
+          "column",
+          "matching_columns",
+          "col",
+          "new_path",
+          "writer",
+          "col"
+        ],
+        "doc": "\n    向下填充Excel中指定列的空白单元格\n    \n    参数:\n        file_path: Excel文件路径\n        column_names: 需要向下填充的列名列表\n    "
+      },
+      {
+        "name": "_process_single_file",
+        "signature": "(core, file_path, column_names)",
+        "locals": [
+          "core",
+          "file_path",
+          "column_names",
+          "e"
+        ],
+        "doc": "处理单个文件"
+      },
+      {
+        "name": "_get_target_files",
+        "signature": "(core, path_str, keyword)",
+        "locals": [
+          "core",
+          "path_str",
+          "keyword",
+          "work_dir",
+          "full_path",
+          "all_files",
+          "target_files"
+        ],
+        "doc": "获取目标文件列表"
+      },
+      {
+        "name": "run",
+        "signature": "(core, config_mode='excel', config_data=None)",
+        "locals": [
+          "core",
+          "config_mode",
+          "config_data",
+          "start_time",
+          "success_count",
+          "fail_count",
+          "processed_files_count",
+          "work_dir",
+          "output_dir",
+          "config",
+          "cfg_rel_path",
+          "full_cfg_path",
+          "wb",
+          "ws",
+          "get_val",
+          "get_val",
+          "e",
+          "file_path",
+          "keyword",
+          "column_names_str",
+          "column_names",
+          "target_files",
+          "msg",
+          "results",
+          "f_idx",
+          "f_path",
+          "f_name",
+          "progress",
+          "res_msg",
+          "err_msg",
+          "name"
+        ],
+        "doc": null
+      }
+    ],
+    "classes": []
+  },
+  {
+    "module": "merge_column",
+    "functions": [
+      {
+        "name": "_letter_to_number",
+        "signature": "(column_letter)",
+        "locals": [
+          "column_letter",
+          "number",
+          "char"
+        ],
+        "doc": "将Excel列字母（如'A', 'B', 'AA'）转换为数字索引（1, 2, 27）"
+      },
+      {
+        "name": "_find_excel_files",
+        "signature": "(directory)",
+        "locals": [
+          "directory",
+          "excel_files",
+          "root_dir",
+          "file"
+        ],
+        "doc": "递归查找给定目录及其子目录下的所有Excel文件"
+      },
+      {
+        "name": "_filter_paths_by_keyword",
+        "signature": "(paths, keyword)",
+        "locals": [
+          "paths",
+          "keyword",
+          "filtered_paths",
+          "path"
+        ],
+        "doc": "根据给定的关键词过滤路径列表（仅匹配文件名）"
+      },
+      {
+        "name": "_merge_columns_in_file",
+        "signature": "(file_path, column_names, delimiter, insert_index, insert_name)",
+        "locals": [
+          "file_path",
+          "column_names",
+          "delimiter",
+          "insert_index",
+          "insert_name",
+          "columns_to_merge",
+          "dtype_dict",
+          "df",
+          "actual_columns",
+          "missing_columns",
+          "merged_column_name",
+          "merge_values",
+          "merge_values",
+          "insert_col_idx",
+          "cols",
+          "new_file_path",
+          "msg",
+          "col",
+          "col",
+          "col",
+          "col"
+        ],
+        "doc": "\n    将Excel中多列值合并为一个新列\n    \n    参数:\n        file_path: Excel文件路径\n        column_names: 需要合并的列名列表（可包含固定值）\n        delimiter: 连接符\n        insert_index: 插入位置（列字母或数字）\n        insert_name: 新列名称\n    "
+      },
+      {
+        "name": "_process_single_file",
+        "signature": "(core, file_path, column_names, delimiter, insert_index, insert_name)",
+        "locals": [
+          "core",
+          "file_path",
+          "column_names",
+          "delimiter",
+          "insert_index",
+          "insert_name",
+          "result",
+          "e"
+        ],
+        "doc": "处理单个文件"
+      },
+      {
+        "name": "_get_target_files",
+        "signature": "(core, path_str, keyword)",
+        "locals": [
+          "core",
+          "path_str",
+          "keyword",
+          "work_dir",
+          "full_path",
+          "all_files",
+          "target_files"
+        ],
+        "doc": "获取目标文件列表"
+      },
+      {
+        "name": "run",
+        "signature": "(core, config_mode='excel', config_data=None)",
+        "locals": [
+          "core",
+          "config_mode",
+          "config_data",
+          "start_time",
+          "success_count",
+          "fail_count",
+          "processed_files_count",
+          "work_dir",
+          "output_dir",
+          "config",
+          "cfg_rel_path",
+          "full_cfg_path",
+          "wb",
+          "ws",
+          "get_val",
+          "get_val",
+          "e",
+          "file_path",
+          "keyword",
+          "column_names",
+          "delimiter",
+          "insert_index",
+          "insert_name",
+          "target_files",
+          "msg",
+          "results",
+          "f_idx",
+          "f_path",
+          "f_name",
+          "progress",
+          "res_msg",
+          "err_msg"
+        ],
+        "doc": null
+      }
+    ],
+    "classes": []
+  },
+  {
+    "module": "cutoff_sampling",
+    "functions": [
+      {
+        "name": "_determine_cutoff_date",
+        "signature": "(start_date, end_date)",
+        "locals": [
+          "start_date",
+          "end_date",
+          "s_date",
+          "e_date",
+          "years",
+          "cutoff_month_days",
+          "candidates",
+          "y",
+          "m",
+          "d",
+          "candidate"
+        ],
+        "doc": "自动判断会计截止日"
+      },
+      {
+        "name": "_clean_and_parse_dates",
+        "signature": "(series)",
+        "locals": [
+          "series",
+          "parse_single_date",
+          "parse_single_date",
+          "cleaned_series"
+        ],
+        "doc": "增强型日期解析"
+      },
+      {
+        "name": "_deduplicate_and_merge_subjects",
+        "signature": "(df, company_col, date_col, voucher_col, subject_col)",
+        "locals": [
+          "df",
+          "company_col",
+          "date_col",
+          "voucher_col",
+          "subject_col",
+          "subset_cols",
+          "merged_subjects",
+          "df_dedup"
+        ],
+        "doc": "\n    核心功能：按凭证号去重，并合并科目名称\n    "
+      },
+      {
+        "name": "_load_and_merge_files",
+        "signature": "(path, sheet_name_opt, ctx)",
+        "locals": [
+          "path",
+          "sheet_name_opt",
+          "ctx",
+          "all_data",
+          "files",
+          "total_files",
+          "target_sheet",
+          "read_sheet_arg",
+          "i",
+          "f",
+          "percent",
+          "df",
+          "e",
+          "f"
+        ],
+        "doc": "读取并合并文件"
+      },
+      {
+        "name": "run",
+        "signature": "(ctx, config_mode='excel', config_data=None)",
+        "locals": [
+          "ctx",
+          "config_mode",
+          "config_data",
+          "start_time",
+          "work_dir",
+          "config_path",
+          "output_dir",
+          "cfg_df",
+          "raw_config_log",
+          "get_cfg",
+          "get_cfg",
+          "path_input",
+          "company_col",
+          "l1_subject_col",
+          "debit_col",
+          "credit_col",
+          "voucher_col",
+          "date_col",
+          "sheet_name_opt",
+          "amount_threshold_raw",
+          "sample_count_raw",
+          "start_date_raw",
+          "end_date_raw",
+          "mode",
+          "amount_threshold",
+          "target_n",
+          "s_date",
+          "e_date",
+          "ve",
+          "e",
+          "cutoff_date",
+          "df",
+          "required_cols_in_data",
+          "missing_cols",
+          "nat_count",
+          "initial_count",
+          "mask_date",
+          "df_filtered",
+          "group_cols",
+          "final_results",
+          "grouped",
+          "name",
+          "group",
+          "selected",
+          "current_n",
+          "df_before",
+          "df_after",
+          "d",
+          "timestamp",
+          "output_path",
+          "writer",
+          "s_name_before",
+          "s_name_after",
+          "duration",
+          "c"
+        ],
+        "doc": null
+      }
+    ],
+    "classes": []
+  },
+  {
+    "module": "data_field_check",
+    "functions": [
+      {
+        "name": "safe_chat_create",
+        "signature": "(client, **kwargs)",
+        "locals": [
+          "client",
+          "kwargs",
+          "threading",
+          "result_holder",
+          "error_holder",
+          "_do_call",
+          "_do_call",
+          "t",
+          "e",
+          "APITimeoutError",
+          "APIConnectionError",
+          "error_code",
+          "err_str",
+          "t2",
+          "genexpr",
+          "genexpr"
+        ],
+        "doc": "\n    兼容各平台的 chat.completions.create 封装。\n    - 通过 extra_body 传递 enable_thinking=False 关闭思考模式\n    - 平台不支持时自动回退\n    - 内置硬超时保护，防止请求无限卡死\n    "
+      },
+      {
+        "name": "test_api_connection",
+        "signature": "(client)",
+        "locals": [
+          "client",
+          "e"
+        ],
+        "doc": "\n    通过尝试列出模型来测试与大语言模型API的连接。\n    "
+      },
+      {
+        "name": "find_excel_files",
+        "signature": "(directory)",
+        "locals": [
+          "directory",
+          "supported_files",
+          "supported_extensions",
+          "root_dir",
+          "ext",
+          "file"
+        ],
+        "doc": "\n    递归搜索指定目录下的所有Excel文件。\n    "
+      },
+      {
+        "name": "read_excel_snippet",
+        "signature": "(file_path, num_rows=10)",
+        "locals": [
+          "file_path",
+          "num_rows",
+          "snippet",
+          "file_name",
+          "workbook",
+          "sheet",
+          "row_idx",
+          "row_values",
+          "row",
+          "e",
+          "cell",
+          "cell",
+          "row",
+          "genexpr",
+          "genexpr"
+        ],
+        "doc": "\n    智能读取Excel文件（兼容.xls和.xlsx）的前N行作为原始数据片段。\n    "
+      },
+      {
+        "name": "check_fields_with_llm",
+        "signature": "(client, model, required_fields, excel_snippet, temperature)",
+        "locals": [
+          "client",
+          "model",
+          "required_fields",
+          "excel_snippet",
+          "temperature",
+          "system_prompt",
+          "user_prompt",
+          "messages",
+          "completion",
+          "response_content",
+          "result_json",
+          "final_result",
+          "e",
+          "field",
+          "field",
+          "field"
+        ],
+        "doc": "\n    使用大语言模型分析原始数据片段，判断所需字段是否存在。\n    "
+      },
+      {
+        "name": "run",
+        "signature": "(ctx, config_mode='excel', config_data=None)",
+        "locals": [
+          "ctx",
+          "config_mode",
+          "config_data",
+          "start_time",
+          "total_files_checked",
+          "work_dir",
+          "settings",
+          "base_url",
+          "api_key",
+          "client",
+          "e",
+          "config_file",
+          "output_dir",
+          "output_file",
+          "wb_config",
+          "ws_config",
+          "model_name",
+          "rows_to_check",
+          "temperature",
+          "configs",
+          "all_sheet_names",
+          "row",
+          "category",
+          "folder_path",
+          "ws_category",
+          "required_fields",
+          "wb_out",
+          "total_categories",
+          "hyperlink_font",
+          "i",
+          "config",
+          "ws_out",
+          "excel_files",
+          "total_files_in_category",
+          "j",
+          "file_path",
+          "progress",
+          "file_name",
+          "snippet",
+          "result_values",
+          "check_results",
+          "result_row",
+          "current_row_index",
+          "path_cell",
+          "end_time",
+          "total_duration",
+          "minutes",
+          "seconds",
+          "cell",
+          "field"
+        ],
+        "doc": "主执行函数"
+      }
+    ],
+    "classes": []
+  },
+  {
+    "module": "paper_verify",
+    "functions": [
+      {
+        "name": "find_supported_files",
+        "signature": "(directory)",
+        "locals": [
+          "directory",
+          "supported_files",
+          "supported_extensions",
+          "archive_extensions",
+          "root_dir",
+          "archives_found",
+          "ext",
+          "file",
+          "archive"
+        ],
+        "doc": null
+      },
+      {
+        "name": "extract_info",
+        "signature": "(client, model, system_prompt, user_prompt, visual_files=None, text_content=None, compress_images=True)",
+        "locals": [
+          "client",
+          "model",
+          "system_prompt",
+          "user_prompt",
+          "visual_files",
+          "text_content",
+          "compress_images",
+          "messages",
+          "content_parts",
+          "files_to_process",
+          "file_path",
+          "file_extension",
+          "base64_images",
+          "img",
+          "base64_image",
+          "info",
+          "completion",
+          "text",
+          "start_char",
+          "end_char",
+          "start_index",
+          "end_index",
+          "core_json",
+          "result",
+          "fixed_json",
+          "e"
+        ],
+        "doc": null
+      },
+      {
+        "name": "try_extract_pdf_text",
+        "signature": "(pdf_path: 'str') -> 'str | None'",
+        "locals": [
+          "pdf_path",
+          "doc",
+          "page_count",
+          "full_text",
+          "page_num",
+          "page",
+          "text",
+          "combined_text",
+          "threshold",
+          "e"
+        ],
+        "doc": null
+      },
+      {
+        "name": "convert_pdf_to_images",
+        "signature": "(pdf_path, compress_images, dpi=200, max_size=(1200, 1200), jpeg_quality=80)",
+        "locals": [
+          "pdf_path",
+          "compress_images",
+          "dpi",
+          "max_size",
+          "jpeg_quality",
+          "base64_images",
+          "current_dpi",
+          "current_max_size",
+          "current_jpeg_quality",
+          "current_subsampling",
+          "doc",
+          "page_num",
+          "page",
+          "pix",
+          "img",
+          "buffer",
+          "compressed_img_bytes",
+          "encoded_string",
+          "e"
+        ],
+        "doc": null
+      },
+      {
+        "name": "encode_image_to_base64",
+        "signature": "(image_path_or_bytes, compress_images, max_size=(1200, 1200), jpeg_quality=80)",
+        "locals": [
+          "image_path_or_bytes",
+          "compress_images",
+          "max_size",
+          "jpeg_quality",
+          "img_bytes",
+          "mime_type",
+          "image_path",
+          "_",
+          "image_file",
+          "e",
+          "img",
+          "original_format",
+          "buffer",
+          "save_params",
+          "encoded_string"
+        ],
+        "doc": null
+      },
+      {
+        "name": "rotate_image_if_needed",
+        "signature": "(img: 'Image.Image') -> 'Image.Image'",
+        "locals": [
+          "img",
+          "osd_data",
+          "rotation_angle",
+          "e"
+        ],
+        "doc": "\n    使用 Tesseract OSD 检测图像方向并将其旋转至正确方向。\n    仅在 IS_PYTESSERACT_AVAILABLE 为 True 时执行。\n    "
+      },
+      {
+        "name": "check_api_connection",
+        "signature": "(base_url, api_key)",
+        "locals": [
+          "base_url",
+          "api_key",
+          "client",
+          "e"
+        ],
+        "doc": null
+      },
+      {
+        "name": "setup_tesseract_path",
+        "signature": "()",
+        "locals": [
+          "platform",
+          "system",
+          "tesseract_install_path",
+          "tesseract_exe_path",
+          "current_path",
+          "tessdata_path",
+          "possible_paths",
+          "p",
+          "shutil",
+          "e"
+        ],
+        "doc": "\n    配置 Tesseract 路径，支持 Windows 和 macOS。\n    Windows: C:\\Program Files\\Tesseract-OCR\n    macOS: /usr/local/bin/tesseract 或 /opt/homebrew/bin/tesseract (Homebrew)\n    自检成功则设置 IS_PYTESSERACT_AVAILABLE = True。\n    自检失败则只打印一行警告，不抛出异常。\n    "
+      },
+      {
+        "name": "safe_chat_create",
+        "signature": "(client, **kwargs)",
+        "locals": [
+          "client",
+          "kwargs",
+          "threading",
+          "result_holder",
+          "error_holder",
+          "_do_call",
+          "_do_call",
+          "t",
+          "e",
+          "APITimeoutError",
+          "APIConnectionError",
+          "error_code",
+          "err_str",
+          "t2",
+          "genexpr",
+          "genexpr"
+        ],
+        "doc": "\n    兼容各平台的 chat.completions.create 封装。\n    - 通过 extra_body 传递 enable_thinking=False 关闭思考模式\n    - 平台不支持时自动回退\n    - 内置硬超时保护，防止请求无限卡死\n    "
+      },
+      {
+        "name": "normalize_value",
+        "signature": "(value) -> 'str'",
+        "locals": [
+          "value",
+          "s",
+          "result",
+          "ch",
+          "code"
+        ],
+        "doc": "\n    标准化字段值：去首尾空格、去内部空格、全角转半角、统一小写。\n\n    处理流程: 原始值 → strip() → 去除所有内部空格 → 全角转半角 → lower()\n\n    如果输入为 None，返回空字符串。非字符串输入先转为字符串。\n    "
+      },
+      {
+        "name": "_parse_match_keys",
+        "signature": "(raw: 'str') -> 'list[str]'",
+        "locals": [
+          "raw",
+          "parts",
+          "p"
+        ],
+        "doc": "解析匹配键字符串，支持中英文逗号分隔。"
+      },
+      {
+        "name": "load_config",
+        "signature": "(core, config_mode: 'str', config_data: 'dict | None') -> 'dict'",
+        "locals": [
+          "core",
+          "config_mode",
+          "config_data",
+          "config",
+          "settings"
+        ],
+        "doc": "\n    读取配置参数和待核对信息表数据。\n\n    返回:\n    {\n        'file_path': str,           # 文件或文件夹路径\n        'match_keys': list[str],    # 匹配键列表\n        'max_workers': int,         # 并发线程数\n        'extra_prompt': str,        # 补充指令\n        'field_names': list[str],   # 待核对信息表的字段名列表\n        'book_records': list[dict], # 账面记录列表\n        'base_url': str,\n        'api_key': str,\n        'model_name': str,\n        'visual_model_name': str,\n    }\n\n    Raises:\n        ValueError: 缺少必填参数或待核对信息表无数据\n    "
+      },
+      {
+        "name": "build_prompt",
+        "signature": "(field_names: 'list[str]', extra_prompt: 'str') -> 'tuple[str, str]'",
+        "locals": [
+          "field_names",
+          "extra_prompt",
+          "fields_str",
+          "system_prompt",
+          "user_prompt"
+        ],
+        "doc": "\n    根据字段名列表自动生成系统提示词和用户提示词。\n\n    返回: (system_prompt, user_prompt)\n    "
+      },
+      {
+        "name": "_load_config_from_excel",
+        "signature": "(core) -> 'dict'",
+        "locals": [
+          "core",
+          "input_path",
+          "wb",
+          "config_sheet",
+          "file_path",
+          "match_keys_raw",
+          "max_workers_raw",
+          "extra_prompt_raw",
+          "max_workers",
+          "extra_prompt",
+          "match_keys",
+          "data_sheet",
+          "rows",
+          "field_names",
+          "book_records",
+          "row",
+          "record",
+          "i",
+          "name",
+          "val",
+          "key",
+          "c"
+        ],
+        "doc": "从 Excel 配置表读取配置参数和待核对信息表数据。"
+      },
+      {
+        "name": "_load_config_from_direct",
+        "signature": "(config_data: 'dict | None') -> 'dict'",
+        "locals": [
+          "config_data",
+          "file_path",
+          "match_keys_raw",
+          "max_workers",
+          "extra_prompt",
+          "field_names",
+          "book_records",
+          "match_keys",
+          "key"
+        ],
+        "doc": "从 config_data 字典读取所有参数。"
+      },
+      {
+        "name": "_is_supported_file",
+        "signature": "(file_path: 'str') -> 'bool'",
+        "locals": [
+          "file_path"
+        ],
+        "doc": "判断文件是否为支持的 PDF/图片类型。"
+      },
+      {
+        "name": "_read_existing_records",
+        "signature": "(output_file: 'str') -> 'list[dict]'",
+        "locals": [
+          "output_file",
+          "wb",
+          "ws",
+          "rows",
+          "headers",
+          "records",
+          "row",
+          "record",
+          "i",
+          "h",
+          "val",
+          "key",
+          "e",
+          "c"
+        ],
+        "doc": "从已有输出文件的\"提取结果\" sheet 读取已保存的记录。\n    \n    兼容旧版（列名 _source_file）和新版（列名 文件路径），\n    统一将内部 key 转为 _source_file。\n    "
+      },
+      {
+        "name": "_save_records_to_excel",
+        "signature": "(records: 'list[dict]', output_file: 'str') -> 'None'",
+        "locals": [
+          "records",
+          "output_file",
+          "wb",
+          "ws",
+          "all_keys",
+          "seen",
+          "rec",
+          "k",
+          "display_headers",
+          "row",
+          "val",
+          "col_idx",
+          "cell",
+          "file_path",
+          "k"
+        ],
+        "doc": "将提取记录保存到输出文件的\"提取结果\" sheet（全量覆盖写入）。"
+      },
+      {
+        "name": "_process_extract_result",
+        "signature": "(data, file_path: 'str') -> 'list[dict]'",
+        "locals": [
+          "data",
+          "file_path",
+          "abs_path",
+          "records",
+          "array_values",
+          "longest",
+          "item",
+          "v"
+        ],
+        "doc": "处理 AI 返回的 JSON 数据，转为记录列表，每条附加 _source_file。"
+      },
+      {
+        "name": "extract_phase",
+        "signature": "(core, config: 'dict', output_file: 'str') -> 'tuple[list[dict], dict]'",
+        "locals": [
+          "core",
+          "config",
+          "output_file",
+          "start_time",
+          "file_path",
+          "p",
+          "all_files",
+          "raw_files",
+          "existing",
+          "existing_records",
+          "processed_files",
+          "rec",
+          "src",
+          "files_to_process",
+          "f",
+          "norm",
+          "total_all",
+          "total_skip",
+          "total_todo",
+          "client",
+          "system_prompt",
+          "user_prompt",
+          "model_name",
+          "visual_model_name",
+          "all_records",
+          "successful_count",
+          "failed_count",
+          "_process_one_file",
+          "_process_one_file",
+          "max_workers",
+          "idx",
+          "fpath",
+          "progress",
+          "fname",
+          "new_records",
+          "e",
+          "completed_count",
+          "executor",
+          "future_to_file",
+          "future",
+          "end_time",
+          "total_time",
+          "extract_stats",
+          "f"
+        ],
+        "doc": "\n    发现文件、并发提取、断点续传。\n\n    返回: (所有提取记录列表, 提取统计信息 dict)\n    统计信息: {'total_time': float, 'total_files': int, 'processed': int,\n               'successful': int, 'failed': int, 'total_records': int}\n    "
+      },
+      {
+        "name": "match_and_compare",
+        "signature": "(book_records: 'list[dict]', extracted_records: 'list[dict]', match_keys: 'list[str]', field_names: 'list[str]') -> 'dict'",
+        "locals": [
+          "book_records",
+          "extracted_records",
+          "match_keys",
+          "field_names",
+          "matched",
+          "used_extracted",
+          "book",
+          "found_idx",
+          "i",
+          "ext",
+          "field_results",
+          "fn",
+          "book_val",
+          "ext_val",
+          "matched_books",
+          "unmatched_book",
+          "unmatched_extracted",
+          "genexpr",
+          "genexpr",
+          "genexpr",
+          "m",
+          "b",
+          "i",
+          "ext"
+        ],
+        "doc": "\n    执行匹配和逐字段比对。\n\n    匹配策略：\n    1. 先精确匹配：对每条账面记录，在提取记录中查找所有匹配键字段值完全相等的记录\n    2. 精确匹配失败后用 normalize_value 做模糊匹配\n    3. 多匹配键时要求所有键都匹配\n    4. 每条提取记录最多匹配一条账面记录（一对一匹配）\n\n    返回:\n    {\n        'matched': [\n            {\n                'book': dict,           # 账面记录\n                'extracted': dict,      # 提取记录\n                'file_path': str,       # 源文件路径\n                'field_results': {      # 逐字段核对结果\n                    '字段名': '一致' | '不一致',\n                    ...\n                }\n            },\n            ...\n        ],\n        'unmatched_book': [dict, ...],      # 账面有但文件无\n        'unmatched_extracted': [dict, ...],  # 文件有但账面无\n    }\n    "
+      },
+      {
+        "name": "write_output",
+        "signature": "(compare_result: 'dict', field_names: 'list[str]', output_file: 'str') -> 'None'",
+        "locals": [
+          "compare_result",
+          "field_names",
+          "output_file",
+          "wb",
+          "sheet_name",
+          "book_cols",
+          "file_path_col",
+          "ext_cols",
+          "result_cols",
+          "headers",
+          "ws_detail",
+          "hyperlink_font",
+          "fp_col_idx",
+          "matched",
+          "unmatched_book",
+          "unmatched_extracted",
+          "m",
+          "book",
+          "extracted",
+          "file_path",
+          "field_results",
+          "row",
+          "fn",
+          "cell",
+          "_",
+          "ext",
+          "_is_consistent",
+          "_is_consistent",
+          "_is_inconsistent",
+          "_is_inconsistent",
+          "consistent_count",
+          "inconsistent_count",
+          "unmatched_book_count",
+          "unmatched_ext_count",
+          "book_total",
+          "ext_total",
+          "field_stats",
+          "c",
+          "ic",
+          "ws_summary",
+          "title_font",
+          "title_fill",
+          "title_align",
+          "section_font",
+          "section_fill",
+          "header_font",
+          "header_fill",
+          "header_align",
+          "label_font",
+          "value_font",
+          "value_align",
+          "green_font",
+          "red_font",
+          "gray_font",
+          "thin_border",
+          "zebra_fill",
+          "row_num",
+          "title_cell",
+          "col",
+          "sec_cell",
+          "ci",
+          "h",
+          "overview_rows",
+          "ri",
+          "label",
+          "value",
+          "special_font",
+          "is_zebra",
+          "c1",
+          "c2",
+          "total_matched",
+          "rate_str",
+          "stats",
+          "fc",
+          "fic",
+          "f_total",
+          "f_rate",
+          "c3",
+          "c4",
+          "fn",
+          "fn",
+          "genexpr",
+          "genexpr",
+          "genexpr",
+          "genexpr",
+          "genexpr"
+        ],
+        "doc": "\n    写入核对明细和汇总表到输出 Excel 文件。\n\n    - 核对明细（\"核对明细\"）：左右对比展示账面记录、文件路径、提取记录和核对结果\n    - 汇总表（\"汇总表\"）：总体统计 + 按字段维度统计一致/不一致数\n\n    如果输出文件已存在，加载它以保留\"提取结果\" sheet。\n    "
+      },
+      {
+        "name": "_ai_recheck_mismatches",
+        "signature": "(compare_result: 'dict', field_names: 'list[str]', config: 'dict') -> 'None'",
+        "locals": [
+          "compare_result",
+          "field_names",
+          "config",
+          "matched",
+          "mismatch_items",
+          "idx",
+          "m",
+          "field_results",
+          "book",
+          "extracted",
+          "fn",
+          "batches",
+          "i",
+          "client",
+          "model_name",
+          "_recheck_batch",
+          "_recheck_batch",
+          "max_workers",
+          "batch_results",
+          "bi",
+          "batch",
+          "executor",
+          "future_to_idx",
+          "future",
+          "e",
+          "ai_consistent",
+          "ai_inconsistent",
+          "ai_skipped",
+          "judgments",
+          "j",
+          "matched_idx",
+          "_"
+        ],
+        "doc": "\n    对 compare_result 中所有\"不一致\"字段进行 AI 二次判断。\n\n    策略：将所有记录的所有不一致字段汇总，按 _AI_RECHECK_BATCH_SIZE 分批，\n    多线程并发调用 AI（线程数使用配置表的 max_workers）。\n\n    AI 判断后直接修改 compare_result['matched'] 中的 field_results：\n    - AI 认为一致 → \"一致(AI)\"\n    - AI 认为不一致 → \"不一致(AI)\"\n    "
+      },
+      {
+        "name": "run",
+        "signature": "(core, config_mode='excel', config_data=None) -> 'dict | None'",
+        "locals": [
+          "core",
+          "config_mode",
+          "config_data",
+          "datetime",
+          "timestamp",
+          "output_dir",
+          "output_file",
+          "settings",
+          "base_url",
+          "api_key",
+          "msg",
+          "config",
+          "extracted_records",
+          "extract_stats",
+          "compare_result",
+          "matched_count",
+          "unmatched_book_count",
+          "unmatched_ext_count",
+          "processed",
+          "success_rate",
+          "e",
+          "error_detail"
+        ],
+        "doc": "\n    主入口函数，串联整个纸质信息核对流程。\n\n    config_mode='excel' 时打印进度和摘要信息到 stdout，返回 None。\n    config_mode='direct' 时返回 {\"status\": \"success\", \"msg\": \"核对完成\", \"output_dir\": \"output/纸质信息核对\"}。\n\n    需求: 7.1, 7.5, 7.6, 8.3\n    "
+      }
+    ],
+    "classes": []
+  },
+  {
+    "module": "xlsx_writer",
+    "functions": [
+      {
+        "name": "get_first_file_extension",
+        "signature": "(folder_path)",
+        "locals": [
+          "folder_path",
+          "files",
+          "first_file",
+          "_",
+          "file_extension",
+          "f"
+        ],
+        "doc": "获取文件夹中第一个文件的扩展名，默认为.xlsx"
+      },
+      {
+        "name": "process_company_data_old",
+        "signature": "(company, data_combination_source_file_path, save_folder, app, mapping_data, is_partitioned)",
+        "locals": [
+          "company",
+          "data_combination_source_file_path",
+          "save_folder",
+          "app",
+          "mapping_data",
+          "is_partitioned",
+          "destination_path",
+          "folder",
+          "extension",
+          "file_paths",
+          "directory",
+          "workbook",
+          "index",
+          "file_path",
+          "macros_with_parameters",
+          "p",
+          "sheet_name",
+          "sheet",
+          "e",
+          "macro_name",
+          "parameter",
+          "macro_to_run",
+          "r_p",
+          "parameter_range",
+          "sheet_name"
+        ],
+        "doc": "处理单个公司的数据，生成小账套文件"
+      },
+      {
+        "name": "process_company_data",
+        "signature": "(company, data_combination_source_file_path, save_folder, app, mapping_data, is_partitioned)",
+        "locals": [
+          "company",
+          "data_combination_source_file_path",
+          "save_folder",
+          "app",
+          "mapping_data",
+          "is_partitioned",
+          "destination_path",
+          "folder",
+          "directory",
+          "workbook",
+          "POSSIBLE_EXTENSIONS",
+          "index",
+          "table_name",
+          "data_file_path",
+          "base_filename",
+          "ext",
+          "potential_path",
+          "macros_with_parameters",
+          "p",
+          "sheet_name",
+          "macro_name",
+          "parameter",
+          "sheet",
+          "e",
+          "macro_to_run",
+          "r_p",
+          "parameter_range"
+        ],
+        "doc": "\n    处理单个公司的数据，生成小账套文件。\n    该函数现在能够为每个数据表（科目余额表、辅助余额表、序时账）\n    独立查找正确的扩展名 (.xlsx, .xls, .xlsm)。\n    "
+      },
+      {
+        "name": "set_file_permissions",
+        "signature": "(file_path)",
+        "locals": [
+          "file_path",
+          "system_type",
+          "command",
+          "e"
+        ],
+        "doc": "根据操作系统设置文件权限"
+      },
+      {
+        "name": "write_title_to_sheet",
+        "signature": "(workbook, cur_table, mapping_data, sheet_name='导入数据')",
+        "locals": [
+          "workbook",
+          "cur_table",
+          "mapping_data",
+          "sheet_name",
+          "data",
+          "sheet",
+          "item",
+          "e"
+        ],
+        "doc": "将映射关系写入 '导入数据' 工作表"
+      },
+      {
+        "name": "generate_json_from_excel",
+        "signature": "(workbook, sheet_name)",
+        "locals": [
+          "workbook",
+          "sheet_name",
+          "sheet",
+          "json_data",
+          "start_row",
+          "original_headers",
+          "small_account_headers",
+          "col_idx",
+          "small_account_header",
+          "column_letter",
+          "cell",
+          "cell"
+        ],
+        "doc": "从Excel映射表生成JSON配置"
+      },
+      {
+        "name": "generate_json_info",
+        "signature": "(file_path)",
+        "locals": [
+          "file_path",
+          "wb",
+          "json_subject",
+          "json_asist_subject",
+          "json_journal",
+          "json_data",
+          "data_folder",
+          "save_folder",
+          "partition_data"
+        ],
+        "doc": "从配置文件完整生成JSON和路径信息"
+      },
+      {
+        "name": "get_company_list",
+        "signature": "(folder_path, is_partitioned)",
+        "locals": [
+          "folder_path",
+          "is_partitioned",
+          "subfolders",
+          "unique_names",
+          "filename",
+          "name_without_extension",
+          "base_name",
+          "entry"
+        ],
+        "doc": "根据配置获取待处理的公司列表"
+      },
+      {
+        "name": "run",
+        "signature": "(ctx, config_mode='excel', config_data=None)",
+        "locals": [
+          "ctx",
+          "config_mode",
+          "config_data",
+          "start_time",
+          "work_dir",
+          "config_path",
+          "app",
+          "success_count",
+          "failed_companies",
+          "mapping_data",
+          "data_folder",
+          "save_folder",
+          "company_list",
+          "total_companies",
+          "mapping_data_json_obj",
+          "i",
+          "company",
+          "progress",
+          "e",
+          "end_time",
+          "total_time"
+        ],
+        "doc": "主执行函数"
+      }
+    ],
+    "classes": []
+  },
+  {
+    "module": "bankflowmerge",
+    "functions": [
+      {
+        "name": "smart_parse_datetime",
+        "signature": "(date_val, time_val=None)",
+        "locals": [
+          "date_val",
+          "time_val",
+          "date_str",
+          "time_str",
+          "date_obj",
+          "date_val_str",
+          "fmt",
+          "hours",
+          "minutes",
+          "seconds",
+          "time_val_str",
+          "time_obj",
+          "time_num",
+          "e",
+          "genexpr",
+          "genexpr"
+        ],
+        "doc": "\n    智能解析日期时间，支持多种格式\n    \n    Args:\n        date_val: 日期值（可能是字符串、数字、datetime对象，或包含日期+时间）\n        time_val: 时间值（可选，可能是字符串、数字）\n    \n    Returns:\n        str: \"YYYY-MM-DD HH:MM:SS\" 格式的字符串\n    "
+      },
+      {
+        "name": "extract_bank_name",
+        "signature": "(text)",
+        "locals": [
+          "text",
+          "bank_keywords",
+          "keyword",
+          "standard_name"
+        ],
+        "doc": "\n    从文本中提取银行简称（使用规范简称）\n    "
+      },
+      {
+        "name": "scan_excel_files",
+        "signature": "(folder_path)",
+        "locals": [
+          "folder_path",
+          "excel_files",
+          "root",
+          "dirs",
+          "files",
+          "file",
+          "e"
+        ],
+        "doc": "\n    递归扫描文件夹，返回所有 Excel 文件路径\n    "
+      },
+      {
+        "name": "increment_column",
+        "signature": "(col)",
+        "locals": [
+          "col",
+          "prefix",
+          "last_char",
+          "new_prefix"
+        ],
+        "doc": "列字母递增函数（支持AA、AB等）"
+      },
+      {
+        "name": "_build_col_maps",
+        "signature": "()",
+        "locals": [
+          "col",
+          "i"
+        ],
+        "doc": null
+      },
+      {
+        "name": "_get_renamed_columns_list",
+        "signature": "(original_cols: 'List[str]') -> 'List[str]'",
+        "locals": [
+          "original_cols",
+          "counts",
+          "new_cols",
+          "col_counts",
+          "duplicates",
+          "col",
+          "name",
+          "count"
+        ],
+        "doc": null
+      },
+      {
+        "name": "_get_max_merged_row",
+        "signature": "(file_path: 'str', sheet_name: 'Union[int, str]', target_row: 'int') -> 'int'",
+        "locals": [
+          "file_path",
+          "sheet_name",
+          "target_row",
+          "max_row_idx",
+          "workbook",
+          "sheet",
+          "merged_cell_range",
+          "target_row_idx",
+          "rlo",
+          "rhi",
+          "clo",
+          "chi",
+          "e"
+        ],
+        "doc": null
+      },
+      {
+        "name": "read_data_with_smart_header",
+        "signature": "(file_path: 'str', header_start_row: 'int', header_start_col: 'str', sheet_name_or_idx: 'Union[int, str]' = 0) -> 'pd.DataFrame'",
+        "locals": [
+          "file_path",
+          "header_start_row",
+          "header_start_col",
+          "sheet_name_or_idx",
+          "sheet_name",
+          "wb",
+          "header_start_row_0_idx",
+          "header_start_col_0_idx",
+          "max_merged_row_idx",
+          "df_preview",
+          "e",
+          "first_data_content_row_idx",
+          "i",
+          "first_data_row_final",
+          "num_header_rows",
+          "ws",
+          "header_data",
+          "max_col",
+          "row_idx",
+          "row_values",
+          "col_idx",
+          "cell_value",
+          "df_header",
+          "df_header_full",
+          "traceback",
+          "new_columns",
+          "df_data_preview",
+          "num_cols",
+          "data_start_row",
+          "num_cols_to_read",
+          "df_data",
+          "end_col_idx",
+          "unique_columns",
+          "col",
+          "part",
+          "i",
+          "col"
+        ],
+        "doc": "\n    智能读取 Excel，支持多行表头和合并单元格\n    "
+      },
+      {
+        "name": "run",
+        "signature": "(core, config_mode='excel', config_data=None)",
+        "locals": [
+          "core",
+          "config_mode",
+          "config_data",
+          "start_time"
+        ],
+        "doc": "\n    主运行入口\n    \n    Args:\n        core: 主程序实例\n        config_mode: 'excel' (手工模式) 或 'direct' (Agent模式)\n        config_data: Agent模式的参数字典\n    "
+      },
+      {
+        "name": "run_manual_mode",
+        "signature": "(core, start_time)",
+        "locals": [
+          "core",
+          "start_time",
+          "config_file",
+          "config_df",
+          "e",
+          "total_folders",
+          "total_files",
+          "total_rows",
+          "out_folder",
+          "standard_columns",
+          "idx",
+          "row",
+          "folder_path",
+          "header_col",
+          "header_row",
+          "custom_fields",
+          "col_name",
+          "cell_ref",
+          "result_df",
+          "file_count",
+          "folder_name",
+          "output_file"
+        ],
+        "doc": "\n    手工模式：按配置表逐行处理\n    "
+      },
+      {
+        "name": "process_folder_manual",
+        "signature": "(core, folder_path, header_row, header_col, custom_fields)",
+        "locals": [
+          "core",
+          "folder_path",
+          "header_row",
+          "header_col",
+          "custom_fields",
+          "result_df",
+          "file_count",
+          "excel_files",
+          "paths",
+          "path",
+          "all_files",
+          "e",
+          "file_path",
+          "file_df",
+          "temp_wb",
+          "temp_sheet",
+          "field_name",
+          "cell_ref",
+          "match",
+          "col_idx",
+          "row_idx",
+          "f"
+        ],
+        "doc": "\n    手工模式：处理单个文件夹或文件\n    支持：文件夹路径、单个文件路径、多个文件路径（用分号分隔）\n    "
+      },
+      {
+        "name": "run_agent_mode",
+        "signature": "(core, config_data, start_time)",
+        "locals": [
+          "core",
+          "config_data",
+          "start_time",
+          "file_paths",
+          "header_start_rows",
+          "header_start_cols",
+          "bank_names",
+          "account_names",
+          "account_numbers",
+          "transaction_date_cols",
+          "transaction_time_cols",
+          "counterparty_name_cols",
+          "counterparty_account_cols",
+          "summary_cols",
+          "income_cols",
+          "expense_cols",
+          "balance_cols",
+          "num_files",
+          "ensure_list",
+          "ensure_list",
+          "clean_value",
+          "clean_value",
+          "clean_account_number",
+          "clean_account_number",
+          "out_folder",
+          "output_file",
+          "all_results",
+          "success_count",
+          "fail_count",
+          "total_rows",
+          "i",
+          "file_path",
+          "file_config",
+          "file_result",
+          "e",
+          "final_df",
+          "writer",
+          "worksheet",
+          "row",
+          "cell",
+          "value_str",
+          "x",
+          "x",
+          "x"
+        ],
+        "doc": "\n    Agent 模式：批量处理多个文件 + 智能识别 + 标准化输出\n    \n    支持批量处理：所有参数都是列表形式，一次性处理多个文件\n    "
+      },
+      {
+        "name": "process_single_file_agent",
+        "signature": "(core, file_path, config_data)",
+        "locals": [
+          "core",
+          "file_path",
+          "config_data",
+          "header_row",
+          "header_col",
+          "df",
+          "bank_name",
+          "account_name",
+          "account_number",
+          "clean_value",
+          "clean_value",
+          "num_rows",
+          "result_df",
+          "date_col",
+          "time_col",
+          "counterparty_col",
+          "counterparty_account_col",
+          "summary_col",
+          "income_col",
+          "expense_col",
+          "balance_col"
+        ],
+        "doc": "\n    Agent 模式：处理单个文件（智能识别）\n    \n    Args:\n        core: 主程序实例\n        file_path: 文件路径\n        config_data: AI 识别的参数字典\n    \n    Returns:\n        pd.DataFrame: 标准化的12列数据\n    "
+      }
+    ],
+    "classes": []
+  },
+  {
+    "module": "bank_flow",
+    "functions": [
+      {
+        "name": "read_data_file",
+        "signature": "(file_path, **kwargs)",
+        "locals": [
+          "file_path",
+          "kwargs",
+          "ext"
+        ],
+        "doc": "\n    根据文件扩展名自动选择读取方式，支持 .xlsx/.xls 和 .csv\n    "
+      },
+      {
+        "name": "safe_float",
+        "signature": "(val)",
+        "locals": [
+          "val",
+          "str_val"
+        ],
+        "doc": null
+      },
+      {
+        "name": "format_date",
+        "signature": "(val)",
+        "locals": [
+          "val",
+          "str_val",
+          "dt",
+          "m",
+          "dt2"
+        ],
+        "doc": "\n    将日期值转换为标准格式字符串 (YYYY-MM-DD)\n    "
+      },
+      {
+        "name": "validate_dates",
+        "signature": "(df, date_col, source_name, raw_date_col_name)",
+        "locals": [
+          "df",
+          "date_col",
+          "source_name",
+          "raw_date_col_name",
+          "total_rows",
+          "failed_rows",
+          "fail_rate",
+          "failed_df",
+          "samples",
+          "_",
+          "row",
+          "raw_val"
+        ],
+        "doc": null
+      },
+      {
+        "name": "run",
+        "signature": "(core, config_mode='excel', config_data=None)",
+        "locals": [
+          "core",
+          "config_mode",
+          "config_data",
+          "start_time",
+          "work_dir",
+          "output_dir",
+          "cfg_path",
+          "config",
+          "sim_engine",
+          "gl_proc",
+          "df_gl",
+          "bank_proc",
+          "df_bank",
+          "engine",
+          "df_summary",
+          "df_detail",
+          "timestamp",
+          "out_file",
+          "_",
+          "row",
+          "acc",
+          "rate_amt",
+          "rate_cnt",
+          "e"
+        ],
+        "doc": null
+      }
+    ],
+    "classes": [
+      {
+        "name": "DataCleaner",
+        "methods": [
+          {
+            "name": "clean_name",
+            "signature": "(text)",
+            "doc": null
+          }
+        ]
+      },
+      {
+        "name": "ConfigLoader",
+        "methods": [
+          {
+            "name": "__init__",
+            "signature": "(self, full_path=None, config_dict=None)",
+            "doc": null
+          },
+          {
+            "name": "_read_sheet",
+            "signature": "(self, sheet_name)",
+            "doc": null
+          }
+        ]
+      },
+      {
+        "name": "SimilarityEngine",
+        "methods": [
+          {
+            "name": "__init__",
+            "signature": "(self)",
+            "doc": null
+          },
+          {
+            "name": "compute_similarity",
+            "signature": "(self, text1, text2)",
+            "doc": null
+          }
+        ]
+      },
+      {
+        "name": "GLProcessor",
+        "methods": [
+          {
+            "name": "__init__",
+            "signature": "(self, config, core_ctx)",
+            "doc": null
+          },
+          {
+            "name": "process",
+            "signature": "(self, work_dir)",
+            "doc": null
+          },
+          {
+            "name": "_process_voucher",
+            "signature": "(self, group, comp_col, acc_col, use_direct_mode, partner_direct_col)",
+            "doc": null
+          },
+          {
+            "name": "_split_by_matching",
+            "signature": "(self, group, target_rows, counter_rows, comp_col, acc_col, summary_col, debit_col, credit_col, partner_cols, make_record)",
+            "doc": "\n        借鉴 finance_viewer 匹配法的拆分逻辑。\n        \n        核心原则：\n        1. 拆分的唯一目的是获取交易对手信息\n        2. 只有对方科目有多个不同客商时才拆分\n        3. 金额以银行存款行自身为准，按对方科目比例分配\n        4. 借贷方发生额绝不改变，不产生残差\n        "
+          },
+          {
+            "name": "_find_subset_sum_lines",
+            "signature": "(candidates, target)",
+            "doc": "在 candidates 中查找 abs_amt 之和等于 target 的子集。"
+          },
+          {
+            "name": "_process_voucher_multi_bank",
+            "signature": "(self, group, target_rows, comp_col, acc_col, summary_col, debit_col, credit_col, make_record)",
+            "doc": "\n        处理同一凭证包含多个银行账户的情况。\n        按账户列将银行目标行分组，每组独立调用 _split_by_matching 匹配法。\n        "
+          }
+        ]
+      },
+      {
+        "name": "BankProcessor",
+        "methods": [
+          {
+            "name": "__init__",
+            "signature": "(self, config)",
+            "doc": null
+          },
+          {
+            "name": "process",
+            "signature": "(self, work_dir)",
+            "doc": null
+          }
+        ]
+      },
+      {
+        "name": "ReconciliationEngine",
+        "methods": [
+          {
+            "name": "__init__",
+            "signature": "(self, df_bank, df_gl, sim_engine, core_ctx, config)",
+            "doc": null
+          },
+          {
+            "name": "_add_month_col",
+            "signature": "(self, df, date_col)",
+            "doc": null
+          },
+          {
+            "name": "run",
+            "signature": "(self)",
+            "doc": null
+          },
+          {
+            "name": "_match_group",
+            "signature": "(self, b_idxs, g_idxs)",
+            "doc": null
+          },
+          {
+            "name": "_mark",
+            "signature": "(self, b_ids, g_ids, desc)",
+            "doc": null
+          },
+          {
+            "name": "_l1_partner_exact",
+            "signature": "(self, b_idxs, g_idxs)",
+            "doc": null
+          },
+          {
+            "name": "_l2_summary_exact",
+            "signature": "(self, b_idxs, g_idxs)",
+            "doc": null
+          },
+          {
+            "name": "_l3_smart_split",
+            "signature": "(self, b_idxs, g_idxs)",
+            "doc": null
+          },
+          {
+            "name": "_find_subset_match",
+            "signature": "(self, df, target, col_name='__bank_amount__')",
+            "doc": null
+          },
+          {
+            "name": "_execute_time_match",
+            "signature": "(self, b_idxs, g_idxs, type_name, used_b_set, used_g_set)",
+            "doc": null
+          },
+          {
+            "name": "_l4_partner_aggregation",
+            "signature": "(self, b_idxs, g_idxs)",
+            "doc": null
+          },
+          {
+            "name": "_l5_fuzzy_semantic",
+            "signature": "(self, b_idxs, g_idxs)",
+            "doc": null
+          },
+          {
+            "name": "_run_fuzzy_core",
+            "signature": "(self, curr_b, curr_g)",
+            "doc": null
+          },
+          {
+            "name": "_fuzzy_matrix_match",
+            "signature": "(self, df_b, df_g, label_prefix, use_summary=False)",
+            "doc": null
+          },
+          {
+            "name": "_l6_same_month_amount",
+            "signature": "(self, b_idxs, g_idxs)",
+            "doc": null
+          },
+          {
+            "name": "_l7_partner_aggregation_to_single",
+            "signature": "(self, b_idxs, g_idxs)",
+            "doc": "\n        L7: 银行流水按交易对手汇总后匹配序时账单笔\n        "
+          },
+          {
+            "name": "_l8_global_brute_force",
+            "signature": "(self, b_idxs, g_idxs)",
+            "doc": null
+          },
+          {
+            "name": "_l8_reverse_brute_force",
+            "signature": "(self, b_idxs, g_idxs)",
+            "doc": "\n        L8 反向凑数 - 从序时账单笔出发，在同月银行流水中找金额组合 (N:1)\n        解决场景：多笔银行流水合计等于一笔序时账（如200+200=400手续费，或多笔税金合计）\n        "
+          },
+          {
+            "name": "_l7_nm_aggregation",
+            "signature": "(self, b_idxs, g_idxs)",
+            "doc": "\n        L7 N:M 汇总匹配 - 同月内，按银行流水交易对手分组，\n        优先按日期子组精细匹配，最后才兜底全量汇总。\n        "
+          },
+          {
+            "name": "_l9_cross_month_boundary",
+            "signature": "(self, b_idxs, g_idxs)",
+            "doc": "\n        L9 跨月边界匹配 — 复用 L1-L8 全部匹配策略。\n        \n        只取月边界附近（每月前3天/后3天）的未匹配记录，\n        分两轮对齐月份后在边界记录之间重跑 L1-L8：\n          轮1: 银行流水月初(1-3日)移到上月 → 和序时账月末(28+日)同月匹配\n          轮2: 序时账月初(1-3日)移到上月 → 和银行流水月末(28+日)同月匹配\n        "
+          },
+          {
+            "name": "_run_l1_l8",
+            "signature": "(self, b_idxs, g_idxs)",
+            "doc": "复用 L1-L8 匹配逻辑的辅助方法。"
+          },
+          {
+            "name": "get_partner_check_status",
+            "signature": "(self, match_type, b_partner, g_partner)",
+            "doc": null
+          },
+          {
+            "name": "_generate_detail_report",
+            "signature": "(self)",
+            "doc": null
+          },
+          {
+            "name": "save_formatted_excel",
+            "signature": "(self, df_summary, df_detail, path)",
+            "doc": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "module": "voucher_check",
+    "functions": [
+      {
+        "name": "find_supported_files",
+        "signature": "(directory)",
+        "locals": [
+          "directory",
+          "supported_files",
+          "supported_extensions",
+          "archive_extensions",
+          "root_dir",
+          "archives_found",
+          "ext",
+          "file",
+          "archive"
+        ],
+        "doc": null
+      },
+      {
+        "name": "encode_image_to_base64",
+        "signature": "(image_path_or_bytes, compress_images, max_size=(1200, 1200), jpeg_quality=80)",
+        "locals": [
+          "image_path_or_bytes",
+          "compress_images",
+          "max_size",
+          "jpeg_quality",
+          "img_bytes",
+          "mime_type",
+          "image_path",
+          "_",
+          "image_file",
+          "e",
+          "img",
+          "original_format",
+          "buffer",
+          "save_params",
+          "encoded_string"
+        ],
+        "doc": null
+      },
+      {
+        "name": "convert_pdf_to_images",
+        "signature": "(pdf_path, compress_images, dpi=200, max_size=(1200, 1200), jpeg_quality=80)",
+        "locals": [
+          "pdf_path",
+          "compress_images",
+          "dpi",
+          "max_size",
+          "jpeg_quality",
+          "base64_images",
+          "current_dpi",
+          "current_max_size",
+          "current_jpeg_quality",
+          "current_subsampling",
+          "doc",
+          "page_num",
+          "page",
+          "pix",
+          "img",
+          "buffer",
+          "compressed_img_bytes",
+          "encoded_string",
+          "e"
+        ],
+        "doc": null
+      },
+      {
+        "name": "extract_info",
+        "signature": "(client, model, system_prompt, user_prompt, visual_files=None, text_content=None, compress_images=True)",
+        "locals": [
+          "client",
+          "model",
+          "system_prompt",
+          "user_prompt",
+          "visual_files",
+          "text_content",
+          "compress_images",
+          "messages",
+          "content_parts",
+          "files_to_process",
+          "file_path",
+          "file_extension",
+          "base64_images",
+          "img",
+          "base64_image",
+          "info",
+          "completion",
+          "text",
+          "start_char",
+          "end_char",
+          "start_index",
+          "end_index",
+          "core_json",
+          "result",
+          "fixed_json",
+          "e"
+        ],
+        "doc": null
+      },
+      {
+        "name": "rotate_image_if_needed",
+        "signature": "(img: 'Image.Image') -> 'Image.Image'",
+        "locals": [
+          "img",
+          "osd_data",
+          "rotation_angle",
+          "e"
+        ],
+        "doc": "\n    使用 Tesseract OSD 检测图像方向并将其旋转至正确方向。\n    仅在 IS_PYTESSERACT_AVAILABLE 为 True 时执行。\n    "
+      },
+      {
+        "name": "setup_tesseract_path",
+        "signature": "()",
+        "locals": [
+          "platform",
+          "system",
+          "tesseract_install_path",
+          "tesseract_exe_path",
+          "current_path",
+          "tessdata_path",
+          "possible_paths",
+          "p",
+          "shutil",
+          "e"
+        ],
+        "doc": "\n    配置 Tesseract 路径，支持 Windows 和 macOS。\n    Windows: C:\\Program Files\\Tesseract-OCR\n    macOS: /usr/local/bin/tesseract 或 /opt/homebrew/bin/tesseract (Homebrew)\n    自检成功则设置 IS_PYTESSERACT_AVAILABLE = True。\n    自检失败则只打印一行警告，不抛出异常。\n    "
+      },
+      {
+        "name": "check_api_connection",
+        "signature": "(base_url, api_key)",
+        "locals": [
+          "base_url",
+          "api_key",
+          "client",
+          "e"
+        ],
+        "doc": null
+      },
+      {
+        "name": "safe_chat_create",
+        "signature": "(client, **kwargs)",
+        "locals": [
+          "client",
+          "kwargs",
+          "threading",
+          "result_holder",
+          "error_holder",
+          "_do_call",
+          "_do_call",
+          "t",
+          "e",
+          "APITimeoutError",
+          "APIConnectionError",
+          "error_code",
+          "err_str",
+          "t2",
+          "genexpr",
+          "genexpr"
+        ],
+        "doc": "\n    兼容各平台的 chat.completions.create 封装。\n    - 通过 extra_body 传递 enable_thinking=False 关闭思考模式\n    - 平台不支持时自动回退\n    - 内置硬超时保护，防止请求无限卡死\n    "
+      },
+      {
+        "name": "_split_path",
+        "signature": "(file_path)",
+        "locals": [
+          "file_path",
+          "s",
+          "PureWindowsPath"
+        ],
+        "doc": "\n    跨平台路径分割：无论当前操作系统是什么，都能正确分割 Windows 和 POSIX 路径。\n    返回 tuple of parts（与 Path.parts 行为一致）。\n    "
+      },
+      {
+        "name": "_path_basename",
+        "signature": "(file_path)",
+        "locals": [
+          "file_path",
+          "parts"
+        ],
+        "doc": "跨平台获取文件名（最后一级）"
+      },
+      {
+        "name": "_path_parent_name",
+        "signature": "(file_path)",
+        "locals": [
+          "file_path",
+          "parts"
+        ],
+        "doc": "跨平台获取父文件夹名（倒数第二级）"
+      },
+      {
+        "name": "_company_matches",
+        "signature": "(company_a, company_b)",
+        "locals": [
+          "company_a",
+          "company_b",
+          "_strip_suffix",
+          "_strip_suffix",
+          "a",
+          "b"
+        ],
+        "doc": "\n    公司名模糊匹配：判断两个公司名是否指向同一实体。\n    处理序时账中带后缀（如 '-藏建集团账簿'）的情况。\n    "
+      },
+      {
+        "name": "parse_file_info",
+        "signature": "(file_path, companies)",
+        "locals": [
+          "file_path",
+          "companies",
+          "parts",
+          "file_name",
+          "name",
+          "strip_m",
+          "company",
+          "part",
+          "c",
+          "month",
+          "m",
+          "m2",
+          "parent_name",
+          "m2b",
+          "vn",
+          "voucher_str",
+          "voucher_type_pattern",
+          "text_to_search",
+          "m_full",
+          "m4",
+          "m5",
+          "m6"
+        ],
+        "doc": "\n    从文件名和路径中提取匹配要素：公司、月份、凭证号字符串、凭证号数字。\n    返回 dict: {\"company\": str|None, \"month\": str|None, \"vn\": str|None, \"voucher_str\": str|None}\n    voucher_str: 完整凭证号字符串（如\"收-98\"、\"转-43\"、\"记-132\"），用于AI匹配时提供上下文\n    vn: 纯数字部分（向后兼容）\n    "
+      },
+      {
+        "name": "extract_vn_from_record",
+        "signature": "(record)",
+        "locals": [
+          "record",
+          "vn",
+          "voucher_no",
+          "m",
+          "m2",
+          "month",
+          "date_str",
+          "m3"
+        ],
+        "doc": "从序时账记录中提取凭证号数字和月份"
+      },
+      {
+        "name": "extract_subject_from_path",
+        "signature": "(file_path, checkpoints_map)",
+        "locals": [
+          "file_path",
+          "checkpoints_map",
+          "parts",
+          "part",
+          "subject"
+        ],
+        "doc": "从文件路径的目录结构中尝试匹配科目"
+      },
+      {
+        "name": "match_file_to_record",
+        "signature": "(file_path, voucher_records, companies, checkpoints_map)",
+        "locals": [
+          "file_path",
+          "voucher_records",
+          "companies",
+          "checkpoints_map",
+          "info",
+          "file_company",
+          "file_month",
+          "file_vn",
+          "candidates",
+          "r",
+          "r_vn",
+          "r_month",
+          "month_matched",
+          "file_subject",
+          "r",
+          "r",
+          "r"
+        ],
+        "doc": "\n    四层降级匹配策略（前3层不消耗token）：\n    层1: 公司 + 月份 + 凭证号数字 → 精确匹配\n    层2: 公司 + 科目 + 唯一性 → 科目唯一匹配\n    层3: 返回 None（由调用方决定是否用 AI 提取）\n    \n    返回 (record|None, match_method: str)\n    "
+      },
+      {
+        "name": "extract_voucher_info_by_ai",
+        "signature": "(client, visual_model_name, file_path)",
+        "locals": [
+          "client",
+          "visual_model_name",
+          "file_path",
+          "file_ext",
+          "fitz",
+          "doc",
+          "page",
+          "pix",
+          "Image",
+          "img",
+          "io",
+          "buffer",
+          "img_bytes",
+          "base64",
+          "b64",
+          "image_url",
+          "e",
+          "prompt",
+          "messages",
+          "completion",
+          "text",
+          "data"
+        ],
+        "doc": "\n    层3 AI提取：只读取文件第一页，提取凭证基本信息用于匹配序时账。\n    返回 dict: {\"公司\": \"\", \"日期\": \"\", \"凭证号\": \"\", \"摘要\": \"\", \"借方科目\": \"\", \"贷方科目\": \"\", \"金额\": \"\"}\n    或 None（提取失败）\n    "
+      },
+      {
+        "name": "match_by_ai_info",
+        "signature": "(ai_info, voucher_records, companies, file_path=None)",
+        "locals": [
+          "ai_info",
+          "voucher_records",
+          "companies",
+          "file_path",
+          "ai_vn",
+          "ai_voucher_no",
+          "m",
+          "ai_amount",
+          "amt_str",
+          "ai_month",
+          "ai_date",
+          "m2",
+          "candidates",
+          "file_info",
+          "file_company",
+          "company_matched",
+          "vn_matched",
+          "month_matched",
+          "amount_matched",
+          "r",
+          "r_amt",
+          "r",
+          "r",
+          "r"
+        ],
+        "doc": "\n    用 AI 提取的凭证信息在序时账中匹配。\n    匹配策略：公司（从路径提取）+ 凭证号 → 唯一确定；辅以金额、月份缩小范围。\n    "
+      },
+      {
+        "name": "_extract_company_from_path",
+        "signature": "(file_path)",
+        "locals": [
+          "file_path",
+          "parts"
+        ],
+        "doc": "从文件路径中粗提取疑似公司名（取最近的非根目录文件夹名）"
+      },
+      {
+        "name": "_build_match_prompt",
+        "signature": "(file_entries, record_entries)",
+        "locals": [
+          "file_entries",
+          "record_entries",
+          "files_text",
+          "records_text",
+          "genexpr",
+          "genexpr",
+          "genexpr"
+        ],
+        "doc": "\n    构建 AI 批量匹配的 prompt。\n    file_entries: list of {\"id\": int, \"path\": str}\n    record_entries: list of {\"id\": int, \"公司\": \"\", \"凭证号\": \"\", \"科目名称\": \"\", \"日期\": \"\", \"摘要\": \"\", \"金额\": \"\"}\n    "
+      },
+      {
+        "name": "ai_batch_match",
+        "signature": "(client, model_name, unmatched_files, voucher_records, companies, thread_count)",
+        "locals": [
+          "client",
+          "model_name",
+          "unmatched_files",
+          "voucher_records",
+          "companies",
+          "thread_count",
+          "company_file_groups",
+          "fallback_files",
+          "f",
+          "folder_name",
+          "file_name",
+          "matched_company",
+          "parts",
+          "c",
+          "part",
+          "name_no_ext",
+          "strip_m",
+          "batch_tasks",
+          "company",
+          "files",
+          "company_records",
+          "subject_groups",
+          "r",
+          "subj",
+          "subj_records",
+          "final_batches",
+          "records",
+          "batch_size",
+          "i",
+          "batch_files",
+          "record_id_map",
+          "idx",
+          "result_map",
+          "match_lock",
+          "_run_batch",
+          "_run_batch",
+          "executor",
+          "futures",
+          "batch_records",
+          "future",
+          "e",
+          "r"
+        ],
+        "doc": "\n    用 AI 文本模型批量匹配未匹配的文件与序时账记录。\n    \n    分组策略：\n    1. 从文件路径粗提取公司名，按公司分组\n    2. 如果某公司组内序时账 > 50 条，再按科目细分\n    3. 每组内序时账完整发送，文件按批次发送（每批上限动态调整）\n    4. 多线程并发各批次\n    \n    返回 dict: {file_path: record}\n    "
+      },
+      {
+        "name": "load_config",
+        "signature": "(core, config_mode, config_data)",
+        "locals": [
+          "core",
+          "config_mode",
+          "config_data",
+          "config_file_path",
+          "thread_count",
+          "raw",
+          "source_paths",
+          "wb",
+          "ws",
+          "row",
+          "tc_val",
+          "headers",
+          "checkpoints_map",
+          "subject",
+          "required_attachments",
+          "check_points",
+          "KNOWN_COLUMNS",
+          "voucher_records",
+          "extra_columns",
+          "ws_v",
+          "v_headers",
+          "col_index_map",
+          "idx",
+          "h",
+          "company_idx",
+          "vn_idx",
+          "company_val",
+          "vn_val",
+          "_get",
+          "_get",
+          "record",
+          "ec",
+          "cell",
+          "v",
+          "cell",
+          "h"
+        ],
+        "doc": "\n    读取配置：数据源路径 + 线程数 + 核查要点 + 序时账（可选）。\n    返回 (source_paths, thread_count, checkpoints_map, voucher_records)\n    \n    checkpoints_map: {\"科目名\": {\"required_attachments\": \"...\", \"check_points\": [...]}}\n    voucher_records: list[dict] 或 [] （空表示无序时账模式）\n    "
+      },
+      {
+        "name": "scan_all_files",
+        "signature": "(source_paths)",
+        "locals": [
+          "source_paths",
+          "supported_extensions",
+          "all_files",
+          "path",
+          "ext",
+          "found",
+          "f"
+        ],
+        "doc": "递归扫描所有路径，返回文件列表"
+      },
+      {
+        "name": "match_subject",
+        "signature": "(file_path, checkpoints_map, record=None)",
+        "locals": [
+          "file_path",
+          "checkpoints_map",
+          "record",
+          "record_subject",
+          "subject",
+          "folder_name"
+        ],
+        "doc": "\n    匹配核查要点中的科目。\n    优先级：序时账科目名称 → 文件夹名称 → 返回None交给AI\n    "
+      },
+      {
+        "name": "build_check_prompt",
+        "signature": "(subject, subject_info, checkpoints_map, record=None)",
+        "locals": [
+          "subject",
+          "subject_info",
+          "checkpoints_map",
+          "record",
+          "concise_rule",
+          "record_info",
+          "amount",
+          "side",
+          "check_points",
+          "required_attachments",
+          "points_text",
+          "attachment_check",
+          "subjects_list",
+          "subject_details",
+          "subj",
+          "info",
+          "att",
+          "pts",
+          "att_str",
+          "genexpr",
+          "genexpr"
+        ],
+        "doc": "\n    构建凭证核查 Prompt。\n    record: 序时账记录（有序时账模式时传入）\n    "
+      },
+      {
+        "name": "parse_ai_response",
+        "signature": "(response, file_path, subject, match_method, auto_generated, check_points_count)",
+        "locals": [
+          "response",
+          "file_path",
+          "subject",
+          "match_method",
+          "auto_generated",
+          "check_points_count",
+          "file_name",
+          "result",
+          "remarks",
+          "data",
+          "json_match",
+          "voucher_info",
+          "ai_subject",
+          "check_results_raw",
+          "check_results",
+          "item",
+          "conclusion",
+          "desc",
+          "e"
+        ],
+        "doc": "解析 AI 返回的 JSON，构建输出行数据"
+      },
+      {
+        "name": "process_single_voucher",
+        "signature": "(client, visual_model_name, file_path, checkpoints_map, record=None)",
+        "locals": [
+          "client",
+          "visual_model_name",
+          "file_path",
+          "checkpoints_map",
+          "record",
+          "file_ext",
+          "file_name",
+          "fitz",
+          "doc",
+          "page_count",
+          "e",
+          "subject",
+          "match_method",
+          "auto_generated",
+          "subject_info",
+          "system_prompt",
+          "prompt_subject",
+          "user_prompt",
+          "response",
+          "cp_count",
+          "result",
+          "ai_subj"
+        ],
+        "doc": "\n    处理单个凭证文件。\n    record: 匹配到的序时账记录（可为 None）\n    "
+      },
+      {
+        "name": "_write_merged_header",
+        "signature": "(ws, extra_columns=None)",
+        "locals": [
+          "ws",
+          "extra_columns",
+          "thin",
+          "border",
+          "center",
+          "extra_start",
+          "extra_cols",
+          "i",
+          "col_name",
+          "row2_labels",
+          "col",
+          "label",
+          "total_cols",
+          "row",
+          "cell"
+        ],
+        "doc": "写入两行合并表头"
+      },
+      {
+        "name": "_compute_overall",
+        "signature": "(check_results)",
+        "locals": [
+          "check_results",
+          "has_fail",
+          "has_pass",
+          "has_unknown",
+          "r",
+          "text"
+        ],
+        "doc": "\n    根据所有测试情况计算总体情况。\n    符合 → √，不符合 → ×，无法判断/混合 → -\n    "
+      },
+      {
+        "name": "init_output",
+        "signature": "(output_dir, output_file)",
+        "locals": [
+          "output_dir",
+          "output_file",
+          "completed",
+          "wb",
+          "ws",
+          "is_header_written",
+          "first_row",
+          "row",
+          "val",
+          "e",
+          "cell"
+        ],
+        "doc": "初始化输出文件，返回 (wb, ws, completed_set, is_header_written)"
+      },
+      {
+        "name": "write_result_row",
+        "signature": "(ws, is_header_written, result, record, seq_no, ai_voucher_info=None, index_ids=None, extra_columns=None)",
+        "locals": [
+          "ws",
+          "is_header_written",
+          "result",
+          "record",
+          "seq_no",
+          "ai_voucher_info",
+          "index_ids",
+          "extra_columns",
+          "extra_cols",
+          "check_results",
+          "company",
+          "date_str",
+          "year",
+          "subject_name",
+          "voucher_no",
+          "summary",
+          "debit_amount",
+          "credit_amount",
+          "ai_date",
+          "amt",
+          "file_name",
+          "info",
+          "vn",
+          "vi",
+          "index_str",
+          "overall",
+          "test_cols",
+          "i",
+          "row_num",
+          "file_path_val",
+          "file_name_val",
+          "cell_fp",
+          "data",
+          "col",
+          "val",
+          "extra_start",
+          "ec"
+        ],
+        "doc": "\n    将单条结果写入 Excel（两行合并表头格式）。\n    record: 序时账记录（可为 None）\n    seq_no: 序号\n    ai_voucher_info: AI从凭证第一页提取的信息\n    index_ids: 索引号列表（来自序时账的索引号字段，可能多个）\n    extra_columns: 用户自定义的额外列名列表\n    返回 is_header_written\n    "
+      },
+      {
+        "name": "_write_checkpoints_sheet",
+        "signature": "(output_file, checkpoints_map)",
+        "locals": [
+          "output_file",
+          "checkpoints_map",
+          "wb",
+          "sheet_name",
+          "ws_cp",
+          "max_points",
+          "info",
+          "headers",
+          "col_idx",
+          "h",
+          "row_idx",
+          "subject",
+          "i",
+          "point",
+          "e",
+          "i"
+        ],
+        "doc": "将核查要点写入输出文件的'核查要点'工作表，作为留存信息"
+      },
+      {
+        "name": "_rename_file_with_prefix",
+        "signature": "(file_path, index_ids)",
+        "locals": [
+          "file_path",
+          "index_ids",
+          "dir_name",
+          "file_name",
+          "m",
+          "prefix",
+          "new_name",
+          "new_path",
+          "e"
+        ],
+        "doc": "\n    在文件名前加上索引号前缀，格式为 [S0001 S0002] 202510记0132.pdf。\n    方括号包裹便于识别，再次运行时会先去掉旧前缀再加新的。\n    "
+      },
+      {
+        "name": "run",
+        "signature": "(core, config_mode='excel', config_data=None)",
+        "locals": [
+          "core",
+          "config_mode",
+          "config_data",
+          "start_time",
+          "base_url",
+          "api_key",
+          "visual_model_name",
+          "msg",
+          "client",
+          "source_paths",
+          "thread_count",
+          "checkpoints_map",
+          "voucher_records",
+          "extra_columns",
+          "e",
+          "companies",
+          "all_files",
+          "file_record_map",
+          "file_match_method",
+          "file_index_ids",
+          "file_all_records",
+          "matched_count",
+          "f",
+          "record",
+          "method",
+          "vn_key",
+          "all_matched",
+          "ids",
+          "unmatched_files",
+          "text_model_name",
+          "ai_matched",
+          "total_matched",
+          "unmatched",
+          "output_dir",
+          "timestamp",
+          "output_file",
+          "existing_files",
+          "latest_file",
+          "is_append",
+          "wb",
+          "ws",
+          "completed_voucher_nos",
+          "is_header_written",
+          "files_to_process",
+          "info",
+          "file_vn",
+          "vn_str",
+          "total_files",
+          "total_this_run",
+          "successful_count",
+          "write_lock",
+          "seq_counter",
+          "_is_stopped",
+          "_is_stopped",
+          "_process_one",
+          "_process_one",
+          "executor",
+          "future_map",
+          "fp",
+          "future",
+          "file_path",
+          "result",
+          "ai_info_for_write",
+          "index_ids",
+          "seq",
+          "new_path",
+          "done",
+          "progress",
+          "matched_record_keys",
+          "unmatched_records",
+          "seen_keys",
+          "unique_unmatched",
+          "r",
+          "key",
+          "sheet_name",
+          "ws_unmatched",
+          "headers",
+          "col_idx",
+          "h",
+          "row_idx",
+          "i",
+          "ec",
+          "end_time",
+          "total_time",
+          "failed_count",
+          "genexpr",
+          "genexpr",
+          "r",
+          "r",
+          "f",
+          "r",
+          "r",
+          "f",
+          "f",
+          "genexpr",
+          "genexpr",
+          "r"
+        ],
+        "doc": "\n    凭证检查主入口（多线程版）。\n    core: AuditTool 实例\n    config_mode: 'excel'（默认）或 'direct'（Agent调用）\n    config_data: dict，仅 config_mode='direct' 时使用\n    "
+      }
+    ],
+    "classes": [
+      {
+        "name": "Tool",
+        "methods": [
+          {
+            "name": "__init__",
+            "signature": "(self)",
+            "doc": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "module": "qcc_processor",
+    "functions": [
+      {
+        "name": "_get_docx_files",
+        "signature": "(directory)",
+        "locals": [
+          "directory",
+          "file_paths",
+          "root",
+          "_",
+          "files",
+          "file"
+        ],
+        "doc": "获取目录下所有的docx文件"
+      },
+      {
+        "name": "_extract_company_name",
+        "signature": "(filename)",
+        "locals": [
+          "filename",
+          "base_name",
+          "parts"
+        ],
+        "doc": "从文件名中提取公司名称"
+      },
+      {
+        "name": "_get_sort_tuple",
+        "signature": "(key_str)",
+        "locals": [
+          "key_str",
+          "match",
+          "x"
+        ],
+        "doc": "辅助排序函数：将 \"2.10\" 转为 [2, 10] 以便正确排序"
+      },
+      {
+        "name": "_clean_toc_line",
+        "signature": "(text)",
+        "locals": [
+          "text",
+          "cleaned_text"
+        ],
+        "doc": "剔除目录行尾的页码"
+      },
+      {
+        "name": "_process_single_report",
+        "signature": "(file_path)",
+        "locals": [
+          "file_path",
+          "name_to_count",
+          "name_to_number",
+          "doc",
+          "pattern",
+          "para",
+          "raw_text",
+          "clean_text",
+          "match",
+          "section_num",
+          "section_name",
+          "count_str",
+          "val",
+          "e"
+        ],
+        "doc": "\n    处理单个Word文档\n    返回: \n    1. success (bool)\n    2. name_to_count (dict): { \"企业标签\": 5, \"变更记录\": 17 } -> 纯名称对应数量\n    3. name_to_number (dict): { \"企业标签\": \"1.2\", \"变更记录\": \"2.7\" } -> 纯名称对应编号\n    4. error_msg (str)\n    "
+      },
+      {
+        "name": "run",
+        "signature": "(core, config_mode='excel', config_data=None)",
+        "locals": [
+          "core",
+          "config_mode",
+          "config_data",
+          "start_time",
+          "success_count",
+          "fail_count",
+          "processed_files_count",
+          "work_dir",
+          "output_dir",
+          "output_file_path",
+          "folder_path",
+          "full_path",
+          "docx_files",
+          "msg",
+          "data_matrix",
+          "global_number_map",
+          "all_unique_items",
+          "f_idx",
+          "file_path",
+          "file_name",
+          "company_name",
+          "progress",
+          "success",
+          "name_counts",
+          "name_nums",
+          "error_msg",
+          "name",
+          "num",
+          "current_best",
+          "sorted_items",
+          "index_data",
+          "item_name",
+          "df_base",
+          "df_values",
+          "company",
+          "counts_dict",
+          "final_df",
+          "e"
+        ],
+        "doc": null
+      }
+    ],
+    "classes": []
+  },
+  {
+    "module": "related_party",
+    "functions": [
+      {
+        "name": "_cookie_file",
+        "signature": "()",
+        "locals": [],
+        "doc": null
+      },
+      {
+        "name": "normalize_name",
+        "signature": "(name: 'str') -> 'str'",
+        "locals": [
+          "name"
+        ],
+        "doc": "标准化企业名称：去空格、统一全半角括号、转小写"
+      },
+      {
+        "name": "_load_excel",
+        "signature": "(data_dir: 'Path', filename: 'str') -> 'list'",
+        "locals": [
+          "data_dir",
+          "filename",
+          "filepath",
+          "wb",
+          "ws",
+          "rows",
+          "headers",
+          "result",
+          "row",
+          "record",
+          "i",
+          "val",
+          "col",
+          "i",
+          "h"
+        ],
+        "doc": "加载单个 Excel，返回 [{col: val, ...}, ...]"
+      },
+      {
+        "name": "_load_all_data",
+        "signature": "(data_dir: 'Path') -> 'dict'",
+        "locals": [
+          "data_dir",
+          "files",
+          "data",
+          "key",
+          "filename"
+        ],
+        "doc": "加载所有 Excel 到 {文件名: [records]} 字典"
+      },
+      {
+        "name": "_load_names_from_file",
+        "signature": "(filepath: 'str') -> 'list'",
+        "locals": [
+          "filepath",
+          "path",
+          "names",
+          "wb",
+          "ws",
+          "row",
+          "f",
+          "line"
+        ],
+        "doc": "从文件加载企业名称列表（支持 txt 和 xlsx）"
+      },
+      {
+        "name": "_set_cell_style",
+        "signature": "(cell, fill=None, font=None, alignment=None, border=None)",
+        "locals": [
+          "cell",
+          "fill",
+          "font",
+          "alignment",
+          "border"
+        ],
+        "doc": null
+      },
+      {
+        "name": "_auto_width",
+        "signature": "(ws)",
+        "locals": [
+          "ws",
+          "col",
+          "max_len",
+          "col_letter",
+          "cell",
+          "val_str",
+          "length",
+          "genexpr",
+          "genexpr"
+        ],
+        "doc": null
+      },
+      {
+        "name": "_create_dimension_findings_map",
+        "signature": "(findings: 'list') -> 'dict'",
+        "locals": [
+          "findings",
+          "dimension_map",
+          "f"
+        ],
+        "doc": null
+      },
+      {
+        "name": "_get_company_role",
+        "signature": "(company_name: 'str', customers: 'list', suppliers: 'list') -> 'str'",
+        "locals": [
+          "company_name",
+          "customers",
+          "suppliers",
+          "norm_name",
+          "c",
+          "s"
+        ],
+        "doc": null
+      },
+      {
+        "name": "_create_company_risk_summary",
+        "signature": "(findings: 'list', customers: 'list', suppliers: 'list', registration_statuses: 'dict' = None) -> 'list'",
+        "locals": [
+          "findings",
+          "customers",
+          "suppliers",
+          "registration_statuses",
+          "company_map",
+          "norm_customers",
+          "norm_suppliers",
+          "f",
+          "target_name",
+          "names_to_process",
+          "name",
+          "norm_name",
+          "result",
+          "confidence_order",
+          "data",
+          "unique_dimensions",
+          "max_confidence",
+          "original_name",
+          "reg_status",
+          "c",
+          "s"
+        ],
+        "doc": null
+      },
+      {
+        "name": "_write_report",
+        "signature": "(findings: 'list', output_path: 'str', audit_target: 'str', customers: 'list', suppliers: 'list', auto_subsidiaries: 'dict' = None, registration_statuses: 'dict' = None)",
+        "locals": [
+          "findings",
+          "output_path",
+          "audit_target",
+          "customers",
+          "suppliers",
+          "auto_subsidiaries",
+          "registration_statuses",
+          "wb",
+          "norm_customers",
+          "norm_suppliers",
+          "dimension_map",
+          "dimension_stats",
+          "dim_key",
+          "dim_findings",
+          "ws_summary",
+          "row",
+          "label",
+          "value",
+          "col",
+          "heatmap_headers",
+          "col_idx",
+          "header",
+          "total_hits",
+          "total_high",
+          "total_mid",
+          "total_low",
+          "info",
+          "stats",
+          "dim_code",
+          "row_data",
+          "cell",
+          "total_data",
+          "company_risk_summary",
+          "risk_headers",
+          "idx",
+          "risk",
+          "val",
+          "dim_name",
+          "ws_dim",
+          "headers",
+          "hit_map",
+          "f",
+          "target_name",
+          "names",
+          "name",
+          "seq",
+          "company",
+          "norm_company",
+          "role",
+          "ws_subs",
+          "norm_c",
+          "norm_s",
+          "sub_name",
+          "sub_info",
+          "is_trading",
+          "ws_input",
+          "title",
+          "items",
+          "item",
+          "c",
+          "s",
+          "genexpr",
+          "genexpr",
+          "genexpr",
+          "genexpr",
+          "c",
+          "s"
+        ],
+        "doc": "输出多 sheet Excel 报告"
+      },
+      {
+        "name": "_save_cookie_string",
+        "signature": "(cookie_str: 'str')",
+        "locals": [
+          "cookie_str",
+          "cookie_data",
+          "cookies_dict",
+          "xsrf_token",
+          "part",
+          "k",
+          "v",
+          "f"
+        ],
+        "doc": "将 cookie 字符串保存为 .cicpa_cookies.json"
+      },
+      {
+        "name": "_run_gui",
+        "signature": "(ctx, config_data: 'dict')",
+        "locals": [
+          "ctx",
+          "config_data",
+          "config_path",
+          "wb",
+          "ws",
+          "config",
+          "row",
+          "audit_target",
+          "data_dir",
+          "threshold",
+          "equity_pen_value",
+          "equity_pen",
+          "eq_depth",
+          "data_path",
+          "config_file",
+          "customers",
+          "suppliers",
+          "former_execs",
+          "sheet_name",
+          "rows",
+          "names",
+          "settings",
+          "cookie_str",
+          "data",
+          "index",
+          "scanner",
+          "findings",
+          "equity_data",
+          "eq",
+          "penetration_targets",
+          "company",
+          "basic",
+          "orgid",
+          "result",
+          "e",
+          "ts",
+          "output_path",
+          "r"
+        ],
+        "doc": "GUI 模式：从配置表读取参数执行"
+      },
+      {
+        "name": "_run_mcp",
+        "signature": "(ctx, config_data: 'dict')",
+        "locals": [
+          "ctx",
+          "config_data",
+          "audit_target",
+          "data_dir",
+          "customers_str",
+          "suppliers_str",
+          "customer_file",
+          "supplier_file",
+          "former_execs_str",
+          "former_exec_file",
+          "threshold",
+          "equity_pen",
+          "eq_depth",
+          "output_path",
+          "cookie_json",
+          "data_path",
+          "customers",
+          "suppliers",
+          "former_execs",
+          "settings",
+          "cookie_str",
+          "e",
+          "data",
+          "data_info",
+          "all_names",
+          "index",
+          "scanner",
+          "equity_data",
+          "eq",
+          "penetration_targets",
+          "company",
+          "basic",
+          "orgid",
+          "result",
+          "findings",
+          "ts",
+          "output_path_p",
+          "dim_summary",
+          "f",
+          "c",
+          "s",
+          "e",
+          "key",
+          "records",
+          "genexpr",
+          "genexpr",
+          "genexpr",
+          "genexpr"
+        ],
+        "doc": "MCP 模式：AI 助手调用"
+      },
+      {
+        "name": "run",
+        "signature": "(ctx, config_mode='gui', config_data=None)",
+        "locals": [
+          "ctx",
+          "config_mode",
+          "config_data"
+        ],
+        "doc": "模块执行入口"
+      }
+    ],
+    "classes": [
+      {
+        "name": "CompanyIndex",
+        "methods": [
+          {
+            "name": "__init__",
+            "signature": "(self, data: 'dict', target_names: 'set')",
+            "doc": null
+          },
+          {
+            "name": "_company_key",
+            "signature": "(self, name) -> 'str'",
+            "doc": null
+          },
+          {
+            "name": "_person_key",
+            "signature": "(self, name) -> 'str'",
+            "doc": null
+          },
+          {
+            "name": "_extract_email_domain",
+            "signature": "(self, email: 'str') -> 'str'",
+            "doc": null
+          },
+          {
+            "name": "_build",
+            "signature": "(self)",
+            "doc": null
+          }
+        ]
+      },
+      {
+        "name": "EquityPenetration",
+        "methods": [
+          {
+            "name": "__init__",
+            "signature": "(self, cookies_path: 'str' = '.cicpa_cookies.json', threshold: 'float' = 50.0, max_depth: 'int' = 5, delay: 'float' = 1.0)",
+            "doc": null
+          },
+          {
+            "name": "_load_cookies",
+            "signature": "(self) -> 'None'",
+            "doc": null
+          },
+          {
+            "name": "_call_api",
+            "signature": "(self, orgid: 'str') -> 'Optional[Dict]'",
+            "doc": null
+          },
+          {
+            "name": "_parse_ratio",
+            "signature": "(self, czbl: 'str') -> 'float'",
+            "doc": null
+          },
+          {
+            "name": "_penetrate_holders",
+            "signature": "(self, children: 'List[Dict]', chain: 'List[str]', depth: 'int') -> 'Dict[str, Dict]'",
+            "doc": null
+          },
+          {
+            "name": "_extract_invests",
+            "signature": "(self, invests: 'Dict') -> 'Dict[str, Dict]'",
+            "doc": null
+          },
+          {
+            "name": "penetrate",
+            "signature": "(self, company_name: 'str', orgid: 'str') -> 'Dict[str, Any]'",
+            "doc": null
+          }
+        ]
+      },
+      {
+        "name": "RelatedPartyScanner",
+        "methods": [
+          {
+            "name": "__init__",
+            "signature": "(self, index: 'CompanyIndex', audit_target: 'str', customers: 'list', suppliers: 'list', subsidiaries: 'list' = None, former_execs: 'list' = None, auto_subsidiary_threshold: 'float' = 50.0, equity_data: 'dict' = None)",
+            "doc": null
+          },
+          {
+            "name": "_add_finding",
+            "signature": "(self, dimension, dimension_name: 'str', target_company: 'str', confidence: 'str', evidence: 'str', detail: 'dict' = None)",
+            "doc": null
+          },
+          {
+            "name": "_get_target_legal_persons",
+            "signature": "(self, company: 'str') -> 'set'",
+            "doc": null
+          },
+          {
+            "name": "_get_target_executives",
+            "signature": "(self, company: 'str') -> 'set'",
+            "doc": null
+          },
+          {
+            "name": "_get_target_shareholders",
+            "signature": "(self, company: 'str') -> 'set'",
+            "doc": null
+          },
+          {
+            "name": "_get_penetrated_shareholders",
+            "signature": "(self, company: 'str') -> 'set'",
+            "doc": null
+          },
+          {
+            "name": "_get_audit_all_persons",
+            "signature": "(self) -> 'set'",
+            "doc": null
+          },
+          {
+            "name": "check_dimension_01",
+            "signature": "(self)",
+            "doc": null
+          },
+          {
+            "name": "check_dimension_02",
+            "signature": "(self)",
+            "doc": null
+          },
+          {
+            "name": "check_dimension_03",
+            "signature": "(self)",
+            "doc": null
+          },
+          {
+            "name": "check_dimension_04",
+            "signature": "(self)",
+            "doc": null
+          },
+          {
+            "name": "check_dimension_05",
+            "signature": "(self)",
+            "doc": null
+          },
+          {
+            "name": "check_dimension_06",
+            "signature": "(self)",
+            "doc": null
+          },
+          {
+            "name": "_extract_address_core",
+            "signature": "(self, addr: 'str') -> 'str'",
+            "doc": null
+          },
+          {
+            "name": "_extract_address_road",
+            "signature": "(self, addr: 'str') -> 'str'",
+            "doc": null
+          },
+          {
+            "name": "check_dimension_07",
+            "signature": "(self)",
+            "doc": null
+          },
+          {
+            "name": "_parse_phones",
+            "signature": "(self, phone_str: 'str') -> 'set'",
+            "doc": null
+          },
+          {
+            "name": "check_dimension_08",
+            "signature": "(self)",
+            "doc": null
+          },
+          {
+            "name": "check_dimension_09",
+            "signature": "(self)",
+            "doc": null
+          },
+          {
+            "name": "check_dimension_10",
+            "signature": "(self)",
+            "doc": null
+          },
+          {
+            "name": "check_dimension_11",
+            "signature": "(self)",
+            "doc": null
+          },
+          {
+            "name": "check_registration_status",
+            "signature": "(self)",
+            "doc": "检查客户/供应商的登记状态（注销/吊销）"
+          },
+          {
+            "name": "check_dimension_e01",
+            "signature": "(self)",
+            "doc": null
+          },
+          {
+            "name": "run_all",
+            "signature": "(self, data: 'dict') -> 'list'",
+            "doc": null
+          }
+        ]
+      }
+    ]
+  }
+]

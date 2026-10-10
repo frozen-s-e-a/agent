@@ -1,0 +1,10 @@
+{
+  "conditionCases": 260,
+  "conditionRowChecks": 5040,
+  "featureCases": 13,
+  "featureRowChecks": 104,
+  "failureCount": 0,
+  "failures": [],
+  "legacyCodeLoaded": false,
+  "scope": "research reconstruction; not production migration"
+}

@@ -1,0 +1,1995 @@
+[
+  {
+    "module": "modules/jet_test/_core.pyd",
+    "sha256": "9df5a28ab7c23f675a9d6e1504247ad1a8528e0b3081a3909c5c2cc5354e0afe",
+    "imageBase": "0x180000000",
+    "sections": [
+      {
+        "name": ".text",
+        "size": 156600,
+        "rva": 4096,
+        "fileSize": 156672,
+        "offset": 1024,
+        "executable": true
+      },
+      {
+        "name": ".rdata",
+        "size": 26242,
+        "rva": 163840,
+        "fileSize": 26624,
+        "offset": 157696,
+        "executable": false
+      },
+      {
+        "name": ".data",
+        "size": 9320,
+        "rva": 192512,
+        "fileSize": 4096,
+        "offset": 184320,
+        "executable": false
+      },
+      {
+        "name": ".pdata",
+        "size": 3696,
+        "rva": 204800,
+        "fileSize": 4096,
+        "offset": 188416,
+        "executable": false
+      },
+      {
+        "name": ".rsrc",
+        "size": 248,
+        "rva": 208896,
+        "fileSize": 512,
+        "offset": 192512,
+        "executable": false
+      },
+      {
+        "name": ".reloc",
+        "size": 408,
+        "rva": 212992,
+        "fileSize": 512,
+        "offset": 193024,
+        "executable": false
+      }
+    ],
+    "methodCandidates": [
+      {
+        "name": "send",
+        "va": "0x1800250a0",
+        "methodDefVa": "0x18002f1f0",
+        "flags": 8,
+        "doc": "send(arg) -> send 'arg' into generator,\nreturn next yielded value or raise StopIteration."
+      },
+      {
+        "name": "throw",
+        "va": "0x180025a10",
+        "methodDefVa": "0x18002f210",
+        "flags": 1,
+        "doc": "throw(typ[,val[,tb]]) -> raise exception in generator,\nreturn next yielded value or raise StopIteration."
+      },
+      {
+        "name": "close",
+        "va": "0x1800254d0",
+        "methodDefVa": "0x18002f230",
+        "flags": 4,
+        "doc": "close() -> raise GeneratorExit inside generator."
+      },
+      {
+        "name": "__reduce_ex__",
+        "va": "0x180026010",
+        "methodDefVa": "0x18002f250",
+        "flags": 8,
+        "doc": null
+      },
+      {
+        "name": "__reduce__",
+        "va": "0x180026010",
+        "methodDefVa": "0x18002f270",
+        "flags": 4,
+        "doc": null
+      },
+      {
+        "name": "__reduce__",
+        "va": "0x180022960",
+        "methodDefVa": "0x18002f2b0",
+        "flags": 1,
+        "doc": null
+      },
+      {
+        "name": "validate_prerequisites",
+        "va": "0x1800067a0",
+        "methodDefVa": "0x18002f880",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_sanitize_sheet_name",
+        "va": "0x180002970",
+        "methodDefVa": "0x18002f8a0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_read_data_file",
+        "va": "0x18001bf60",
+        "methodDefVa": "0x18002f8c0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "lambda1",
+        "va": "0x18000c510",
+        "methodDefVa": "0x18002f900",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_resolve_files",
+        "va": "0x18001aeb0",
+        "methodDefVa": "0x18002f920",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_ensure_dir",
+        "va": "0x180002fa0",
+        "methodDefVa": "0x18002f940",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "process_data_chunk",
+        "va": "0x180014380",
+        "methodDefVa": "0x18002f960",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_check_condition",
+        "va": "0x180011e60",
+        "methodDefVa": "0x18002fb20",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_parse_cols",
+        "va": "0x180009cd0",
+        "methodDefVa": "0x18002fcf0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "write_audit_file",
+        "va": "0x180017d80",
+        "methodDefVa": "0x18002fd10",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_sanitize_filename",
+        "va": "0x180002320",
+        "methodDefVa": "0x18002fd98",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_force_numeric",
+        "va": "0x180001800",
+        "methodDefVa": "0x18002fdb8",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "apply_tool",
+        "va": "0x18000a420",
+        "methodDefVa": "0x18002fdf8",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "get_mod",
+        "va": "0x18000a730",
+        "methodDefVa": "0x18002fe18",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "inspect_data",
+        "va": "0x1800041b0",
+        "methodDefVa": "0x18002fe38",
+        "flags": 130,
+        "doc": "读取数据源，返回结构信息。"
+      },
+      {
+        "name": "_force_numeric_val",
+        "va": "0x180001e70",
+        "methodDefVa": "0x18002fe58",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "CythonUnboundCMethod",
+        "va": "0x180020010",
+        "methodDefVa": "0x18002fe78",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_check_single_item",
+        "va": "0x18000fdb0",
+        "methodDefVa": "0x18002fe98",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "get_tail",
+        "va": "0x18000b330",
+        "methodDefVa": "0x18002feb8",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "get_col_by_fuzzy_name",
+        "va": "0x180003660",
+        "methodDefVa": "0x18002fed8",
+        "flags": 130,
+        "doc": null
+      }
+    ],
+    "asciiClues": [
+      {
+        "va": "0x1800287b0",
+        "offset": 159664,
+        "text": "build\\modules\\jet_test\\_core.c"
+      },
+      {
+        "va": "0x1800287d0",
+        "offset": 159696,
+        "text": "modules/jet_test/_core.py"
+      },
+      {
+        "va": "0x180028800",
+        "offset": 159744,
+        "text": "modules.jet_test._core._force_numeric"
+      },
+      {
+        "va": "0x180028840",
+        "offset": 159808,
+        "text": "modules.jet_test._core._force_numeric_val"
+      },
+      {
+        "va": "0x180028888",
+        "offset": 159880,
+        "text": "modules.jet_test._core._sanitize_filename"
+      },
+      {
+        "va": "0x1800288d0",
+        "offset": 159952,
+        "text": "modules.jet_test._core._sanitize_sheet_name"
+      },
+      {
+        "va": "0x180028910",
+        "offset": 160016,
+        "text": "modules.jet_test._core._ensure_dir"
+      },
+      {
+        "va": "0x180028950",
+        "offset": 160080,
+        "text": "modules.jet_test._core.get_col_by_fuzzy_name"
+      },
+      {
+        "va": "0x180028990",
+        "offset": 160144,
+        "text": "modules.jet_test._core.inspect_data"
+      },
+      {
+        "va": "0x1800289b8",
+        "offset": 160184,
+        "text": "validate_prerequisites"
+      },
+      {
+        "va": "0x1800289d0",
+        "offset": 160208,
+        "text": "modules.jet_test._core.validate_prerequisites"
+      },
+      {
+        "va": "0x180028a48",
+        "offset": 160328,
+        "text": "modules.jet_test._core.FeatureEngine._parse_cols"
+      },
+      {
+        "va": "0x180028a90",
+        "offset": 160400,
+        "text": "modules.jet_test._core.FeatureEngine.apply_tool"
+      },
+      {
+        "va": "0x180028ac8",
+        "offset": 160456,
+        "text": "modules.jet_test._core.FeatureEngine.apply_tool.get_mod"
+      },
+      {
+        "va": "0x180028b48",
+        "offset": 160584,
+        "text": "modules.jet_test._core.FeatureEngine.apply_tool.get_tail"
+      },
+      {
+        "va": "0x180028b88",
+        "offset": 160648,
+        "text": "modules.jet_test._core.FeatureEngine.apply_tool.genexpr"
+      },
+      {
+        "va": "0x180028bd8",
+        "offset": 160728,
+        "text": "modules.jet_test._core.FeatureEngine.apply_tool.lambda1"
+      },
+      {
+        "va": "0x180028c28",
+        "offset": 160808,
+        "text": "modules.jet_test._core._check_single_item"
+      },
+      {
+        "va": "0x180028c58",
+        "offset": 160856,
+        "text": "_check_condition"
+      },
+      {
+        "va": "0x180028c70",
+        "offset": 160880,
+        "text": "modules.jet_test._core._check_condition"
+      },
+      {
+        "va": "0x180028cb0",
+        "offset": 160944,
+        "text": "modules.jet_test._core.process_data_chunk"
+      },
+      {
+        "va": "0x180028cf8",
+        "offset": 161016,
+        "text": "modules.jet_test._core.write_audit_file"
+      },
+      {
+        "va": "0x180028d30",
+        "offset": 161072,
+        "text": "modules.jet_test._core._resolve_files"
+      },
+      {
+        "va": "0x180028d68",
+        "offset": 161128,
+        "text": "modules.jet_test._core._read_data_file"
+      },
+      {
+        "va": "0x180028d90",
+        "offset": 161168,
+        "text": "modules.jet_test._core.__pyx_scope_struct__apply_tool"
+      },
+      {
+        "va": "0x180028dc8",
+        "offset": 161224,
+        "text": "modules.jet_test._core.__pyx_scope_struct_1_genexpr"
+      },
+      {
+        "va": "0x18002ae40",
+        "offset": 169536,
+        "text": "does not match"
+      },
+      {
+        "va": "0x18002cc82",
+        "offset": 177282,
+        "text": "_core.cp312-win_amd64.pyd"
+      },
+      {
+        "va": "0x18002d520",
+        "offset": 179488,
+        "text": "PyErr_GivenExceptionMatches"
+      },
+      {
+        "va": "0x18002d6da",
+        "offset": 179930,
+        "text": "PyArg_ValidateKeywordArguments"
+      },
+      {
+        "va": "0x18002dc4e",
+        "offset": 181326,
+        "text": "PyErr_ExceptionMatches"
+      },
+      {
+        "va": "0x18002e47a",
+        "offset": 183418,
+        "text": "IsProcessorFeaturePresent"
+      }
+    ]
+  },
+  {
+    "module": "modules/bank_flow.pyd",
+    "sha256": "112b3f0850cff595d0f3f004d5d3216ead42fea67fcd62af9ff9cf2dd659607f",
+    "imageBase": "0x180000000",
+    "sections": [
+      {
+        "name": ".text",
+        "size": 500520,
+        "rva": 4096,
+        "fileSize": 500736,
+        "offset": 1024,
+        "executable": true
+      },
+      {
+        "name": ".rdata",
+        "size": 51894,
+        "rva": 507904,
+        "fileSize": 52224,
+        "offset": 501760,
+        "executable": false
+      },
+      {
+        "name": ".data",
+        "size": 26336,
+        "rva": 561152,
+        "fileSize": 13824,
+        "offset": 553984,
+        "executable": false
+      },
+      {
+        "name": ".pdata",
+        "size": 8256,
+        "rva": 589824,
+        "fileSize": 8704,
+        "offset": 567808,
+        "executable": false
+      },
+      {
+        "name": ".rsrc",
+        "size": 248,
+        "rva": 602112,
+        "fileSize": 512,
+        "offset": 576512,
+        "executable": false
+      },
+      {
+        "name": ".reloc",
+        "size": 800,
+        "rva": 606208,
+        "fileSize": 1024,
+        "offset": 577024,
+        "executable": false
+      }
+    ],
+    "methodCandidates": [
+      {
+        "name": "send",
+        "va": "0x180079090",
+        "methodDefVa": "0x1800891f0",
+        "flags": 8,
+        "doc": "send(arg) -> send 'arg' into generator,\nreturn next yielded value or raise StopIteration."
+      },
+      {
+        "name": "throw",
+        "va": "0x180079960",
+        "methodDefVa": "0x180089210",
+        "flags": 1,
+        "doc": "throw(typ[,val[,tb]]) -> raise exception in generator,\nreturn next yielded value or raise StopIteration."
+      },
+      {
+        "name": "close",
+        "va": "0x1800794c0",
+        "methodDefVa": "0x180089230",
+        "flags": 4,
+        "doc": "close() -> raise GeneratorExit inside generator."
+      },
+      {
+        "name": "__reduce_ex__",
+        "va": "0x180079f60",
+        "methodDefVa": "0x180089250",
+        "flags": 8,
+        "doc": null
+      },
+      {
+        "name": "__reduce__",
+        "va": "0x180079f60",
+        "methodDefVa": "0x180089270",
+        "flags": 4,
+        "doc": null
+      },
+      {
+        "name": "__reduce__",
+        "va": "0x1800762e0",
+        "methodDefVa": "0x1800892b0",
+        "flags": 1,
+        "doc": null
+      },
+      {
+        "name": "_l8_global_brute_force",
+        "va": "0x180047640",
+        "methodDefVa": "0x180089880",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_fuzzy_matrix_match",
+        "va": "0x18003f160",
+        "methodDefVa": "0x1800898a0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "safe_float",
+        "va": "0x180003240",
+        "methodDefVa": "0x1800898c0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "lambda9",
+        "va": "0x180032d10",
+        "methodDefVa": "0x1800898e0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "__init__",
+        "va": "0x180067910",
+        "methodDefVa": "0x180089aa0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_l9_cross_month_boundary",
+        "va": "0x180053bd0",
+        "methodDefVa": "0x180089ac0",
+        "flags": 130,
+        "doc": "\n        L9 跨月边界匹配 — 复用 L1-L8 全部匹配策略。\n        \n        只取月边界附近（每月前3天/后3天）的未匹配记录，\n        分两轮对齐月份后在边界记录之间重跑 L1-L8：\n          轮1: 银行流水月初(1-3日)移到上月 → 和序时账月末(28+日)同月匹配\n          轮2: 序时账月初(1-3日)移到上月 → 和银行流水月末(28+日)同月匹配\n        "
+      },
+      {
+        "name": "_l2_summary_exact",
+        "va": "0x18002ff10",
+        "methodDefVa": "0x180089ae0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "process",
+        "va": "0x180023230",
+        "methodDefVa": "0x180089b00",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "lambda12",
+        "va": "0x1800479b0",
+        "methodDefVa": "0x180089b20",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_execute_time_match",
+        "va": "0x180037a20",
+        "methodDefVa": "0x180089b40",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "__init__",
+        "va": "0x180022d40",
+        "methodDefVa": "0x180089b80",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_process_voucher_multi_bank",
+        "va": "0x180020a80",
+        "methodDefVa": "0x180089ba0",
+        "flags": 130,
+        "doc": "\n        处理同一凭证包含多个银行账户的情况。\n        按账户列将银行目标行分组，每组独立调用 _split_by_matching 匹配法。\n        "
+      },
+      {
+        "name": "log",
+        "va": "0x180002c70",
+        "methodDefVa": "0x180089bc0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "lambda8",
+        "va": "0x180032960",
+        "methodDefVa": "0x180089f20",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_read_sheet",
+        "va": "0x180009c60",
+        "methodDefVa": "0x180089f40",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_l1_partner_exact",
+        "va": "0x18002e160",
+        "methodDefVa": "0x180089f60",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_add_month_col",
+        "va": "0x1800275a0",
+        "methodDefVa": "0x18008a120",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_generate_detail_report",
+        "va": "0x180058a60",
+        "methodDefVa": "0x18008a140",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "lambda1",
+        "va": "0x18000d930",
+        "methodDefVa": "0x18008a300",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "clean_name",
+        "va": "0x1800081c0",
+        "methodDefVa": "0x18008a4c0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_match_group",
+        "va": "0x18002c780",
+        "methodDefVa": "0x18008a4e0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_l8_reverse_brute_force",
+        "va": "0x18004b130",
+        "methodDefVa": "0x18008a500",
+        "flags": 130,
+        "doc": "\n        L8 反向凑数 - 从序时账单笔出发，在同月银行流水中找金额组合 (N:1)\n        解决场景：多笔银行流水合计等于一笔序时账（如200+200=400手续费，或多笔税金合计）\n        "
+      },
+      {
+        "name": "get_planning_guide",
+        "va": "0x180002c50",
+        "methodDefVa": "0x18008a520",
+        "flags": 4,
+        "doc": null
+      },
+      {
+        "name": "format_date",
+        "va": "0x1800039e0",
+        "methodDefVa": "0x18008a540",
+        "flags": 130,
+        "doc": "\n    将日期值转换为标准格式字符串 (YYYY-MM-DD)\n    "
+      },
+      {
+        "name": "process",
+        "va": "0x18000cbc0",
+        "methodDefVa": "0x18008a560",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "lambda14",
+        "va": "0x18004b4a0",
+        "methodDefVa": "0x18008a588",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "compute_similarity",
+        "va": "0x18000b8e0",
+        "methodDefVa": "0x18008a8f0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "get_partner_check_status",
+        "va": "0x180057bf0",
+        "methodDefVa": "0x18008a910",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_mark",
+        "va": "0x18002d680",
+        "methodDefVa": "0x18008a930",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "get_description",
+        "va": "0x180002080",
+        "methodDefVa": "0x18008a950",
+        "flags": 4,
+        "doc": null
+      },
+      {
+        "name": "_l5_fuzzy_semantic",
+        "va": "0x18003d730",
+        "methodDefVa": "0x18008a970",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "matches_any_subject",
+        "va": "0x18000cef0",
+        "methodDefVa": "0x18008a990",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_run_fuzzy_core",
+        "va": "0x18003e7c0",
+        "methodDefVa": "0x18008abb8",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_l4_partner_aggregation",
+        "va": "0x180038c50",
+        "methodDefVa": "0x18008abd8",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_run_l1_l8",
+        "va": "0x1800573f0",
+        "methodDefVa": "0x18008af40",
+        "flags": 130,
+        "doc": "复用 L1-L8 匹配逻辑的辅助方法。"
+      },
+      {
+        "name": "is_same_entity",
+        "va": "0x1800323b0",
+        "methodDefVa": "0x18008af60",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "lambda10",
+        "va": "0x180039770",
+        "methodDefVa": "0x18008b2c0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "save_formatted_excel",
+        "va": "0x18005e690",
+        "methodDefVa": "0x18008b2e0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "run",
+        "va": "0x180063de0",
+        "methodDefVa": "0x18008b320",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "__init__",
+        "va": "0x18000b4b0",
+        "methodDefVa": "0x18008b680",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "__init__",
+        "va": "0x180026a50",
+        "methodDefVa": "0x18008b6a0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "get_category",
+        "va": "0x180002060",
+        "methodDefVa": "0x18008b6c0",
+        "flags": 4,
+        "doc": null
+      },
+      {
+        "name": "_l6_same_month_amount",
+        "va": "0x1800416f0",
+        "methodDefVa": "0x18008b6e0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "is_same_entity",
+        "va": "0x180038fc0",
+        "methodDefVa": "0x18008b8a0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "read_data_file",
+        "va": "0x1800018e0",
+        "methodDefVa": "0x18008b8c0",
+        "flags": 130,
+        "doc": "\n    根据文件扩展名自动选择读取方式，支持 .xlsx/.xls 和 .csv\n    "
+      },
+      {
+        "name": "_l7_nm_aggregation",
+        "va": "0x18004ecc0",
+        "methodDefVa": "0x18008b8e0",
+        "flags": 130,
+        "doc": "\n        L7 N:M 汇总匹配 - 同月内，按银行流水交易对手分组，\n        优先按日期子组精细匹配，最后才兜底全量汇总。\n        "
+      },
+      {
+        "name": "CythonUnboundCMethod",
+        "va": "0x180073090",
+        "methodDefVa": "0x18008b900",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "make_record",
+        "va": "0x180012270",
+        "methodDefVa": "0x18008bc60",
+        "flags": 130,
+        "doc": "\n            orig_row: 原始行（用于保留原始列数据）\n            base_row: 银行目标行（用于提取公司/账户/日期/凭证号等基础信息）\n            "
+      },
+      {
+        "name": "_process_voucher",
+        "va": "0x180011d90",
+        "methodDefVa": "0x18008bc80",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "get_excel_config_schema",
+        "va": "0x1800020c0",
+        "methodDefVa": "0x18008bca0",
+        "flags": 4,
+        "doc": null
+      },
+      {
+        "name": "lambda11",
+        "va": "0x180039b20",
+        "methodDefVa": "0x18008bcc0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "__init__",
+        "va": "0x18000c620",
+        "methodDefVa": "0x18008bce0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "__init__",
+        "va": "0x180008be0",
+        "methodDefVa": "0x18008bd00",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "run",
+        "va": "0x180027d40",
+        "methodDefVa": "0x18008bd20",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_find_subset_sum_lines",
+        "va": "0x18001fbd0",
+        "methodDefVa": "0x18008bd40",
+        "flags": 130,
+        "doc": "在 candidates 中查找 abs_amt 之和等于 target 的子集。"
+      },
+      {
+        "name": "_find_subset_match",
+        "va": "0x180036130",
+        "methodDefVa": "0x18008bd60",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_split_by_matching",
+        "va": "0x180017f00",
+        "methodDefVa": "0x18008bd80",
+        "flags": 130,
+        "doc": "\n        借鉴 finance_viewer 匹配法的拆分逻辑。\n        \n        核心原则：\n        1. 拆分的唯一目的是获取交易对手信息\n        2. 只有对方科目有多个不同客商时才拆分\n        3. 金额以银行存款行自身为准，按对方科目比例分配\n        4. 借贷方发生额绝不改变，不产生残差\n        "
+      },
+      {
+        "name": "find_g_combo",
+        "va": "0x18004f030",
+        "methodDefVa": "0x18008c280",
+        "flags": 130,
+        "doc": "在序时账中找金额总和等于 b_subset 总额的组合"
+      },
+      {
+        "name": "_l7_partner_aggregation_to_single",
+        "va": "0x180043830",
+        "methodDefVa": "0x18008c2a0",
+        "flags": 130,
+        "doc": "\n        L7: 银行流水按交易对手汇总后匹配序时账单笔\n        "
+      },
+      {
+        "name": "get_input_file_path",
+        "va": "0x1800020a0",
+        "methodDefVa": "0x18008c2c0",
+        "flags": 4,
+        "doc": null
+      },
+      {
+        "name": "validate_dates",
+        "va": "0x180006460",
+        "methodDefVa": "0x18008c2e0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_l3_smart_split",
+        "va": "0x180032040",
+        "methodDefVa": "0x18008c4c0",
+        "flags": 130,
+        "doc": null
+      }
+    ],
+    "asciiClues": [
+      {
+        "va": "0x18007c810",
+        "offset": 503824,
+        "text": "build\\modules\\bank_flow.c"
+      },
+      {
+        "va": "0x18007c830",
+        "offset": 503856,
+        "text": "modules/bank_flow.py"
+      },
+      {
+        "va": "0x18007c858",
+        "offset": 503896,
+        "text": "modules.bank_flow.read_data_file"
+      },
+      {
+        "va": "0x18007c8d0",
+        "offset": 504016,
+        "text": "modules.bank_flow.get_excel_config_schema"
+      },
+      {
+        "va": "0x18007c918",
+        "offset": 504088,
+        "text": "modules.bank_flow.log"
+      },
+      {
+        "va": "0x18007c940",
+        "offset": 504128,
+        "text": "modules.bank_flow.safe_float"
+      },
+      {
+        "va": "0x18007c960",
+        "offset": 504160,
+        "text": "format_date"
+      },
+      {
+        "va": "0x18007c970",
+        "offset": 504176,
+        "text": "modules.bank_flow.format_date"
+      },
+      {
+        "va": "0x18007c990",
+        "offset": 504208,
+        "text": "validate_dates"
+      },
+      {
+        "va": "0x18007c9a0",
+        "offset": 504224,
+        "text": "modules.bank_flow.validate_dates"
+      },
+      {
+        "va": "0x18007c9d8",
+        "offset": 504280,
+        "text": "modules.bank_flow.DataCleaner.clean_name"
+      },
+      {
+        "va": "0x18007ca18",
+        "offset": 504344,
+        "text": "modules.bank_flow.ConfigLoader.__init__"
+      },
+      {
+        "va": "0x18007ca50",
+        "offset": 504400,
+        "text": "modules.bank_flow.ConfigLoader._read_sheet"
+      },
+      {
+        "va": "0x18007ca80",
+        "offset": 504448,
+        "text": "modules.bank_flow.SimilarityEngine.__init__"
+      },
+      {
+        "va": "0x18007cac8",
+        "offset": 504520,
+        "text": "modules.bank_flow.SimilarityEngine.compute_similarity"
+      },
+      {
+        "va": "0x18007cb00",
+        "offset": 504576,
+        "text": "modules.bank_flow.GLProcessor.__init__"
+      },
+      {
+        "va": "0x18007cb30",
+        "offset": 504624,
+        "text": "modules.bank_flow.GLProcessor.process"
+      },
+      {
+        "va": "0x18007cb58",
+        "offset": 504664,
+        "text": "matches_any_subject"
+      },
+      {
+        "va": "0x18007cb70",
+        "offset": 504688,
+        "text": "modules.bank_flow.GLProcessor.process.matches_any_subject"
+      },
+      {
+        "va": "0x18007cbb0",
+        "offset": 504752,
+        "text": "modules.bank_flow.GLProcessor.process.matches_any_subject.genexpr"
+      },
+      {
+        "va": "0x18007cc88",
+        "offset": 504968,
+        "text": "modules.bank_flow.GLProcessor.process.lambda1"
+      },
+      {
+        "va": "0x18007ccd8",
+        "offset": 505048,
+        "text": "modules.bank_flow.GLProcessor._process_voucher"
+      },
+      {
+        "va": "0x18007cd18",
+        "offset": 505112,
+        "text": "modules.bank_flow.GLProcessor._process_voucher.make_record"
+      },
+      {
+        "va": "0x18007cda8",
+        "offset": 505256,
+        "text": "modules.bank_flow.GLProcessor._process_voucher.genexpr"
+      },
+      {
+        "va": "0x18007ce18",
+        "offset": 505368,
+        "text": "_split_by_matching"
+      },
+      {
+        "va": "0x18007ce30",
+        "offset": 505392,
+        "text": "modules.bank_flow.GLProcessor._split_by_matching"
+      },
+      {
+        "va": "0x18007ce68",
+        "offset": 505448,
+        "text": "modules.bank_flow.GLProcessor._split_by_matching.genexpr"
+      },
+      {
+        "va": "0x18007cec0",
+        "offset": 505536,
+        "text": "modules.bank_flow.GLProcessor._find_subset_sum_lines"
+      },
+      {
+        "va": "0x18007cef8",
+        "offset": 505592,
+        "text": "modules.bank_flow.GLProcessor._find_subset_sum_lines.genexpr"
+      },
+      {
+        "va": "0x18007cf58",
+        "offset": 505688,
+        "text": "modules.bank_flow.GLProcessor._process_voucher_multi_bank"
+      },
+      {
+        "va": "0x18007cf98",
+        "offset": 505752,
+        "text": "modules.bank_flow.BankProcessor.__init__"
+      },
+      {
+        "va": "0x18007cfc8",
+        "offset": 505800,
+        "text": "modules.bank_flow.BankProcessor.process"
+      },
+      {
+        "va": "0x18007cff0",
+        "offset": 505840,
+        "text": "modules.bank_flow.ReconciliationEngine.__init__"
+      },
+      {
+        "va": "0x18007d020",
+        "offset": 505888,
+        "text": "_add_month_col"
+      },
+      {
+        "va": "0x18007d030",
+        "offset": 505904,
+        "text": "modules.bank_flow.ReconciliationEngine._add_month_col"
+      },
+      {
+        "va": "0x18007d070",
+        "offset": 505968,
+        "text": "modules.bank_flow.ReconciliationEngine.run"
+      },
+      {
+        "va": "0x18007d0a8",
+        "offset": 506024,
+        "text": "_match_group"
+      },
+      {
+        "va": "0x18007d0b8",
+        "offset": 506040,
+        "text": "modules.bank_flow.ReconciliationEngine._match_group"
+      },
+      {
+        "va": "0x18007d0f8",
+        "offset": 506104,
+        "text": "modules.bank_flow.ReconciliationEngine._mark"
+      },
+      {
+        "va": "0x18007d140",
+        "offset": 506176,
+        "text": "modules.bank_flow.ReconciliationEngine._l1_partner_exact"
+      },
+      {
+        "va": "0x18007d198",
+        "offset": 506264,
+        "text": "modules.bank_flow.ReconciliationEngine._l2_summary_exact"
+      },
+      {
+        "va": "0x18007d1e8",
+        "offset": 506344,
+        "text": "modules.bank_flow.ReconciliationEngine._l3_smart_split"
+      },
+      {
+        "va": "0x18007d230",
+        "offset": 506416,
+        "text": "modules.bank_flow.ReconciliationEngine._l3_smart_split.is_same_entity"
+      },
+      {
+        "va": "0x18007d280",
+        "offset": 506496,
+        "text": "modules.bank_flow.ReconciliationEngine._l3_smart_split.lambda8"
+      },
+      {
+        "va": "0x18007d2d8",
+        "offset": 506584,
+        "text": "modules.bank_flow.ReconciliationEngine._l3_smart_split.lambda9"
+      },
+      {
+        "va": "0x18007d320",
+        "offset": 506656,
+        "text": "_find_subset_match"
+      },
+      {
+        "va": "0x18007d338",
+        "offset": 506680,
+        "text": "modules.bank_flow.ReconciliationEngine._find_subset_match"
+      },
+      {
+        "va": "0x18007d378",
+        "offset": 506744,
+        "text": "_execute_time_match"
+      },
+      {
+        "va": "0x18007d390",
+        "offset": 506768,
+        "text": "modules.bank_flow.ReconciliationEngine._execute_time_match"
+      },
+      {
+        "va": "0x18007d3e8",
+        "offset": 506856,
+        "text": "modules.bank_flow.ReconciliationEngine._l4_partner_aggregation"
+      },
+      {
+        "va": "0x18007d430",
+        "offset": 506928,
+        "text": "modules.bank_flow.ReconciliationEngine._l4_partner_aggregation.is_same_entity"
+      },
+      {
+        "va": "0x18007d490",
+        "offset": 507024,
+        "text": "modules.bank_flow.ReconciliationEngine._l4_partner_aggregation.lambda10"
+      },
+      {
+        "va": "0x18007d4f0",
+        "offset": 507120,
+        "text": "modules.bank_flow.ReconciliationEngine._l4_partner_aggregation.lambda11"
+      },
+      {
+        "va": "0x18007d550",
+        "offset": 507216,
+        "text": "modules.bank_flow.ReconciliationEngine._l5_fuzzy_semantic"
+      },
+      {
+        "va": "0x18007d5a0",
+        "offset": 507296,
+        "text": "modules.bank_flow.ReconciliationEngine._run_fuzzy_core"
+      },
+      {
+        "va": "0x18007d5d8",
+        "offset": 507352,
+        "text": "_fuzzy_matrix_match"
+      },
+      {
+        "va": "0x18007d5f0",
+        "offset": 507376,
+        "text": "modules.bank_flow.ReconciliationEngine._fuzzy_matrix_match"
+      },
+      {
+        "va": "0x18007d630",
+        "offset": 507440,
+        "text": "_l6_same_month_amount"
+      },
+      {
+        "va": "0x18007d648",
+        "offset": 507464,
+        "text": "modules.bank_flow.ReconciliationEngine._l6_same_month_amount"
+      },
+      {
+        "va": "0x18007d6b0",
+        "offset": 507568,
+        "text": "modules.bank_flow.ReconciliationEngine._l7_partner_aggregation_to_single"
+      },
+      {
+        "va": "0x18007d718",
+        "offset": 507672,
+        "text": "modules.bank_flow.ReconciliationEngine._l8_global_brute_force"
+      },
+      {
+        "va": "0x18007d770",
+        "offset": 507760,
+        "text": "modules.bank_flow.ReconciliationEngine._l8_global_brute_force.lambda12"
+      },
+      {
+        "va": "0x18007d7d0",
+        "offset": 507856,
+        "text": "modules.bank_flow.ReconciliationEngine._l8_global_brute_force.genexpr"
+      },
+      {
+        "va": "0x18007d830",
+        "offset": 507952,
+        "text": "modules.bank_flow.ReconciliationEngine._l8_reverse_brute_force"
+      },
+      {
+        "va": "0x18007d880",
+        "offset": 508032,
+        "text": "modules.bank_flow.ReconciliationEngine._l8_reverse_brute_force.lambda14"
+      },
+      {
+        "va": "0x18007d8e0",
+        "offset": 508128,
+        "text": "modules.bank_flow.ReconciliationEngine._l8_reverse_brute_force.genexpr"
+      },
+      {
+        "va": "0x18007d940",
+        "offset": 508224,
+        "text": "modules.bank_flow.ReconciliationEngine._l7_nm_aggregation"
+      },
+      {
+        "va": "0x18007d990",
+        "offset": 508304,
+        "text": "modules.bank_flow.ReconciliationEngine._l7_nm_aggregation.find_g_combo"
+      },
+      {
+        "va": "0x18007d9e0",
+        "offset": 508384,
+        "text": "modules.bank_flow.ReconciliationEngine._l7_nm_aggregation.find_g_combo.genexpr"
+      },
+      {
+        "va": "0x18007da30",
+        "offset": 508464,
+        "text": "_l9_cross_month_boundary"
+      },
+      {
+        "va": "0x18007da50",
+        "offset": 508496,
+        "text": "modules.bank_flow.ReconciliationEngine._l9_cross_month_boundary"
+      },
+      {
+        "va": "0x18007daa0",
+        "offset": 508576,
+        "text": "modules.bank_flow.ReconciliationEngine._run_l1_l8"
+      },
+      {
+        "va": "0x18007db00",
+        "offset": 508672,
+        "text": "modules.bank_flow.ReconciliationEngine.get_partner_check_status"
+      },
+      {
+        "va": "0x18007db58",
+        "offset": 508760,
+        "text": "modules.bank_flow.ReconciliationEngine._generate_detail_report"
+      },
+      {
+        "va": "0x18007dba0",
+        "offset": 508832,
+        "text": "modules.bank_flow.ReconciliationEngine._generate_detail_report.genexpr"
+      },
+      {
+        "va": "0x18007dc00",
+        "offset": 508928,
+        "text": "modules.bank_flow.ReconciliationEngine.save_formatted_excel"
+      },
+      {
+        "va": "0x18007dc40",
+        "offset": 508992,
+        "text": "modules.bank_flow.ReconciliationEngine.save_formatted_excel.genexpr"
+      },
+      {
+        "va": "0x18007dc98",
+        "offset": 509080,
+        "text": "modules.bank_flow.run"
+      },
+      {
+        "va": "0x18007dcb0",
+        "offset": 509104,
+        "text": "modules.bank_flow.MockCore.__init__"
+      },
+      {
+        "va": "0x18007dcd8",
+        "offset": 509144,
+        "text": "modules.bank_flow.__pyx_scope_struct__process"
+      },
+      {
+        "va": "0x18007dd08",
+        "offset": 509192,
+        "text": "modules.bank_flow.__pyx_scope_struct_1_matches_any_subject"
+      },
+      {
+        "va": "0x18007dd48",
+        "offset": 509256,
+        "text": "modules.bank_flow.__pyx_scope_struct_2_genexpr"
+      },
+      {
+        "va": "0x18007dd78",
+        "offset": 509304,
+        "text": "modules.bank_flow.__pyx_scope_struct_3__process_voucher"
+      },
+      {
+        "va": "0x18007ddb0",
+        "offset": 509360,
+        "text": "modules.bank_flow.__pyx_scope_struct_4_genexpr"
+      },
+      {
+        "va": "0x18007dde0",
+        "offset": 509408,
+        "text": "modules.bank_flow.__pyx_scope_struct_5_genexpr"
+      },
+      {
+        "va": "0x18007de10",
+        "offset": 509456,
+        "text": "modules.bank_flow.__pyx_scope_struct_6_genexpr"
+      },
+      {
+        "va": "0x18007de40",
+        "offset": 509504,
+        "text": "modules.bank_flow.__pyx_scope_struct_7_genexpr"
+      },
+      {
+        "va": "0x18007de70",
+        "offset": 509552,
+        "text": "modules.bank_flow.__pyx_scope_struct_8_genexpr"
+      },
+      {
+        "va": "0x18007dea0",
+        "offset": 509600,
+        "text": "modules.bank_flow.__pyx_scope_struct_9_genexpr"
+      },
+      {
+        "va": "0x18007ded0",
+        "offset": 509648,
+        "text": "modules.bank_flow.__pyx_scope_struct_10__l3_smart_split"
+      },
+      {
+        "va": "0x18007df10",
+        "offset": 509712,
+        "text": "modules.bank_flow.__pyx_scope_struct_11__l4_partner_aggregation"
+      },
+      {
+        "va": "0x18007df50",
+        "offset": 509776,
+        "text": "modules.bank_flow.__pyx_scope_struct_12__l8_global_brute_force"
+      },
+      {
+        "va": "0x18007df90",
+        "offset": 509840,
+        "text": "modules.bank_flow.__pyx_scope_struct_13_genexpr"
+      },
+      {
+        "va": "0x18007dfc0",
+        "offset": 509888,
+        "text": "modules.bank_flow.__pyx_scope_struct_14__l8_reverse_brute_force"
+      },
+      {
+        "va": "0x18007e000",
+        "offset": 509952,
+        "text": "modules.bank_flow.__pyx_scope_struct_15_genexpr"
+      },
+      {
+        "va": "0x18007e030",
+        "offset": 510000,
+        "text": "modules.bank_flow.__pyx_scope_struct_16_find_g_combo"
+      },
+      {
+        "va": "0x18007e068",
+        "offset": 510056,
+        "text": "modules.bank_flow.__pyx_scope_struct_17_genexpr"
+      },
+      {
+        "va": "0x18007e098",
+        "offset": 510104,
+        "text": "modules.bank_flow.__pyx_scope_struct_18_genexpr"
+      },
+      {
+        "va": "0x18007e0c8",
+        "offset": 510152,
+        "text": "modules.bank_flow.__pyx_scope_struct_19_genexpr"
+      },
+      {
+        "va": "0x18007e0f8",
+        "offset": 510200,
+        "text": "modules.bank_flow.__pyx_scope_struct_20_save_formatted_excel"
+      },
+      {
+        "va": "0x18007e138",
+        "offset": 510264,
+        "text": "modules.bank_flow.__pyx_scope_struct_21_genexpr"
+      },
+      {
+        "va": "0x1800828e0",
+        "offset": 528608,
+        "text": "does not match"
+      },
+      {
+        "va": "0x180082a13",
+        "offset": 528915,
+        "text": " candidates "
+      },
+      {
+        "va": "0x1800832e1",
+        "offset": 531169,
+        "text": " _split_by_matching "
+      },
+      {
+        "va": "0x180086f82",
+        "offset": 546690,
+        "text": "bank_flow.cp312-win_amd64.pyd"
+      },
+      {
+        "va": "0x1800878a8",
+        "offset": 549032,
+        "text": "PyErr_GivenExceptionMatches"
+      },
+      {
+        "va": "0x180087a50",
+        "offset": 549456,
+        "text": "PyDict_Update"
+      },
+      {
+        "va": "0x180087a72",
+        "offset": 549490,
+        "text": "PyArg_ValidateKeywordArguments"
+      },
+      {
+        "va": "0x180088004",
+        "offset": 550916,
+        "text": "PyErr_ExceptionMatches"
+      },
+      {
+        "va": "0x1800884b4",
+        "offset": 552116,
+        "text": "PyUnicode_Tailmatch"
+      },
+      {
+        "va": "0x1800888ae",
+        "offset": 553134,
+        "text": "IsProcessorFeaturePresent"
+      }
+    ]
+  },
+  {
+    "module": "modules/monthly_analysis/_core.pyd",
+    "sha256": "a9b78b8e9e048c3411baa1b79cdd216df3b7d73dc332ae6bce633da2dd0da109",
+    "imageBase": "0x180000000",
+    "sections": [
+      {
+        "name": ".text",
+        "size": 219208,
+        "rva": 4096,
+        "fileSize": 219648,
+        "offset": 1024,
+        "executable": true
+      },
+      {
+        "name": ".rdata",
+        "size": 33100,
+        "rva": 225280,
+        "fileSize": 33280,
+        "offset": 220672,
+        "executable": false
+      },
+      {
+        "name": ".data",
+        "size": 10296,
+        "rva": 262144,
+        "fileSize": 3072,
+        "offset": 253952,
+        "executable": false
+      },
+      {
+        "name": ".pdata",
+        "size": 3984,
+        "rva": 274432,
+        "fileSize": 4096,
+        "offset": 257024,
+        "executable": false
+      },
+      {
+        "name": ".rsrc",
+        "size": 248,
+        "rva": 278528,
+        "fileSize": 512,
+        "offset": 261120,
+        "executable": false
+      },
+      {
+        "name": ".reloc",
+        "size": 364,
+        "rva": 282624,
+        "fileSize": 512,
+        "offset": 261632,
+        "executable": false
+      }
+    ],
+    "methodCandidates": [
+      {
+        "name": "__reduce__",
+        "va": "0x180032530",
+        "methodDefVa": "0x180040150",
+        "flags": 1,
+        "doc": null
+      },
+      {
+        "name": "_select_focus_months",
+        "va": "0x18001f710",
+        "methodDefVa": "0x180040598",
+        "flags": 130,
+        "doc": "根据月度差异选择重点月份"
+      },
+      {
+        "name": "_prepare_df",
+        "va": "0x180017550",
+        "methodDefVa": "0x1800405b8",
+        "flags": 130,
+        "doc": "预处理：类型转换、计算DirAmt(方向金额)和Month\n        DirAmt: 只取方向列的值（借方向取借方，贷方向取贷方），与monthly_analysis的pivot逻辑一致\n        "
+      },
+      {
+        "name": "_agg_by_sub",
+        "va": "0x18001b770",
+        "methodDefVa": "0x1800405d8",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "resolve_path",
+        "va": "0x18000e870",
+        "methodDefVa": "0x180040618",
+        "flags": 130,
+        "doc": "路径解析：相对路径用 ctx.current_work_dir 拼接，绝对路径直接使用"
+      },
+      {
+        "name": "read_source_file",
+        "va": "0x18000b890",
+        "methodDefVa": "0x180040638",
+        "flags": 130,
+        "doc": "根据文件扩展名自动选择读取方式，支持 csv 和 Excel"
+      },
+      {
+        "name": "calc_sub_name",
+        "va": "0x18000ef50",
+        "methodDefVa": "0x180040658",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "calc_sub_code",
+        "va": "0x18000f940",
+        "methodDefVa": "0x180040678",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_build_sub_account_overview",
+        "va": "0x18001b380",
+        "methodDefVa": "0x180040698",
+        "flags": 130,
+        "doc": "构建下级科目汇总对比（全局视角第二层）"
+      },
+      {
+        "name": "_build_samples",
+        "va": "0x180020540",
+        "methodDefVa": "0x1800406b8",
+        "flags": 130,
+        "doc": "构建序时账样本文本 - 过滤结转分录，智能选样"
+      },
+      {
+        "name": "convert_to_float",
+        "va": "0x180009ed0",
+        "methodDefVa": "0x1800406d8",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_filter_transfer_entries",
+        "va": "0x18001f020",
+        "methodDefVa": "0x180040700",
+        "flags": 130,
+        "doc": "过滤损益结转分录（摘要含'结转'的行）"
+      },
+      {
+        "name": "monthly_analysis",
+        "va": "0x1800109e0",
+        "methodDefVa": "0x1800408c0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "get_source_path",
+        "va": "0x18000b2b0",
+        "methodDefVa": "0x1800408e0",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "get_error_details",
+        "va": "0x180002cf0",
+        "methodDefVa": "0x180040900",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "lambda1",
+        "va": "0x180010f20",
+        "methodDefVa": "0x180040988",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_safe_amt",
+        "va": "0x180016f10",
+        "methodDefVa": "0x1800409a8",
+        "flags": 130,
+        "doc": "安全取金额列，nan填充为0"
+      },
+      {
+        "name": "lambda",
+        "va": "0x180003420",
+        "methodDefVa": "0x1800409c8",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "_fmt_rows",
+        "va": "0x1800209b0",
+        "methodDefVa": "0x1800409e8",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "remove_parent_code",
+        "va": "0x1800158b0",
+        "methodDefVa": "0x180040a28",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "get_code_info",
+        "va": "0x18000c4b0",
+        "methodDefVa": "0x180040a48",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "check_api_connection",
+        "va": "0x1800018d0",
+        "methodDefVa": "0x180040a68",
+        "flags": 130,
+        "doc": "检查API参数并测试连接性"
+      },
+      {
+        "name": "convert_to_date",
+        "va": "0x180008430",
+        "methodDefVa": "0x180040a88",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "perform_ai_variance_analysis",
+        "va": "0x1800169c0",
+        "methodDefVa": "0x180040aa8",
+        "flags": 130,
+        "doc": "AI变动分析核心逻辑 - 分层prompt策略：全局视角 + 重点样本"
+      },
+      {
+        "name": "_build_monthly_overview",
+        "va": "0x180018470",
+        "methodDefVa": "0x180040ac8",
+        "flags": 130,
+        "doc": "构建月度汇总对比表（全局视角第一层）"
+      },
+      {
+        "name": "calc_level",
+        "va": "0x1800101f0",
+        "methodDefVa": "0x180040ae8",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "first2second",
+        "va": "0x18000dc10",
+        "methodDefVa": "0x180040b08",
+        "flags": 130,
+        "doc": null
+      },
+      {
+        "name": "validate_source_data",
+        "va": "0x180002830",
+        "methodDefVa": "0x180040b28",
+        "flags": 130,
+        "doc": "全量数据预检函数"
+      },
+      {
+        "name": "find_parent_codes",
+        "va": "0x180016060",
+        "methodDefVa": "0x180040b48",
+        "flags": 130,
+        "doc": null
+      }
+    ],
+    "asciiClues": [
+      {
+        "va": "0x180037740",
+        "offset": 222528,
+        "text": "build\\modules\\monthly_analysis\\_core.c"
+      },
+      {
+        "va": "0x180037768",
+        "offset": 222568,
+        "text": "modules/monthly_analysis/_core.py"
+      },
+      {
+        "va": "0x1800377a8",
+        "offset": 222632,
+        "text": "modules.monthly_analysis._core.check_api_connection"
+      },
+      {
+        "va": "0x1800377e0",
+        "offset": 222688,
+        "text": "validate_source_data"
+      },
+      {
+        "va": "0x1800377f8",
+        "offset": 222712,
+        "text": "modules.monthly_analysis._core.validate_source_data"
+      },
+      {
+        "va": "0x180037850",
+        "offset": 222800,
+        "text": "modules.monthly_analysis._core.validate_source_data.get_error_details"
+      },
+      {
+        "va": "0x1800378a0",
+        "offset": 222880,
+        "text": "modules.monthly_analysis._core.validate_source_data.lambda"
+      },
+      {
+        "va": "0x1800378e0",
+        "offset": 222944,
+        "text": "convert_to_date"
+      },
+      {
+        "va": "0x1800378f0",
+        "offset": 222960,
+        "text": "modules.monthly_analysis._core.convert_to_date"
+      },
+      {
+        "va": "0x180037938",
+        "offset": 223032,
+        "text": "modules.monthly_analysis._core.convert_to_float"
+      },
+      {
+        "va": "0x180037978",
+        "offset": 223096,
+        "text": "modules.monthly_analysis._core.get_source_path"
+      },
+      {
+        "va": "0x1800379c0",
+        "offset": 223168,
+        "text": "modules.monthly_analysis._core.read_source_file"
+      },
+      {
+        "va": "0x180037a00",
+        "offset": 223232,
+        "text": "modules.monthly_analysis._core.get_code_info"
+      },
+      {
+        "va": "0x180037a40",
+        "offset": 223296,
+        "text": "modules.monthly_analysis._core.first2second"
+      },
+      {
+        "va": "0x180037a80",
+        "offset": 223360,
+        "text": "modules.monthly_analysis._core.resolve_path"
+      },
+      {
+        "va": "0x180037ac0",
+        "offset": 223424,
+        "text": "modules.monthly_analysis._core.calc_sub_name"
+      },
+      {
+        "va": "0x180037b00",
+        "offset": 223488,
+        "text": "modules.monthly_analysis._core.calc_sub_code"
+      },
+      {
+        "va": "0x180037b40",
+        "offset": 223552,
+        "text": "modules.monthly_analysis._core.calc_level"
+      },
+      {
+        "va": "0x180037b70",
+        "offset": 223600,
+        "text": "monthly_analysis"
+      },
+      {
+        "va": "0x180037b88",
+        "offset": 223624,
+        "text": "modules.monthly_analysis._core.monthly_analysis"
+      },
+      {
+        "va": "0x180037bc0",
+        "offset": 223680,
+        "text": "modules.monthly_analysis._core.monthly_analysis.lambda1"
+      },
+      {
+        "va": "0x180037c10",
+        "offset": 223760,
+        "text": "modules.monthly_analysis._core.remove_parent_code"
+      },
+      {
+        "va": "0x180037c60",
+        "offset": 223840,
+        "text": "modules.monthly_analysis._core.find_parent_codes"
+      },
+      {
+        "va": "0x180037cb8",
+        "offset": 223928,
+        "text": "modules.monthly_analysis._core.perform_ai_variance_analysis"
+      },
+      {
+        "va": "0x180037d10",
+        "offset": 224016,
+        "text": "modules.monthly_analysis._core.perform_ai_variance_analysis._safe_amt"
+      },
+      {
+        "va": "0x180037d70",
+        "offset": 224112,
+        "text": "modules.monthly_analysis._core.perform_ai_variance_analysis._prepare_df"
+      },
+      {
+        "va": "0x180037dd8",
+        "offset": 224216,
+        "text": "cname_date"
+      },
+      {
+        "va": "0x180037de8",
+        "offset": 224232,
+        "text": "_build_monthly_overview"
+      },
+      {
+        "va": "0x180037e00",
+        "offset": 224256,
+        "text": "modules.monthly_analysis._core.perform_ai_variance_analysis._build_monthly_overview"
+      },
+      {
+        "va": "0x180037ed0",
+        "offset": 224464,
+        "text": "modules.monthly_analysis._core.perform_ai_variance_analysis._build_sub_account_overview"
+      },
+      {
+        "va": "0x180037f40",
+        "offset": 224576,
+        "text": "modules.monthly_analysis._core.perform_ai_variance_analysis._build_sub_account_overview._agg_by_sub"
+      },
+      {
+        "va": "0x180037ff0",
+        "offset": 224752,
+        "text": "modules.monthly_analysis._core.perform_ai_variance_analysis._filter_transfer_entries"
+      },
+      {
+        "va": "0x180038058",
+        "offset": 224856,
+        "text": "_select_focus_months"
+      },
+      {
+        "va": "0x180038070",
+        "offset": 224880,
+        "text": "modules.monthly_analysis._core.perform_ai_variance_analysis._select_focus_months"
+      },
+      {
+        "va": "0x180038110",
+        "offset": 225040,
+        "text": "modules.monthly_analysis._core.perform_ai_variance_analysis._build_samples"
+      },
+      {
+        "va": "0x180038170",
+        "offset": 225136,
+        "text": "modules.monthly_analysis._core.perform_ai_variance_analysis._build_samples._fmt_rows"
+      },
+      {
+        "va": "0x1800381e0",
+        "offset": 225248,
+        "text": "modules.monthly_analysis._core.__pyx_scope_struct__perform_ai_variance_analysis"
+      },
+      {
+        "va": "0x1800383a0",
+        "offset": 225696,
+        "text": "modules.monthly_analysis._core"
+      },
+      {
+        "va": "0x1800383c0",
+        "offset": 225728,
+        "text": "init modules.monthly_analysis._core"
+      },
+      {
+        "va": "0x18003aea8",
+        "offset": 236712,
+        "text": "does not match"
+      },
+      {
+        "va": "0x18003b048",
+        "offset": 237128,
+        "text": "Month"
+      },
+      {
+        "va": "0x18003b0a6",
+        "offset": 237222,
+        "text": "monthly_analysis"
+      },
+      {
+        "va": "0x18003d902",
+        "offset": 247554,
+        "text": "_core.cp312-win_amd64.pyd"
+      },
+      {
+        "va": "0x18003e12e",
+        "offset": 249646,
+        "text": "PyErr_GivenExceptionMatches"
+      },
+      {
+        "va": "0x18003e23c",
+        "offset": 249916,
+        "text": "PyDict_Update"
+      },
+      {
+        "va": "0x18003e25e",
+        "offset": 249950,
+        "text": "PyArg_ValidateKeywordArguments"
+      },
+      {
+        "va": "0x18003e78a",
+        "offset": 251274,
+        "text": "PyErr_ExceptionMatches"
+      },
+      {
+        "va": "0x18003ef44",
+        "offset": 253252,
+        "text": "IsProcessorFeaturePresent"
+      }
+    ]
+  }
+]

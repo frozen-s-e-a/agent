@@ -1,0 +1,4 @@
+{
+  "_parse_cols": "(source_col_str)",
+  "apply_tool": "(df, tool_type, source_col_str, param)"
+}

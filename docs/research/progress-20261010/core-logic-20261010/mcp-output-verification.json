@@ -1,0 +1,87 @@
+{
+  "source": "C:\\Users\\Install\\Desktop\\ai助手\\artifacts\\core-logic-20261010\\synthetic-mcp.xlsx",
+  "sourceSha256": "dba873ea51de788c5f1a81e074e963f7975b7e06c40a27a8e59e39c129876f41",
+  "originalOutput": "C:\\Users\\Install\\Desktop\\ai助手\\artifacts\\core-logic-20261010\\oracle\\validated\\会计分录测试_20261010_1049.xlsx",
+  "reportedTotalHits": 21,
+  "expectedRuleHitSum": 21,
+  "summaryRows": 21,
+  "distinctSourceRows": 11,
+  "comparisons": [
+    {
+      "rule": "basic_positive",
+      "expectedIds": [
+        "P02",
+        "P03",
+        "P05"
+      ],
+      "actualIds": [
+        "P02",
+        "P03",
+        "P05"
+      ],
+      "equal": true
+    },
+    {
+      "rule": "basic_numeric",
+      "expectedIds": [
+        "P06",
+        "P07",
+        "P08",
+        "P09",
+        "P10",
+        "P12",
+        "P16",
+        "P17"
+      ],
+      "actualIds": [
+        "P06",
+        "P07",
+        "P08",
+        "P09",
+        "P10",
+        "P12",
+        "P16",
+        "P17"
+      ],
+      "equal": true
+    },
+    {
+      "rule": "combined",
+      "expectedIds": [
+        "P06",
+        "P07",
+        "P08",
+        "P09",
+        "P10",
+        "P12",
+        "P16",
+        "P17"
+      ],
+      "actualIds": [
+        "P06",
+        "P07",
+        "P08",
+        "P09",
+        "P10",
+        "P12",
+        "P16",
+        "P17"
+      ],
+      "equal": true
+    },
+    {
+      "rule": "excluded",
+      "expectedIds": [
+        "P02",
+        "P05"
+      ],
+      "actualIds": [
+        "P02",
+        "P05"
+      ],
+      "equal": true
+    }
+  ],
+  "failureCount": 0,
+  "referenceLegacyCodeLoaded": false
+}

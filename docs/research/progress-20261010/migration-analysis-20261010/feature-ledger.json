@@ -1,0 +1,2842 @@
+{
+  "date": "2026-10-10",
+  "status": "analysis_and_proposals_only",
+  "entries": [
+    {
+      "id": "mcp_add_column",
+      "legacyName": "add_column",
+      "legacyModule": "modules.add_column",
+      "legacyFile": "modules/add_column.pyd",
+      "package": "P01_table",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/table_ops.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "文件或文件夹路径: 要处理的 Excel 文件路径或包含 Excel 文件的文件夹路径"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "文件名关键词: 用于过滤文件名的关键词，留空则处理所有 Excel 文件"
+          },
+          "column_name": {
+            "type": "string",
+            "description": "待合并列名: 需要合并的列名（如：客户）"
+          },
+          "delimiter": {
+            "type": "string",
+            "description": "连接符: 用于连接多个值的分隔符（如：,或;），留空则直接拼接"
+          },
+          "max_column_num": {
+            "type": "number",
+            "description": "最大列数: 相同列名的最大数量，不足时自动插入空列"
+          }
+        },
+        "required": [
+          "file_path",
+          "keyword",
+          "column_name",
+          "delimiter",
+          "max_column_num"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "同名列合并、分隔符、最多列数与 keyword 范围；不能映射成新增固定值列。",
+      "nameCollisionWithBuiltin": true,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_asist_split",
+      "legacyName": "asist_split",
+      "legacyModule": "modules.asist_split",
+      "legacyFile": "modules/asist_split.pyd",
+      "package": "P01_table",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/table_ops.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "文件或文件夹路径: 对应 B1 单元格"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "文件名关键词: 对应 B2 单元格"
+          },
+          "col_name": {
+            "type": "string",
+            "description": "辅助项列名: 对应 B3 单元格"
+          },
+          "kv_sep": {
+            "type": "string",
+            "description": "辅助项分隔符: 对应 B4 单元格 (如 :)"
+          },
+          "item_sep": {
+            "type": "string",
+            "description": "辅助项拆分符: 对应 B5。填 ';' 代表按分号切分；填 '【】' 代表提取括号内内容"
+          }
+        },
+        "required": [
+          "file_path",
+          "keyword",
+          "col_name",
+          "kv_sep",
+          "item_sep"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "按键值/项目分隔符拆辅助核算；测试空项、重复键、嵌套/异常文本与 Sheet 范围。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_dropsummary",
+      "legacyName": "dropsummary",
+      "legacyModule": "modules.dropsummary",
+      "legacyFile": "modules/dropsummary.pyd",
+      "package": "P01_table",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/table_ops.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "文件路径: 要处理的 Excel 文件路径（配置表中每行一个文件）"
+          },
+          "keywords": {
+            "type": "string",
+            "description": "关键字: 用于匹配合计行的关键字，多个关键字用竖线分隔（如：合计|小计|总计）"
+          },
+          "column_name": {
+            "type": "string",
+            "description": "关键字所在列: 关键字所在的列名"
+          }
+        },
+        "required": [
+          "file_path",
+          "keywords",
+          "column_name"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "关键词匹配方式、作用列、空行与 Sheet 范围；核对排除记录和剩余顺序。",
+      "nameCollisionWithBuiltin": true,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_fill_column",
+      "legacyName": "fill_column",
+      "legacyModule": "modules.fill_column",
+      "legacyFile": "modules/fill_column.pyd",
+      "package": "P01_table",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/table_ops.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "文件或文件夹路径: 要处理的 Excel 文件路径或包含 Excel 文件的文件夹路径"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "文件名关键词: 用于过滤文件名的关键词，留空则处理所有 Excel 文件"
+          },
+          "column_names": {
+            "type": "string",
+            "description": "待填充列名: 需要向下填充的列名，多个列名用逗号分隔（如：客户,项目）"
+          }
+        },
+        "required": [
+          "file_path",
+          "keyword",
+          "column_names"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "空值定义、列列表、keyword 匹配与 Sheet 边界；跨文件/工作表不能串填。",
+      "nameCollisionWithBuiltin": true,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_headers_process",
+      "legacyName": "headers_process",
+      "legacyModule": "modules.headers_process",
+      "legacyFile": "modules/headers_process.pyd",
+      "package": "P01_table",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/table_ops.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "文件或文件夹路径: 要处理的 Excel 文件路径或包含 Excel 文件的文件夹路径"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "文件名关键词: 用于过滤文件名的关键词，留空则处理所有 Excel 文件"
+          },
+          "header_rows": {
+            "type": "string",
+            "description": "表头行: 表头所在的行号，多行用逗号分隔（如：1,2 表示第1行和第2行）"
+          }
+        },
+        "required": [
+          "file_path",
+          "keyword",
+          "header_rows"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "多行表头、合并格、重复字段与关键词定位；核对列顺序和数据起始行。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_insert_column",
+      "legacyName": "insert_column",
+      "legacyModule": "modules.insert_column",
+      "legacyFile": "modules/insert_column.pyd",
+      "package": "P01_table",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/table_ops.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "文件路径: 要处理的 Excel 文件路径（配置表中每行一个文件）"
+          },
+          "insert_position": {
+            "type": "string",
+            "description": "插入列位置: 插入位置，可以是列字母（如 A）或数字索引（如 1）"
+          },
+          "column_name": {
+            "type": "string",
+            "description": "插入列名: 新列的列名"
+          },
+          "fill_value": {
+            "type": "string",
+            "description": "插入值: 填充到新列的固定值"
+          },
+          "sheet_name": {
+            "type": "string",
+            "description": "指定表: 工作表名称，留空则使用第一张表"
+          }
+        },
+        "required": [
+          "file_path",
+          "insert_position",
+          "column_name",
+          "fill_value",
+          "sheet_name"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [
+        "workbook_fidelity_validation"
+      ],
+      "baselineAndAcceptanceNeeded": "插入位置/列名/固定值/Sheet；核对原列顺序、公式引用调整和样式。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_merge_column",
+      "legacyName": "merge_column",
+      "legacyModule": "modules.merge_column",
+      "legacyFile": "modules/merge_column.pyd",
+      "package": "P01_table",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/table_ops.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "文件或文件夹路径: 要处理的 Excel 文件路径或包含 Excel 文件的文件夹路径"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "文件名关键词: 用于过滤文件名的关键词，留空则处理所有 Excel 文件"
+          },
+          "column_names": {
+            "type": "string",
+            "description": "待合并列名: 需要合并的列名，多个列名用逗号分隔（如：客户,项目,\"固定值\"）"
+          },
+          "delimiter": {
+            "type": "string",
+            "description": "连接符: 用于连接多个值的分隔符（如：,或;）"
+          },
+          "insert_index": {
+            "type": "string",
+            "description": "插入位置: 新列插入位置，可以是列字母（如 A）或数字索引（如 1）"
+          },
+          "insert_name": {
+            "type": "string",
+            "description": "新列名称: 合并后的新列名称，留空则默认为'合并列'"
+          }
+        },
+        "required": [
+          "file_path",
+          "keyword",
+          "column_names",
+          "delimiter",
+          "insert_index",
+          "insert_name"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "空值/分隔符/插入位置/新列名/Sheet 筛选；核对是否保留原列及输出顺序。",
+      "nameCollisionWithBuiltin": true,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_pickup_value",
+      "legacyName": "pickup_value",
+      "legacyModule": "modules.pickup_value",
+      "legacyFile": "modules/pickup_value.pyd",
+      "package": "P01_table",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/table_ops.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "folder_path": {
+            "type": "string",
+            "description": "文件夹路径: 要处理的文件夹路径（会递归查找所有 Excel 文件）"
+          },
+          "field_mappings": {
+            "type": "string",
+            "description": "提取字段配置: 从第3行开始，A列为字段名，B列为单元格位置（如 A1, B2）"
+          }
+        },
+        "required": [
+          "folder_path",
+          "field_mappings"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "按 field_mappings 逐文件取指定单元格；核对空值、公式缓存/公式文本与多级目录。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_select_column",
+      "legacyName": "select_column",
+      "legacyModule": "modules.select_column",
+      "legacyFile": "modules/select_column.pyd",
+      "package": "P01_table",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/table_ops.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "folder_path": {
+            "type": "string",
+            "description": "文件夹路径: 要处理的文件夹路径（会递归查找所有 Excel 文件）"
+          },
+          "should_merge": {
+            "type": "string",
+            "description": "是否合并: 填写'是'表示合并多个文件，否则原地替换"
+          },
+          "sheet_keywords": {
+            "type": "string",
+            "description": "表名（选填）: 表名关键词，多个关键词用中文或英文逗号分隔，仅处理包含关键词的工作表，留空则处理所有工作表"
+          },
+          "columns_to_keep": {
+            "type": "string",
+            "description": "选择列配置: 需要提取的列名（在'选择列配置'工作表中列出），留空则全量合并"
+          }
+        },
+        "required": [
+          "folder_path",
+          "should_merge",
+          "sheet_keywords",
+          "columns_to_keep"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "目录、should_merge、Sheet 关键词、字段选择与顺序全部实现；核对缺列、多文件和来源。",
+      "nameCollisionWithBuiltin": true,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_multi_collect_file",
+      "legacyName": "multi_collect_file",
+      "legacyModule": "modules.multi_collect_file",
+      "legacyFile": "modules/multi_collect_file.pyd",
+      "package": "P01_table",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/table_ops.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "多表汇集-来源文件.xlsx"
+      ],
+      "dependencyProposal": [
+        "workbook_fidelity_validation"
+      ],
+      "baselineAndAcceptanceNeeded": "配置指定文件/表/范围的复制与汇集；核对格式、公式、来源和重名 Sheet。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_multi_collect_folder",
+      "legacyName": "multi_collect_folder",
+      "legacyModule": "modules.multi_collect_folder",
+      "legacyFile": "modules/multi_collect_folder.pyd",
+      "package": "P01_table",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/table_ops.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "多表汇集-来源文件夹.xlsx"
+      ],
+      "dependencyProposal": [
+        "workbook_fidelity_validation"
+      ],
+      "baselineAndAcceptanceNeeded": "目录关键词/文件/表筛选与复制；核对递归、排序、排除规则和重名。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_data_field_check",
+      "legacyName": "data_field_check",
+      "legacyModule": "modules.data_field_check",
+      "legacyFile": "modules/data_field_check.pyd",
+      "package": "P01_table",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/table_ops.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "AI API Base URL"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "AI API Key"
+          },
+          "model_name": {
+            "type": "string",
+            "description": "模型名称"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "资料字段检查配置表.xlsx"
+      ],
+      "dependencyProposal": [
+        "model"
+      ],
+      "baselineAndAcceptanceNeeded": "配置驱动必填、类型、格式等真实规则；模型建议不替代判定，定位缺失/异常字段。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_text_match",
+      "legacyName": "text_match",
+      "legacyModule": "modules.text_match",
+      "legacyFile": "modules/text_match.pyd",
+      "package": "P01_table",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/table_ops.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "AI API Base URL"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "AI API Key"
+          },
+          "model_name": {
+            "type": "string",
+            "description": "模型名称"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "文本提取匹配配置表.xlsx"
+      ],
+      "dependencyProposal": [
+        "model"
+      ],
+      "baselineAndAcceptanceNeeded": "配置与模型参与的原提取规则；不能映射为简单包含关键词筛选，输出来源和无法确认项。",
+      "nameCollisionWithBuiltin": true,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_auxiliary_selection",
+      "legacyName": "auxiliary_selection",
+      "legacyModule": "modules.auxiliary_selection",
+      "legacyFile": "modules/auxiliary_selection.pyd",
+      "package": "P01_table",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/table_ops.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "AI API Base URL"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "AI API Key"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "辅助项选择配置表.xlsx"
+      ],
+      "dependencyProposal": [
+        "model"
+      ],
+      "baselineAndAcceptanceNeeded": "解析辅助项配置与筛选口径；模型建议与确定性提取分开，测试缺项和重复辅助项。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_tool_preview",
+      "legacyName": "tool_preview",
+      "legacyModule": "modules.subject_clean.tool_preview",
+      "legacyFile": "modules/subject_clean/tool_preview.pyd",
+      "package": "P02_subject",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/subjects.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "源 Excel 文件路径"
+          },
+          "sheet_name": {
+            "type": "string",
+            "description": "Sheet 名称（不传则读取第一个 Sheet）"
+          },
+          "preview_rows": {
+            "type": "integer",
+            "description": "预览行数（默认 5）"
+          },
+          "header_row": {
+            "type": "integer",
+            "description": "表头所在行号（1-indexed）。不传则自动检测"
+          }
+        },
+        "required": [
+          "file_path"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "实际余额表预览、表头识别与参数建议；建议保留置信/证据，不默认当成已确认配置。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_tool_execute",
+      "legacyName": "tool_execute",
+      "legacyModule": "modules.subject_clean.tool_execute",
+      "legacyFile": "modules/subject_clean/tool_execute.pyd",
+      "package": "P02_subject",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/subjects.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "源 Excel 文件路径"
+          },
+          "code_column": {
+            "type": "string",
+            "description": "科目编码列名（如：科目编码）"
+          },
+          "code_name_column": {
+            "type": "string",
+            "description": "科目名称列名（如：科目名称）"
+          },
+          "header_row": {
+            "type": "integer",
+            "description": "表头所在行号（1-indexed，通常为 1 或 2）"
+          },
+          "code_name_split": {
+            "type": "string",
+            "description": "科目名称分隔符（如 '-' 或 '_'），留空则按编码层级推断"
+          },
+          "asist_column": {
+            "type": "string",
+            "description": "辅助核算列名，留空则跳过辅助处理"
+          },
+          "asist_name_split": {
+            "type": "string",
+            "description": "辅助项键值分隔符（如 ':' 或 '：'），必须填符号"
+          },
+          "asist_item_wrapper": {
+            "type": "string",
+            "description": "辅助项包裹符号（如 '[]' 或 '【】'）"
+          },
+          "beginning_balance": {
+            "type": "string",
+            "description": "期初余额公式（如 '期初余额-期末余额'），留空则不计算"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "公司名称，用于输出文件名"
+          },
+          "grouping_column": {
+            "type": "string",
+            "description": "分组汇总列（如 '核算账簿' 或 '公司名称'），用于多账套分组"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认 output/科目余额表处理/"
+          }
+        },
+        "required": [
+          "file_path",
+          "code_column",
+          "code_name_column",
+          "header_row"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "科目编码/名称拆分、辅助核算、层级、期初、主体/分组；核对余额方向和控制合计。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_subject_clean_after",
+      "legacyName": "subject_clean_after",
+      "legacyModule": "modules.subject_clean_after",
+      "legacyFile": "modules/subject_clean_after.pyd",
+      "package": "P02_subject",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/subjects.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录 output/科目余额表后处理。"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "科目余额表后处理配置表.xlsx"
+      ],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "配置驱动余额表后处理各分支；核对原科目/辅助项结构和处理前后控制合计。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_subject_allocation",
+      "legacyName": "subject_allocation",
+      "legacyModule": "modules.subject_allocation",
+      "legacyFile": "modules/subject_allocation.pyd",
+      "package": "P02_subject",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/subjects.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "AI API Base URL"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "AI API Key"
+          },
+          "model_name": {
+            "type": "string",
+            "description": "模型名称"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "科目分配派工.xlsx"
+      ],
+      "dependencyProposal": [
+        "model"
+      ],
+      "baselineAndAcceptanceNeeded": "配置的科目/人员/派工口径与模型建议；核对重复派工、未分配和成果可复核。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_jet_test_inspect",
+      "legacyName": "jet_test_inspect",
+      "legacyModule": "modules.jet_test.jet_test_inspect",
+      "legacyFile": "modules/jet_test/jet_test_inspect.pyd",
+      "package": "P03_checks_sampling",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/checks.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "数据源文件路径或文件夹路径"
+          },
+          "preview_rows": {
+            "type": "integer",
+            "description": "预览行数（默认5行）"
+          },
+          "include_templates": {
+            "type": "boolean",
+            "description": "是否同时返回内置特征和规则模板（默认true）"
+          }
+        },
+        "required": [
+          "file_path"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "列类型/样本/规则模板及 include_templates；检查非规则表头、空值和完整字段。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_jet_test_execute",
+      "legacyName": "jet_test_execute",
+      "legacyModule": "modules.jet_test.jet_test_execute",
+      "legacyFile": "modules/jet_test/jet_test_execute.pyd",
+      "package": "P03_checks_sampling",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/checks.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "数据源文件路径或文件夹路径"
+          },
+          "features": {
+            "type": "string",
+            "description": "特征定义：'builtin'使用全部内置，或传入自定义特征列表，或两者混合"
+          },
+          "rules": {
+            "type": "string",
+            "description": "规则配置：'builtin'使用全部内置，或传入规则名称列表/自定义规则列表，或混合"
+          },
+          "column_mapping": {
+            "type": "string",
+            "description": "列名映射（JSON字符串），将模板列名映射到实际列名。如 {\"制单日期\":\"日期\"}"
+          },
+          "settings": {
+            "type": "string",
+            "description": "全局设置（JSON字符串）：company_col, output_empty, split_output"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径"
+          }
+        },
+        "required": [
+          "file_path"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "自定义特征与规则矩阵、映射/settings；核对边界、作用域、疑点集合和来源。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_voucher_check",
+      "legacyName": "voucher_check",
+      "legacyModule": "modules.voucher_check",
+      "legacyFile": "modules/voucher_check.pyd",
+      "package": "P03_checks_sampling",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/checks.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "source_paths": {
+            "type": "array",
+            "description": "数据源路径: 需要扫描的文件或文件夹路径列表",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "source_paths"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "文件/文件夹 source_paths 的真实检查分支；不只当前凭证借贷不平规则。",
+      "nameCollisionWithBuiltin": true,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_ledger_check",
+      "legacyName": "ledger_check",
+      "legacyModule": "modules.ledger_check",
+      "legacyFile": "modules/ledger_check.pyd",
+      "package": "P03_checks_sampling",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/checks.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "directory": {
+            "type": "string",
+            "description": "存放小账套文件的文件夹路径"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          }
+        },
+        "required": [
+          "directory"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "账套借贷、总额与序时账、一级/二级科目及余额勾稽；核对全部检查分支和定位。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_cutoff_sampling",
+      "legacyName": "cutoff_sampling",
+      "legacyModule": "modules.cutoff_sampling",
+      "legacyFile": "modules/cutoff_sampling.pyd",
+      "package": "P03_checks_sampling",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/sampling.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "截止测试配置表.xlsx"
+      ],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "解析期间/截止日/范围/样本量；核对随机性、顺序、边界、异常与样本行来源。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_bank_digit2",
+      "legacyName": "bank_digit2",
+      "legacyModule": "modules.bank_digit2",
+      "legacyFile": "modules/bank_digit2.pyd",
+      "package": "P04_bank",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/bank.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "输出文件路径。不传则使用默认路径。"
+          }
+        },
+        "required": [
+          "config_file"
+        ]
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "银行函证表格生成-电子格式二配置表.xlsx",
+        "询证函模板-电子格式二.xlsx"
+      ],
+      "dependencyProposal": [
+        "workbook_fidelity_validation"
+      ],
+      "baselineAndAcceptanceNeeded": "电子格式二配置及函证模板填充；核对账户分组、金额与版面。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_bank_paper1",
+      "legacyName": "bank_paper1",
+      "legacyModule": "modules.bank_paper1",
+      "legacyFile": "modules/bank_paper1.pyd",
+      "package": "P04_bank",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/bank.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "输出文件路径。不传则使用默认路径。"
+          }
+        },
+        "required": [
+          "config_file"
+        ]
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "银行函证表格生成-纸质格式一配置表.xlsx",
+        "询证函模板-纸质格式一.xlsx"
+      ],
+      "dependencyProposal": [
+        "workbook_fidelity_validation"
+      ],
+      "baselineAndAcceptanceNeeded": "纸质格式一函证配置和模板填充；核对账户、银行、打印设置与全部字段。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_bank_paper2",
+      "legacyName": "bank_paper2",
+      "legacyModule": "modules.bank_paper2",
+      "legacyFile": "modules/bank_paper2.pyd",
+      "package": "P04_bank",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/bank.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "输出文件路径。不传则使用默认路径。"
+          }
+        },
+        "required": [
+          "config_file"
+        ]
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "银行函证表格生成-纸质格式二配置表.xlsx",
+        "询证函模板-纸质格式二.xlsx"
+      ],
+      "dependencyProposal": [
+        "workbook_fidelity_validation"
+      ],
+      "baselineAndAcceptanceNeeded": "纸质格式二函证配置和模板填充；与格式一区分，核对字段、分组与版面。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_bank_flow",
+      "legacyName": "bank_flow",
+      "legacyModule": "modules.bank_flow",
+      "legacyFile": "modules/bank_flow.pyd",
+      "package": "P04_bank",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/bank.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "gl_path": {
+            "type": "string",
+            "description": "序时账文件路径"
+          },
+          "gl_date_col": {
+            "type": "string",
+            "description": "序时账-日期列"
+          },
+          "gl_voucher_col": {
+            "type": "string",
+            "description": "序时账-凭证号列"
+          },
+          "gl_subject_col": {
+            "type": "string",
+            "description": "序时账-科目列"
+          },
+          "gl_bank_subject": {
+            "type": "string",
+            "description": "序时账-银行科目值"
+          },
+          "gl_summary_col": {
+            "type": "string",
+            "description": "序时账-摘要列"
+          },
+          "gl_partner_direct_col": {
+            "type": "string",
+            "description": "序时账-交易对手列名: 如果序时账中已有交易对手列（如'客户'、'供应商'等），直接填写该列名。填写此项后将忽略'客商辅助项列名'配置"
+          },
+          "gl_partner_col": {
+            "type": "string",
+            "description": "序时账-客商辅助项列名: 用于凭证拆分模式：从对方科目的辅助项中提取客商。如果同时存在多个列（如'客户－名称'和'供应商－名称'），请用英文逗号分隔填写所有列名，例如：客户－名称,供应商－名称。注意：如果已填写'交易对手列名'，此项将被忽略"
+          },
+          "gl_debit_col": {
+            "type": "string",
+            "description": "序时账-借方列"
+          },
+          "gl_credit_col": {
+            "type": "string",
+            "description": "序时账-贷方列"
+          },
+          "bank_path": {
+            "type": "string",
+            "description": "银行流水文件路径"
+          },
+          "bank_date_col": {
+            "type": "string",
+            "description": "流水-日期列"
+          },
+          "bank_income_col": {
+            "type": "string",
+            "description": "流水-收入列"
+          },
+          "bank_expense_col": {
+            "type": "string",
+            "description": "流水-支出列"
+          },
+          "bank_partner_col": {
+            "type": "string",
+            "description": "流水-对方户名列"
+          }
+        },
+        "required": [
+          "gl_path",
+          "gl_date_col",
+          "gl_voucher_col",
+          "gl_subject_col",
+          "gl_bank_subject",
+          "gl_summary_col",
+          "gl_partner_direct_col",
+          "gl_partner_col",
+          "gl_debit_col",
+          "gl_credit_col",
+          "bank_path",
+          "bank_date_col",
+          "bank_income_col",
+          "bank_expense_col",
+          "bank_partner_col"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "方向/日期/对手标准化及真实双向匹配；核对重复占用、拆合、跨日、未匹配和控制合计。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_bankflowmerge",
+      "legacyName": "bankflowmerge",
+      "legacyModule": "modules.bankflowmerge",
+      "legacyFile": "modules/bankflowmerge.pyd",
+      "package": "P04_bank",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/bank.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_paths": {
+            "type": "array",
+            "description": "文件路径列表: 银行流水文件的完整路径列表（必填，支持单个或多个文件）",
+            "items": {
+              "type": "string"
+            }
+          },
+          "header_start_cols": {
+            "type": "array",
+            "description": "表头起始列列表: 每个文件的表头起始列，如 ['A', 'A', 'B']（必填）",
+            "items": {
+              "type": "string"
+            }
+          },
+          "header_start_rows": {
+            "type": "array",
+            "description": "表头起始行列表: 每个文件的表头起始行，如 [5, 2, 7]（必填）",
+            "items": {
+              "type": "string"
+            }
+          },
+          "bank_names": {
+            "type": "array",
+            "description": "银行名称列表: 每个文件的银行简称列表，如 ['浦发银行', '工商银行', '民生银行']",
+            "items": {
+              "type": "string"
+            }
+          },
+          "account_names": {
+            "type": "array",
+            "description": "银行户名列表: 每个文件的账户名称列表",
+            "items": {
+              "type": "string"
+            }
+          },
+          "account_numbers": {
+            "type": "array",
+            "description": "银行账号列表: 每个文件的银行账号列表（必须是纯数字，如'83110154700000722'，不要填写账户名称）",
+            "items": {
+              "type": "string"
+            }
+          },
+          "transaction_date_cols": {
+            "type": "array",
+            "description": "交易日期列列表: 每个文件的交易日期列名列表",
+            "items": {
+              "type": "string"
+            }
+          },
+          "transaction_time_cols": {
+            "type": "array",
+            "description": "交易时间列列表: 每个文件的交易时间列名列表",
+            "items": {
+              "type": "string"
+            }
+          },
+          "counterparty_name_cols": {
+            "type": "array",
+            "description": "对方账户列列表: 每个文件的对方账户名称列名列表",
+            "items": {
+              "type": "string"
+            }
+          },
+          "counterparty_account_cols": {
+            "type": "array",
+            "description": "对方账号列列表: 每个文件的对方账号列名列表",
+            "items": {
+              "type": "string"
+            }
+          },
+          "summary_cols": {
+            "type": "array",
+            "description": "摘要列列表: 每个文件的摘要列名列表",
+            "items": {
+              "type": "string"
+            }
+          },
+          "income_cols": {
+            "type": "array",
+            "description": "收入金额列列表: 每个文件的收入金额列名列表",
+            "items": {
+              "type": "string"
+            }
+          },
+          "expense_cols": {
+            "type": "array",
+            "description": "支出金额列列表: 每个文件的支出金额列名列表",
+            "items": {
+              "type": "string"
+            }
+          },
+          "balance_cols": {
+            "type": "array",
+            "description": "余额列列表: 每个文件的余额列名列表",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "file_paths",
+          "header_start_cols",
+          "header_start_rows",
+          "bank_names",
+          "account_names",
+          "account_numbers",
+          "transaction_date_cols",
+          "transaction_time_cols",
+          "counterparty_name_cols",
+          "counterparty_account_cols",
+          "summary_cols",
+          "income_cols",
+          "expense_cols",
+          "balance_cols"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "每文件参数数组一一对应；统一时间、收支、账户与余额，保留原文件/原行。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_monthly_preview",
+      "legacyName": "monthly_preview",
+      "legacyModule": "modules.monthly_analysis.monthly_preview",
+      "legacyFile": "modules/monthly_analysis/monthly_preview.pyd",
+      "package": "P05_analysis",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/analysis.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "序时账数据文件路径（Excel 或 CSV）"
+          },
+          "sheet_name": {
+            "type": "string",
+            "description": "Sheet 名称（不传则读取第一个 Sheet）"
+          },
+          "preview_rows": {
+            "type": "integer",
+            "description": "预览行数（默认 5）"
+          }
+        },
+        "required": [
+          "file_path"
+        ]
+      },
+      "inputOutputProposal": "CSV / Excel 与映射 → 预览/层级或分析表",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "Excel/CSV 的实际类型、样本与基础统计；预览不能替代全量核查。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_monthly_detect_structure",
+      "legacyName": "monthly_detect_structure",
+      "legacyModule": "modules.monthly_analysis.monthly_detect_structure",
+      "legacyFile": "modules/monthly_analysis/monthly_detect_structure.pyd",
+      "package": "P05_analysis",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/analysis.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "序时账数据文件路径（Excel 或 CSV）"
+          },
+          "column_mapping": {
+            "type": "string",
+            "description": "列名映射 JSON: {\"date\": \"日期列名\", \"subject_code\": \"科目代码列名\", \"subject_name\": \"科目名称列名\", \"debit\": \"借方列名\", \"credit\": \"贷方列名\", \"company\": \"公司列名\", \"desc\": \"摘要列名\", \"voucher\": \"凭证号列名\"}。date/subject_code/subject_name 必填"
+          },
+          "sheet_name": {
+            "type": "string",
+            "description": "Sheet 名称（不传则读取第一个 Sheet）"
+          },
+          "top_n": {
+            "type": "integer",
+            "description": "返回前 N 个一级科目（默认 30）"
+          }
+        },
+        "required": [
+          "file_path",
+          "column_mapping"
+        ]
+      },
+      "inputOutputProposal": "CSV / Excel 与映射 → 预览/层级或分析表",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "映射列中编码的层级、分隔符/步长和 top_n；含例外编码时给实际不确定项。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_monthly_execute",
+      "legacyName": "monthly_execute",
+      "legacyModule": "modules.monthly_analysis.monthly_execute",
+      "legacyFile": "modules/monthly_analysis/monthly_execute.pyd",
+      "package": "P05_analysis",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/analysis.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "this_year_file": {
+            "type": "string",
+            "description": "本期序时账数据文件路径（Excel/CSV）"
+          },
+          "last_year_file": {
+            "type": "string",
+            "description": "上期序时账数据文件路径，不传则仅做本期月度汇总"
+          },
+          "this_year_sheet": {
+            "type": "string",
+            "description": "本期数据 Sheet 名（默认第一个 Sheet）"
+          },
+          "last_year_sheet": {
+            "type": "string",
+            "description": "上期数据 Sheet 名（默认第一个 Sheet）"
+          },
+          "subjects": {
+            "type": "string",
+            "description": "要分析的科目列表 JSON: [{\"code\": \"6001\", \"direction\": \"贷\"}, ...]。direction 为借或贷"
+          },
+          "column_mapping": {
+            "type": "string",
+            "description": "序时账列名映射 JSON: {\"date\": \"日期列名\", \"subject_code\": \"科目代码列名\", \"subject_name\": \"科目名称列名\", \"debit\": \"借方列名\", \"credit\": \"贷方列名\", \"company\": \"公司名称列名\", \"desc\": \"摘要列名\", \"voucher\": \"凭证号列名\"}。date/subject_code/subject_name 必填，debit 和 credit 至少填一个"
+          },
+          "code_structure": {
+            "type": "string",
+            "description": "科目编码结构参数 JSON: {\"flag\": \"科目名称分隔符\", \"start\": 1, \"full_length\": 0, \"init_length\": 4, \"step\": 2, \"code_delimiter\": \"科目代码分隔符\"}"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "输出文件路径。不传则使用默认路径 output/月间分析结果表.xlsx"
+          },
+          "threshold_amt": {
+            "type": "number",
+            "description": "AI变动分析-变动额阈值（默认100000），超过此金额的科目才做AI分析"
+          },
+          "threshold_rate": {
+            "type": "number",
+            "description": "AI变动分析-变动率阈值（默认0.3即30%），超过此比率的科目才做AI分析"
+          }
+        },
+        "required": [
+          "this_year_file",
+          "subjects",
+          "column_mapping"
+        ]
+      },
+      "inputOutputProposal": "CSV / Excel 与映射 → 预览/层级或分析表",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "主体/科目方向/层级、本期上期、阈值和所有月份；核对合计、零基数、缺上期。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_monthly_ai_analysis",
+      "legacyName": "monthly_ai_analysis",
+      "legacyModule": "modules.monthly_analysis.monthly_ai_analysis",
+      "legacyFile": "modules/monthly_analysis/monthly_ai_analysis.pyd",
+      "package": "P05_analysis",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/analysis.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "result_file": {
+            "type": "string",
+            "description": "已生成的月间分析结果文件路径（Excel）"
+          },
+          "this_year_file": {
+            "type": "string",
+            "description": "本期序时账原始数据文件路径（用于 AI 提取样本凭证）"
+          },
+          "last_year_file": {
+            "type": "string",
+            "description": "上期序时账原始数据文件路径"
+          },
+          "this_year_sheet": {
+            "type": "string",
+            "description": "本期数据 Sheet 名（默认第一个 Sheet）"
+          },
+          "last_year_sheet": {
+            "type": "string",
+            "description": "上期数据 Sheet 名（默认第一个 Sheet）"
+          },
+          "column_mapping": {
+            "type": "string",
+            "description": "序时账列名映射 JSON: {\"date\": \"日期列名\", \"subject_code\": \"科目代码列名\", \"subject_name\": \"科目名称列名\", \"debit\": \"借方列名\", \"credit\": \"贷方列名\", \"company\": \"公司名称列名\", \"desc\": \"摘要列名\", \"voucher\": \"凭证号列名\"}。desc 字段用于 AI 提取样本凭证摘要"
+          },
+          "threshold_amt": {
+            "type": "number",
+            "description": "变动额阈值（默认 100000），超过此金额的科目才做 AI 分析"
+          },
+          "threshold_rate": {
+            "type": "number",
+            "description": "变动率阈值（默认 0.3 即 30%），超过此比率的科目才做 AI 分析"
+          },
+          "month_conc_threshold": {
+            "type": "number",
+            "description": "月度集中度阈值（默认 0.8），单月占比超过此值时重点分析"
+          },
+          "max_sample_rows": {
+            "type": "integer",
+            "description": "每个科目最多提取的样本凭证行数（默认 50）"
+          },
+          "generate_procedure": {
+            "type": "string",
+            "description": "是否生成审计应对建议（默认 '是'）"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "输出文件路径。不传则覆盖原结果文件"
+          }
+        },
+        "required": [
+          "result_file",
+          "this_year_file",
+          "column_mapping"
+        ]
+      },
+      "inputOutputProposal": "分析结果表/序时账 → 变动解释/程序与证据",
+      "templatesObserved": [],
+      "dependencyProposal": [
+        "model"
+      ],
+      "baselineAndAcceptanceNeeded": "读取已生成结果与实际凭证样本，按阈值解释/生成程序；结果引用、模型失败与来源可查。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_gross_margin_analysis",
+      "legacyName": "gross_margin_analysis",
+      "legacyModule": "modules.gross_margin_analysis",
+      "legacyFile": "modules/gross_margin_analysis.pyd",
+      "package": "P05_analysis",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/analysis.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "preview",
+              "analyze"
+            ],
+            "description": "执行模式: auto=全自动（推荐，自动检测列映射和维度后执行分析），preview=只预览数据列信息不执行分析，analyze=手动指定配置执行分析"
+          },
+          "this_data_path": {
+            "type": "string",
+            "description": "本期数据路径: 本期收入成本明细 Excel 文件路径（相对于 input/ 目录或绝对路径）"
+          },
+          "this_data_sheet": {
+            "type": "string",
+            "description": "本期数据表名: 本期数据所在 Sheet 名称（preview 模式可省略，默认读第一个 Sheet）"
+          },
+          "last_data_path": {
+            "type": "string",
+            "description": "上期数据路径: 上期收入成本明细 Excel 文件路径（仅 analyze 模式，不填则不做两期对比）"
+          },
+          "last_data_sheet": {
+            "type": "string",
+            "description": "上期数据表名: 上期数据所在 Sheet 名称"
+          },
+          "field_mapping": {
+            "type": "string",
+            "description": "字段映射: 可选。不传则自动检测列名。JSON 对象，键为标准字段名，值为数据源列名。必填标准字段: 营业收入, 营业成本, 数量。可选标准字段: 材料费用, 人工费用, 制造费用, 日期, 会计主体。示例: {\"营业收入\":\"销售金额\",\"营业成本\":\"成本金额\",\"数量\":\"销量\",\"日期\":\"记账日期\"}"
+          },
+          "dimensions": {
+            "type": "string",
+            "description": "透视维度: 可选。不传则自动检测分类列作为维度。JSON 数组，每个元素指定一个分析维度。每个元素: {\"name\":\"维度名称\",\"column\":\"数据源列名\",\"threshold\":0.05,\"revenue_threshold\":0}。示例: [{\"name\":\"产品\",\"column\":\"产品类别\",\"threshold\":0.05}]"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "输出路径: 分析结果输出路径（默认自动生成到 output/毛利率分析/ 目录）"
+          },
+          "thread_count": {
+            "type": "integer",
+            "description": "AI并发线程数: AI分析并发线程数，默认5"
+          },
+          "confirmed": {
+            "type": "boolean",
+            "description": "用户确认: 【重要】必须等待用户确认后才能设为 true。首次调用不传此参数，工具会返回自动检测的字段映射和维度供审查。你必须将检测结果展示给用户，等用户明确确认无误后，才能在下次调用时传 confirmed=true。绝对不要自行设置 confirmed=true。"
+          }
+        },
+        "required": [
+          "this_data_path"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [
+        "model_if_ai_mode"
+      ],
+      "baselineAndAcceptanceNeeded": "模式、字段映射、维度、本期上期及收入/成本方向；核对零收入/负数/汇总层级和结果。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_detailed_table_inspect",
+      "legacyName": "detailed_table_inspect",
+      "legacyModule": "modules.detailed_table.detailed_table_inspect",
+      "legacyFile": "modules/detailed_table/detailed_table_inspect.pyd",
+      "package": "P06_workpapers",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/workpapers.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "数据源文件路径或文件夹路径"
+          },
+          "sheet_name": {
+            "type": "string",
+            "description": "指定读取的 Sheet 名称（不传则读取第一个 Sheet）"
+          },
+          "preview_rows": {
+            "type": "integer",
+            "description": "预览行数（默认5行）"
+          }
+        },
+        "required": [
+          "file_path"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "检查文件/目录真实结构，返回公司/科目/行数/列与样本；区别普通前 N 行预览。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_detailed_table_inspect_template",
+      "legacyName": "detailed_table_inspect_template",
+      "legacyModule": "modules.detailed_table.detailed_table_inspect_template",
+      "legacyFile": "modules/detailed_table/detailed_table_inspect_template.pyd",
+      "package": "P06_workpapers",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/workpapers.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "template_dir": {
+            "type": "string",
+            "description": "底稿模板文件夹路径"
+          }
+        },
+        "required": [
+          "template_dir"
+        ]
+      },
+      "inputOutputProposal": "XLSX / XLSM 模板目录 → Sheet/批注/部件结构",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "扫描模板实际 Sheet 与批注映射标记；识别隐藏、命名范围、VBA/链接等资源。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_detailed_table_save_config",
+      "legacyName": "detailed_table_save_config",
+      "legacyModule": "modules.detailed_table.detailed_table_save_config",
+      "legacyFile": "modules/detailed_table/detailed_table_save_config.pyd",
+      "package": "P06_workpapers",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/workpapers.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "work_dir": {
+            "type": "string",
+            "description": "工作目录路径（配置文件将保存在其 config/ 子目录下）"
+          },
+          "config_type": {
+            "type": "string",
+            "description": "配置类型。固定类型：paths / field_mapping / subject_mapping / template_assignment。自定义映射类型：使用模板批注名（如 披露、关联方）"
+          },
+          "config_data": {
+            "type": "string",
+            "description": "配置内容（JSON 字符串）"
+          }
+        },
+        "required": [
+          "work_dir",
+          "config_type",
+          "config_data"
+        ]
+      },
+      "inputOutputProposal": "配置 JSON 与表格/模板引用 → 配置或实际校验结果",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "固定配置类型及自定义批注配置；规范 JSON、合并/覆盖语义、原子保存与恢复。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_detailed_table_validate",
+      "legacyName": "detailed_table_validate",
+      "legacyModule": "modules.detailed_table.detailed_table_validate",
+      "legacyFile": "modules/detailed_table/detailed_table_validate.pyd",
+      "package": "P06_workpapers",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/workpapers.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "work_dir": {
+            "type": "string",
+            "description": "工作目录路径（包含 config/ 子目录下的 JSON 配置文件）"
+          },
+          "file_path": {
+            "type": "string",
+            "description": "数据源文件路径（用于交叉验证列名）"
+          }
+        },
+        "required": [
+          "work_dir"
+        ]
+      },
+      "inputOutputProposal": "配置 JSON 与表格/模板引用 → 配置或实际校验结果",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "验证字段/科目/模板配置完整性和引用；给出实际缺项，禁止把保存成功当校验通过。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_detailed_table_generate",
+      "legacyName": "detailed_table_generate",
+      "legacyModule": "modules.detailed_table.detailed_table_generate",
+      "legacyFile": "modules/detailed_table/detailed_table_generate.pyd",
+      "package": "P06_workpapers",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/workpapers.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "work_dir": {
+            "type": "string",
+            "description": "工作目录路径（包含 config/ 子目录下的 JSON 配置文件）"
+          },
+          "file_path": {
+            "type": "string",
+            "description": "数据源文件路径或文件夹路径"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径（优先级高于 paths 配置中的值）"
+          },
+          "confirmed": {
+            "type": "boolean",
+            "description": "确认覆盖已有输出文件（默认 false）"
+          }
+        },
+        "required": [
+          "work_dir",
+          "file_path"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [
+        "64_bit_excel_in_original_contract; new_writer_selection_pending"
+      ],
+      "baselineAndAcceptanceNeeded": "使用保存的各类映射与模板批注批量填底稿；校验公司/科目/期间、金额和工作簿保真。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_xlsx_writer",
+      "legacyName": "xlsx_writer",
+      "legacyModule": "modules.xlsx_writer",
+      "legacyFile": "modules/xlsx_writer.pyd",
+      "package": "P06_workpapers",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/workpapers.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "批量生成小账套.xlsx",
+        "小账套-模板.xlsm"
+      ],
+      "dependencyProposal": [
+        "workbook_fidelity_validation"
+      ],
+      "baselineAndAcceptanceNeeded": "配置驱动生成小账套；核对模板宏、主体/科目/期间、公式、原总额与文件命名。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_link_extractor",
+      "legacyName": "link_extractor",
+      "legacyModule": "modules.link_extractor",
+      "legacyFile": "modules/link_extractor.pyd",
+      "package": "P07_workbook_structure",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/workbook_structure.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "链接提取配置表.xlsx"
+      ],
+      "dependencyProposal": [
+        "workbook_fidelity_validation"
+      ],
+      "baselineAndAcceptanceNeeded": "配置范围内外链/公式/命名范围提取；索引到原工作簿、Sheet 与单元格。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_link_ref_replace",
+      "legacyName": "link_ref_replace",
+      "legacyModule": "modules.link_ref_replace",
+      "legacyFile": "modules/link_ref_replace.pyd",
+      "package": "P07_workbook_structure",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/workbook_structure.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "target_path": {
+            "type": "string",
+            "description": "文件或文件夹"
+          },
+          "sheet_keywords": {
+            "type": "string",
+            "description": "工作表关键词"
+          },
+          "ref_axis": {
+            "type": "string",
+            "description": "参考列/行"
+          },
+          "target_axis": {
+            "type": "string",
+            "description": "处理列/行"
+          },
+          "example_cell": {
+            "type": "string",
+            "description": "处理示例单元格"
+          }
+        },
+        "required": [
+          "target_path",
+          "sheet_keywords",
+          "ref_axis",
+          "target_axis",
+          "example_cell"
+        ]
+      },
+      "inputOutputProposal": "Excel 文件/目录与参数 → 预览/JSON 或处理后表格（逐项核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [
+        "workbook_fidelity_validation"
+      ],
+      "baselineAndAcceptanceNeeded": "参考轴/目标轴/example_cell 的替换规则；核对绝对/相对引用、范围与多 Sheet。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_link_replace_range",
+      "legacyName": "link_replace_range",
+      "legacyModule": "modules.link_replace_range",
+      "legacyFile": "modules/link_replace_range.pyd",
+      "package": "P07_workbook_structure",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/workbook_structure.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "链接替换-单元格区域替换.xlsx"
+      ],
+      "dependencyProposal": [
+        "workbook_fidelity_validation"
+      ],
+      "baselineAndAcceptanceNeeded": "按配置替换单元格区域引用；保护不在目标范围的公式和链接。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_link_replace_text",
+      "legacyName": "link_replace_text",
+      "legacyModule": "modules.link_replace_text",
+      "legacyFile": "modules/link_replace_text.pyd",
+      "package": "P07_workbook_structure",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/workbook_structure.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "链接替换-文件夹路径替换.xlsx"
+      ],
+      "dependencyProposal": [
+        "workbook_fidelity_validation"
+      ],
+      "baselineAndAcceptanceNeeded": "路径片段替换与大小写/转义规则；测试中文/空格路径、公式和外链部件。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_link_replace_workbook",
+      "legacyName": "link_replace_workbook",
+      "legacyModule": "modules.link_replace_workbook",
+      "legacyFile": "modules/link_replace_workbook.pyd",
+      "package": "P07_workbook_structure",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/workbook_structure.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "链接替换-文件名替换.xlsx"
+      ],
+      "dependencyProposal": [
+        "workbook_fidelity_validation"
+      ],
+      "baselineAndAcceptanceNeeded": "工作簿名替换和实际目标关系；核对名称冲突、路径、公式及外链关系。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_extract_disclosure_scope",
+      "legacyName": "extract_disclosure_scope",
+      "legacyModule": "modules.extract_disclosure_scope",
+      "legacyFile": "modules/extract_disclosure_scope.pyd",
+      "package": "P07_workbook_structure",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/workbook_structure.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "披露口径提取配置表.xlsx"
+      ],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "配置定位及披露口径提取；核对数据范围、科目/公司/期间与输出字段。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_extract_disclosure_tables",
+      "legacyName": "extract_disclosure_tables",
+      "legacyModule": "modules.extract_disclosure_tables",
+      "legacyFile": "modules/extract_disclosure_tables.pyd",
+      "package": "P07_workbook_structure",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/workbook_structure.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "披露表提取配置表.xlsx"
+      ],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "定位并提取披露表及其标题/层级/口径；核对公式、合并格与空值。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_insert_footnote_comments",
+      "legacyName": "insert_footnote_comments",
+      "legacyModule": "modules.insert_footnote_comments",
+      "legacyFile": "modules/insert_footnote_comments.pyd",
+      "package": "P07_workbook_structure",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/workbook_structure.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "插附注批注配置表.xlsx"
+      ],
+      "dependencyProposal": [
+        "workbook_fidelity_validation"
+      ],
+      "baselineAndAcceptanceNeeded": "配置定位附注和批注范围；核对批注内容、位置与原有批注合并/覆盖。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_ipo_bj",
+      "legacyName": "ipo_bj",
+      "legacyModule": "modules.ipo_bj",
+      "legacyFile": "modules/ipo_bj.pyd",
+      "package": "P08_remote",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/connectors/ipo_bse.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "description": "开始日期: 格式 YYYY-MM-DD"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "结束日期: 格式 YYYY-MM-DD"
+          },
+          "update_mode": {
+            "type": "string",
+            "description": "更新模式: 严格填写'项目'或'文件'"
+          }
+        },
+        "required": [
+          "start_date",
+          "end_date",
+          "update_mode"
+        ]
+      },
+      "inputOutputProposal": "查询条件 → 披露原文件（PDF 等）、索引、失败清单",
+      "templatesObserved": [],
+      "dependencyProposal": [
+        "network"
+      ],
+      "baselineAndAcceptanceNeeded": "北交所直接适配器；项目/文件更新、日期范围、分页/附件/增量、hash 与失败清单。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_ipo_sh",
+      "legacyName": "ipo_sh",
+      "legacyModule": "modules.ipo_sh",
+      "legacyFile": "modules/ipo_sh.pyd",
+      "package": "P08_remote",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/connectors/ipo_sse.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "description": "开始日期: 格式 YYYY-MM-DD"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "结束日期: 格式 YYYY-MM-DD"
+          },
+          "update_mode": {
+            "type": "string",
+            "description": "更新模式: 严格填写'项目'或'文件'"
+          }
+        },
+        "required": [
+          "start_date",
+          "end_date",
+          "update_mode"
+        ]
+      },
+      "inputOutputProposal": "查询条件 → 披露原文件（PDF 等）、索引、失败清单",
+      "templatesObserved": [],
+      "dependencyProposal": [
+        "network"
+      ],
+      "baselineAndAcceptanceNeeded": "上交所直接适配器；科创/主板范围、项目/文件更新、分页/附件/增量与版本。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_ipo_sz",
+      "legacyName": "ipo_sz",
+      "legacyModule": "modules.ipo_sz",
+      "legacyFile": "modules/ipo_sz.pyd",
+      "package": "P08_remote",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/connectors/ipo_szse.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "description": "开始日期: 格式 YYYY-MM-DD"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "结束日期: 格式 YYYY-MM-DD"
+          },
+          "update_mode": {
+            "type": "string",
+            "description": "更新模式: 必须严格填写'项目'或'文件'，不要填其他词"
+          }
+        },
+        "required": [
+          "start_date",
+          "end_date",
+          "update_mode"
+        ]
+      },
+      "inputOutputProposal": "查询条件 → 披露原文件（PDF 等）、索引、失败清单",
+      "templatesObserved": [],
+      "dependencyProposal": [
+        "network"
+      ],
+      "baselineAndAcceptanceNeeded": "深交所直接适配器；板块/日期/更新模式、项目详情与附件下载、增量及失败恢复。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_announcement",
+      "legacyName": "announcement",
+      "legacyModule": "modules.announcement",
+      "legacyFile": "modules/announcement.pyd",
+      "package": "P08_remote",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/connectors/announcements.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "stock_codes": {
+            "type": "array",
+            "description": "股票代码列表: 如 ['000002', '600519']",
+            "items": {
+              "type": "string"
+            }
+          },
+          "start_date": {
+            "type": "string",
+            "description": "开始日期: YYYY-MM-DD"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "结束日期: YYYY-MM-DD"
+          },
+          "market_type": {
+            "type": "string",
+            "description": "市场板块: 默认为'京沪深'"
+          },
+          "category_name": {
+            "type": "string",
+            "description": "公告类型: 可选值: '年报', '半年报', '一季报', '三季报', '业绩预告', '中介报告', '首发', '增发' 等，为空则下载全部类型"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "标题关键词: 筛选标题内容"
+          }
+        },
+        "required": [
+          "stock_codes",
+          "start_date",
+          "end_date",
+          "market_type",
+          "category_name",
+          "keyword"
+        ]
+      },
+      "inputOutputProposal": "查询条件 → 披露原文件（PDF 等）、索引、失败清单",
+      "templatesObserved": [],
+      "dependencyProposal": [
+        "network"
+      ],
+      "baselineAndAcceptanceNeeded": "直接来源查询、分页、代码/日期/市场/类别/关键词筛选，下载附件及索引；核对失效链接。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_cicpa_query",
+      "legacyName": "cicpa_query",
+      "legacyModule": "modules.cicpa_query",
+      "legacyFile": "modules/cicpa_query.pyd",
+      "package": "P08_remote",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/connectors/cicpa.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "query_mode": {
+            "type": "string",
+            "description": "查询模式: search=轻量搜索, detail=企业详情, export=全维度导出, subsidiary=子公司发现, check_cookies=检查Cookie"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "企业名称: 企业精确工商注册全称，多个用逗号分隔"
+          },
+          "org_id": {
+            "type": "string",
+            "description": "企业org_id: 中注协系统内部ID（detail模式可选，代替company_name）"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "输出路径: 结果保存路径"
+          },
+          "subsidiary_threshold": {
+            "type": "integer",
+            "description": "子公司持股阈值: 持股比例阈值，默认50"
+          },
+          "cookie_json": {
+            "type": "string",
+            "description": "Cookie JSON: 手动粘贴的cookie（JSON字符串，AI模式使用）"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "查询/授权 → JSON、Excel / ZIP（依模式核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [
+        "network",
+        "service_authorization_if_online"
+      ],
+      "baselineAndAcceptanceNeeded": "search/detail/export/subsidiary/check_cookies 分别实现；会话失效、分页、导出目录和实际来源验证。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_currency",
+      "legacyName": "currency",
+      "legacyModule": "modules.currency",
+      "legacyFile": "modules/currency.pyd",
+      "package": "P08_remote",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/connectors/exchange_rates.py",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "inputOutputProposal": "当前无参数 → 汇率数据（来源/格式待核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [
+        "network"
+      ],
+      "baselineAndAcceptanceNeeded": "核对数据来源、汇率日期、币种与输出范围；当前空参数 schema 不能说明具体业务行为。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_qcc_processor",
+      "legacyName": "qcc_processor",
+      "legacyModule": "modules.qcc_processor",
+      "legacyFile": "modules/qcc_processor.pyd",
+      "package": "P09_relationships",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/relationships.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "folder_path": {
+            "type": "string",
+            "description": "文件夹路径: 存放企查查信用报告（DOCX格式）的文件夹路径"
+          }
+        },
+        "required": [
+          "folder_path"
+        ]
+      },
+      "inputOutputProposal": "DOCX 目录 → 结构化目录/统计成果（待核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "解析 DOCX 报告目录和结构统计；空目录、不同报告版本、表格/标题层级对照。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_related_party",
+      "legacyName": "related_party",
+      "legacyModule": "modules.related_party",
+      "legacyFile": "modules/related_party.pyd",
+      "package": "P09_relationships",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/relationships.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "audit_target": {
+            "type": "string",
+            "description": "被审计单位: 被审计单位名称（精确工商注册全称）"
+          },
+          "data_dir": {
+            "type": "string",
+            "description": "数据目录: 工商信息Excel所在目录（解压后的文件夹路径）"
+          },
+          "threshold": {
+            "type": "integer",
+            "description": "持股阈值(%): 持股比例>=该值识别为分子公司/继续穿透，默认50，设0禁用自动识别"
+          },
+          "equity_penetration": {
+            "type": "string",
+            "enum": [
+              "否",
+              "是"
+            ],
+            "description": "启用股权穿透: 是否启用CICPA股权穿透API，需要注协Cookie"
+          },
+          "equity_depth": {
+            "type": "integer",
+            "description": "穿透深度: 最大穿透层数，默认5"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "输出路径: 报告输出路径（MCP模式使用，默认自动生成到output目录）"
+          },
+          "cookie_json": {
+            "type": "string",
+            "description": "Cookie JSON: 注协系统Cookie（AI模式使用）"
+          }
+        },
+        "required": [
+          "audit_target",
+          "data_dir"
+        ]
+      },
+      "inputOutputProposal": "XLSX 配置及工商导出目录 → 关系明细/报告",
+      "templatesObserved": [
+        "关联方核查配置表.xlsx"
+      ],
+      "dependencyProposal": [
+        "service_authorization_if_online"
+      ],
+      "baselineAndAcceptanceNeeded": "离线工商关系与线上股权穿透拆分；阈值/层数/环路/人员/地址/离任高管及证据。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_address_split",
+      "legacyName": "address_split",
+      "legacyModule": "modules.address_split",
+      "legacyFile": "modules/address_split.pyd",
+      "package": "P10_documents_ai",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/documents_ai.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "address_column": {
+            "type": "string",
+            "description": "Excel列名: Excel模式专用：指定地址所在的列名（默认为第一列）"
+          },
+          "address_list": {
+            "type": "string",
+            "description": "直接查询地址: 直接模式专用：一个地址字符串，或多个地址组成的列表"
+          }
+        },
+        "required": [
+          "address_column",
+          "address_list"
+        ]
+      },
+      "inputOutputProposal": "文本列表 → 结构化 JSON / 表格",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "结构化地址解析；测试简称、缺层级、重复地址与无法解析；核对原词典和结果字段。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_id_card",
+      "legacyName": "id_card",
+      "legacyModule": "modules.id_card",
+      "legacyFile": "modules/id_card.pyd",
+      "package": "P10_documents_ai",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/documents_ai.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id_column": {
+            "type": "string",
+            "description": "Excel列名: Excel模式专用：指定身份证号所在的列名（默认为'身份证号'）"
+          },
+          "id_list": {
+            "type": "string",
+            "description": "直接查询号码: 直接模式专用：一个身份证号字符串，或多个号码组成的列表/字符串"
+          }
+        },
+        "required": [
+          "id_column",
+          "id_list"
+        ]
+      },
+      "inputOutputProposal": "文本列表 → 结构化 JSON / 表格",
+      "templatesObserved": [],
+      "dependencyProposal": [],
+      "baselineAndAcceptanceNeeded": "号码校验/解析和非法号码；核对原库/地区字典及结构化输出，保护前导零和未知项。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_ai_formula_filler",
+      "legacyName": "ai_formula_filler",
+      "legacyModule": "modules.ai_formula_filler",
+      "legacyFile": "modules/ai_formula_filler.pyd",
+      "package": "P10_documents_ai",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/documents_ai.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "AI API Base URL"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "AI API Key"
+          },
+          "model_name": {
+            "type": "string",
+            "description": "模型名称"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "公式填充配置表.xlsx"
+      ],
+      "dependencyProposal": [
+        "model"
+      ],
+      "baselineAndAcceptanceNeeded": "读取配置表、由模型提出公式、校验目标/引用后填副本；核对公式文本与实际计算。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_file_classification",
+      "legacyName": "file_classification",
+      "legacyModule": "modules.file_classification",
+      "legacyFile": "modules/file_classification.pyd",
+      "package": "P10_documents_ai",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/documents_ai.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "AI API Base URL"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "AI API Key"
+          },
+          "visual_model_name": {
+            "type": "string",
+            "description": "视觉模型名称"
+          },
+          "model_name": {
+            "type": "string",
+            "description": "语言模型名称"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "文件分类配置表.xlsx"
+      ],
+      "dependencyProposal": [
+        "model"
+      ],
+      "baselineAndAcceptanceNeeded": "解析多维分类配置；读取不同文档/图片、模型分类、输出路由与无法确认项。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_info_extract",
+      "legacyName": "info_extract",
+      "legacyModule": "modules.info_extract",
+      "legacyFile": "modules/info_extract.pyd",
+      "package": "P10_documents_ai",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/documents_ai.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "role_prompt": {
+            "type": "string",
+            "description": "用户提示词: 提取信息的具体指令"
+          },
+          "folder": {
+            "type": "string",
+            "description": "处理文件夹: 需要扫描的文件或文件夹路径"
+          },
+          "max_workers": {
+            "type": "integer",
+            "description": "并发线程数: 同时处理的任务数量，默认1（单线程），建议3-5"
+          }
+        },
+        "required": [
+          "role_prompt",
+          "folder",
+          "max_workers"
+        ]
+      },
+      "inputOutputProposal": "文档/图片 → 结构化提取/核对成果（后缀待核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [
+        "model"
+      ],
+      "baselineAndAcceptanceNeeded": "按角色任务读取目录文件、并行提取；来源页/表/单元格、结构化结果及失败文件清单。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_info_extract_multi",
+      "legacyName": "info_extract_multi",
+      "legacyModule": "modules.info_extract_multi",
+      "legacyFile": "modules/info_extract_multi.pyd",
+      "package": "P10_documents_ai",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/documents_ai.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "description": "配置表文件路径（绝对路径或相对路径）"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "输出目录路径。不传则使用默认目录。"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "AI API Base URL"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "AI API Key"
+          },
+          "visual_model_name": {
+            "type": "string",
+            "description": "视觉模型名称"
+          },
+          "model_name": {
+            "type": "string",
+            "description": "语言模型名称"
+          }
+        },
+        "required": []
+      },
+      "inputOutputProposal": "XLSX 配置、相应数据/模板 → 业务成果（逐项核对）",
+      "templatesObserved": [
+        "多类型文件信息提取配置表.xlsx"
+      ],
+      "dependencyProposal": [
+        "model"
+      ],
+      "baselineAndAcceptanceNeeded": "配置中的公司/文件类型/字段分别解析提取；核对多维结果、缺资料与模型失败。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_paper_verify",
+      "legacyName": "paper_verify",
+      "legacyModule": "modules.paper_verify",
+      "legacyFile": "modules/paper_verify.pyd",
+      "package": "P10_documents_ai",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/documents_ai.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "文件或文件夹路径: 需要核对的PDF/图片文件或文件夹路径"
+          },
+          "match_keys": {
+            "type": "string",
+            "description": "匹配键: 用于关联提取数据与账面数据的字段名，支持中英文逗号分隔多个"
+          },
+          "max_workers": {
+            "type": "integer",
+            "description": "并发线程数: 同时处理的任务数量，默认1（单线程），建议3-5"
+          },
+          "extra_prompt": {
+            "type": "string",
+            "description": "补充指令: 追加到AI提示词末尾的补充指令，可选"
+          }
+        },
+        "required": [
+          "file_path",
+          "match_keys",
+          "max_workers",
+          "extra_prompt"
+        ]
+      },
+      "inputOutputProposal": "文档/图片 → 结构化提取/核对成果（后缀待核对）",
+      "templatesObserved": [],
+      "dependencyProposal": [
+        "model"
+      ],
+      "baselineAndAcceptanceNeeded": "纸质资料字段识别与 match_keys 对齐；差异、识别不确定、无法核对项及页/图像定位。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    },
+    {
+      "id": "mcp_photo_rename",
+      "legacyName": "photo_rename",
+      "legacyModule": "modules.photo_rename",
+      "legacyFile": "modules/photo_rename.pyd",
+      "package": "P10_documents_ai",
+      "currentExecution": "legacy_executable_mcp",
+      "migrationStatus": "observed_not_independently_migrated",
+      "proposedImplementation": "src/audit-domain/documents_ai.py",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "directory": {
+            "type": "string",
+            "description": "包含图片的文件夹路径（绝对路径或相对路径）"
+          },
+          "user_prompt": {
+            "type": "string",
+            "description": "AI 提示词，描述如何从图片中提取文件名信息"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "AI API Base URL"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "AI API Key"
+          },
+          "visual_model_name": {
+            "type": "string",
+            "description": "视觉模型名称"
+          }
+        },
+        "required": [
+          "directory",
+          "user_prompt"
+        ]
+      },
+      "inputOutputProposal": "图像目录 → 重命名计划、实际文件、失败/恢复清单",
+      "templatesObserved": [],
+      "dependencyProposal": [
+        "model"
+      ],
+      "baselineAndAcceptanceNeeded": "图像识别→重命名计划→实际执行；重名、非法文件名、识别失败与恢复清单。",
+      "nameCollisionWithBuiltin": false,
+      "independentVerified": false,
+      "behaviorVerifiedInThisAnalysis": false
+    }
+  ],
+  "skillImplementationProposals": {
+    "monthly-analysis-mcp": [
+      "monthly_preview / detect_structure / execute / ai_analysis",
+      "更新真实参数契约、科目/方向确认与各阶段成果；不能只接当前按月汇总。"
+    ],
+    "jet-test": [
+      "jet_test_inspect / execute",
+      "自定义特征/规则与实际字段映射、规则确认及异常成果。"
+    ],
+    "detailed-table-generation": [
+      "五个 detailed_table_* 入口",
+      "数据/模板检查→配置→校验→生成全链条，改为应用内资源。"
+    ],
+    "cicpa-query": [
+      "cicpa_query 各 query_mode",
+      "会话/授权、实际连接器和输出格式；旧浏览器工具名与 Cookie 描述须重核。"
+    ],
+    "related-party-identification": [
+      "related_party + cicpa_query 数据供应",
+      "离线关系规则、可选在线穿透、阈值与证据成果。"
+    ],
+    "find-skills": [
+      "技能维护服务（不是 63 项审计业务接口）",
+      "真实发现/安装工具、来源/版本及安装验收；当前仅有说明文件。"
+    ],
+    "skill-creator": [
+      "技能维护服务",
+      "真实 create_skill 注册与工作区写入/校验；当前仅有说明文件。"
+    ],
+    "skill-vetter": [
+      "技能维护服务",
+      "真实 Skill 内容读取/检查及安装前审查结果；当前仅有说明文件。"
+    ]
+  }
+}

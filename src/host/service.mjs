@@ -10,25 +10,35 @@ import {createModelTools,toolLabels} from './model-tools.mjs';
 import {listModels,testConnection,normalizeBase,normalizeKey} from '../harness-adapter/connection.mjs';
 import {Attachments,publicAttachment} from '../conversations/attachments.mjs';
 import {LegacyMcpClient,mcpToOpenAiTool,constrainMcpArgs} from '../mcp/legacy-client.mjs';
+import {buildCatalog,normalizeParameters,INPUT_PATH_KEYS} from '../workflows/contracts.mjs';
+import {workflowService} from '../workflows/state.mjs';
+import {createMcpRunner} from '../workflows/mcp-runner.mjs';
+import {skillContext} from '../skills/loader.mjs';
+import {createHash} from 'node:crypto';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const readJSON=p=>JSON.parse(fs.readFileSync(path.join(ROOT,p),'utf8'));
 const tools=readJSON('src/resources/tools.json');
 const legacyToolMetadata=readJSON('src/resources/legacy-mcp-tools.json');
+const catalog=buildCatalog(tools,legacyToolMetadata);
 const inventory=readJSON('src/resources/legacy-inventory.json');
 const jet=readJSON('src/resources/jet-rules.json');
 const defaults={id:'settings',baseUrl:'https://api.deepseek.com',model:'deepseek-chat',visionModel:'',models:[],temperature:0.2,maxTokens:4096,memoryMiB:2048,threads:2,defaultMode:'auto'};
 export async function createBackend(options={}){
  const dataRoot=options.dataRoot||process.env.AUDIT_DATA_DIR||path.join(process.env.LOCALAPPDATA||os.homedir(),'AuditAssistant');
  const store=new Store(dataRoot),scheduler=new Scheduler(store);let apiKey='';const streams=new Map();let previews=0;
+ const workflows=workflowService(store,ROOT),mcpRunner=createMcpRunner(store,{clientFactory:options.legacyClientFactory});
  const attachments=new Attachments(store);let closed=false;let legacyMeta=null;
  const legacyCatalog=async()=>{if(legacyMeta)return legacyMeta;legacyMeta=legacyToolMetadata;return legacyMeta;};
- const legacyUiTools=async()=> (await legacyCatalog()).map(x=>({id:'mcp_'+x.name,name:x.name,group:'原版 MCP',description:x.description||'原版审计工具箱 MCP 工具',fields:Object.entries(x.inputSchema?.properties||{}).map(([key,v])=>({key,label:v.description||key,required:(x.inputSchema.required||[]).includes(key),default:v.default===undefined?'':String(v.default)})),status:'legacy-mcp',legacy:x.name,mcpName:x.name}));
+ const legacyUiTools=async()=>catalog.filter(t=>t.engine==='mcp');
  for(const c of store.all('toolCalls'))if(c.status==='running')store.put('toolCalls',{...c,status:'cancelled',result:{ok:false,error:'上次应用关闭中断了调用；已产生的结果可在任务卡核对'}});
  const settings=()=>({...defaults,...store.get('settings','settings'),hasKey:!!apiKey});
  const must=(kind,id)=>{const x=store.get(kind,id);if(!x)throw new Error('找不到指定的'+kind);return x;};
  async function action(method,p={}){
+  if(method.startsWith('workflow.'))return workflows.action(method,p);
   switch(method){
-   case 'bootstrap':{const legacy=await legacyUiTools();return {version:'0.1.0 内部测试版',projects:store.all('projects').filter(p=>!p.internal),sessions:store.all('sessions'),tools,legacyTools:legacy,settings:settings(),jetRules:jet.rules,counts:{modules:inventory.records.filter(r=>r.category==='modules').length,templates:inventory.records.filter(r=>r.category==='_template').length,skills:inventory.records.filter(r=>r.category==='skills').length,mcp:0,legacyMcp:legacy.length},coverage:{implemented:tools.length,legacyValidated:0},activeTurns:[...streams.keys()]};}
+   case 'templates.copy':{const project=must('projects',p.projectId),tool=catalog.find(t=>t.id===p.tool);if(!tool?.contract.templates?.length)throw Error('此操作没有关联的配置模板');const client=new LegacyMcpClient(),source=path.join(path.dirname(client.executable),'_template'),directory=path.join(project.root,'input');if(fs.existsSync(directory))inside(project.root,directory);else fs.mkdirSync(directory);const files=tool.contract.templates.map(name=>{const src=inside(source,name),target=path.join(directory,name),existed=fs.existsSync(target);if(existed)inside(project.root,target);else fs.copyFileSync(src,target,fs.constants.COPYFILE_EXCL);return {name,path:path.relative(project.root,target),existed,templateHash:createHash('sha256').update(fs.readFileSync(src)).digest('hex')};});return {files};}
+   case 'bootstrap':{const legacy=await legacyUiTools();return {version:readJSON('package.json').version,preview:process.env.AUDIT_WORKBENCH_PREVIEW==='1',build:fs.existsSync(path.join(ROOT,'build/client/index.html'))?fs.statSync(path.join(ROOT,'build/client/index.html')).mtime.toISOString():null,projects:store.all('projects').filter(p=>!p.internal),sessions:store.all('sessions'),tools:catalog.filter(t=>t.engine==='builtin'),legacyTools:legacy,settings:settings(),jetRules:jet.rules,counts:{modules:inventory.records.filter(r=>r.category==='modules').length,templates:inventory.records.filter(r=>r.category==='_template').length,skills:workflows.skills.length,mcp:0,legacyMcp:legacy.length},coverage:{implemented:tools.length,legacyValidated:0},activeTurns:[...streams.keys()]};}
+   case 'runtime.status':{const client=new LegacyMcpClient();const excel=[process.env.ProgramFiles,process.env['ProgramFiles(x86)']].filter(Boolean).flatMap(base=>['Microsoft Office/root/Office16/EXCEL.EXE','Microsoft Office/Office16/EXCEL.EXE'].map(x=>path.join(base,x))).find(x=>fs.existsSync(x));let excel64=false;if(excel){const f=fs.openSync(excel,'r');try{const head=Buffer.alloc(64);fs.readSync(f,head,0,64,0);const machine=Buffer.alloc(6);fs.readSync(f,machine,0,6,head.readUInt32LE(60));excel64=machine.readUInt16LE(4)===0x8664;}finally{fs.closeSync(f);}}return {mcpAvailable:client.available(),mcpPath:client.executable,excel:excel||null,excel64,skills:workflows.skills.map(({id,name,description})=>({id,name,description}))};}
    case 'project.create':{const root=fs.realpathSync(p.root);if(!fs.statSync(root).isDirectory())throw new Error('请选择项目文件夹');if(typeof p.name!=='string'||!p.name.trim())throw new Error('请填写项目名称');return store.create('projects',{name:p.name.trim().slice(0,120),root});}
    case 'session.create':{if(p.projectId)must('projects',p.projectId);if(p.parentSessionId)must('sessions',p.parentSessionId);return store.create('sessions',{projectId:p.projectId||null,title:p.title?.slice(0,100)||'新对话',parentSessionId:p.parentSessionId||null,branchedFromEventId:p.branchedFromEventId||null});}
    case 'session.get':{must('sessions',p.id);return {events:store.events(p.id).filter(e=>!['attachment-context','tool-evidence'].includes(e.type)),calls:store.all('toolCalls').filter(c=>c.sessionId===p.id),attachments:attachments.list(p.id),tasks:store.all('tasks').filter(t=>t.sessionId===p.id),turn:streams.get(p.id)?.text||'',phase:streams.get(p.id)?.phase,streaming:streams.has(p.id)};}
@@ -42,8 +52,11 @@ export async function createBackend(options={}){
    case 'session.rename':{const s=must('sessions',p.id);s.title=String(p.title||'新对话').slice(0,100);return store.put('sessions',s);}
     case 'session.delete':{const id=p.id;must('sessions',id);fs.rmSync(path.join(dataRoot,'sessions',id+'.jsonl'),{force:true});const toolCalls=store.all('toolCalls').filter(c=>c.sessionId===id);for(const tc of toolCalls)store.delete('toolCalls',tc.id);const tasks=store.all('tasks').filter(t=>t.sessionId===id);for(const t of tasks)store.delete('tasks',t.id);const atts=store.all('attachments').filter(a=>a.sessionId===id);for(const a of atts)store.delete('attachments',a.id);store.delete('sessions',id);return {deleted:id};}
    case 'files.list':return listFiles(must('projects',p.projectId).root,p.path||'');
+   case 'project.activity':{must('projects',p.projectId);return {sessions:store.all('sessions').filter(s=>s.projectId===p.projectId),tasks:store.all('tasks').filter(t=>t.projectId===p.projectId)};}
    case 'files.preview':{
-    if(previews>=2)throw new Error('预览正在处理，请稍后重试');const project=must('projects',p.projectId);inside(project.root,p.file);previews++;
+    if(previews>=2)throw new Error('预览正在处理，请稍后重试');const project=must('projects',p.projectId);const inputFile=inside(project.root,p.file);if(fs.statSync(inputFile).isDirectory())return {columns:['名称','类型','大小'],preview:listFiles(project.root,p.file).slice(0,50).map(f=>[f.name,f.directory?'文件夹':'文件',f.size||0]),previewOnly:true};
+    if(['.json','.txt','.md'].includes(path.extname(inputFile).toLowerCase())){const fd=fs.openSync(inputFile,'r');try{const buffer=Buffer.alloc(Math.min(fs.statSync(inputFile).size,100000));fs.readSync(fd,buffer);return {text:buffer.toString('utf8'),previewOnly:true,truncated:fs.statSync(inputFile).size>100000};}finally{fs.closeSync(fd);}}
+    previews++;
     try{return await new Promise((resolve,reject)=>{let result,err;const child=worker({protocolVersion:1,taskId:'preview',root:project.root,tool:'__preview',files:[p.file],mode:'auto',parameters:p.parameters||{},limits:{memoryMiB:512,threads:1}},ev=>{if(ev.type==='result')result=ev.result;if(ev.type==='error')err=ev.message;});const timer=setTimeout(()=>{child.kill();reject(Error('预览超时'));},20000);child.once('close',()=>{clearTimeout(timer);result?resolve(result):reject(Error(err||'预览失败'));});});}finally{previews--;}
    }
    case 'demo.create':{
@@ -66,20 +79,34 @@ export async function createBackend(options={}){
    case 'secret.set':apiKey=normalizeKey(p.key||'');return {hasKey:!!apiKey};
    case 'task.run':{
     const session=must('sessions',p.sessionId);if(!session.projectId)throw new Error('请先关联项目再操作文件');const project=must('projects',session.projectId);
-    const tool=tools.find(t=>t.id===p.tool), legacyCandidate=legacyToolMetadata.find(t=>('mcp_'+t.name)===p.tool||t.name===p.tool), requestedFiles=Array.isArray(p.files)?p.files:[];if(!tool&&!legacyCandidate)throw new Error('工具未实现，不能执行');if(requestedFiles.length>1000||new Set(requestedFiles).size!==requestedFiles.length||(!legacyCandidate&&!requestedFiles.length))throw new Error('请选择文件，且不能重复');
-    if(!['auto','local-light','local-batch'].includes(p.mode))throw new Error('处理模式无效');
-    const params=p.parameters||{};for(const field of (tool?.fields||[]))if(field.required&&!String(params[field.key]??'').trim())throw new Error('请填写：'+field.label);
-    const legacy=await legacyCatalog(), legacyTool=legacy.find(x=>x.name===p.tool||'mcp_'+x.name===p.tool);
-    if(legacyTool){
-      const allowedFiles=new Set(requestedFiles.map(file=>path.resolve(project.root,file)));
-      const task=store.create('tasks',{sessionId:session.id,projectId:project.id,tool:legacyTool.name,files:requestedFiles,mode:p.mode,parameters:params,status:'running',phase:'原版 MCP 执行中',root:project.root});store.append(session.id,{type:'task',taskId:task.id});
-      try{const client=new LegacyMcpClient({workDir:project.root});const result=await client.call(legacyTool.name,constrainMcpArgs(params,project.root,'',allowedFiles));task.status='succeeded';task.phase='结果已发布';task.result={inputRows:0,rowCount:0,columns:[],preview:[],outputs:[],warningCount:0,warnings:[],mcp:true,content:result?.content||[],isError:!!result?.isError};await client.close();}catch(e){task.status='failed';task.error=e.message;}task.finishedAt=new Date().toISOString();store.put('tasks',task);return task;
+    const tool=catalog.find(t=>t.id===p.tool);if(!tool)throw Error('工具未实现，不能执行');
+    const requestedFiles=Array.isArray(p.files)?p.files:[],mode=p.mode||settings().defaultMode;
+    if(requestedFiles.length>1000||new Set(requestedFiles).size!==requestedFiles.length)throw Error('资料不能重复，且最多 1000 项');
+    if(!['auto','local-light','local-batch'].includes(mode))throw Error('处理模式无效');
+    const params=normalizeParameters(tool,p.parameters||{});const permitted=requestedFiles.map(f=>inside(project.root,f));
+    if(session.workflow){workflows.runAllowed(session.id,p.stageId,p.tool);if(store.all('tasks').some(t=>t.sessionId===session.id&&['queued','running','cancelling'].includes(t.status)))throw Error('当前任务仍在执行');}
+    const checkFormat=(file,extensions=tool.contract.extensions)=>{if(extensions?.length&&!extensions.includes(path.extname(file).toLowerCase()))throw Error(path.basename(file)+' 格式不支持；'+tool.contract.format);};
+    let task;
+    if(tool.engine==='mcp'){
+      if(tool.contract.mutates&&p.acknowledgeMutation!==true)throw Error('请确认此操作可能写入或修改所选资料，并使用已备份的工作副本');
+      for(const field of tool.fields.filter(f=>INPUT_PATH_KEYS.has(f.key))){const vals=Array.isArray(params[field.key])?params[field.key]:[params[field.key]];for(const v of vals.filter(Boolean)){const file=inside(project.root,v);if(fs.statSync(file).isFile())checkFormat(file,field.key==='config_file'?['.xlsx','.xlsm']:tool.contract.extensions);else if(field.kind==='file'&&field.key!=='source_paths')throw Error(field.label+'需要选择文件');}}
+      const args=constrainMcpArgs(params,project.root,'',new Set(permitted));
+      if(tool.id==='mcp_related_party')inside(project.root,'input/关联方核查配置表.xlsx');
+      for(const field of tool.fields.filter(f=>f.kind==='json'&&args[f.key]))args[field.key]=JSON.stringify(constrainMcpArgs(JSON.parse(args[field.key]),project.root,'',new Set(permitted)));
+      for(const [key,value]of Object.entries({api_key:apiKey,base_url:settings().baseUrl,model_name:settings().model,visual_model_name:settings().visionModel}))if(tool.fields.some(f=>f.key===key)&&!args[key]&&value)args[key]=value;
+      const safeParams=Object.fromEntries(Object.entries(params).filter(([k])=>!tool.fields.some(f=>f.key===k&&f.kind==='secret')));
+      task=store.create('tasks',{sessionId:session.id,projectId:project.id,stageId:p.stageId,tool:tool.id,mcpName:tool.mcpName,engine:'mcp',files:requestedFiles,mode,parameters:safeParams,acknowledgeMutation:p.acknowledgeMutation===true,status:'running',root:project.root});store.append(session.id,{type:'task',taskId:task.id});
+      if(session.workflow)workflows.attachTask(session.id,p.stageId,task.id);mcpRunner.launch(task,args);
+    }else{
+      const files=[];const expand=(file,depth=0)=>{if(depth>12||files.length>=1000)throw Error('目录过深或超过 1000 个文件，请缩小资料范围');if(fs.statSync(file).isDirectory()){for(const e of fs.readdirSync(file,{withFileTypes:true})){if(e.name.startsWith('.')||e.isSymbolicLink()||['output','outputs'].includes(e.name))continue;const f=inside(project.root,path.join(file,e.name));if(e.isDirectory()||!tool.contract.extensions||tool.contract.extensions.includes(path.extname(f).toLowerCase()))expand(f,depth+1);}}else{checkFormat(file);files.push(path.relative(project.root,file));}};permitted.forEach(f=>expand(f));
+      if(!files.length)throw Error('请选择本功能支持的资料：'+tool.contract.format);
+      task=scheduler.queue(session,project,tool.id,[...new Set(files)],mode,params,settings());task.stageId=p.stageId;store.put('tasks',task);if(session.workflow)workflows.attachTask(session.id,p.stageId,task.id);
     }
-    return scheduler.queue(session,project,p.tool,requestedFiles,p.mode,params,settings());
+    return task;
    }
-   case 'task.cancel':return scheduler.cancel(p.id);
-   case 'task.retry':return scheduler.retry(p.id);
-   case 'result.path':{const t=must('tasks',p.id);if(t.status!=='succeeded')throw new Error('任务尚未完成');const root=must('projects',t.projectId).root;return inside(root,path.join(t.result.outputDir,p.name||''));}
+   case 'task.cancel':return must('tasks',p.id).engine==='mcp'?mcpRunner.cancel(p.id):scheduler.cancel(p.id);
+   case 'task.retry':{const t=must('tasks',p.id);if(!['failed','interrupted','cancelled'].includes(t.status))throw Error('此任务不能重试');return action('task.run',{sessionId:t.sessionId,stageId:t.stageId,tool:t.tool,files:t.files,mode:t.mode,parameters:t.parameters,acknowledgeMutation:t.acknowledgeMutation});}
+   case 'result.path':{const t=must('tasks',p.id);if(!t.result)throw Error('任务尚无结果');const root=must('projects',t.projectId).root;const output=t.result.outputs?.find(x=>x.name===p.name&&(p.path===undefined||x.path===p.path));if(!output)throw Error('成果文件不在任务记录中');return inside(root,output.path||path.join(t.result.outputDir,output.name));}
    case 'chat.send':{
     const s=must('sessions',p.sessionId);if(streams.has(s.id))throw new Error('当前回复尚未结束');const items=attachments.validate(s.id,p.attachments||[]),text=String(p.text||'').trim();if((!text&&!items.length)||text.length>32000)throw new Error('消息为空或超过长度限制');
     const imageCount=items.flatMap(a=>a.children||[a]).filter(a=>a.kind==='image').length;if(imageCount>6)throw Error('一条消息最多发送 6 张图片（含文件夹中的图片）');
@@ -111,9 +138,9 @@ export async function createBackend(options={}){
      const content=typeof built.content==='string'?built.content+scope:[{...built.content[0],text:built.content[0].text+scope},...built.content.slice(1)];
      const allDefs=useLegacy?[...local.definitions,...legacyDefs]:local.definitions;
      const execute=async(name,args)=>name.startsWith('legacy_')?legacyExecute(name,args):local.execute(name,args);
-     const systemPrompt=useLegacy
+     const systemPrompt=(useLegacy
        ? system+' 原版 MCP 工具已接入；需要复杂底稿、银行、查询、抽样、文件处理或原版 AI 功能时，直接调用对应的 legacy_ 工具。所有路径必须位于当前项目目录。'
-       : system+' 当前为轻量本地模式，只能使用列出的本地工具；不要尝试调用原版 MCP 工具。';
+       : system+' 当前为轻量本地模式，只能使用列出的本地工具；不要尝试调用原版 MCP 工具。')+skillContext(workflows.skills,text);
      const r=await runAgent({settings:config,key:turnKey,messages:[{role:'system',content:systemPrompt},...history,{role:'user',content}],signal:controller.signal,tools:allDefs,execute,onDelta:d=>{state.text+=d;},onRound:()=>{state.text='';state.phase='模型正在分析…';},onStep:step=>{if(closed)return;if(step.phase==='start'){const c=store.create('toolCalls',{sessionId:s.id,userEventId:user.id,name:step.name,label:toolLabels[step.name]||step.name.replace(/^legacy_/,'原版 MCP · '),status:'running'});callIds.set(step.id,c.id);store.append(s.id,{type:'tool',callId:c.id});state.phase=c.label+'…';}else{const c=store.get('toolCalls',callIds.get(step.id));if(c){store.put('toolCalls',{...c,status:step.result.ok===false?'failed':'succeeded',result:step.result,finishedAt:new Date().toISOString()});store.append(s.id,{type:'tool-evidence',userEventId:user.id,name:step.name,result:step.result});}}}});if(legacyClient)await legacyClient.close();if(!closed)store.append(s.id,{type:'assistant',...r,model:config.model,attachmentNotes:built.notes});}).catch(e=>{if(legacyClient)legacyClient.close().catch(()=>{});if(closed)return;for(const id of callIds.values()){const c=store.get('toolCalls',id);if(c?.status==='running')store.put('toolCalls',{...c,status:controller.signal.aborted?'cancelled':'failed',result:{ok:false,error:controller.signal.aborted?'已停止执行':e.message}});}for(const a of items){a.used=false;store.put('attachments',a);}store.append(s.id,{type:'error',userEventId:user.id,text:controller.signal.aborted?'已停止生成；附件已保留，可重新发送。本轮用量统计不完整。':e.message+(items.length?'（附件已保留，可重新发送）':'')});}).finally(()=>{clearTimeout(timer);streams.delete(s.id);});return {started:true};
    }
    case 'chat.cancel':streams.get(p.sessionId)?.controller.abort();return {stopped:true};
@@ -121,6 +148,6 @@ export async function createBackend(options={}){
    default:throw new Error('未知操作');
   }
  }
- return {store,action,close:()=>{closed=true;scheduler.stop();for(const x of streams.values())x.controller.abort();store.close();}};
+ return {store,action,close:()=>{closed=true;mcpRunner.close();scheduler.stop();for(const x of streams.values())x.controller.abort();store.close();}};
 }
 

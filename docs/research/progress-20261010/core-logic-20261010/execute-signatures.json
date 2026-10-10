@@ -1,0 +1,17 @@
+{
+  "BUILTIN_FEATURES": "list",
+  "BUILTIN_RULES": "list",
+  "Path": "(*args, **kwargs)",
+  "_apply_column_mapping": "(features, column_mapping)",
+  "_core": "module",
+  "_features_to_df": "(features)",
+  "_resolve_features": "(features_input, column_mapping)",
+  "_resolve_rules": "(rules_input)",
+  "_rules_to_df": "(rules)",
+  "get_description": "()",
+  "get_excel_config_schema": "()",
+  "os": "module",
+  "pd": "module",
+  "run": "(ctx, config_mode='direct', config_data=None)",
+  "time": "module"
+}
