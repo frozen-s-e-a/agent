@@ -22,6 +22,7 @@
 | [06 Agent 层交互设计](docs/06-agent-interaction-design.md) | 需求理解、程序映射、参数确认、追问、下钻、复核反馈 |
 | [07 问题诊断与评估基准](docs/07-diagnosis-baseline.md) | 诊断清单、失败样本标注、基准指标 |
 | [08 Agent 搭建方案](docs/08-agent-build-plan.md) | 路线选择、总体架构、两种执行模式、各模块设计、失败处理、选型、实施路线 |
+| [09 能力边界与补充手段](docs/09-capability-limits-and-enhancements.md) | 方案能解决和不能解决的问题；异常识别算法、示例库、微调、多次采样等补充手段 |
 
 **阅读建议**：先看 08 了解全貌，再按需查阅其他文档。
 
