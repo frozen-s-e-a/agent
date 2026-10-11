@@ -114,10 +114,13 @@ steps:
   - { id: select,       type: procedure, procedure: AR_CONFIRM_SELECT }
   - { id: interpret,    type: llm,       role: analyst, inputs: [summary_table, exceptions_top50] }
   - { id: drilldown,    type: agent,     tools: [query_by_party, query_voucher], max_turns: 5, optional: true }
-  - { id: write_wp,     type: llm,       role: writer, template: WP_AR_CONF }
+  - { id: write_wp,     type: llm,       role: writer, template: WP_AR_CONF,
+      inputs: [run_aging.summary_table, select.summary_table, interpret.findings, drilldown.conclusions] }
   - { id: verify_wp,    type: verify,    checks: [numbers_traceable, "checklist:AR_CONF"] }
 on_verify_fail: { retry: 3, then: pause_and_report }
 ```
+
+**输入声明规则**：每个 llm 和 agent 节点必须用 `inputs` 声明需要哪些前序节点的哪些输出，引擎只把声明的内容放进该节点的上下文；未声明的前序输出一律不带。节点之间传递的数字由引擎从结果表原样读取，不经模型转述。
 
 工作流和程序目录一样纳入版本管理，修改需审核并跑回归评估。
 
@@ -218,6 +221,13 @@ stateDiagram-v2
 ### 4.4 上下文管理器
 
 - **按角色组装**：每个角色有独立的提示词模板，只包含该角色需要的内容，不再使用一个包罗万象的 system prompt。
+- **每步上下文由五部分组成**（两种模式相同，详见 03 第 9 节）：
+  1. 固定锚点：用户原话、已确认参数、全局约束。每步都带，任何情况下不裁剪。
+  2. 任务清单：每步一行状态。
+  3. 当前步骤：目标、完成标准、上次失败原因。
+  4. 依赖输入：按工作流 `inputs` 或计划 `depends_on` 声明，从前序步骤的结构化输出中取指定字段；不按远近，也不默认带上一步。
+  5. 本步往返：本步内的工具调用与结果，步骤结束即丢弃。
+- **步骤之间只传结构化输出**：一句话摘要只用于展示给人，不作为下游步骤的输入。
 - **按槽位预算**：system、任务清单、步骤输入、检索内容、历史分别设上限（见 04 和 03 的 `CONFIG`）。
 - **大对象放引用**：结果表、文件、凭证列表存于状态存储，上下文中只放"结果 ID + 摘要 + 前 N 行"，需要时再按 ID 查询。
 - **结构化状态每次重新渲染**：计划、已确认参数、结果 ID 列表不参与压缩，每次调用时从状态存储重新生成，压缩只作用于对话和工具往返。

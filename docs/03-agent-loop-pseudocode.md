@@ -71,12 +71,19 @@ class Step:
     done_criteria: str       # 完成标准（可被代码或模型检查）
     verify: dict             # 验证方式，如 {"type":"cmd","cmd":"pytest -q"}
     status: str              # pending | in_progress | done | failed | blocked
-    result_summary: str      # 完成后的一句话摘要（下一步只看这个）
+    depends_on: list[Dep]    # 本步需要哪些前序步骤的哪些输出（规划时声明）
+    output: dict             # 完成后的结构化输出：关键字段、数字、结果 ID（下游按依赖取用）
+    result_summary: str      # 一句话摘要，仅用于展示给人，不在步骤之间传递
+
+class Dep:
+    step_id: int             # 依赖的步骤
+    fields: list[str]        # 需要该步输出中的哪些字段，如 ["result_id", "total_amount"]
 
 class Plan:
-    original_request: str
+    original_request: str    # 用户原话，每一步都带（固定锚点）
+    confirmed_params: dict   # 已确认参数，每一步都带（固定锚点）
+    constraints: list[str]   # 全局约束，如"只看第四季度"，每一步都带（固定锚点）
     steps: list[Step]
-    notes: str               # 关键约束、已知事实（短）
 
 class RunState:
     plan: Plan
@@ -128,6 +135,8 @@ PLANNER_PROMPT = """
 - goal：一句话，可独立执行
 - done_criteria：如何判断完成（可检查）
 - verify：能用命令或读文件验证就给出，否则填 null
+- depends_on：本步需要哪些前序步骤的哪些输出；不需要就填 []
+同时输出 constraints：用户请求中适用于所有步骤的约束（期间、范围、门槛等），原样保留。
 不要合并不相关的子任务，不要遗漏用户提到的任何交付物。
 """
 
@@ -139,6 +148,9 @@ def make_plan(user_msg, session):
     )
     raw = llm(ctx, response_format=PLAN_JSON_SCHEMA)  # 用约束解码保证 JSON 合法
     plan = parse_or_repair(raw, PLAN_JSON_SCHEMA)
+    plan.original_request = user_msg                  # 原话由代码保存，不经模型改写
+    plan.confirmed_params = session.confirmed_params  # 来自项目档案和本会话已确认的参数
+    check_dependencies(plan)                          # 代码校验：依赖只能指向前序步骤，字段名合法
     plan = coverage_check(plan, user_msg)             # 见 4.1
     return plan
 ```
@@ -209,7 +221,9 @@ def run_step_with_retries(step, state, session):
 
         verdict = verify_step(step, outcome, session)             # 见第 8 节
         if verdict.passed:
-            step.result_summary = summarize_step(step, outcome)   # 一句话，喂给下一步
+            # 结构化输出由代码从工具结果中提取（结果 ID、金额、笔数等），不让模型转述数字
+            step.output = extract_structured_output(step, outcome)
+            step.result_summary = summarize_step(step, outcome)   # 仅用于展示
             return True
 
         # 把真实失败信息（截断后）作为下次的反馈，不让模型"假装成功"
@@ -362,28 +376,55 @@ def build_context(system, plan_view="", step_input="", history=(),
 
     ctx = assemble(msgs, hist_msgs, tools)
 
-    # 兜底：总量仍超限时，先压 history，再压 retrieved，最后才动 step_input
+    # 兜底：总量仍超限时，先压 history，再压 retrieved，最后才动 step_input；
+    #       step_input 中的固定锚点（render_anchor）任何情况下都不裁剪
     while tokens(ctx) > CONFIG["context_window"] - CONFIG["reserve_for_output"]:
         ctx = shrink_next_lowest_priority(ctx)
     return ctx
 
 def render_plan_view(plan, current):
-    # 常驻任务清单：短、稳定、放在固定位置
+    # 常驻任务清单：只显示每步状态，让模型知道全局进度；不带结果内容
     lines = []
     for s in plan.steps:
         mark = {"done":"[x]","in_progress":"[>]","pending":"[ ]",
                 "failed":"[!]","blocked":"[!]"}[s.status]
-        tail = f" — {s.result_summary}" if s.status == "done" else ""
-        lines.append(f"{mark} {s.id}. {s.goal}{tail}")
+        lines.append(f"{mark} {s.id}. {s.goal}")
     return "任务清单：\n" + "\n".join(lines)
 
+def render_anchor(plan):
+    # 固定锚点：每一步都带，保证全局约束不丢；内容短，且从不被裁剪
+    return (
+        f"用户原始需求：{plan.original_request}\n"
+        f"已确认参数：{to_compact_json(plan.confirmed_params)}\n"
+        f"全局约束：{'；'.join(plan.constraints) or '无'}\n"
+    )
+
 def render_step_input(step, plan, feedback):
-    prev = last_done_summary(plan)                   # 只带上一步的一句话摘要
-    txt  = f"当前步骤：{step.goal}\n完成标准：{step.done_criteria}\n"
-    if prev:     txt += f"上一步结果：{prev}\n"
+    txt  = render_anchor(plan)
+    txt += f"\n当前步骤：{step.goal}\n完成标准：{step.done_criteria}\n"
+
+    # 按依赖取输入，而不是默认带上一步：
+    # 只取声明的字段，原值由代码从结构化输出中读取，不经模型转述
+    for dep in step.depends_on:
+        src = plan.steps_by_id[dep.step_id]
+        values = {f: src.output.get(f) for f in dep.fields}
+        txt += f"来自第 {dep.step_id} 步：{to_compact_json(values)}\n"
+
     if feedback: txt += f"上次失败原因（请避免重复）：{feedback}\n"
     return txt
 ```
+
+上下文组成示意（每一步都相同的结构）：
+
+```
+固定锚点   用户原话 · 已确认参数 · 全局约束          ← 每步都带，不裁剪
+任务清单   每步一行状态                              ← 每步都带
+当前步骤   目标 · 完成标准 · 上次失败原因
+依赖输入   按 depends_on 取前序步骤的指定字段         ← 不按远近，按声明
+本步往返   本步内的工具调用与结果（截断）             ← 只属于本步，步结束即丢弃
+```
+
+与"只保留最近 N 步"的滑动窗口相比：全局约束不会滑出窗口；需要第 2 步结果的第 7 步能直接拿到；数字由代码原样传递，不会逐级失真。
 
 ---
 
@@ -398,7 +439,9 @@ def replan(plan, failed_step, session):
         step_input=render_replan_input(plan, failed_step),
     )
     new_tail = llm_json(ctx, response_format=PLAN_JSON_SCHEMA)
-    return Plan(plan.original_request, done + new_tail.steps, plan.notes)
+    check_dependencies_against(done, new_tail.steps)   # 新步骤只能依赖已完成或新计划中的前序步骤
+    return Plan(plan.original_request, plan.confirmed_params, plan.constraints,
+                done + new_tail.steps)
 
 def report_blocker(plan, step):
     # 不无限转圈：明确告诉用户 卡在哪 / 为什么 / 建议
@@ -411,17 +454,20 @@ def report_blocker(plan, step):
     }
 
 FINAL_CHECK_PROMPT = """
-对照【原始请求】逐条核对【已完成步骤】。
+对照【原始请求】和【全局约束】逐条核对【各步骤结构化输出】。
 输出 JSON：{"covered": [...], "missing": [...], "summary": "给用户的最终答复"}
-只根据步骤结果判断，不要编造未做的事。
+只根据步骤输出判断，不要编造未做的事；summary 中的数字只能来自步骤输出。
 """
 
 def final_check(plan, session):
+    # 汇总步：唯一一个看全局的步骤，但看的是各步精简的结构化输出，不是全部历史
+    outputs = {s.id: compact(s.output) for s in plan.steps if s.status == "done"}
     ctx = build_context(
         system=FINAL_CHECK_PROMPT,
-        step_input=plan.original_request + "\n\n" + render_plan_view(plan, None),
+        step_input=render_anchor(plan) + "\n各步骤输出：" + to_compact_json(outputs),
     )
     r = llm_json(ctx)
+    verify_traceable(r["summary"], outputs)            # summary 中的数字必须能在步骤输出中找到（08 第 4.7 节）
     if r["missing"]:
         # 有漏项：把漏项追加成新步骤，回到执行循环补做（限一次）
         plan.steps += steps_for(r["missing"])
@@ -438,7 +484,8 @@ def final_check(plan, session):
 def simple_loop(user_msg, session):
     # 不做规划，但仍保留：预算控制 + 工具容错 + 轮数上限
     step = Step(goal=user_msg, done_criteria="回答/完成用户请求", verify=None)
-    outcome = run_step(step, Plan(user_msg, [step], ""), session, feedback=None)
+    plan = Plan(user_msg, session.confirmed_params, constraints=[], steps=[step])
+    outcome = run_step(step, plan, session, feedback=None)
     return outcome.text
 ```
 
