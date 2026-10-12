@@ -1,5 +1,6 @@
 import fs from 'node:fs';import path from 'node:path';import {createHash} from 'node:crypto';
 import {inside,listFiles} from '../file-ops/paths.mjs';import {worker} from '../task-scheduler/scheduler.mjs';
+import {boundedToolResult} from '../agent/context-builder.mjs';
 const source={type:'string',enum:['project','attachments'],description:'project 为当前项目，attachments 为当前对话已发送附件'};
 const parameters={type:'object',description:'工具参数。表格可指定 headerRow（1 起）、sheets（工作表名逗号分隔）、encoding。业务字段按 get_audit_tools 返回填写。',additionalProperties:true};
 const define=(name,description,properties,required=[])=>({type:'function',function:{name,description,parameters:{type:'object',properties,required,additionalProperties:false}}});
@@ -12,8 +13,8 @@ export const localToolDefinitions=[
 ];
 export const toolLabels={list_local_files:'浏览本地文件',preview_local_file:'读取文件内容',get_audit_tools:'选择审计工具',run_audit_tool:'执行本地审计',get_task_result:'读取执行结果'};
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
-function summary(t){return {ok:t.status==='succeeded',taskId:t.id,status:t.status,tool:t.tool,error:t.error||undefined,...(t.result?{inputRows:t.result.inputRows,inputUnit:t.result.inputUnit||'输入记录',resultRows:t.result.rowCount,resultUnit:t.result.resultUnit||'结果记录',structureOnly:!!t.result.structureOnly,columns:t.result.columns,preview:t.result.preview?.slice(0,20),outputs:t.result.outputs,warningCount:t.result.warningCount,warnings:t.result.warnings?.slice(0,5),note:'任务已实际执行；样本最多 20 行，完整结果可在任务卡打开。兼容性：'+t.result.compatibility}:{phase:t.phase})};}
-export function createModelTools({store,scheduler,attachments,session,settings,selectedProjectFiles=[],catalog,signal,onPhase,validateTask,runTask}){
+function summary(t){return {ok:t.status==='succeeded',taskId:t.id,status:t.status,tool:t.tool,validationStatus:t.validationStatus||'not_checked',publicationStatus:t.publicationStatus||'not_published',error:t.error||undefined,...(t.result?{inputRows:t.result.inputRows,inputUnit:t.result.inputUnit||'输入记录',resultRows:t.result.rowCount,resultUnit:t.result.resultUnit||'结果记录',structureOnly:!!t.result.structureOnly,columns:t.result.columns,preview:t.result.preview?.slice(0,20),previewIsSample:true,outputs:t.result.outputs,warningCount:t.result.warningCount,warnings:t.result.warnings?.slice(0,5),note:'任务已实际执行；样本最多 20 行，完整结果可在任务卡打开。兼容性：'+t.result.compatibility}:{phase:t.phase})};}
+export function createModelTools({store,scheduler,attachments,session,settings,selectedProjectFiles=[],catalog,signal,onPhase,validateTask,runTask,boundResults=true}){
  const repeated=new Map();
  const selectedSet=new Set(selectedProjectFiles.filter(f=>typeof f==='string').map(f=>path.normalize(f)));
  const project=()=>{const p=session.projectId&&store.get('projects',session.projectId);if(!p)throw Error('当前对话未关联项目，请使用已上传附件，或先创建项目选择文件夹');return p;};
@@ -38,13 +39,23 @@ export function createModelTools({store,scheduler,attachments,session,settings,s
   if(name==='get_task_result'){const t=store.get('tasks',args.taskId);if(!t||t.sessionId!==session.id)throw Error('任务不存在或不属于此对话');return summary(t);}
   if(name==='run_audit_tool'){
    const tool=catalog.find(t=>t.id===args.tool);if(!tool)throw Error('此审计工具尚未实现');if(!Array.isArray(args.files)||!args.files.length||args.files.length>200||new Set(args.files).size!==args.files.length)throw Error('请选择 1–200 个不重复文件');const params=validParameters(args.parameters||{});for(const field of tool.fields)if(field.required&&!String(params[field.key]??'').trim())throw Error('缺少必填参数：'+field.label);const mode=settings.requestedMode||args.mode||settings.defaultMode;if(!['auto','local-light','local-batch'].includes(mode))throw Error('处理模式无效');
-   const signature=JSON.stringify(args);if(repeated.has(signature))return repeated.get(signature);
-   const files=args.files.map(f=>resolve(args.source,f));const input=args.source==='project'?{project:project(),files:files.map(f=>f.name)}:await attachmentProject(files);signal.throwIfAborted();const task=runTask?await runTask({sessionId:session.id,project:input.project,tool:tool.id,files:input.files,mode,parameters:params}):scheduler.queue(session,input.project,tool.id,input.files,mode,params,settings);
+   const signature=JSON.stringify({source:args.source,tool:tool.id,files:args.files,parameters:params,mode});
+   if(repeated.has(signature))return repeated.get(signature);
+   const files=args.files.map(f=>resolve(args.source,f));const input=args.source==='project'?{project:project(),files:files.map(f=>f.name)}:await attachmentProject(files);signal.throwIfAborted();
+   const existing=store.all('tasks').filter(item=>item.sessionId===session.id&&item.idempotencyKey===signature).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')))[0];
+   if(existing?.status==='succeeded'){
+    const cached=summary(existing);repeated.set(signature,cached);return cached;
+   }
+   const task=runTask?await runTask({sessionId:session.id,project:input.project,tool:tool.id,files:input.files,mode,parameters:params,idempotencyKey:signature}):scheduler.queue(session,input.project,tool.id,input.files,mode,params,settings);
+   if(!runTask){if(!task.idempotencyKey)task.idempotencyKey=signature;task.agentSessionId=session.id;store.put('tasks',task);}
    const cancel=()=>runTask?runTask({cancel:task.id}):scheduler.cancel(task.id);signal.addEventListener('abort',cancel,{once:true});const deadline=Date.now()+240000;
-   try{while(true){signal.throwIfAborted();const current=store.get('tasks',task.id);if(!['queued','running','cancelling'].includes(current.status)){if(current.status==='succeeded'&&validateTask){try{validateTask(current);}catch(error){current.status='failed';current.error=error.message;current.validationStatus='failed';store.put('tasks',current);}}const result=summary(store.get('tasks',task.id));repeated.set(signature,result);return result;}if(Date.now()>deadline){cancel();return {ok:false,taskId:task.id,error:'本地任务超过 4 分钟，已请求停止；请查看任务卡确认最终状态'};}onPhase(tool.name+' · '+(current.phase||'执行中'));await new Promise(r=>setTimeout(r,250));}}finally{signal.removeEventListener('abort',cancel);}
+   try{while(true){signal.throwIfAborted();const current=store.get('tasks',task.id);if(!['queued','running','cancelling'].includes(current.status)){
+      if(current.status==='succeeded'&&validateTask){try{validateTask(current);}catch(error){current.status='failed';current.error=error.message;current.validationStatus='failed';current.publicationStatus='rejected';store.put('tasks',current);}}
+      const result=summary(store.get('tasks',task.id));if(result.ok)repeated.set(signature,result);return result;
+    }if(Date.now()>deadline){cancel();return {ok:false,taskId:task.id,status:'interrupted',error:'本地任务超过 4 分钟，已请求停止；请查看任务卡确认最终状态'};}onPhase(tool.name+' · '+(current.phase||'执行中'));await new Promise(r=>setTimeout(r,250));}}finally{signal.removeEventListener('abort',cancel);}
   }
   throw Error('未知本地工具');
  }
- return {definitions:localToolDefinitions,execute:async(name,args)=>{const r=await execute(name,args);const json=JSON.stringify(r);return json.length>90000?{ok:r.ok,taskId:r.taskId,excerpt:json.slice(0,60000),truncated:true,note:'工具结果超出本轮展示预算；这是部分摘录，完整结果在任务卡中'}:r;},scope:{project:session.projectId?{name:project().name}:null,attachments:attachmentFiles().map(({record,...f})=>f).slice(0,100)}};
+  return {definitions:localToolDefinitions,execute:async(name,args)=>{const r=await execute(name,args);return boundResults?boundedToolResult(r,{limit:90000,resultRef:r?.taskId?{kind:'tasks',id:r.taskId}:undefined}):r;},scope:{project:session.projectId?{name:project().name}:null,attachments:attachmentFiles().map(({record,...f})=>f).slice(0,100)}};
 }
 function validParameters(params){if(!params||Array.isArray(params)||typeof params!=='object'||JSON.stringify(params).length>32000)throw Error('工具参数无效');if(params.headerRow!==undefined&&(!Number.isInteger(Number(params.headerRow))||Number(params.headerRow)<1||Number(params.headerRow)>10000))throw Error('表头行必须在 1–10000');return params;}

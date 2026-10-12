@@ -30,10 +30,10 @@ function parseToolMessages(value){
  return completeToolCalls(calls);
 }
 
-async function nonStreamingFallback(settings,key,messages,signal,tools){
+async function nonStreamingFallback(settings,key,messages,signal,tools,onRequest){
  const body={model:settings.model,messages,stream:false,temperature:settings.temperature,max_tokens:settings.maxTokens,...(tools?.length?{tools,tool_choice:'auto'}:{})};
  let response;
- try{({response}=await modelRequest(settings,key,'chat/completions',body,signal));}
+ try{({response}=await modelRequest(settings,key,'chat/completions',body,signal,onRequest));}
  catch(e){if(tools?.length&&/HTTP 400|HTTP 422/.test(e.message))throw Error(e.message+'\n本轮包含本地工具定义，请确认所选模型及服务已启用兼容的工具调用。');throw e;}
  let data;try{data=JSON.parse(await response.text());}catch{throw Error('模型返回了无效的非流式消息');}
  if(data?.error)throw Error('模型流返回错误，请重试。');
@@ -42,12 +42,12 @@ async function nonStreamingFallback(settings,key,messages,signal,tools){
  const toolCalls=parseToolMessages(message.tool_calls);
  const finishReason=choice.finish_reason||null;
  validateToolCalls(toolCalls,true,finishReason);
- return {text,reasoningContent,toolCalls,usage:data.usage||null,usageIncomplete:!data.usage};
+ return {text,reasoningContent,toolCalls,finishReason,usage:data.usage||null,usageIncomplete:!data.usage};
 }
 
-export async function streamChat(settings,key,messages,signal,onDelta,tools){
+export async function streamChat(settings,key,messages,signal,onDelta,tools,onRequest){
  const body={model:settings.model,messages,stream:true,stream_options:{include_usage:true},temperature:settings.temperature,max_tokens:settings.maxTokens,...(tools?.length?{tools,tool_choice:'auto'}:{})};
- let response;try{({response}=await modelRequest(settings,key,'chat/completions',body,signal));}catch(e){if(tools?.length&&/HTTP 400|HTTP 422/.test(e.message))throw Error(e.message+'\n本轮包含本地工具定义，请确认所选模型及服务已启用兼容的工具调用。');throw e;}
+ let response;try{({response}=await modelRequest(settings,key,'chat/completions',body,signal,onRequest));}catch(e){if(tools?.length&&/HTTP 400|HTTP 422/.test(e.message))throw Error(e.message+'\n本轮包含本地工具定义，请确认所选模型及服务已启用兼容的工具调用。');throw e;}
  const reader=response.body.getReader(),decoder=new TextDecoder(),calls=new Map();let buffer='',text='',reasoningContent='',usage=null,finished=false,finishReason=null;
  function line(raw){
   const value=raw.trim();if(!value.startsWith('data:'))return;const data=value.slice(5).trim();if(data==='[DONE]'){finished=true;return;}
@@ -61,12 +61,12 @@ export async function streamChat(settings,key,messages,signal,onDelta,tools){
  }
  try{while(true){const {done,value}=await reader.read();if(done)break;buffer+=decoder.decode(value,{stream:true});if(buffer.length>2_000_000)throw Error('模型流式数据超出限制');let i;while((i=buffer.indexOf('\n'))>=0){line(buffer.slice(0,i));buffer=buffer.slice(i+1);}}buffer+=decoder.decode();if(buffer.trim())line(buffer);}finally{await reader.cancel().catch(()=>{});}
  const toolCalls=completeToolCalls(calls);validateToolCalls(toolCalls,finished,finishReason);
- if(text||toolCalls.length)return {text,usage,usageIncomplete:!usage,toolCalls,reasoningContent};
+ if(text||toolCalls.length){if(!finished)throw Error('模型响应连接中断，未放行完成状态');return {text,usage,usageIncomplete:!usage,toolCalls,reasoningContent,finishReason};}
 
  // 部分 vLLM/网关在思考模型上会结束一个空的 SSE 流，但非流式接口能正常
  // 返回 message.content 或 tool_calls。只在空流时重试一次，避免重复正常请求。
  let fallback;
- try{fallback=await nonStreamingFallback(settings,key,messages,signal,tools);}catch(e){
+ try{fallback=await nonStreamingFallback(settings,key,messages,signal,tools,onRequest);}catch(e){
   if(reasoningContent)throw Error('模型只返回了思考过程，没有生成最终答复；请提高最大输出 Token，或切换到非思考模型。');
   throw e;
  }

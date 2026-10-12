@@ -79,6 +79,10 @@ class Context:
         self.outputs = []
         self.warnings = []
         self.session = session
+        if self.settings.get('network_disabled'):
+            from .transport import Session
+            self.session = session or Session()
+            self.session.local_only = True
         self._copies = {}
 
     def path(self, value, exists=False):

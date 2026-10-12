@@ -33,6 +33,10 @@ class Session:
         self.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/130 Safari/537.36', **(headers or {})}
         class Redirects(urllib.request.HTTPRedirectHandler):
             def redirect_request(self,req,fp,code,msg,headers,newurl):
+                if getattr(owner, 'local_only', False):
+                    target=urllib.parse.urlparse(newurl)
+                    if target.scheme!='http' or target.hostname not in {'localhost','127.0.0.1','::1'}:
+                        raise RuntimeError('离线测试模式禁止重定向到外部服务')
                 if code in [307,308]:
                     old,new=urllib.parse.urlparse(req.full_url),urllib.parse.urlparse(newurl)
                     if old.scheme=='https' and new.scheme!='https':raise RuntimeError('服务重定向到非加密地址')
@@ -40,8 +44,13 @@ class Session:
                     if old.netloc!=new.netloc:h={k:v for k,v in h.items() if k.lower() not in ['authorization','cookie']}
                     return urllib.request.Request(newurl,data=req.data,headers=h,method=req.get_method())
                 return super().redirect_request(req,fp,code,msg,headers,newurl)
+        owner=self
         self.opener=urllib.request.build_opener(Redirects(),urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
     def request(self, method, url, params=None, data=None, json=None, headers=None, timeout=30, files=None, **kwargs):
+        if getattr(self, 'local_only', False):
+            target = urllib.parse.urlparse(url)
+            if target.scheme != 'http' or target.hostname not in {'localhost', '127.0.0.1', '::1'}:
+                raise RuntimeError('离线测试模式禁止访问外部服务')
         if params:
             url += ('&' if '?' in url else '?') + urllib.parse.urlencode(params)
         h = {**self.headers, **(headers or {})}
@@ -108,16 +117,31 @@ def model(ctx, prompt, images=None, schema=None):
         {'role':'user','content':content}], 'max_tokens':min(16000, int(settings.get('maxTokens', 8192)))}
     if schema:
         body['response_format'] = {'type':'json_object'}
+    # Save the exact request locally before the existing transport is invoked.
+    # This event contains no headers or credentials and never changes routing.
+    input_bytes = len(json.dumps({'messages': body['messages'], 'tools': []}, ensure_ascii=False).encode('utf-8'))
+    window = int(settings.get('contextWindow', 128000))
+    if input_bytes + body['max_tokens'] + 8192 > window:
+        raise RuntimeError('内部模型必要输入超过上下文预算，未发送请求；请分批处理')
     session = ctx.session or Session()
+    if settings.get('network_disabled'):
+        session.local_only = True
     payload=None
+    def post_model(endpoint, actual_body):
+        ctx.emit({'type': 'model_input', 'taskId': ctx.task_id, 'messages': actual_body['messages'], 'tools': [],
+                  'url':endpoint, 'requestBody':actual_body,
+                  'model': name, 'maxTokens': actual_body['max_tokens'], 'contextWindow': window,
+                  'budget': {'method': 'utf8-byte-upper-bound', 'inputUpperBound': input_bytes,
+                             'outputReserved': actual_body['max_tokens'], 'safetyMargin': 8192}})
+        return session.post(endpoint,json=actual_body,headers={'Authorization':'Bearer '+key},timeout=180).json()
     for index,endpoint in enumerate(endpoints):
         try:
             try:
-                payload=session.post(endpoint,json=body,headers={'Authorization':'Bearer '+key},timeout=180).json()
+                payload=post_model(endpoint,body)
             except RemoteHttpError as error:
                 if error.status_code in [400,422] and 'response_format' in body:
                     compatible={k:v for k,v in body.items() if k not in ['response_format','temperature']}
-                    payload=session.post(endpoint,json=compatible,headers={'Authorization':'Bearer '+key},timeout=180).json()
+                    payload=post_model(endpoint,compatible)
                 else:raise
             break
         except RemoteHttpError as error:
@@ -127,6 +151,10 @@ def model(ctx, prompt, images=None, schema=None):
         text = payload['choices'][0]['message']['content']
     except (KeyError, IndexError, TypeError):
         raise RuntimeError('模型返回格式不正确，未生成成果') from None
+    ctx.emit({'type': 'model_response', 'taskId': ctx.task_id, 'usage': payload.get('usage'),
+              'finishReason': payload['choices'][0].get('finish_reason')})
+    if payload['choices'][0].get('finish_reason') == 'length':
+        raise RuntimeError('模型输出被截断，未放行成果')
     if schema:
         import re
         text = re.sub(r'^```(?:json)?\s*|\s*```$', '', text.strip())

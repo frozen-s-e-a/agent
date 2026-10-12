@@ -13,6 +13,8 @@ export interface Session {
   branchedFromEventId?: string | null;
   updatedAt?: string;
   workflow?: any;
+  agentStatus?: string;
+  streaming?: boolean;
 }
 
 export interface ToolField {

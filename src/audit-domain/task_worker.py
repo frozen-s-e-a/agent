@@ -1,5 +1,6 @@
 """One process per task; line-delimited JSON compatible with the host runner."""
 import json
+import os
 import sys
 
 from runtime.context import Context,plain
@@ -25,7 +26,15 @@ def main():
     if not isinstance(result,dict):raise RuntimeError('任务没有返回结构化结果')
     # Only complete successes receive a publication manifest.
     if result.get('success') and result.get('status')=='success':
-        context.json({'taskId':context.task_id,'status':'succeeded','tool':request['name'],'outputs':context.outputs.copy()},'manifest.json')
+        manifest={**plain(result),'taskId':context.task_id,'status':'succeeded','tool':request['name'],'outputs':context.outputs.copy()}
+        target=context.destination('manifest.json')
+        temporary=target.with_suffix('.pending')
+        with temporary.open('w',encoding='utf-8') as stream:
+            json.dump(manifest,stream,ensure_ascii=False,indent=2,allow_nan=False)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary,target)
+        context.register(target)
         result['outputs']=context.outputs
     emit({'type':'result','result':result})
 

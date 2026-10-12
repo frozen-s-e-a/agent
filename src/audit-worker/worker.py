@@ -44,10 +44,14 @@ def tables(p,params):
         finally:wb.close()
     else:raise ValueError('此表格工具支持 CSV、TSV、XLSX、XLSM；其他格式仍待迁移。')
 
-def import_tables(db,files,root,params):
+def import_tables(db,files,root,params,approved_inputs=None):
     columns=[];count=0;db.execute('CREATE TABLE data (_source_file VARCHAR,_source_sheet VARCHAR,_source_row BIGINT,_row_id BIGINT)')
     for p in files:
         published=False
+        approved=next((item for item in (approved_inputs or []) if Path(item.get('path','')).as_posix()==p.relative_to(root).as_posix()),None)
+        if approved:
+            if not approved.get('sourceTaskId') or digest(p)!=approved.get('sha256'):raise ValueError('后续成果与已校验来源不一致')
+            published=True
         manifest_path=p.parent/'manifest.json'
         if p.is_relative_to(root/'outputs') and manifest_path.is_file():
             manifest=json.loads(manifest_path.read_text(encoding='utf-8'))
@@ -284,7 +288,11 @@ def run(request):
             if header is None:continue
             import itertools
             if len(header)>512:raise ValueError('工作表超过预览列数预算')
-            return {'columns':[str(x)[:200] if x is not None else f'未命名列{i+1}' for i,x in enumerate(header)],'sheet':sheet,'preview':[[val(x)[:200] if x is not None else None for x in row[:512]] for row in itertools.islice(rows,10)],'previewOnly':True}
+            first_row=int(p.get('headerRow',1))+1
+            start_row=int(p.get('previewStartRow',first_row))
+            if not first_row<=start_row<=10_000_000:raise ValueError('来源行预览范围无效')
+            preview=[[val(x)[:200] if x is not None else None for x in row[:512]] for row in itertools.islice(rows,start_row-first_row,start_row-first_row+10)]
+            return {'columns':[str(x)[:200] if x is not None else f'未命名列{i+1}' for i,x in enumerate(header)],'sheet':sheet,'preview':preview,'sourceRows':list(range(start_row,start_row+len(preview))),'previewOnly':True}
         raise ValueError('文件中没有可预览的数据')
     total=sum(f.stat().st_size for f in files);expanded=total
     for f in files:
@@ -348,7 +356,7 @@ def run(request):
                 emit('progress',phase='处理文件',rows=count)
             query='SELECT * FROM data'
         else:
-            columns,count=import_tables(db,files,root,p);emit('progress',phase='执行计算',rows=count)
+            columns,count=import_tables(db,files,root,p,request.get('approvedInputs'));emit('progress',phase='执行计算',rows=count)
             query=run_sql(db,tool,p,columns)
         result=export_result(db,query,stage)
         if layout_inspect:

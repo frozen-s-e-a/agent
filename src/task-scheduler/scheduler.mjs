@@ -22,12 +22,12 @@ export class Scheduler{
  }
  queue(session,project,tool,files,mode,parameters,settings){
   files.forEach(f=>inside(project.root,f));
-  const t=this.store.create('tasks',{sessionId:session.id,projectId:project.id,tool,files,mode,parameters,status:'queued',phase:'等待执行',limits:{memoryMiB:settings.memoryMiB,threads:settings.threads},root:project.root});
+  const t=this.store.create('tasks',{sessionId:session.id,projectId:project.id,tool,files,mode,parameters,status:'queued',phase:'等待执行',limits:{memoryMiB:settings.memoryMiB,threads:settings.threads},root:project.root,...(settings.agentTask || {})});
   this.store.append(session.id,{type:'task',taskId:t.id});this.pump();return t;
  }
  pump(){if(this.closed||this.active)return;const task=this.store.all('tasks').find(t=>t.status==='queued'&&t.engine!=='mcp');if(!task)return;
   task.status='running';task.startedAt=new Date().toISOString();this.store.put('tasks',task);let result=null;let failure=null;
-  let child;try{child=worker({protocolVersion:1,taskId:task.id,root:task.root,tool:task.tool,files:task.files,mode:task.mode,parameters:task.parameters,limits:task.limits},ev=>{
+  let child;try{child=worker({protocolVersion:1,taskId:task.id,root:task.root,tool:task.tool,files:task.files,mode:task.mode,parameters:task.parameters,limits:task.limits,approvedInputs:task.approvedInputs || []},ev=>{
    if(ev.type==='result')result=ev.result;else if(ev.type==='error')failure=ev.message;else if(ev.type==='strategy'){task.selectedMode=ev.mode;task.reason=ev.reason;}else if(ev.type==='progress'){task.phase=ev.phase;task.rows=ev.rows;}this.store.put('tasks',task);
   });}catch(e){task.status='failed';task.error=e.message;this.store.put('tasks',task);queueMicrotask(()=>this.pump());return;}
   this.active={id:task.id,child,task};

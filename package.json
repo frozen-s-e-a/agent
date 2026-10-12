@@ -1,6 +1,6 @@
 {
   "name": "audit-assistant",
-  "version": "0.1.0-internal.30",
+  "version": "0.1.0-internal.31",
   "private": true,
   "type": "module",
   "description": "本地审计 AI 助手",
@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node --test tests/unit/*.test.mjs",
     "start": "electron .",
+    "demo:agent": "node scripts/offline-demo.mjs",
     "package:test": "node scripts/package.mjs"
   },
   "dependencies": {

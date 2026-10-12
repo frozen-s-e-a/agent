@@ -14,9 +14,10 @@ async function errorDetail(response,key){
  let text='';try{const r=response.body.getReader();const first=await r.read();await r.cancel();const raw=new TextDecoder().decode(first.value||new Uint8Array()).slice(0,4096);const v=JSON.parse(raw);text=String(v.error?.message||v.message||'');}catch{}
  if(key)text=text.split(key).join('[已隐藏]');return text.replace(/Bearer\s+[^\s"']+/gi,'Bearer [已隐藏]').replace(/sk-[\w-]+/g,'[已隐藏]').replace(/[\x00-\x1f]/g,' ').slice(0,300);
 }
-export async function modelRequest(settings,key,endpoint,body,signal){
+export async function modelRequest(settings,key,endpoint,body,signal,onRequest){
  const base=normalizeBase(settings.baseUrl);key=normalizeKey(key);const root=new URL(base).pathname.replace(/\/$/,'');const bases=root===''?[base,base+'/v1']:[base];
  for(let i=0;i<bases.length;i++){
+  await onRequest?.({url:bases[i]+'/'+endpoint,method:body?'POST':'GET',body,requestedAt:new Date().toISOString()});
   let response;try{response=await fetch(bases[i]+'/'+endpoint,{method:body?'POST':'GET',headers:{...(key?{Authorization:'Bearer '+key}:{}),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined,signal,redirect:'error'});}
   catch(e){if(signal?.aborted)throw e;const code=e.cause?.code;throw Error(code==='ENOTFOUND'?'无法解析服务地址，请检查域名和网络。':code==='ECONNREFUSED'?'无法连接模型服务，请检查端口和服务是否启动。':'无法连接模型服务，请检查网络、代理、证书和服务地址。');}
   if(!response.ok){if([404,405].includes(response.status)&&i+1<bases.length){await response.body?.cancel();continue;}throw Error(describeHttp(response.status,await errorDetail(response,key)));}

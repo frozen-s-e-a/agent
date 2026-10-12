@@ -10,7 +10,7 @@ export function verifyTaskArtifacts(task, store) {
   const outputs = (task.result.outputs || []).map(output => {
     const relative = output.path || path.join(task.result.outputDir || '',output.name);
     const file = inside(root,relative), stat = fs.statSync(file);
-    if(!stat.isFile()) throw Error('成果不是文件：'+output.name);
+    if(!stat.isFile() || stat.size===0) throw Error('成果不是完整文件：'+output.name);
     const sha256 = fileHash(file);
     if(output.sha256 && sha256!==output.sha256) throw Error('成果哈希与执行记录不一致：'+output.name);
     const extension = path.extname(file).toLowerCase();
@@ -20,7 +20,7 @@ export function verifyTaskArtifacts(task, store) {
       const expected = extension==='.pdf' ? '%PDF-' : extension==='.parquet' ? 'PAR1' : 'PK';
       if(!header.toString('ascii').startsWith(expected)) throw Error('成果文件格式不正确：'+output.name);
     }
-    return {...output,path:relative,size:stat.size,sha256};
+    return {...output,path:path.relative(root,file),size:stat.size,sha256};
   });
   if(!outputs.length && !task.result.structureOnly && !task.result.columns?.length && !task.result.preview?.length && !task.result.content?.length) throw Error('执行没有返回可核查成果');
   const validation = {status:'passed', level:'execution_and_file_integrity', checkedAt:new Date().toISOString(), checks:['business_status','project_scope','actual_file_read','file_format','sha256'], semanticReview:'task_specific_business_rules_are_not_implied_by_file_integrity'};
@@ -36,4 +36,16 @@ export function checkpointValid(node, store) {
     const root = store.get('projects',task.projectId)?.root;
     return !!root && task.status==='succeeded' && node.checkpoint.outputs.every(output => fileHash(inside(root,output.path))===output.sha256);
   } catch { return false; }
+}
+
+export function recoverPublishedTask(task,store) {
+  if(!['interrupted','running','cancelling','cancelled'].includes(task.status))return false;
+  const project=store.get('projects',task.projectId);if(!project)return false;
+  const manifestPath=path.join(project.root,'outputs',task.id,'manifest.json');
+  if(!fs.existsSync(manifestPath))return false;
+  const manifest=JSON.parse(fs.readFileSync(inside(project.root,manifestPath),'utf8'));
+  if(manifest.taskId!==task.id || manifest.status!=='succeeded' || !Array.isArray(manifest.outputs) || !manifest.outputs.length)throw Error('发布记录不完整，不能恢复为成功');
+  for(const output of manifest.outputs){const file=inside(project.root,output.path || path.join('outputs',task.id,output.name));if(!output.sha256 || fileHash(file)!==output.sha256)throw Error('已发布成果与记录不一致，不能自动重试');}
+  task.result={...(task.result || {}),...manifest,outputs:manifest.outputs.map(output=>({...output,path:output.path || path.join('outputs',task.id,output.name)}))};task.status='succeeded';task.phase='已恢复并校验发布记录';task.recoveredAt=new Date().toISOString();delete task.error;
+  verifyTaskArtifacts(task,store);return true;
 }

@@ -45,7 +45,7 @@ function App() {
     const project = await api('project.create', { name, root }) as Project;
     const next = await refresh();
     setProjectId(next.projects.find(item => item.id === project.id)?.id || project.id);
-    notify('项目已创建，可以开始选择审计任务。');
+    notify('项目已创建，可以在对话中下达审计任务。');
   }, [notify, refresh]);
 
   const createDemo = useCallback(async () => {
@@ -56,7 +56,7 @@ function App() {
   }, [notify, refresh]);
 
   if (!boot) {
-    return <div className="new-loading"><div className="new-loading-mark"><Sparkles size={21} /></div><Loader2 className="spin" size={24} /><strong>正在打开审计工作台</strong>{error && <p>{error}</p>}</div>;
+    return <div className="new-loading"><div className="new-loading-mark"><Sparkles size={21} /></div><Loader2 className="spin" size={24} /><strong>正在打开审计 Agent</strong>{error && <p>{error}</p>}</div>;
   }
 
   const project = boot.projects.find(item => item.id === projectId) || boot.projects[0];
