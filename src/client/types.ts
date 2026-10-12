@@ -11,10 +11,8 @@ export interface Session {
   id: string;
   projectId: string | null;
   title: string;
-  model?: string;
   createdAt?: string;
   updatedAt?: string;
-  workflow?: unknown;
   agentStatus?: string;
   streaming?: boolean;
 }
@@ -29,12 +27,20 @@ export interface AppSettings {
   hasCicpaCookies?: boolean;
 }
 
+/** A registered audit program; plan steps refer to it by id. */
+export interface CatalogTool {
+  id: string;
+  name: string;
+}
+
 export interface Boot {
   version: string;
   build?: string | null;
   projects: Project[];
   sessions: Session[];
   settings: AppSettings;
+  tools: CatalogTool[];
+  legacyTools?: CatalogTool[];
 }
 
 export interface Attachment {
@@ -45,17 +51,18 @@ export interface Attachment {
 }
 
 export type ChatEvent =
-  | {id: string; type: 'user'; text: string; at?: string}
-  | {id: string; type: 'assistant'; text: string; at?: string; toolCount?: number; runStatus?: string}
-  | {id: string; type: 'tool'; callId: string; at?: string}
-  | {id: string; type: 'error'; text: string; at?: string}
-  | {id: string; type: 'task' | 'attachment-context' | 'tool-evidence'; at?: string};
+  | {id: string; type: 'user'; text: string; at?: string; runId?: string; projectFiles?: string[]; attachments?: {name: string}[]}
+  | {id: string; type: 'assistant'; text: string; at?: string; runId?: string; toolCount?: number; runStatus?: string}
+  | {id: string; type: 'tool'; callId: string; at?: string; runId?: string}
+  | {id: string; type: 'error'; text: string; at?: string; runId?: string}
+  | {id: string; type: 'task' | 'attachment-context' | 'tool-evidence'; at?: string; runId?: string};
 
 /** Events rendered as chat text; other event kinds are bookkeeping. */
 export type TextEvent = Extract<ChatEvent, {type: 'user' | 'assistant' | 'error'}>;
 
 export interface ToolCall {
   id: string;
+  runId?: string;
   name: string;
   label?: string;
   status: string;
@@ -71,7 +78,10 @@ export interface Task {
   tool: string;
   status: string;
   phase?: string;
+  error?: string;
+  agentRunId?: string;
   validationStatus?: string;
+  createdAt?: string;
   result?: {
     inputRows?: number;
     rowCount?: number;
@@ -88,17 +98,35 @@ export interface AgentStep {
   result?: {error?: string};
 }
 
+export interface PlanStep {
+  id: string;
+  toolId: string;
+  files?: string[];
+  status: string;
+  taskId?: string;
+}
+
+export interface AgentQuestion {
+  id: string;
+  text: string;
+  status: string;
+}
+
 export interface AgentInput {
   id: string;
   path: string;
+  source?: string;
 }
 
 export interface AgentRun {
   id: string;
   status: string;
   objective: string;
+  resumeOf?: string;
   startedAt?: string;
   createdAt?: string;
+  plan?: {status?: string; steps: PlanStep[]};
+  questions?: AgentQuestion[];
   steps: AgentStep[];
   inputs: AgentInput[];
   changedInputs?: string[];
@@ -116,6 +144,13 @@ export interface SessionRecord {
   turn?: string;
   phase?: string;
   streaming?: boolean;
+}
+
+export interface FileEntry {
+  name: string;
+  path: string;
+  directory: boolean;
+  size?: number;
 }
 
 export interface SourceOrigin {

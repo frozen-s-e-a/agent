@@ -122,3 +122,18 @@ test('event log reads only appended bytes and repairs a partial trailing line', 
     assert.deepEqual(store.bySession('tasks','s1').map(task=>task.id),['t1']);
   } finally {store.close();fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+test('a project can be renamed and removed with its conversations, leaving its folder alone', async () => {
+  const dir=temp('agent-project-remove-'),project=temp('agent-project-');
+  fs.writeFileSync(path.join(project,'账表.csv'),'a\n1\n');
+  const backend=await createBackend({dataRoot:dir});
+  try {
+    const saved=await backend.action('project.create',{name:'旧名',root:project});
+    await backend.action('session.create',{projectId:saved.id});
+    assert.equal((await backend.action('project.rename',{id:saved.id,name:'新名'})).name,'新名');
+    await backend.action('project.remove',{id:saved.id});
+    assert.deepEqual(backend.store.all('projects'),[]);
+    assert.deepEqual(backend.store.all('sessions'),[]);
+    assert.ok(fs.existsSync(path.join(project,'账表.csv')));
+  } finally {backend.close();removeTree(dir);fs.rmSync(project,{recursive:true,force:true});}
+});

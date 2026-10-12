@@ -2,91 +2,95 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Loader2, Sparkles} from 'lucide-react';
 import {api} from './api';
 import {byRecent} from './lib/format';
+import {WorkspaceContext, type WorkspaceServices} from './lib/workspace';
 import {useSessionRecord} from './hooks/useSessionRecord';
 import {useToasts} from './hooks/useToasts';
-import {Sidebar, type View} from './components/Sidebar';
-import {ChatHeader} from './components/ChatHeader';
-import {ChatView} from './components/ChatView';
-import {HistoryPanel} from './components/HistoryPanel';
-import {ProjectSetup} from './components/ProjectSetup';
+import {Sidebar} from './components/Sidebar';
+import {Conversation} from './components/Conversation';
+import {SidePanel, type PanelTab} from './components/SidePanel';
 import {SettingsView} from './components/SettingsView';
+import {Onboarding} from './components/Onboarding';
+import {ProjectDialog} from './components/Projects';
+import {FilePreview} from './components/FilePreview';
 import {Toasts} from './components/Toasts';
-import type {Boot, Project, Session} from './types';
+import type {Boot, FilePreviewData, Project, Session, SourceOrigin} from './types';
 
 export function App() {
   const {toasts, dismiss, reportError, notify} = useToasts();
   const [boot, setBoot] = useState<Boot | null>(null);
+  const [setupProject, setSetupProject] = useState('');
 
   const refresh = useCallback(async () => {
     const next = await api('bootstrap') as Boot;
     setBoot(next);
     return next;
   }, []);
-
   useEffect(() => { refresh().catch(reportError); }, [refresh, reportError]);
 
+  let body: React.ReactNode;
   if (!boot) {
-    return <div className="boot-screen">
-      <div className="boot-mark"><Sparkles size={22} /></div>
-      <Loader2 className="spin" size={20} />
+    body = <div className="boot-screen">
+      <div className="boot-mark"><Sparkles size={20} /></div>
+      <Loader2 className="spin" size={18} />
       <strong>正在打开审计 Agent</strong>
-      <Toasts toasts={toasts} onDismiss={dismiss} />
     </div>;
+  } else if (!boot.settings.baseUrl || !boot.settings.model || !boot.projects.length) {
+    body = <Onboarding boot={boot} onRefresh={refresh} onProject={project => { setSetupProject(project.id); refresh().catch(reportError); }} />;
+  } else {
+    body = <Workspace boot={boot} initialProject={setupProject} onRefresh={refresh} onError={reportError} onNotice={notify} />;
   }
-  return <>
-    <Workspace boot={boot} onRefresh={refresh} onError={reportError} onNotice={notify} />
-    <Toasts toasts={toasts} onDismiss={dismiss} />
-  </>;
+  return <>{body}<Toasts toasts={toasts} onDismiss={dismiss} /></>;
 }
 
 interface WorkspaceProps {
   boot: Boot;
+  initialProject: string;
   onRefresh: () => Promise<Boot>;
   onError: (error: unknown) => void;
   onNotice: (message: string) => void;
 }
 
-function Workspace({boot, onRefresh, onError, onNotice}: WorkspaceProps) {
-  const [projectId, setProjectId] = useState(boot.projects[0]?.id || '');
+function Workspace({boot, initialProject, onRefresh, onError, onNotice}: WorkspaceProps) {
+  const [projectId, setProjectId] = useState(() => boot.projects.find(item => item.id === initialProject)?.id || boot.projects[0].id);
   const [sessionId, setSessionId] = useState('');
-  const [view, setView] = useState<View>('chat');
-  const [historyOpen, setHistoryOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [panel, setPanel] = useState<PanelTab | null>(null);
+  const [projectDialog, setProjectDialog] = useState<'new' | 'edit' | null>(null);
+  const [preview, setPreview] = useState<FilePreviewData | null>(null);
   const [draft, setDraft] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [scope, setScope] = useState<string[]>([]);
+  const settingsDirty = useRef(false);
   const {record, reload} = useSessionRecord(sessionId, onError);
+  const markSettingsDirty = useCallbackRef(settingsDirty);
 
-  const project = boot.projects.find(item => item.id === projectId);
+  const project = boot.projects.find(item => item.id === projectId) || boot.projects[0];
   const sessions = useMemo(
-    () => boot.sessions.filter(item => item.projectId === projectId).sort(byRecent),
-    [boot.sessions, projectId],
+    () => boot.sessions.filter(item => item.projectId === project.id).sort(byRecent),
+    [boot.sessions, project.id],
   );
-
-  // Keep the latest boot data reachable from async work without re-running effects on every refresh.
   const latestBoot = useRef(boot);
   latestBoot.current = boot;
 
-  const run = useCallback(async (work: () => Promise<void>) => {
-    setBusy(true);
-    try { await work(); } catch (error) { onError(error); } finally { setBusy(false); }
-  }, [onError]);
+  const services = useMemo<WorkspaceServices>(() => ({
+    onError,
+    openPreview: setPreview,
+    toolNames: new Map([...(boot.legacyTools || []), ...boot.tools].map(tool => [tool.id, tool.name])),
+  }), [onError, boot.tools, boot.legacyTools]);
 
   // Opening a project resumes its most recent conversation, or starts one.
   useEffect(() => {
-    if (!projectId) { setSessionId(''); return; }
     let cancelled = false;
-    const existing = latestBoot.current.sessions
-      .filter((item: Session) => item.projectId === projectId && !item.workflow)
-      .sort(byRecent)[0];
+    const existing = latestBoot.current.sessions.filter(item => item.projectId === project.id).sort(byRecent)[0];
     (async () => {
-      const session = existing || await api('session.create', {projectId, title: '新对话'}) as Session;
+      const session = existing || await api('session.create', {projectId: project.id, title: '新对话'}) as Session;
       if (cancelled) return;
       setSessionId(session.id);
       if (!existing) await onRefresh();
     })().catch(onError);
     return () => { cancelled = true; };
-  }, [projectId, onRefresh, onError]);
+  }, [project.id, onRefresh, onError]);
 
-  // Session titles and statuses in the sidebar come from bootstrap; refresh once a turn ends.
+  // Titles and statuses in the conversation list come from bootstrap; refresh when a turn ends.
   const wasStreaming = useRef(false);
   useEffect(() => {
     const streaming = !!record?.streaming;
@@ -94,95 +98,112 @@ function Workspace({boot, onRefresh, onError, onNotice}: WorkspaceProps) {
     wasStreaming.current = streaming;
   }, [record?.streaming, onRefresh, onError]);
 
-  const showChat = () => { setView('chat'); setHistoryOpen(false); };
-
+  /** Leaving settings with unsaved model edits asks first, whichever way the user leaves. */
+  const leaveSettings = () => {
+    if (settingsOpen && settingsDirty.current && !window.confirm('模型服务有未保存的修改，确定放弃吗？')) return false;
+    setSettingsOpen(false);
+    return true;
+  };
   const openSession = (id: string) => {
-    if (busy) return;
-    showChat();
-    setDraft('');
+    if (!leaveSettings()) return;
+    if (id !== sessionId) { setDraft(''); setScope([]); }
     setSessionId(id);
   };
-
   const openProject = (id: string) => {
-    showChat();
+    if (!leaveSettings()) return;
     setDraft('');
+    setScope([]);
     setProjectId(id);
   };
-
-  const newChat = () => {
-    if (!project || busy) return;
-    run(async () => {
-      showChat();
-      setDraft('');
+  const newChat = async () => {
+    if (!leaveSettings()) return;
+    // An untouched conversation is reused instead of piling up empty ones.
+    if (record && record.id === sessionId && !record.events.length && !record.attachments.length) { setDraft(''); return; }
+    try {
       const session = await api('session.create', {projectId: project.id, title: '新对话'}) as Session;
+      setDraft('');
+      setScope([]);
       setSessionId(session.id);
       await onRefresh();
-    });
+    } catch (error) { onError(error); }
+  };
+  const renameSession = (id: string, title: string) => api('session.rename', {id, title}).then(onRefresh).catch(onError);
+  const deleteSession = async (session: Session) => {
+    if (!window.confirm(`删除对话「${session.title}」？对话记录、执行快照和本对话的附件都会被清理，已导出的成果文件不受影响。`)) return;
+    try {
+      await api('session.delete', {id: session.id});
+      const next = await onRefresh();
+      if (session.id !== sessionId) return;
+      const fallback = next.sessions.filter(item => item.projectId === project.id).sort(byRecent)[0];
+      setSessionId(fallback?.id || (await api('session.create', {projectId: project.id, title: '新对话'}) as Session).id);
+      if (!fallback) await onRefresh();
+    } catch (error) { onError(error); }
+  };
+  const previewSource = async (source: SourceOrigin) => {
+    try {
+      const value = await api('agent.sourcePreview', {sessionId: source.sessionId, id: source.runId, inputId: source.inputId, row: source.row, sheet: source.sheet, headerRow: source.headerRow});
+      setPreview({...value, name: source.path});
+    } catch (error) { onError(error); }
   };
 
-  const adoptProject = async (created: Project, message: string) => {
-    await onRefresh();
-    openProject(created.id);
-    onNotice(message);
-  };
-  const createProject = (name: string, root: string) => run(async () => {
-    const created = await api('project.create', {name, root}) as Project;
-    await adoptProject(created, '项目已创建，可以在对话中下达审计任务。');
-  });
-  const createDemo = () => run(async () => {
-    const created = await api('demo.create') as Project;
-    await adoptProject(created, '已加载示例项目，可以直接体验任务流程。');
-  });
-
-  if (!project) {
-    return <div className="shell">
-      <Sidebar boot={boot} />
-      <main className="main"><ProjectSetup busy={busy} onCreate={createProject} onDemo={createDemo} /></main>
-    </div>;
-  }
-
-  return <div className="shell">
-    <Sidebar
-      boot={boot}
-      project={project}
-      sessionCount={sessions.length}
-      view={view}
-      historyOpen={historyOpen}
-      busy={busy}
-      onProject={openProject}
-      onNewChat={newChat}
-      onView={next => { setView(next); setHistoryOpen(false); }}
-      onToggleHistory={() => setHistoryOpen(open => !open)}
-    />
-    <main className="main">
-      {view === 'project'
-        ? <ProjectSetup busy={busy} onCreate={createProject} onDemo={createDemo} onBack={showChat} />
-        : <>
-          <ChatHeader project={project} record={record} busy={busy} onNewChat={newChat} />
-          {view === 'settings'
-            ? <SettingsView boot={boot} onRefresh={onRefresh} onNotice={onNotice} onClose={showChat} />
-            : <ChatView
-              boot={boot}
+  return <WorkspaceContext.Provider value={services}>
+    <div className={'shell' + (panel && !settingsOpen ? ' with-panel' : '')}>
+      <Sidebar
+        projects={boot.projects}
+        project={project}
+        sessions={sessions}
+        sessionId={sessionId}
+        settings={boot.settings}
+        settingsOpen={settingsOpen}
+        onProject={openProject}
+        onNewProject={() => setProjectDialog('new')}
+        onEditProject={() => setProjectDialog('edit')}
+        onNewChat={newChat}
+        onOpenSession={openSession}
+        onRenameSession={renameSession}
+        onDeleteSession={deleteSession}
+        onSettings={() => setSettingsOpen(true)}
+      />
+      <main className="main">
+        {settingsOpen
+          ? <SettingsView boot={boot} onRefresh={onRefresh} onNotice={onNotice} onClose={() => setSettingsOpen(false)} onDirtyChange={markSettingsDirty} />
+          : <div className="workspace">
+            <Conversation
               project={project}
               sessionId={sessionId}
               record={record}
               reload={reload}
               draft={draft}
               setDraft={setDraft}
-              busy={busy}
-              setBusy={setBusy}
-              onRefresh={onRefresh}
-              onError={onError}
-              onNotice={onNotice}
-            />}
-        </>}
-      {historyOpen && <HistoryPanel
-        sessions={sessions}
-        selectedId={sessionId}
-        busy={busy}
-        onSelect={openSession}
-        onClose={() => setHistoryOpen(false)}
-      />}
-    </main>
-  </div>;
+              scope={scope}
+              setScope={setScope}
+              panelOpen={!!panel}
+              onTogglePanel={() => setPanel(panel ? null : 'files')}
+              onPickScope={() => setPanel('files')}
+              onTurnStarted={onRefresh}
+            />
+            {panel && <SidePanel project={project} record={record?.id === sessionId ? record : null} tab={panel} onTab={setPanel} scope={scope} onScope={setScope} onClose={() => setPanel(null)} />}
+          </div>}
+      </main>
+    </div>
+    {projectDialog && <ProjectDialog
+      project={projectDialog === 'edit' ? project : undefined}
+      canRemove
+      onClose={() => setProjectDialog(null)}
+      onCreated={async created => { setProjectDialog(null); await onRefresh(); openProject(created.id); }}
+      onRenamed={() => { setProjectDialog(null); onRefresh().catch(onError); }}
+      onRemoved={async removed => {
+        setProjectDialog(null);
+        const next = await onRefresh();
+        const fallback = next.projects.find(item => item.id !== removed.id);
+        if (fallback) openProject(fallback.id);
+      }}
+    />}
+    {preview && <FilePreview value={preview} onClose={() => setPreview(null)} onSource={previewSource} />}
+  </WorkspaceContext.Provider>;
+}
+
+/** Stable setter that mirrors a child's dirty flag into a ref without re-rendering the workspace. */
+function useCallbackRef(target: React.MutableRefObject<boolean>) {
+  return useCallback((value: boolean) => { target.current = value; }, [target]);
 }
