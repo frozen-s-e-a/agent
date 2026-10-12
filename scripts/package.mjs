@@ -31,7 +31,7 @@ for(const name of ['使用说明.md','THIRD_PARTY_NOTICES.md','独立客户端�
 for(const name of ['requirements.txt','pnpm-lock.yaml'])fs.copyFileSync(name,path.join(output,name));
 fs.writeFileSync(path.join(output,'启动AI助手.cmd'),'@echo off\r\nchcp 65001 >nul\r\nstart "" "%~dp0AI助手.exe"\r\n');
 fs.mkdirSync(path.join(app,'scripts'),{recursive:true});fs.copyFileSync('scripts/offline-demo.mjs',path.join(app,'scripts/offline-demo.mjs'));
-fs.copyFileSync('启动Agent离线体验.cmd',path.join(output,'启动Agent离线体验.cmd'));fs.copyFileSync('启动Agent离线体验.ps1',path.join(output,'启动Agent离线体验.ps1'));
+fs.writeFileSync(path.join(output,'启动Agent离线体验.cmd'),fs.readFileSync('启动Agent离线体验.cmd','utf8').replace(/\r?\n/g,'\r\n'));fs.copyFileSync('启动Agent离线体验.ps1',path.join(output,'启动Agent离线体验.ps1'));
 if(fs.existsSync('docs/Agent方案/Agent测试版使用说明.md'))fs.copyFileSync('docs/Agent方案/Agent测试版使用说明.md',path.join(output,'Agent测试版使用说明.md'));
 const evidence=path.join(output,'验收记录');fs.mkdirSync(evidence,{recursive:true});
 for(const [name,entry] of Object.entries(verified.evidence||{}))if(entry.path&&fs.existsSync(entry.path))fs.copyFileSync(entry.path,path.join(evidence,name+path.extname(entry.path)));
