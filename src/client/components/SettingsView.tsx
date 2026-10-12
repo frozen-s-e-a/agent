@@ -11,19 +11,35 @@ interface Props {
   onClose: () => void;
 }
 
-type Feedback = {tone: 'success' | 'error'; text: string; models?: string[]} | null;
+type Feedback = {tone: 'success' | 'error'; text: string} | null;
+type Action = 'save' | 'test' | 'models' | 'clearKey' | 'cicpaLogin' | 'cicpaCheck' | 'cicpaImport';
+type ModelForm = Pick<AppSettings, 'baseUrl' | 'model' | 'visionModel' | 'defaultMode'>;
+
+const formOf = (settings: AppSettings): ModelForm => ({
+  baseUrl: settings.baseUrl || '',
+  model: settings.model || '',
+  visionModel: settings.visionModel || '',
+  defaultMode: settings.defaultMode || 'auto',
+});
+const sameForm = (a: ModelForm, b: ModelForm) => (Object.keys(a) as (keyof ModelForm)[]).every(key => (a[key] || '').trim() === (b[key] || '').trim());
 
 export function SettingsView({boot, onRefresh, onNotice, onClose}: Props) {
-  // Edits are local until saved; later bootstrap refreshes must not overwrite them.
-  const [config, setConfig] = useState<AppSettings>({...boot.settings});
+  // Edits stay local until saved; `saved` is what the backend holds, so the page can tell what is unsaved.
+  const [saved, setSaved] = useState<ModelForm>(() => formOf(boot.settings));
+  const [form, setForm] = useState<ModelForm>(saved);
+  const [models, setModels] = useState<string[]>(boot.settings.models || []);
   const [key, setKey] = useState('');
   const [cookies, setCookies] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<Action | null>(null);
+  const [modelFeedback, setModelFeedback] = useState<Feedback>(null);
+  const [cicpaFeedback, setCicpaFeedback] = useState<Feedback>(null);
   const [runtime, setRuntime] = useState<RuntimeStatus | null>(null);
   const [runtimeError, setRuntimeError] = useState('');
-  const [feedback, setFeedback] = useState<Feedback>(null);
   const [loggingIn, setLoggingIn] = useState(false);
   const [advanced, setAdvanced] = useState(false);
+
+  const dirty = !sameForm(form, saved) || !!key.trim();
+  const busy = pending !== null;
 
   useEffect(() => {
     api('runtime.status').then(setRuntime).catch(error => setRuntimeError(errorMessage(error)));
@@ -36,52 +52,86 @@ export function SettingsView({boot, onRefresh, onNotice, onClose}: Props) {
         const status = await api('service.cicpa.loginStatus');
         if (status.state === 'waiting') return;
         setLoggingIn(false);
-        setFeedback({tone: status.state === 'authorized' ? 'success' : 'error', text: status.message});
+        setCicpaFeedback({tone: status.state === 'authorized' ? 'success' : 'error', text: status.message});
         await onRefresh();
       } catch (error) {
         setLoggingIn(false);
-        setFeedback({tone: 'error', text: errorMessage(error)});
+        setCicpaFeedback({tone: 'error', text: errorMessage(error)});
       }
     }, 2000);
     return () => window.clearInterval(timer);
   }, [loggingIn, onRefresh]);
 
-  const perform = async (work: () => Promise<Feedback | void>) => {
-    setBusy(true);
-    setFeedback(null);
-    try { const result = await work(); if (result) setFeedback(result); }
-    catch (error) { setFeedback({tone: 'error', text: errorMessage(error)}); }
-    finally { setBusy(false); }
+  /** Runs one button's work; only that button shows progress and only its section shows the outcome. */
+  const run = (action: Action, report: (value: Feedback) => void, work: () => Promise<Feedback>) => async () => {
+    setPending(action);
+    report(null);
+    try { report(await work()); }
+    catch (error) { report({tone: 'error', text: errorMessage(error)}); }
+    finally { setPending(null); }
   };
+  const modelAction = (action: Action, work: () => Promise<Feedback>) => run(action, setModelFeedback, work);
+  const cicpaAction = (action: Action, work: () => Promise<Feedback>) => run(action, setCicpaFeedback, work);
+  const update = (patch: Partial<ModelForm>) => setForm(current => ({...current, ...patch}));
+  const draft = () => ({...form, baseUrl: form.baseUrl.trim(), model: form.model.trim(), visionModel: (form.visionModel || '').trim()});
+  const requireAddress = () => { if (!form.baseUrl.trim()) throw Error('请先填写 API 地址。'); };
 
-  const update = (patch: Partial<AppSettings>) => setConfig(current => ({...current, ...patch}));
-
-  const save = () => perform(async () => {
-    if (cookies.trim()) JSON.parse(cookies);
-    await api('settings.save', config);
-    if (key.trim()) { await api('secret.save', {key}); setKey(''); }
-    if (cookies.trim()) { await api('secret.cicpa.save', {cookies}); setCookies(''); }
+  const save = modelAction('save', async () => {
+    requireAddress();
+    if (!form.model.trim()) throw Error('请填写文本模型，或先点“获取模型列表”再选择。');
+    const next = draft();
+    await api('settings.save', {...next, models});
+    setSaved(next);
+    setForm(next);
+    if (key.trim()) {
+      try { await api('secret.save', {key}); setKey(''); }
+      catch (error) { await onRefresh(); return {tone: 'error', text: `模型设置已保存，但密钥没有保存：${errorMessage(error)}`}; }
+    }
     await onRefresh();
-    onNotice('模型服务与授权已保存');
+    onNotice('模型服务设置已保存');
+    return {tone: 'success', text: '已保存。新的对话会使用这些设置。'};
   });
-  const testConnection = () => perform(async () => {
-    const result = await api('connection.test', {settings: config, key: key || undefined});
-    return {tone: 'success', text: `连接正常 · 模型 ${result.model} · 响应 ${result.latencyMs} ms`};
+  const testConnection = modelAction('test', async () => {
+    requireAddress();
+    const result = await api('connection.test', {settings: draft(), key: key || undefined});
+    return {tone: 'success', text: `连接正常 · 模型 ${result.model} · 响应 ${result.latencyMs} ms${dirty ? '。当前修改还没有保存。' : ''}`};
   });
-  const listModels = () => perform(async () => {
-    const result = await api('models.list', {settings: config, key: key || undefined});
-    return {tone: 'success', text: `服务提供 ${result.count} 个模型，点击即可填入文本模型：`, models: result.models};
+  const listModels = modelAction('models', async () => {
+    requireAddress();
+    const result = await api('models.list', {settings: draft(), key: key || undefined});
+    setModels(result.models);
+    if (!result.models.length) return {tone: 'error', text: '服务没有返回可用模型，请手动填写模型名称。'};
+    return {tone: 'success', text: `服务提供 ${result.count} 个模型，已放进文本模型和视觉模型的下拉列表。保存设置时会一并记住这份列表。`};
   });
-  const checkCicpa = () => perform(async () => {
-    if (cookies.trim()) { await api('secret.cicpa.save', {cookies}); setCookies(''); await onRefresh(); }
+  const clearKey = modelAction('clearKey', async () => {
+    await api('secret.save', {key: ''});
+    setKey('');
+    await onRefresh();
+    return {tone: 'success', text: '已清除保存的密钥。'};
+  });
+
+  const loginCicpa = cicpaAction('cicpaLogin', async () => {
+    await api('service.cicpa.login');
+    setLoggingIn(true);
+    return {tone: 'success', text: '已打开注协官网，请在新窗口完成登录，授权会自动保存。'};
+  });
+  const checkCicpa = cicpaAction('cicpaCheck', async () => {
+    if (!boot.settings.hasCicpaCookies) throw Error('还没有注协授权，请先登录注协。');
     const result = await api('service.cicpa.test');
     return {tone: 'success', text: result.message};
   });
-  const loginCicpa = () => perform(async () => {
-    await api('service.cicpa.login');
-    setLoggingIn(true);
-    return {tone: 'success', text: '请在注协官网窗口完成登录。'};
+  const importCicpa = cicpaAction('cicpaImport', async () => {
+    try { JSON.parse(cookies); } catch { throw Error('导入内容不是有效的 Cookie JSON。'); }
+    await api('secret.cicpa.save', {cookies});
+    setCookies('');
+    await onRefresh();
+    return {tone: 'success', text: '已导入授权，可以点“检查注协授权”确认是否有效。'};
   });
+
+  const close = () => {
+    if (dirty && !window.confirm('模型服务有未保存的修改，确定放弃吗？')) return;
+    onClose();
+  };
 
   return <div className="settings-scroll">
     <div className="settings">
@@ -90,65 +140,78 @@ export function SettingsView({boot, onRefresh, onNotice, onClose}: Props) {
           <h2>运行设置</h2>
           <p className="muted">模型服务和授权只影响当前本机，不会写入项目成果。</p>
         </div>
-        <button className="icon-button" aria-label="关闭运行设置" onClick={onClose}><X size={16} /></button>
+        <button className="icon-button" aria-label="关闭运行设置" onClick={close}><X size={16} /></button>
       </div>
 
       <section className="card settings-card">
         <header className="card-head">
           <span className="card-icon"><KeyRound size={16} /></span>
-          <div><h3>模型服务与查询授权</h3><p className="muted">AI 提取使用文本或视觉模型，工商查询使用注协登录授权。</p></div>
+          <div><h3>模型服务与查询授权</h3><p className="muted">Agent 对话和 AI 提取使用下面的模型服务；工商查询使用注协登录授权。</p></div>
         </header>
-        <div className="form-grid">
-          <label className="field wide"><span>API 地址</span><input value={config.baseUrl} onChange={event => update({baseUrl: event.target.value})} placeholder="例如 https://模型网关地址/v1；内网服务可用 http" /></label>
-          <label className="field"><span>文本模型</span><input value={config.model} onChange={event => update({model: event.target.value})} placeholder="点击“查看模型”可直接选择" /></label>
-          <label className="field"><span>视觉模型</span><input value={config.visionModel || ''} onChange={event => update({visionModel: event.target.value})} placeholder="用于图片和扫描件" /></label>
-          <label className="field"><span>API 密钥</span><input type="password" autoComplete="new-password" value={key} onChange={event => setKey(event.target.value)} placeholder={boot.settings.hasKey ? '已保存，留空保留' : '输入密钥'} /></label>
-          <label className="field"><span>默认执行方式</span>
-            <select value={config.defaultMode || 'auto'} onChange={event => update({defaultMode: event.target.value})}>
-              <option value="auto">自动选择</option>
-              <option value="local-light">本地轻量</option>
-              <option value="local-batch">本地批量</option>
-            </select>
-          </label>
-        </div>
 
-        <div className="authorization">
-          <ShieldCheck size={18} />
-          <div>
-            <strong>注协工商资料</strong>
-            <p className="muted">{boot.settings.hasCicpaCookies ? '已保存登录授权，可检查有效性。' : '通过官网登录后自动保存授权，用于工商查询、资料导出和在线股权穿透。'}</p>
+        <form className="settings-group" onSubmit={event => { event.preventDefault(); if (!busy) save(); }}>
+          <div className="group-head">
+            <h4>模型服务</h4>
+            {dirty
+              ? <span className="pill tone-warning"><i className="dot" />有未保存的修改</span>
+              : saved.baseUrl && saved.model ? <span className="pill tone-success"><i className="dot" />已保存</span>
+              : <span className="pill tone-neutral"><i className="dot" />尚未配置</span>}
           </div>
-          <button className="button" disabled={busy || loggingIn} onClick={loginCicpa}>
-            {loggingIn ? <><Loader2 size={14} className="spin" />等待官网登录…</> : boot.settings.hasCicpaCookies ? '重新登录注协' : '登录注协'}
-          </button>
-        </div>
+          <div className="form-grid">
+            <label className="field wide"><span>API 地址</span>
+              <input value={form.baseUrl} onChange={event => update({baseUrl: event.target.value})} placeholder="例如 https://模型网关地址/v1；企业内网服务可用 http" />
+            </label>
+            <label className="field"><span>API 密钥</span>
+              <input type="password" autoComplete="new-password" value={key} onChange={event => setKey(event.target.value)} placeholder={boot.settings.hasKey ? '已保存，留空则继续使用' : '服务不需要密钥时可留空'} />
+              {boot.settings.hasKey && <small className="field-hint">已保存一把密钥。<button type="button" className="link-button" disabled={busy} onClick={clearKey}>清除已保存的密钥</button></small>}
+            </label>
+            <label className="field"><span>默认执行方式</span>
+              <select value={form.defaultMode} onChange={event => update({defaultMode: event.target.value})}>
+                <option value="auto">自动选择</option>
+                <option value="local-light">本地轻量</option>
+                <option value="local-batch">本地批量</option>
+              </select>
+            </label>
+            <ModelField label="文本模型" value={form.model} options={models} required onChange={model => update({model})} />
+            <ModelField label="视觉模型" value={form.visionModel || ''} options={models} onChange={visionModel => update({visionModel})} />
+          </div>
+          {modelFeedback && <FeedbackLine value={modelFeedback} />}
+          <div className="actions">
+            <button type="submit" className="button primary" disabled={busy || !dirty}>{pending === 'save' && <Loader2 size={14} className="spin" />}保存设置</button>
+            <button type="button" className="button" disabled={busy} onClick={testConnection}>{pending === 'test' && <Loader2 size={14} className="spin" />}测试模型连接</button>
+            <button type="button" className="button" disabled={busy} onClick={listModels}>{pending === 'models' && <Loader2 size={14} className="spin" />}获取模型列表</button>
+          </div>
+        </form>
 
-        <button className="disclosure" aria-expanded={advanced} onClick={() => setAdvanced(!advanced)}>
-          <ChevronDown size={14} className="chevron" />{advanced ? '收起' : '展开'}高级授权导入
-        </button>
-        {advanced && <label className="field"><span>导入已有会话（可选）</span>
-          <input type="password" autoComplete="new-password" value={cookies} onChange={event => setCookies(event.target.value)} placeholder="仅用于导入已有 Cookie JSON；通常使用官网登录即可" />
-        </label>}
+        <div className="settings-group">
+          <div className="group-head">
+            <h4>注协工商资料</h4>
+            {boot.settings.hasCicpaCookies
+              ? <span className="pill tone-success"><i className="dot" />已保存授权</span>
+              : <span className="pill tone-neutral"><i className="dot" />未授权</span>}
+          </div>
+          <div className="authorization">
+            <ShieldCheck size={18} />
+            <div><p className="muted">通过注协官网登录后自动保存授权，用于工商查询、资料导出和在线股权穿透。</p></div>
+            <button className="button" disabled={busy || loggingIn} onClick={loginCicpa}>
+              {loggingIn ? <><Loader2 size={14} className="spin" />等待官网登录…</> : boot.settings.hasCicpaCookies ? '重新登录注协' : '登录注协'}
+            </button>
+            <button className="button" disabled={busy || loggingIn} onClick={checkCicpa}>{pending === 'cicpaCheck' && <Loader2 size={14} className="spin" />}检查注协授权</button>
+          </div>
+          <button className="disclosure" aria-expanded={advanced} onClick={() => setAdvanced(!advanced)}>
+            <ChevronDown size={14} className="chevron" />{advanced ? '收起' : '展开'}高级授权导入
+          </button>
+          {advanced && <div className="field">
+            <span>导入已有会话（可选）</span>
+            <div className="input-group">
+              <input type="password" autoComplete="new-password" aria-label="导入已有会话" value={cookies} onChange={event => setCookies(event.target.value)} placeholder="粘贴 Cookie JSON；通常直接登录注协即可" />
+              <button className="button" disabled={busy || !cookies.trim()} onClick={importCicpa}>{pending === 'cicpaImport' && <Loader2 size={14} className="spin" />}导入授权</button>
+            </div>
+          </div>}
+          {cicpaFeedback && <FeedbackLine value={cicpaFeedback} />}
+        </div>
 
         <p className="muted small">密钥和注协授权使用系统加密保存在本机，不写入项目成果或任务参数。</p>
-
-        {feedback && <div role="status" className={'feedback ' + feedback.tone}>
-          {feedback.tone === 'success' ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
-          <div>
-            <p>{feedback.text}</p>
-            {feedback.models && <div className="model-chips">
-              {feedback.models.slice(0, 60).map(model => <button key={model} className={'chip' + (model === config.model ? ' selected' : '')} onClick={() => update({model})}>{model}</button>)}
-              {feedback.models.length > 60 && <small className="muted">另有 {feedback.models.length - 60} 个，可手动填写。</small>}
-            </div>}
-          </div>
-        </div>}
-
-        <div className="actions">
-          <button className="button primary" disabled={busy} onClick={save}>保存设置</button>
-          <button className="button" disabled={busy} onClick={testConnection}>测试模型连接</button>
-          <button className="button" disabled={busy} onClick={listModels}>查看模型</button>
-          <button className="button" disabled={busy} onClick={checkCicpa}>检查注协授权</button>
-        </div>
       </section>
 
       <section className="card settings-card">
@@ -164,6 +227,31 @@ export function SettingsView({boot, onRefresh, onNotice, onClose}: Props) {
         </dl> : <p className="muted">{runtimeError || '正在检查运行环境…'}</p>}
       </section>
     </div>
+  </div>;
+}
+
+const MANUAL = '__manual__';
+
+/** A model name picked from the fetched list, or typed by hand when the list lacks it or was never fetched. */
+function ModelField({label, value, options, required, onChange}: {label: string; value: string; options: string[]; required?: boolean; onChange: (value: string) => void}) {
+  const [manual, setManual] = useState(false);
+  const listed = options.length > 0 && !manual && (!value || options.includes(value));
+  return <label className="field"><span>{label}</span>
+    {listed
+      ? <select value={value} onChange={event => event.target.value === MANUAL ? setManual(true) : onChange(event.target.value)}>
+          <option value="">{required ? '请选择模型' : '不使用'}</option>
+          {options.map(option => <option key={option} value={option}>{option}</option>)}
+          <option value={MANUAL}>手动填写…</option>
+        </select>
+      : <input value={value} onChange={event => onChange(event.target.value)} placeholder={required ? '填写模型名称，或先获取模型列表' : '用于图片和扫描件，可留空'} />}
+    {!listed && options.length > 0 && <small className="field-hint"><button type="button" className="link-button" onClick={() => { setManual(false); if (!options.includes(value)) onChange(''); }}>从模型列表选择</button></small>}
+  </label>;
+}
+
+function FeedbackLine({value}: {value: NonNullable<Feedback>}) {
+  return <div role="status" className={'feedback ' + value.tone}>
+    {value.tone === 'success' ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+    <div><p>{value.text}</p></div>
   </div>;
 }
 
