@@ -1,6 +1,6 @@
 # Agent 测试版使用说明
 
-版本：0.1.0-internal.33，Windows x64。
+版本：0.1.0-internal.34，Windows x64。
 
 双击程序目录中的 **启动Agent离线体验.cmd**。启动器会打开聊天程序并准备合成示例项目，无需安装 Node、Python、pnpm 或登录原审计工具箱。移动程序时须保留整个“AI助手”目录。
 
