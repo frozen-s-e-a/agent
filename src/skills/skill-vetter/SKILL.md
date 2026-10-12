@@ -2,6 +2,7 @@
 name: skill-vetter
 description: "安装第三方 Skill 前进行安全审查，检查代码红旗和权限范围"
 triggers: "审查skill, 检查skill安全, skill安全, vet skill, review skill, skill审核, 安全检查skill"
+audience: authoring
 ---
 
 # skill-vetter

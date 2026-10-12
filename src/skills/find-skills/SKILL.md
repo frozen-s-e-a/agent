@@ -2,6 +2,7 @@
 name: find-skills
 description: "搜索网络 Skill 注册表，发现可安装的新 Skill"
 triggers: "搜索skill, 查找skill, find skill, 发现技能, 搜索技能, 找skill, skill商店"
+audience: authoring
 ---
 
 # find-skills

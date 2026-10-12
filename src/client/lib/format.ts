@@ -46,3 +46,11 @@ export function errorMessage(value: unknown) {
 
 export const byRecent = <T extends {updatedAt?: string; createdAt?: string}>(a: T, b: T) =>
   String(b.updatedAt || b.createdAt || '').localeCompare(String(a.updatedAt || a.createdAt || ''));
+
+/** Mirrors isLocalModel in src/agent/runtime.mjs: this build only chats with a model on this machine. */
+export function isLocalModelUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname) && !url.username && !url.password;
+  } catch { return false; }
+}

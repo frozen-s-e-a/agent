@@ -1,6 +1,7 @@
 ---
 name: jet-test
 description: JET 会计分录测试。AI 检查序时账数据结构，智能选用内置规则或生成自定义规则，用户确认后执行分录测试。
+triggers: JET, 分录测试, 会计分录测试, 日记账测试, 凭证测试, 筛选凭证, 异常分录, journal entry
 ---
 
 # JET 会计分录测试

@@ -27,6 +27,8 @@ export interface AppSettings {
   defaultMode?: string;
   hasKey?: boolean;
   hasCicpaCookies?: boolean;
+  /** False when the saved address is not a local model service, which this build refuses to chat with. */
+  localModel?: boolean;
 }
 
 export interface Boot {

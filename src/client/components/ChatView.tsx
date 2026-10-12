@@ -76,6 +76,7 @@ export function ChatView({boot, project, sessionId, record, reload, draft, setDr
       onReload={reload}
       onError={onError}
     />
+    {boot.settings.localModel === false && <p className="composer-warning" role="note">当前模型地址不是本机服务，测试版会拒绝发送。请在「运行设置」里改成本机模型地址。</p>}
     <Composer
       projectName={project.name}
       draft={draft}

@@ -14,7 +14,8 @@ export const localToolDefinitions=[
 export const toolLabels={list_local_files:'浏览本地文件',preview_local_file:'读取文件内容',get_audit_tools:'选择审计工具',run_audit_tool:'执行本地审计',get_task_result:'读取执行结果'};
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 function summary(t){return {ok:t.status==='succeeded',taskId:t.id,status:t.status,tool:t.tool,validationStatus:t.validationStatus||'not_checked',publicationStatus:t.publicationStatus||'not_published',error:t.error||undefined,...(t.result?{inputRows:t.result.inputRows,inputUnit:t.result.inputUnit||'输入记录',resultRows:t.result.rowCount,resultUnit:t.result.resultUnit||'结果记录',structureOnly:!!t.result.structureOnly,columns:t.result.columns,preview:t.result.preview?.slice(0,20),previewIsSample:true,outputs:t.result.outputs,warningCount:t.result.warningCount,warnings:t.result.warnings?.slice(0,5),note:'任务已实际执行；样本最多 20 行，完整结果可在任务卡打开。兼容性：'+t.result.compatibility}:{phase:t.phase})};}
-export function createModelTools({store,scheduler,attachments,session,settings,selectedProjectFiles=[],catalog,signal,onPhase,validateTask,runTask,boundResults=true}){
+export const TASK_WAIT_MS=10*60*1000;
+export function createModelTools({store,scheduler,attachments,session,settings,selectedProjectFiles=[],catalog,signal,onPhase,validateTask,runTask,boundResults=true,taskTimeoutMs=TASK_WAIT_MS}){
  const repeated=new Map();
  const selectedSet=new Set(selectedProjectFiles.filter(f=>typeof f==='string').map(f=>path.normalize(f)));
  const project=()=>{const p=session.projectId&&store.get('projects',session.projectId);if(!p)throw Error('当前对话未关联项目，请使用已上传附件，或先创建项目选择文件夹');return p;};
@@ -42,17 +43,18 @@ export function createModelTools({store,scheduler,attachments,session,settings,s
    const signature=JSON.stringify({source:args.source,tool:tool.id,files:args.files,parameters:params,mode});
    if(repeated.has(signature))return repeated.get(signature);
    const files=args.files.map(f=>resolve(args.source,f));const input=args.source==='project'?{project:project(),files:files.map(f=>f.name)}:await attachmentProject(files);signal.throwIfAborted();
-   const existing=store.all('tasks').filter(item=>item.sessionId===session.id&&item.idempotencyKey===signature).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')))[0];
+   // With runTask the caller owns reuse (its keys include input versions); this lookup only covers direct use.
+   const existing=runTask?null:store.all('tasks').filter(item=>item.sessionId===session.id&&item.idempotencyKey===signature).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')))[0];
    if(existing?.status==='succeeded'){
     const cached=summary(existing);repeated.set(signature,cached);return cached;
    }
    const task=runTask?await runTask({sessionId:session.id,project:input.project,tool:tool.id,files:input.files,mode,parameters:params,idempotencyKey:signature}):scheduler.queue(session,input.project,tool.id,input.files,mode,params,settings);
    if(!runTask){if(!task.idempotencyKey)task.idempotencyKey=signature;task.agentSessionId=session.id;store.put('tasks',task);}
-   const cancel=()=>runTask?runTask({cancel:task.id}):scheduler.cancel(task.id);signal.addEventListener('abort',cancel,{once:true});const deadline=Date.now()+240000;
+   const cancel=()=>runTask?runTask({cancel:task.id}):scheduler.cancel(task.id);signal.addEventListener('abort',cancel,{once:true});const deadline=Date.now()+taskTimeoutMs;
    try{while(true){signal.throwIfAborted();const current=store.get('tasks',task.id);if(!['queued','running','cancelling'].includes(current.status)){
       if(current.status==='succeeded'&&validateTask){try{validateTask(current);}catch(error){current.status='failed';current.error=error.message;current.validationStatus='failed';current.publicationStatus='rejected';store.put('tasks',current);}}
       const result=summary(store.get('tasks',task.id));if(result.ok)repeated.set(signature,result);return result;
-    }if(Date.now()>deadline){cancel();return {ok:false,taskId:task.id,status:'interrupted',error:'本地任务超过 4 分钟，已请求停止；请查看任务卡确认最终状态'};}onPhase(tool.name+' · '+(current.phase||'执行中'));await new Promise(r=>setTimeout(r,250));}}finally{signal.removeEventListener('abort',cancel);}
+    }if(Date.now()>deadline){await cancel();const latest=store.get('tasks',task.id);return {...summary(latest),ok:false,error:`本地任务超过 ${Math.round(taskTimeoutMs/60000)} 分钟，已请求停止；当前状态：${latest.status}`};}onPhase(tool.name+' · '+(current.phase||'执行中'));await new Promise(r=>setTimeout(r,250));}}finally{signal.removeEventListener('abort',cancel);}
   }
   throw Error('未知本地工具');
  }

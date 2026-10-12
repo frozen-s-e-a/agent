@@ -3,18 +3,27 @@ import {digest, checkRequestBudget} from './context.mjs';
 export const CONTEXT_BUILDER_VERSION = 'audit-context-builder/1';
 const textual = content => typeof content === 'string' ? content : JSON.stringify(content || '');
 const bytes = value => Buffer.byteLength(JSON.stringify(value), 'utf8');
+const UNFINISHED = new Set(['waiting_for_user','stopped','interrupted','failed']);
+
+/** Earlier runs whose questions and requirements still apply: unfinished, and newer than the last completed run. */
+export function pendingRuns(previousRuns = []) {
+  const lastCompleted = previousRuns.map(item => item.status).lastIndexOf('completed');
+  return previousRuns.slice(lastCompleted + 1).filter(item => UNFINISHED.has(item.status));
+}
 
 export function contextState(run, previousRuns = []) {
   const all = [...previousRuns, run].filter(Boolean);
+  const pending = pendingRuns(previousRuns);
+  const unfinished = [...pending, run].filter(Boolean);
   return {
     version:CONTEXT_BUILDER_VERSION,
     current:{id:run.id, objective:run.objective, workflowIds:run.workflowIds || [], currentNode:run.currentNode, status:run.status, revision:run.revision || 0, inputVersion:run.inputVersion, resumeOf:run.resumeOf},
     plan:run.plan,
     nodeContract:run.nodeContract || null,
-    priorPlans:previousRuns.filter(item=>['waiting_for_user','stopped','interrupted','failed'].includes(item.status)).map(item=>({runId:item.id,plan:item.plan,checkpoints:item.checkpoints,recovery:item.recovery})),
+    priorPlans:pending.map(item=>({runId:item.id,plan:item.plan,checkpoints:item.checkpoints,recovery:item.recovery})),
     requirements:(run.requirements || []).map(item => ({id:item.id, text:item.text, status:item.status, source:item.source})),
     inputs:(run.inputs || []).map(item => ({id:item.id, path:item.path, sha256:item.sha256, size:item.size, status:item.status})),
-    questions:all.flatMap(item => (item.questions || []).filter(q => q.status !== 'answered').map(q => ({...q, runId:item.id}))),
+    questions:unfinished.flatMap(item => (item.questions || []).filter(q => q.status !== 'answered').map(q => ({...q, runId:item.id}))),
     results:all.flatMap(item => (item.steps || []).filter(step => step.result).map(step => ({
       id:step.id, runId:item.id, name:step.name, taskId:step.taskId, status:step.status,
       validationStatus:step.result.validationStatus,

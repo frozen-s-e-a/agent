@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {CheckCircle2, ChevronDown, Cpu, KeyRound, Loader2, ShieldCheck, X, XCircle} from 'lucide-react';
 import {api} from '../api';
-import {errorMessage, fullTime} from '../lib/format';
+import {errorMessage, fullTime, isLocalModelUrl} from '../lib/format';
 import type {AppSettings, Boot, RuntimeStatus} from '../types';
 
 interface Props {
@@ -99,7 +99,9 @@ export function SettingsView({boot, onRefresh, onNotice, onClose}: Props) {
           <div><h3>模型服务与查询授权</h3><p className="muted">AI 提取使用文本或视觉模型，工商查询使用注协登录授权。</p></div>
         </header>
         <div className="form-grid">
-          <label className="field wide"><span>API 地址</span><input value={config.baseUrl} onChange={event => update({baseUrl: event.target.value})} /></label>
+          <label className="field wide"><span>API 地址</span><input value={config.baseUrl} onChange={event => update({baseUrl: event.target.value})} />
+            {!isLocalModelUrl(config.baseUrl) && <small className="field-warning">当前测试版的 Agent 对话只接受本机模型服务（http://127.0.0.1 或 localhost）。这个地址可以保存给审计程序使用，但发送对话会被拒绝。</small>}
+          </label>
           <label className="field"><span>文本模型</span><input value={config.model} onChange={event => update({model: event.target.value})} /></label>
           <label className="field"><span>视觉模型</span><input value={config.visionModel || ''} onChange={event => update({visionModel: event.target.value})} placeholder="用于图片和扫描件" /></label>
           <label className="field"><span>API 密钥</span><input type="password" autoComplete="new-password" value={key} onChange={event => setKey(event.target.value)} placeholder={boot.settings.hasKey ? '已保存，留空保留' : '输入密钥'} /></label>
