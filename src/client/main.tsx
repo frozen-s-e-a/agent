@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { AlertCircle, Check, Loader2, Sparkles, X } from 'lucide-react';
 import { createRoot } from 'react-dom/client';
 import { api } from './api';
-import { ProjectWorkbench } from './ProjectWorkbench';
-import type { Boot, Project, Tool } from './types';
+import { AgentChatWorkspace } from './AgentChatWorkspace';
+import type { Boot, Project } from './types';
 import './style.css';
 
 function App() {
@@ -60,13 +60,10 @@ function App() {
   }
 
   const project = boot.projects.find(item => item.id === projectId) || boot.projects[0];
-  const allTools: Tool[] = [...(boot.tools || []), ...(boot.legacyTools || [])].reduce<Tool[]>((items, tool) => items.some(item => item.id === tool.id) ? items : [...items, tool], []);
-
   return <div className="new-app-root">
-    <ProjectWorkbench
+    <AgentChatWorkspace
       boot={boot}
       initialProject={project}
-      allTools={allTools}
       onRefresh={refresh}
       onSelectProject={selected => setProjectId(selected.id)}
       onCreateProject={createProject}
