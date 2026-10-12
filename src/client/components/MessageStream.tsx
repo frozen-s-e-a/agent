@@ -1,5 +1,5 @@
 import React, {useLayoutEffect, useRef} from 'react';
-import {Loader2, Sparkles} from 'lucide-react';
+import {Columns3, FolderSearch, Loader2, Scale, Sparkles} from 'lucide-react';
 import {isActiveTask} from '../lib/format';
 import {Message} from './Message';
 import {StepGroup} from './StepGroup';
@@ -7,9 +7,9 @@ import {RunPanel} from './RunPanel';
 import type {ChatEvent, SessionRecord, TextEvent, ToolCall} from '../types';
 
 const SUGGESTIONS = [
-  {label: '检查资料结构', text: '检查项目资料结构，输出文件清单。'},
-  {label: '提取需要的字段', text: '提取公司、凭证日期、科目名称、借方金额、贷方金额五列，输出新表。'},
-  {label: '检查借贷平衡', text: '读取示例序时账，检查借贷是否平衡，生成差异清单。'},
+  {label: '检查资料结构', text: '检查项目资料结构，输出文件清单。', icon: FolderSearch},
+  {label: '提取需要的字段', text: '提取公司、凭证日期、科目名称、借方金额、贷方金额五列，输出新表。', icon: Columns3},
+  {label: '检查借贷平衡', text: '读取示例序时账，检查借贷是否平衡，生成差异清单。', icon: Scale},
 ];
 
 type Block = {kind: 'event'; event: TextEvent} | {kind: 'steps'; id: string; calls: ToolCall[]};
@@ -65,6 +65,7 @@ export function MessageStream({record, demo, onSuggestion, onReload, onError}: P
         <p className="muted">直接说目标、资料范围和希望得到的成果。Agent 会先读取资料，再选择可用的独立审计程序；资料或关键口径不足时，会在这里集中提问。</p>
         <div className="suggestions">
           {SUGGESTIONS.map(item => <button key={item.label} className="suggestion" aria-label={item.label} title={item.text} onClick={() => onSuggestion(item.text)}>
+            <span className="suggestion-icon"><item.icon size={15} aria-hidden="true" /></span>
             <strong>{item.label}</strong><small>{item.text}</small>
           </button>)}
         </div>

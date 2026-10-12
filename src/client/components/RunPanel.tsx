@@ -59,10 +59,10 @@ export function RunPanel({record, onReload, onError}: Props) {
       </header>
       <ul className="file-list">
         {task.result!.outputs!.map((output, index) => <li className="file-row agent-result-file" key={output.path || output.name + index}>
-          <FileText size={15} className="muted" aria-hidden="true" />
+          <FileType name={output.name} />
           <span className="file-name">{output.name}</span>
-          <button className="button small" disabled={busy} onClick={() => previewOutput(task, output)}><Eye size={14} aria-hidden="true" />预览</button>
-          <button className="button small" disabled={busy} onClick={() => openOutput(task, output)}><ExternalLink size={14} aria-hidden="true" />打开成果</button>
+          <button className="button small ghost" disabled={busy} onClick={() => previewOutput(task, output)}><Eye size={14} aria-hidden="true" />预览</button>
+          <button className="button small ghost" disabled={busy} onClick={() => openOutput(task, output)}><ExternalLink size={14} aria-hidden="true" />打开成果</button>
         </li>)}
       </ul>
       {!!task.result?.warnings?.length && <details className="warnings">
@@ -100,4 +100,11 @@ export function RunPanel({record, onReload, onError}: Props) {
 
     {preview && <FilePreview value={preview} onClose={() => setPreview(null)} onSource={previewOrigin} />}
   </div>;
+}
+
+/** Extension badge, coloured by family so tables, workbooks and data files are told apart at a glance. */
+function FileType({name}: {name: string}) {
+  const ext = (name.match(/\.([a-z0-9]+)$/i)?.[1] || 'file').toLowerCase();
+  const family = ['xlsx', 'xlsm', 'xls'].includes(ext) ? 'sheet' : ['csv', 'tsv', 'txt'].includes(ext) ? 'text' : ['parquet', 'duckdb', 'json'].includes(ext) ? 'data' : ['pdf', 'docx', 'doc'].includes(ext) ? 'doc' : 'other';
+  return <span className={'file-type type-' + family} aria-hidden="true">{ext.slice(0, 4).toUpperCase()}</span>;
 }
