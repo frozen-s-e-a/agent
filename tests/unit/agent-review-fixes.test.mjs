@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {Store} from '../../src/conversations/store.mjs';
 import {captureInputs,collectUnusedBlobs,removeTree,workspaceRoot} from '../../src/agent/inputs.mjs';
-import {matchPlannedStep,isBareContinue,isExecutionStep,isLocalModel} from '../../src/agent/runtime.mjs';
+import {matchPlannedStep,isBareContinue,isExecutionStep} from '../../src/agent/runtime.mjs';
 import {pendingRuns,contextState} from '../../src/agent/context-builder.mjs';
 import {estimateTokens} from '../../src/agent/context.mjs';
 import {loadSkills,skillContext} from '../../src/skills/loader.mjs';
@@ -70,10 +70,18 @@ test('only audit-program steps count toward the outcome, and a bare continue ans
   for(const text of ['期间是 2026 年','金额单位为万元，继续'])assert.equal(isBareContinue(text),false,text);
 });
 
-test('local model check accepts only loopback http addresses', () => {
-  assert.equal(isLocalModel({baseUrl:'http://127.0.0.1:11434/v1'}),true);
-  assert.equal(isLocalModel({baseUrl:'https://api.deepseek.com'}),false);
-  assert.equal(isLocalModel({baseUrl:'not a url'}),false);
+test('a conversation can use a remote model service once address and model are set', async () => {
+  const dir=temp('agent-remote-'),backend=await createBackend({dataRoot:dir});
+  try {
+    const project=await backend.action('demo.create'),session=await backend.action('session.create',{projectId:project.id});
+    await assert.rejects(backend.action('chat.send',{sessionId:session.id,text:'检查借贷平衡'}),/服务地址/);
+    // A remote HTTPS gateway is accepted; the unresolvable host fails later inside the turn, not at the gate.
+    await backend.action('settings.save',{baseUrl:'https://model.invalid/v1',model:'enterprise-128k'});
+    await backend.action('chat.send',{sessionId:session.id,text:'检查借贷平衡'});
+    for(let i=0;i<100&&(await backend.action('session.get',{id:session.id})).streaming;i++)await new Promise(resolve=>setTimeout(resolve,100));
+    const events=(await backend.action('session.get',{id:session.id})).events;
+    assert.ok(events.some(event=>event.type==='error'&&!/本机/.test(event.text)),'turn ends with a connection error');
+  } finally {backend.close();removeTree(dir);}
 });
 
 test('questions of runs before the last completed run are no longer pending', () => {

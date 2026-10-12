@@ -1,4 +1,4 @@
-/* 审计 Agent · 清爽专业 2.1 — tokens follow DESIGN.md. */
+/* 审计 Agent · 清爽专业 2.1 — tokens follow DESIGN.md. Light theme only. */
 
 :root {
   color-scheme: light;
@@ -49,46 +49,6 @@
   font-synthesis: none;
   font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --chrome: #0f1013;
-    --bg: #16171b;
-    --surface: #1c1d22;
-    --surface-muted: #23252b;
-    --surface-sunken: #121316;
-    --glass: #16171bcc;
-    --ink: #eceef2;
-    --ink-2: #a9aeb9;
-    --ink-3: #7d8391;
-    --ink-4: #555a66;
-    --brand: #7b7bf0;
-    --brand-hover: #8d8df5;
-    --brand-ink: #a5a5ff;
-    --brand-soft: #7b7bf014;
-    --brand-tint: #7b7bf026;
-    --brand-line: #7b7bf05c;
-    --user-bubble: #262849;
-    --success: #4ade80;
-    --success-soft: #4ade801a;
-    --warning: #fbbf24;
-    --warning-soft: #fbbf241a;
-    --danger: #f87171;
-    --danger-soft: #f871711a;
-    --highlight: #fbbf2433;
-    --line: #2a2c33;
-    --line-strong: #353841;
-    --shadow-xs: 0 1px 1px #00000033;
-    --shadow: 0 1px 2px #0000004d;
-    --shadow-lift: 0 1px 2px #0000004d, 0 8px 24px #00000059;
-    --shadow-pop: 0 24px 64px #00000080;
-    --scrim: #00000099;
-    --veil: #ffffff0a;
-    --veil-strong: #ffffff14;
-    --mark: linear-gradient(140deg, #8a8af5, #5b5bd6);
-  }
 }
 
 * { box-sizing: border-box; }
@@ -325,7 +285,6 @@ details[open] > summary > .chevron, [aria-expanded="true"] > .chevron, .steps.op
 .file-type.type-text { background: #0891b217; color: #0e7490; }
 .file-type.type-data { background: var(--brand-tint); color: var(--brand-ink); }
 .file-type.type-doc { background: #dc262612; color: var(--danger); }
-@media (prefers-color-scheme: dark) { .file-type.type-text { color: #67e8f9; } }
 .warnings { margin: 2px 0 10px; font-size: 12px; color: var(--warning); }
 .warnings p { margin-top: 4px; color: var(--ink-2); }
 
@@ -366,8 +325,6 @@ details[open] > summary > .chevron, [aria-expanded="true"] > .chevron, .steps.op
 .send-button:active:not(:disabled) { transform: scale(.95); }
 .send-button:disabled { background: var(--surface-sunken); color: var(--ink-4); box-shadow: none; cursor: not-allowed; }
 .send-button.stop, .send-button.stop:hover:not(:disabled) { background: var(--ink); color: var(--surface); box-shadow: none; }
-.field-warning { font-size: 11.5px; line-height: 1.55; color: var(--warning); }
-.composer-warning { width: min(732px, calc(100% - 48px)); margin: 0 auto 8px; padding: 7px 12px; border-radius: var(--radius-sm); background: var(--warning-soft); color: var(--warning); font-size: 12px; }
 .composer-help { margin-top: 6px; text-align: center; font-size: 10.5px; color: var(--ink-4); }
 
 /* ---------- History drawer ---------- */

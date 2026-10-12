@@ -30,7 +30,7 @@ Windows 桌面审计 Agent，当前版本 `0.1.0-internal.34`。用户在聊天�
 
 ## 文档和依赖
 
-- [测试版使用说明](docs/Agent方案/Agent测试版使用说明.md)：启动、可测场景、本机模型和数据位置。
+- [测试版使用说明](docs/Agent方案/Agent测试版使用说明.md)：启动、可测场景、模型服务配置和数据位置。
 - [本轮实施记录](docs/Agent方案/Agent工作流实施记录-20261012.md)：五项实现及验证边界。
 - [节点与能力合同](docs/Agent方案/Agent节点与能力合同.json)、[能力绑定矩阵](docs/Agent方案/Agent能力绑定矩阵.md)：从实际代码生成的版本、阶段、输入、输出和工具映射。
 - [Agent 方案目录](docs/Agent方案/README.md)：原方案与待细化清单。

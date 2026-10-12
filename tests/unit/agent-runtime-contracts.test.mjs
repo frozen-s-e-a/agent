@@ -7,7 +7,7 @@ import {Store} from '../../src/conversations/store.mjs';
 import {createAgentRun,transitionAgentRun,recoverAgentRuns} from '../../src/agent/state.mjs';
 import {rebuildContext,requiredStateFingerprint,boundedToolResult,evidenceRequestAllowed} from '../../src/agent/context-builder.mjs';
 import {normalizeToolResult} from '../../src/agent/tool-results.mjs';
-import {assertLocalModel} from '../../src/agent/runtime.mjs';
+import {normalizeBase} from '../../src/harness-adapter/connection.mjs';
 import {buildAgentWorkflows,verifyWorkflowPlan} from '../../src/agent/definitions.mjs';
 import {buildCatalog} from '../../src/workflows/contracts.mjs';
 const catalog=buildCatalog(JSON.parse(fs.readFileSync('src/resources/tools.json','utf8')),JSON.parse(fs.readFileSync('src/resources/audit-task-tools.json','utf8'))),flows=buildAgentWorkflows(catalog);
@@ -48,9 +48,10 @@ test('tool contracts keep failed, pending, waiting and unknown submissions disti
   assert.equal(normalizeToolResult({structuredContent:{needs_confirmation:true}}).status,'awaiting_input');
 });
 
-test('offline execution explicitly rejects external model endpoints',()=>{
-  assertLocalModel({baseUrl:'http://127.0.0.1:1234/v1'});
-  for(const address of ['https://model.example/v1','http://example.com/v1','http://127.0.0.1@outside.example'])assert.throws(()=>assertLocalModel({baseUrl:address}),/本机/);
+test('model endpoints need HTTPS unless they are on this machine or the internal network',()=>{
+  for(const address of ['https://model.example/v1','http://127.0.0.1:1234/v1','http://10.2.3.4:8000/v1','http://192.168.1.20/v1'])assert.doesNotThrow(()=>normalizeBase(address),address);
+  assert.throws(()=>normalizeBase('http://example.com/v1'),/HTTPS/);
+  assert.throws(()=>normalizeBase('http://user:pass@10.2.3.4/v1'),/账号/);
 });
 
 test('metadata transaction commits a complete checkpoint or rolls back both records',()=>{

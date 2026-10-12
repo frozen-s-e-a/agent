@@ -14,7 +14,7 @@ import {createMcpRunner} from '../workflows/mcp-runner.mjs';
 import {createHash} from 'node:crypto';
 import {buildAgentWorkflows} from '../agent/definitions.mjs';
 import {verifyTaskArtifacts,recoverPublishedTask} from '../agent/validation.mjs';
-import {createAgentRuntime,isLocalModel} from '../agent/runtime.mjs';
+import {createAgentRuntime} from '../agent/runtime.mjs';
 import {fileHash,removeTree,workspaceRoot,collectUnusedBlobs} from '../agent/inputs.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const readJSON=p=>JSON.parse(fs.readFileSync(path.join(ROOT,p),'utf8'));
@@ -25,8 +25,7 @@ const agentWorkflows=buildAgentWorkflows(catalog);
 const verificationPath=path.join(ROOT,'src/resources/verification.json');
 const verification=fs.existsSync(verificationPath)?readJSON('src/resources/verification.json'):{};
 const jet=readJSON('src/resources/jet-rules.json');
-// This build only talks to a local model service (see assertLocalModel), so the defaults point there.
-const defaults={id:'settings',baseUrl:'http://127.0.0.1:11434/v1',model:'',visionModel:'',models:[],temperature:0.2,maxTokens:4096,contextWindow:128000,memoryMiB:2048,threads:2,defaultMode:'auto'};
+const defaults={id:'settings',baseUrl:'',model:'',visionModel:'',models:[],temperature:0.2,maxTokens:4096,contextWindow:128000,memoryMiB:2048,threads:2,defaultMode:'auto'};
 export async function createBackend(options={}){
  const dataRoot=options.dataRoot||process.env.AUDIT_DATA_DIR||path.join(process.env.LOCALAPPDATA||os.homedir(),'AuditAssistant');
  const store=new Store(dataRoot),scheduler=new Scheduler(store);let apiKey='',cicpaCookies='';const streams=new Map();let previews=0;
@@ -36,7 +35,7 @@ export async function createBackend(options={}){
  const legacyCatalog=async()=>{if(legacyMeta)return legacyMeta;legacyMeta=legacyToolMetadata;return legacyMeta;};
  const legacyUiTools=async()=>catalog.filter(t=>t.engine==='mcp');
  for(const c of store.all('toolCalls'))if(c.status==='running')store.put('toolCalls',{...c,status:'cancelled',result:{ok:false,error:'上次应用关闭中断了调用；已产生的结果可在任务卡核对'}});
- const settings=()=>{const value={...defaults,...store.get('settings','settings'),hasKey:!!apiKey,hasCicpaCookies:!!cicpaCookies};return {...value,localModel:isLocalModel(value)};};
+ const settings=()=>{const value={...defaults,...store.get('settings','settings'),hasKey:!!apiKey,hasCicpaCookies:!!cicpaCookies};return value;};
  const agents=createAgentRuntime({store,scheduler,mcpRunner,attachments,catalog,workflows:agentWorkflows,skills:workflows.skills,settings,secrets:()=>({apiKey}),streams});
  const must=(kind,id)=>{const x=store.get(kind,id);if(!x)throw new Error('找不到指定的'+kind);return x;};
  async function action(method,p={}){
