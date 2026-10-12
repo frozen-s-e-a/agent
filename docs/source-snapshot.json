@@ -1,0 +1,1423 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-12T03:08:44.9196809Z",
+  "sourceVersion": "0.1.0-internal.29",
+  "sourceBaseRevision": "e747399ae380e8bfe86ab941e09ecdb65ab44c21",
+  "includesUncommittedSource": true,
+  "fileCount": 271,
+  "files": [
+    {
+      "path": "src/audit-domain/task_worker.py",
+      "bytes": 1475,
+      "sha256": "6b8a6c28d4e6cfcb5fe07507bc54a980530a118e7f83ae23ef5b7558dd048818"
+    },
+    {
+      "path": "src/audit-domain/recovered/__init__.py",
+      "bytes": 786,
+      "sha256": "9ae3b46a73a270de25f3b6faefe66463a19d2394935b5aae820e11dbd781177d"
+    },
+    {
+      "path": "src/audit-domain/recovered/accounting.py",
+      "bytes": 6513,
+      "sha256": "3d627075f4b6636de6b9e8892b52d7da0644078093792b54344f0c409948f820"
+    },
+    {
+      "path": "src/audit-domain/recovered/bank_helpers.py",
+      "bytes": 1590,
+      "sha256": "17edb34b03deb5a219696c18630cfeb0dfa20f00a77530a978c0a697c9ce4fb3"
+    },
+    {
+      "path": "src/audit-domain/recovered/date_rules.py",
+      "bytes": 1429,
+      "sha256": "bd5273dd977d3ee1347bfba8f20df4f83ad605b9611ffc4488c7a00f55ee0475"
+    },
+    {
+      "path": "src/audit-domain/recovered/ipo.py",
+      "bytes": 11018,
+      "sha256": "c27c5cd78e7c474aa00bcaee390e59bb5a66433262a646d2420b88a7170a9301"
+    },
+    {
+      "path": "src/audit-domain/recovered/jet_builtin_rules.json",
+      "bytes": 8261,
+      "sha256": "439764b2472326795055eb3b6e41c62845e9ff6709cb7e8e8e324787ccccddd6"
+    },
+    {
+      "path": "src/audit-domain/recovered/jet.py",
+      "bytes": 4891,
+      "sha256": "ccd444c5d1855c20f126a21ef7886b435cf74e6b2c83b10548c7e045e1977a5d"
+    },
+    {
+      "path": "src/audit-domain/recovered/kernels.py",
+      "bytes": 8886,
+      "sha256": "d3f422acb71829dd3508e8c8aa77e2d69a5932b457bbc6a2dc4c9a9d8f76d91c"
+    },
+    {
+      "path": "src/audit-domain/recovered/matching.py",
+      "bytes": 2610,
+      "sha256": "f13fec5d8e1babf62687f21778ed81a2a1c7d98c2ad5652ab486186ebe6229f1"
+    },
+    {
+      "path": "src/audit-domain/recovered/README.md",
+      "bytes": 1899,
+      "sha256": "0fcc386724281aed68535febdc899435c648940f8a5ab06b42887714e21c114f"
+    },
+    {
+      "path": "src/audit-domain/recovered/related.py",
+      "bytes": 13235,
+      "sha256": "27e10b85e3a615ce3aa87cb219d308ae0cc8cce8b0741fcc96018897475fd271"
+    },
+    {
+      "path": "src/audit-domain/recovered/relation_helpers.py",
+      "bytes": 1553,
+      "sha256": "982c6cbef5bd9eb2cd565ad105f15e6f967a94e315c52aa1e52123c9e3844872"
+    },
+    {
+      "path": "src/audit-domain/recovered/requirements-research.txt",
+      "bytes": 46,
+      "sha256": "f244dbb451b4881192a7cc5de453a62d20548a4ad1f5577376bac81ed3ddc179"
+    },
+    {
+      "path": "src/audit-domain/recovered/table_files.py",
+      "bytes": 5556,
+      "sha256": "e75a2ebc5ee239933eece00c32ef8fb399aedda409a7478dbecc4bc83c573d3b"
+    },
+    {
+      "path": "src/audit-domain/recovered/workpapers.py",
+      "bytes": 7330,
+      "sha256": "702bb549c8cb9a89766fb3ee472463ae75cf92214a68a7c69afa1b159966a135"
+    },
+    {
+      "path": "src/audit-domain/runtime/__init__.py",
+      "bytes": 79,
+      "sha256": "abe6833a817abbd791f408e94242b966885396839f5785d3833f16b0b11c4026"
+    },
+    {
+      "path": "src/audit-domain/runtime/analysis_tasks.py",
+      "bytes": 17670,
+      "sha256": "9041ce8d51af33fef592b499d2cf6ad04784431b2b5da22ba3a6bae3e84493ff"
+    },
+    {
+      "path": "src/audit-domain/runtime/bank_tasks.py",
+      "bytes": 20367,
+      "sha256": "ef97e3288e78f7ebbf88222dfbc33a7360e45d52cbda100e8cf1552cfb185349"
+    },
+    {
+      "path": "src/audit-domain/runtime/company_tasks.py",
+      "bytes": 14014,
+      "sha256": "d7dd654fe696e07dd34b8a96bb46ccbf8ad5689a225ca5d95762018e3163b3d2"
+    },
+    {
+      "path": "src/audit-domain/runtime/context.py",
+      "bytes": 9844,
+      "sha256": "61dd9e8a670c3eeb88723331c76d583ee068e87b5e67627ec945ed177d8c70f1"
+    },
+    {
+      "path": "src/audit-domain/runtime/document_tasks.py",
+      "bytes": 19427,
+      "sha256": "eb9f44418311cffc31eb7335e19364ed94920f040aaa6cf56ef88e652b26064c"
+    },
+    {
+      "path": "src/audit-domain/runtime/network_tasks.py",
+      "bytes": 16185,
+      "sha256": "f61033af0348bc975f38bdccfd007de5fb20a6bd8eb714b13033d8bc21424430"
+    },
+    {
+      "path": "src/audit-domain/runtime/registry.py",
+      "bytes": 1083,
+      "sha256": "1ca1b73bcfa7c52c75b911061ed7703c1d1a793e9763d3963d19172e67ff576f"
+    },
+    {
+      "path": "src/audit-domain/runtime/table_tasks.py",
+      "bytes": 8932,
+      "sha256": "6a281225688f90a648244503f427812f749ee672f0837207f50268cdc670870b"
+    },
+    {
+      "path": "src/audit-domain/runtime/transport.py",
+      "bytes": 8144,
+      "sha256": "ac2b587c0244002619ab0968f5bd7c085a8b5bc8427734d5eb121aa0de970e3d"
+    },
+    {
+      "path": "src/audit-domain/runtime/workbook_tasks.py",
+      "bytes": 12089,
+      "sha256": "2984be32a7b6f401526d48d7a35438a492ba9b12cec741e1d92028d355b1bb9c"
+    },
+    {
+      "path": "src/audit-domain/runtime/workpaper_tasks.py",
+      "bytes": 23164,
+      "sha256": "8ee7c1f6325755f79a81b61c1b9ece3af00a43a550aa6547ecdd856ee2b5471f"
+    },
+    {
+      "path": "src/audit-worker/attachment_extract.py",
+      "bytes": 2149,
+      "sha256": "ee0ab888e8a9fc9e75765f010be76ba040373e2829d9efbeab81abb4e0555db8"
+    },
+    {
+      "path": "src/audit-worker/file_structure.py",
+      "bytes": 3718,
+      "sha256": "62bf0e2ec9905a66b0f29be3ebac1f3cb419688f8ed450f3f2a971be61e059c3"
+    },
+    {
+      "path": "src/audit-worker/inspect_layout.py",
+      "bytes": 1731,
+      "sha256": "0ef9f2cca314f5ff3cbed4f2ed6a62a6b690f79101a15dbd264eea1797e1e179"
+    },
+    {
+      "path": "src/audit-worker/worker.py",
+      "bytes": 28218,
+      "sha256": "f5209ed112ea42881da1df30503bc50c4ec340d696b2e1326d5b7d542d9e5492"
+    },
+    {
+      "path": "src/client/api.ts",
+      "bytes": 475,
+      "sha256": "ea1dd8ec695eb7f43de6d3e546dd430d637b574bdff7cb539c47632bbc0f527f"
+    },
+    {
+      "path": "src/client/index.html",
+      "bytes": 529,
+      "sha256": "54e2d68f10337cc749121b244adecd579661bda7f33f24ba4e7e7fff1899d22a"
+    },
+    {
+      "path": "src/client/main.tsx",
+      "bytes": 3587,
+      "sha256": "9735f018d64d8f865f4fefd2dadb4ecedd25bf62e394ac637c23f9bd8756f678"
+    },
+    {
+      "path": "src/client/project-workbench.css",
+      "bytes": 24095,
+      "sha256": "5dcb853a6239f11a24561e0a6a0bc721e36e7cb2a91ebc5b5c78d8c018bb2408"
+    },
+    {
+      "path": "src/client/ProjectWorkbench.tsx",
+      "bytes": 24346,
+      "sha256": "3c4915a88f9110484d7fa73fd22d9f3e7c6e0d012ae745c1f75675474bff90e1"
+    },
+    {
+      "path": "src/client/RedesignedApp.tsx",
+      "bytes": 7821,
+      "sha256": "3df0cf400cca5297d6d450ae43ac3f036d0a9699ee560c644a15720e09c15384"
+    },
+    {
+      "path": "src/client/ServiceSettings.tsx",
+      "bytes": 5496,
+      "sha256": "a8e653678ebc24e2503a84137f700832462eb964c79331220007273fd2f35982"
+    },
+    {
+      "path": "src/client/style.css",
+      "bytes": 32,
+      "sha256": "30ff16acbb9be1a29b3cd1f51da841cad732ea3de3bb05babd4c078c3c3e658a"
+    },
+    {
+      "path": "src/client/taskDefinitions.ts",
+      "bytes": 918,
+      "sha256": "204cf2766bad667dfc0b1317a89f8900700ff1d89d6821e198371944c26914fb"
+    },
+    {
+      "path": "src/client/types.ts",
+      "bytes": 2095,
+      "sha256": "a3cc5872f57fee7c38e40d1303c7fc5b94afe33d8b4cf9b95a3763900e12184d"
+    },
+    {
+      "path": "src/client/workbenchActions.ts",
+      "bytes": 6470,
+      "sha256": "53df2fe0c4a16f81d5d34f8172157a1b6df58c2284a514a115c08ccc7ddaf2bb"
+    },
+    {
+      "path": "src/client/WorkbenchOperation.tsx",
+      "bytes": 14269,
+      "sha256": "d6c4c2bcf19d55a4e6a4772ea3f8d224b0f3426eac00d38c97f5b399c862b3b7"
+    },
+    {
+      "path": "src/client/Workflow.tsx",
+      "bytes": 30713,
+      "sha256": "92a4004e723503413cb55cbebf5f908c4fbf9baae3bc89ae5e4ce42e3fd46c5e"
+    },
+    {
+      "path": "src/client/workspace.css",
+      "bytes": 18319,
+      "sha256": "79c94bf10b782d1bc2025ab1630503da1b775050cec0899e53f6a5ec96534b3c"
+    },
+    {
+      "path": "src/contracts/task.schema.json",
+      "bytes": 702,
+      "sha256": "87424959714f0c1a32b896a8312b372bf00e342d65a6e7ecdda872a26c2ea038"
+    },
+    {
+      "path": "src/conversations/attachments.mjs",
+      "bytes": 9921,
+      "sha256": "8475242c52cd929cc597e5a641af7b313ce3aecd07a765e6ab1fb814d8f3dd3d"
+    },
+    {
+      "path": "src/conversations/store.mjs",
+      "bytes": 2130,
+      "sha256": "f4a2e23f5f41841be1f399ddaaf0da764f633348b4b644fa8941404aa05b1891"
+    },
+    {
+      "path": "src/desktop-launcher/app.manifest",
+      "bytes": 590,
+      "sha256": "c21827f8275bb1ec05407bc3ecdfcb826360066a71c3f682152bc0345a152596"
+    },
+    {
+      "path": "src/desktop-launcher/PortableLauncher.cs",
+      "bytes": 10474,
+      "sha256": "81dd09d3358154df4baa41b332c43ca9e37d726b369858f5d668726824643873"
+    },
+    {
+      "path": "src/file-ops/paths.mjs",
+      "bytes": 787,
+      "sha256": "d499502885b1483bfa9aeaabf408a160064a7a4ce6ce9282e62d52a5983943f7"
+    },
+    {
+      "path": "src/harness-adapter/agent.mjs",
+      "bytes": 1807,
+      "sha256": "c024c7c3e0c50d959ca8dd5dbffddb04af29de9c9b02da9a28698c410dfa803f"
+    },
+    {
+      "path": "src/harness-adapter/connection.mjs",
+      "bytes": 5614,
+      "sha256": "5ab18880db5d00cd58f2d0b5b9d59c48b3821197aa0eadbac0464c792b2d4099"
+    },
+    {
+      "path": "src/harness-adapter/model.mjs",
+      "bytes": 5891,
+      "sha256": "75ce0906f8b77624f2613362b9ec461632895a9c6506f8b12be3900b32e5c3db"
+    },
+    {
+      "path": "src/host/electron.cjs",
+      "bytes": 11149,
+      "sha256": "d1e329699ec60b39b2881afe020b931c266efab07238866624d943f9f24a8373"
+    },
+    {
+      "path": "src/host/model-tools.mjs",
+      "bytes": 11485,
+      "sha256": "697fd3a3dc8cba004117345767b6205d8ed0f1c9b1429701a6dd6f48b4a2abd7"
+    },
+    {
+      "path": "src/host/preload.cjs",
+      "bytes": 188,
+      "sha256": "d7e6a103a65c9a8df4baec21de92ced4ae23cad6a2826af15051d328ad814f06"
+    },
+    {
+      "path": "src/host/service.mjs",
+      "bytes": 26268,
+      "sha256": "6d05e7264ea3fb4be74db51ad370d6b7c7e084e5c84aaf6e6df1efad58ff99e2"
+    },
+    {
+      "path": "src/host/stdio.mjs",
+      "bytes": 971,
+      "sha256": "1b76d724260a7a4d2016cb7ae187907db607d6fd9d64f4fea2392517efdeff93"
+    },
+    {
+      "path": "src/mcp/arguments.mjs",
+      "bytes": 2036,
+      "sha256": "55427d3e27bf67a2a01a06014b208d6d00975506f349edf309e611ffde22f857"
+    },
+    {
+      "path": "src/mcp/independent-client.mjs",
+      "bytes": 2816,
+      "sha256": "a6ee385f1a237c302b2a3e5c2bfb5bd1ec39180bdb8ea25c12a3f8147c416536"
+    },
+    {
+      "path": "src/resources/audit-task-tools.json",
+      "bytes": 60391,
+      "sha256": "cf98d8554d799d9034d14ceef30a7e00824107d9d19fb7eef2af8a37c220db27"
+    },
+    {
+      "path": "src/resources/jet-rules.json",
+      "bytes": 7010,
+      "sha256": "ccbb0cd900b9644454f6ff11df362bcdf7a30a8c59a7bc287e6a3bab2ab9e098"
+    },
+    {
+      "path": "src/resources/mcp-migration.json",
+      "bytes": 3892,
+      "sha256": "7cb6a372bd469b7352af375e599cc1874b76eaf316e0bca812212783e63f44ba"
+    },
+    {
+      "path": "src/resources/tools.json",
+      "bytes": 6990,
+      "sha256": "681cffa4796f180b29f920269d49377c82bfe1582502574aa345784f2354487f"
+    },
+    {
+      "path": "src/resources/verification.json",
+      "bytes": 2882,
+      "sha256": "4422f367fc825d154b967227e9235effe2884d03bad14ebdc7a59429c981f937"
+    },
+    {
+      "path": "src/resources/templates/插附注批注配置表.xlsx",
+      "bytes": 8603,
+      "sha256": "6475f360cfe969ad669c6a71937c8e5e01b67d87cc012d948babcd9154e95336"
+    },
+    {
+      "path": "src/resources/templates/多表汇集-来源文件.xlsx",
+      "bytes": 9001,
+      "sha256": "83eb1fdaf46ea0711e750b398dbddf48a6f412033f2ad0056bd872d41579735c"
+    },
+    {
+      "path": "src/resources/templates/多表汇集-来源文件夹.xlsx",
+      "bytes": 9088,
+      "sha256": "baa84a67bf35360aebdb72c8a42a3a0671b07d143ddf792179e680c8ac731961"
+    },
+    {
+      "path": "src/resources/templates/多类型文件信息提取配置表.xlsx",
+      "bytes": 9175,
+      "sha256": "13eb3a4b5f7b49672dea83168240975a9118ad0e5254929be8e7c229919a2452"
+    },
+    {
+      "path": "src/resources/templates/辅助项选择配置表.xlsx",
+      "bytes": 9241,
+      "sha256": "50bbc10d80d8c69ef4173d56a7e5616eefdc285bd9bed0cd4c394ac8d9798e81"
+    },
+    {
+      "path": "src/resources/templates/公式填充配置表.xlsx",
+      "bytes": 9424,
+      "sha256": "6c9d9535686d234e5c97a66354ae4d8a1e5111bed80f0233ae89ae892a3d2aa7"
+    },
+    {
+      "path": "src/resources/templates/关联方核查配置表.xlsx",
+      "bytes": 10047,
+      "sha256": "4ef2b2de6ad4ea41e6057ba3989bc48c127fc2742ee000c6b6e908f8069d1463"
+    },
+    {
+      "path": "src/resources/templates/截止测试配置表.xlsx",
+      "bytes": 8707,
+      "sha256": "44fc0633ded6231f6e5c99f231bf10503f9306c331aad630931c8db8f6d9ed18"
+    },
+    {
+      "path": "src/resources/templates/科目分配派工.xlsx",
+      "bytes": 10605,
+      "sha256": "b7ebf78863240838456af67cfb3ddf5561513dac7407eb0b0378fa495ae749ad"
+    },
+    {
+      "path": "src/resources/templates/科目余额表后处理配置表.xlsx",
+      "bytes": 10734,
+      "sha256": "a542eace8d99756d05344f590a4f8bc8dd6add33a2bdd996217933b8e9be78f2"
+    },
+    {
+      "path": "src/resources/templates/链接提取配置表.xlsx",
+      "bytes": 8199,
+      "sha256": "1f42bb4917ef5c34c23b736eeb7d2aad460ade63b0bae39187e11291955f19e1"
+    },
+    {
+      "path": "src/resources/templates/链接替换-单元格区域替换.xlsx",
+      "bytes": 8270,
+      "sha256": "7ee980e13a28b6b73a81592b4b51450f3ee9c7f34eabee574840ad23290e6987"
+    },
+    {
+      "path": "src/resources/templates/链接替换-文件夹路径替换.xlsx",
+      "bytes": 6727,
+      "sha256": "1219e13de3a2bc814b20cd22fa81a2f3b968d43ed84dd4bcfa59bbce486600f2"
+    },
+    {
+      "path": "src/resources/templates/链接替换-文件名替换.xlsx",
+      "bytes": 6682,
+      "sha256": "51b141511286b67ab432157890064801942f1030ec663c9235318b67f50b2904"
+    },
+    {
+      "path": "src/resources/templates/批量生成小账套.xlsx",
+      "bytes": 10116,
+      "sha256": "e7646b761c3762b041abbb8fa89d43b709d8a359c3a5cee1793328bbc0647a4a"
+    },
+    {
+      "path": "src/resources/templates/披露表提取配置表.xlsx",
+      "bytes": 8318,
+      "sha256": "4802c8db4ae2c5f63fdb5f992113388add70830485b07db77e2d677b4d6a3e8f"
+    },
+    {
+      "path": "src/resources/templates/披露口径提取配置表.xlsx",
+      "bytes": 8531,
+      "sha256": "cf4bb95ee5d38669b4531701d686103ef74f2d62cfcdf6fe37e7ec19742a37cc"
+    },
+    {
+      "path": "src/resources/templates/凭证检查配置表.xlsx",
+      "bytes": 11126,
+      "sha256": "3e5e819cade81aabc30cfd5a74c07492ee5fe1558c3020a6ca4bf8a68532ece1"
+    },
+    {
+      "path": "src/resources/templates/文本提取匹配配置表.xlsx",
+      "bytes": 10767,
+      "sha256": "16c4ca3e8da1991119be7c97abd85b4b8e32080c3a35ffbe9b1f7240b3eea75f"
+    },
+    {
+      "path": "src/resources/templates/文件分类配置表.xlsx",
+      "bytes": 9194,
+      "sha256": "1a0850356d37f86e8f271e64821985f7e98ec2d89abd7b9f6245f4eafb9ed378"
+    },
+    {
+      "path": "src/resources/templates/小账套-模板.xlsm",
+      "bytes": 261749,
+      "sha256": "c4ec671a6eda4fcbb828d99956af57ff877354e4b0b7dfd22996cef0d46fc57b"
+    },
+    {
+      "path": "src/resources/templates/询证函模板-电子格式二.xlsx",
+      "bytes": 126647,
+      "sha256": "bbdabc8c9ed5e5e126040ae45ee87bb0ef39d050af685e074db06300a257fbdb"
+    },
+    {
+      "path": "src/resources/templates/询证函模板-纸质格式二.xlsx",
+      "bytes": 127972,
+      "sha256": "bba7f331130875ecdc63ff732b9655a90e49428dfbd8c9d5514d406a31ec0513"
+    },
+    {
+      "path": "src/resources/templates/询证函模板-纸质格式一.xlsx",
+      "bytes": 127978,
+      "sha256": "4f6f4bcf62474f64573117cd294cf4a716b3833cf7905369a227a7692101b81e"
+    },
+    {
+      "path": "src/resources/templates/银行函证表格生成-电子格式二配置表.xlsx",
+      "bytes": 14575,
+      "sha256": "054ae340a6cbb2b25ec2e1ac6486cdc6c176944913fc733433c7a87631fa01d7"
+    },
+    {
+      "path": "src/resources/templates/银行函证表格生成-纸质格式二配置表.xlsx",
+      "bytes": 16906,
+      "sha256": "f298fd41d925461ad23d26ad577433ee0b3564bd61b8d619c00b0a51ff3eaf1f"
+    },
+    {
+      "path": "src/resources/templates/银行函证表格生成-纸质格式一配置表.xlsx",
+      "bytes": 22179,
+      "sha256": "9f400c6c31e2fa0ddfcd3827033aeeafc9ea88a988ffd994f0b0d7703ab3ea4a"
+    },
+    {
+      "path": "src/resources/templates/纸质信息核对配置表.xlsx",
+      "bytes": 9273,
+      "sha256": "114e76b99d1732ddb7919314372b8308b92ce64013584e0734e1a93a3d5f0fd9"
+    },
+    {
+      "path": "src/resources/templates/资料字段检查配置表.xlsx",
+      "bytes": 11004,
+      "sha256": "5ace87907b93669ce9e58ef2ab8bfefc3635d224fb38e4ae3c38809b161d40d3"
+    },
+    {
+      "path": "src/resources/templates/manifest.json",
+      "bytes": 3812,
+      "sha256": "0ed208232b988096572c453d0bf64e7be1075daf3d07dd93d2587142b0d748d6"
+    },
+    {
+      "path": "src/skills/loader.mjs",
+      "bytes": 1651,
+      "sha256": "051391ae3408caf5ae7fa72a46d6a7f1f678d5e5c887f92313bbf6df0b5bad2f"
+    },
+    {
+      "path": "src/skills/cicpa-query/SKILL.md",
+      "bytes": 1331,
+      "sha256": "08947eaf17a112190b96ee5c896ba460616ffe27805c60b60e24875aa3fa6c55"
+    },
+    {
+      "path": "src/skills/detailed-table-generation/SKILL.md",
+      "bytes": 18859,
+      "sha256": "40b10682a0d1729b8a341046b1972f2754b6c64b70fac6a756af18a4714a6f6e"
+    },
+    {
+      "path": "src/skills/find-skills/SKILL.md",
+      "bytes": 903,
+      "sha256": "2e4d1428b021daf1f4013d204662f3865e483b9a8b87b5b445ea3b14f154f6f9"
+    },
+    {
+      "path": "src/skills/jet-test/SKILL.md",
+      "bytes": 8433,
+      "sha256": "a1f0559aa8fc22ec0162568a7c46b7b2dbf66eaf9903bc42582ff42b80e7f4e7"
+    },
+    {
+      "path": "src/skills/monthly-analysis-mcp/SKILL.md",
+      "bytes": 5807,
+      "sha256": "3afc690ab1f78ed9b95b1399129d1779bf5fc55c8734a2bc4c1233c4c296ac91"
+    },
+    {
+      "path": "src/skills/related-party-identification/SKILL.md",
+      "bytes": 4675,
+      "sha256": "36a33bb6355b94429ade48684d9d1a1ca03b3f8c24b266fd508601249474ddc2"
+    },
+    {
+      "path": "src/skills/skill-creator/SKILL.md",
+      "bytes": 973,
+      "sha256": "a9b0591ae141078bdd033e42a9306b93e62603c31c8d4ed9c65d79afd7a56825"
+    },
+    {
+      "path": "src/skills/skill-vetter/SKILL.md",
+      "bytes": 1184,
+      "sha256": "5f24e227eed6191ce49d43b90f2688871494ba3fd6fa26680eb954aa5343d84e"
+    },
+    {
+      "path": "src/task-scheduler/scheduler.mjs",
+      "bytes": 5242,
+      "sha256": "5ee3ccc3264816a9ddf6e27c2e5c30aaf036a5e02558bfb7e8ebe63414a28ee9"
+    },
+    {
+      "path": "src/workflows/contracts.mjs",
+      "bytes": 10597,
+      "sha256": "65fcee943bb7e6b22ced697b72236974b0b610ec0e7bccf6ed863825e40b378b"
+    },
+    {
+      "path": "src/workflows/definitions.mjs",
+      "bytes": 7926,
+      "sha256": "ef8b968aca488c03581c0f57b77a9685a7427adad75b0b01cb80e90229a8c601"
+    },
+    {
+      "path": "src/workflows/mcp-runner.mjs",
+      "bytes": 5118,
+      "sha256": "8998ba1489321e713daceb9045a33a367f6ff4b3345320bf69014bd1a5cca9a7"
+    },
+    {
+      "path": "src/workflows/state.mjs",
+      "bytes": 7870,
+      "sha256": "4a492fabdc4ca4ba17c439482fa011ae9e4163bdaf9e9da3d36ebf31ad8dd8fa"
+    },
+    {
+      "path": "src/workflows/templates.mjs",
+      "bytes": 1622,
+      "sha256": "0074d4709948813593f38fd5b8de8c2bcd9235d34cec7b9b145c0ac8b8a093bf"
+    },
+    {
+      "path": "tests/e2e/desktop.mjs",
+      "bytes": 97,
+      "sha256": "e0328a40f3a0ce1fcfad3ca9fdf85435faa9775f031b60f4bfd3a990654b3465"
+    },
+    {
+      "path": "tests/e2e/launchers.ps1",
+      "bytes": 2261,
+      "sha256": "8d204ec684468a25870fa33e667056a6208ec12b9032d3fde82a45f2aca12e73"
+    },
+    {
+      "path": "tests/e2e/package.mjs",
+      "bytes": 4486,
+      "sha256": "f54723988056e8307538ab36ef4723961f6f7d56ca2cd50c5514c8ec3839c8c7"
+    },
+    {
+      "path": "tests/e2e/single-file.ps1",
+      "bytes": 3026,
+      "sha256": "12a86110307184ae8a34cba2870950a5405c5b9f1b83d231d8962af7c2d06c6d"
+    },
+    {
+      "path": "tests/e2e/smoke.mjs",
+      "bytes": 92,
+      "sha256": "189cc8071e8ca4389713ed74e9d5ccc11e768e30b555f21d98dcb06f5637c9a3"
+    },
+    {
+      "path": "tests/e2e/workbench.mjs",
+      "bytes": 8297,
+      "sha256": "2bb52d005efb21c195a6a7de6a75b9f59dd56e9abae0f67d7ab379ac1ba185d3"
+    },
+    {
+      "path": "tests/e2e/workflow-catalog.mjs",
+      "bytes": 2671,
+      "sha256": "15f310aea316fdb253eb021db88ff626ea5bc081f5ec0d57fe7b358cc0c2aca4"
+    },
+    {
+      "path": "tests/fixtures/agent-server.mjs",
+      "bytes": 2213,
+      "sha256": "3f5c2210a62a63600a4e717b4e98a45b107d7398ac4490c32e5b227be4625c7c"
+    },
+    {
+      "path": "tests/fixtures/model-server.mjs",
+      "bytes": 1625,
+      "sha256": "4d5a9bc36d2ab52c91b6a5bb4a5c88ed25fcf8293c55a23cf287166f345a48a1"
+    },
+    {
+      "path": "tests/integration/agent.test.mjs",
+      "bytes": 5161,
+      "sha256": "b965097d70bd5f4051ee039c0160f24030b432eced2a0901c5da21010ddd801c"
+    },
+    {
+      "path": "tests/integration/client-independent-tasks.mjs",
+      "bytes": 5101,
+      "sha256": "901e9fd609ba941915974961eb855da90bd3ba0896b24d4c317c353f1a5e1818"
+    },
+    {
+      "path": "tests/integration/client-public-tasks.mjs",
+      "bytes": 2706,
+      "sha256": "d0f689e3638b88bd079d38402a64dc3aefed95a3f32fd9229bb9424c5150563e"
+    },
+    {
+      "path": "tests/integration/independent_tasks.py",
+      "bytes": 38683,
+      "sha256": "adaf0c24e720d326cbad471b195a6ad72ebd17f2d135601d936f9129fcc3a79b"
+    },
+    {
+      "path": "tests/integration/scheduler.test.mjs",
+      "bytes": 2371,
+      "sha256": "079fc3efee70010f4e9cac73107a6849e970330c54c49fc244625a40fff57772"
+    },
+    {
+      "path": "tests/integration/test_attachments.py",
+      "bytes": 3252,
+      "sha256": "55d7d296fe6f30b4fd2c809d82f3cb1650a60223ae0a08e315dc08c0b817b790"
+    },
+    {
+      "path": "tests/integration/test_layout_inspection.py",
+      "bytes": 1972,
+      "sha256": "b8f3a3a5bf6a2d4b3c178a44cf5faa9f86f799e61f4141dcf66a2285faba420f"
+    },
+    {
+      "path": "tests/integration/test_worker.py",
+      "bytes": 10338,
+      "sha256": "c78d3fd59ff56e4cae73134591a5ebedd92d8e988d08aa27da69b7b8eb786b5a"
+    },
+    {
+      "path": "tests/integration/verify_reported_workbook.py",
+      "bytes": 1791,
+      "sha256": "17475c7e91b0eb3c29d2fa7ce79208452d71b1f3fbdf131293afb6fe5bf2b529"
+    },
+    {
+      "path": "tests/integration/workflow-repair.test.mjs",
+      "bytes": 10242,
+      "sha256": "94e9a1d077dabb17b6bd01cb2b7b7c9ab51c2122fe52b914f0e68eda7d0d27f1"
+    },
+    {
+      "path": "tests/unit/agent-protocol.test.mjs",
+      "bytes": 2485,
+      "sha256": "a563bb0ddc04aed4728056254ad6859856cd8ba594004791f215addceee3fbe6"
+    },
+    {
+      "path": "tests/unit/desktop-transport.test.mjs",
+      "bytes": 1681,
+      "sha256": "fb9786dabb01b306578f7f9ef76faa874571813d2c32d2f99566c300fed887d1"
+    },
+    {
+      "path": "tests/unit/host.test.mjs",
+      "bytes": 3314,
+      "sha256": "2e249f85ebd30f225452bca5fc4640294bfbb98e3e9d673104895b3351d03774"
+    },
+    {
+      "path": "tests/unit/model-attachments.test.mjs",
+      "bytes": 4551,
+      "sha256": "f653dd4ba6df3cce4835ba5da43afb7a6ef019b82578c9d1352c11b87f7753ce"
+    },
+    {
+      "path": "scripts/benchmark.py",
+      "bytes": 2347,
+      "sha256": "ddc5b8ead3dd3bff8070afbac6ccd1fa353fc97dbd41064146848330b4e00097"
+    },
+    {
+      "path": "scripts/build-single-file.py",
+      "bytes": 3585,
+      "sha256": "1ae6fd87ed8801d6657b439779ab91a482209982b2ea8d43acd474674ab0d757"
+    },
+    {
+      "path": "scripts/bundle-python-dependencies.py",
+      "bytes": 1063,
+      "sha256": "1fa88c7dc67affee651552e90e14c9fe9a80ad9141848a1a15e090b394835bbd"
+    },
+    {
+      "path": "scripts/bundle-ui-licenses.mjs",
+      "bytes": 1286,
+      "sha256": "9fc6638dde300121c925ba1c1539b15313af42d927565df05d412e043c7ea9b5"
+    },
+    {
+      "path": "scripts/connect-local-agent.mjs",
+      "bytes": 5375,
+      "sha256": "e7ca24f5076878cf47150329e3ff61d63db09e7135bc76f24d4806ff311d6c22"
+    },
+    {
+      "path": "scripts/convert-desktop.mjs",
+      "bytes": 1900,
+      "sha256": "db47edd63fa780d0f45ad1e5da8af9e717810165ca4dd40897ad8d4c279fc815"
+    },
+    {
+      "path": "scripts/deliver-desktop.mjs",
+      "bytes": 2035,
+      "sha256": "e6f776845f2b2a480fb4350836ed4e4d774af5dceac64f6b3d55585db4ae10c3"
+    },
+    {
+      "path": "scripts/deliver.ps1",
+      "bytes": 3469,
+      "sha256": "267e0decf87bf7605cd43718255bb3563cb02a7b72da97759703b61981d2d608"
+    },
+    {
+      "path": "scripts/dev.mjs",
+      "bytes": 2235,
+      "sha256": "39706f5cedf6ff49bcf131a8a7c16ebbd33d76c730a12a22c676ab769d53b093"
+    },
+    {
+      "path": "scripts/document-inspect-fix.mjs",
+      "bytes": 3135,
+      "sha256": "ebd4677c82a7c82811d1ba259b3344f34589104622a413f0c6015ae89c68def4"
+    },
+    {
+      "path": "scripts/extract-rules.py",
+      "bytes": 761,
+      "sha256": "4e85f30283aeb8424bbc7fa671ae7173bb8430874ef08b4b101596ca9fc64db5"
+    },
+    {
+      "path": "scripts/live-client-validation.mjs",
+      "bytes": 2545,
+      "sha256": "71ef3c4dd4e7a9159f95ea503616cee14a2e7a66426bddc5eea794809db9e970"
+    },
+    {
+      "path": "scripts/package.mjs",
+      "bytes": 5266,
+      "sha256": "9e126eed66de91f4c3c91dc10f1944109ccf4296512fd02009098241016d0ad3"
+    },
+    {
+      "path": "scripts/preview-workbench.mjs",
+      "bytes": 877,
+      "sha256": "34c8b22f862aa84d6a830ac4296ebcd992f126bf21ce58abf548049631a944aa"
+    },
+    {
+      "path": "scripts/probe-public-audit-services.py",
+      "bytes": 2313,
+      "sha256": "f70600abdd4be1b08172f744a36bfce7eea871f58609169935aec9b93b0342a8"
+    },
+    {
+      "path": "scripts/runtime.mjs",
+      "bytes": 885,
+      "sha256": "cf1f092b41801400cc9ac78ae10bc3560a91fc562429a6f59c13c8794e265697"
+    },
+    {
+      "path": "scripts/seal-delivery.py",
+      "bytes": 4134,
+      "sha256": "a5bac7ebdd120a4ddf02050f6289220182749e4b964a590cf51225f85aa1acf5"
+    },
+    {
+      "path": "scripts/update-desktop-docs.mjs",
+      "bytes": 2055,
+      "sha256": "a94a478e0e3787da3d82b0305fe1eb9fb6186591c07513b69da52d3a474bdb4f"
+    },
+    {
+      "path": "scripts/verify-public-task-flows.py",
+      "bytes": 4213,
+      "sha256": "9c89a5e34c2604371cc2d6a6ca746ab98afe6082a4fe5778cb3800f510521b91"
+    },
+    {
+      "path": "scripts/verify-runtime-dependencies.py",
+      "bytes": 1936,
+      "sha256": "5f2a3fdfe737f2a84b15219505ac044ed52a49a4e3079fef31f1868828673b5c"
+    },
+    {
+      "path": "scripts/workbench-demo.mjs",
+      "bytes": 4479,
+      "sha256": "d7c0a60119e1b0dfa88681cc282589b2454bdfa1ac9f6751ff82bddf3b8a93ee"
+    },
+    {
+      "path": "scripts/write-delivery-docs.py",
+      "bytes": 11352,
+      "sha256": "9e0012123fb8ada4475e97817c3dbfc69ecf81c650210838984457bff90e2441"
+    },
+    {
+      "path": "docs/63项MCP核心还原成果-20261010.md",
+      "bytes": 11069,
+      "sha256": "6fd642846165d535fe66c5aa7f5e254704df87bdfd32680d73d1c7c7a94aaf1f"
+    },
+    {
+      "path": "docs/63项MCP核心逻辑提取范围与进展-20261010.md",
+      "bytes": 20315,
+      "sha256": "76706555936da609cd90cc95c2fe21f9ce7ddc68e0e5792d1177bc4d68cb3992"
+    },
+    {
+      "path": "docs/变更记录.md",
+      "bytes": 2257,
+      "sha256": "3a0d413bd9ee040f891151bdb45fe8f6badd9fc9109816b739daf19e083c121d"
+    },
+    {
+      "path": "docs/测试记录-20260909.md",
+      "bytes": 2875,
+      "sha256": "3a792523c58fbb23aa5d791e5aed97268016b6179e5d744a81ef5fee5a6a3aac"
+    },
+    {
+      "path": "docs/独立客户端验收与使用-20261010.md",
+      "bytes": 4520,
+      "sha256": "cf27f4eea6e8a4569d0bce2b2cf47fe8e6a510938ba9020082fb37484088c4bc"
+    },
+    {
+      "path": "docs/独立迁移实现分析-20261010.md",
+      "bytes": 24581,
+      "sha256": "f8f3c455cfc5132b57d264f6f2a00034c298f2d136a17bef6dd105ad548bb5f2"
+    },
+    {
+      "path": "docs/独立迁移逐项清单-20261010.md",
+      "bytes": 19835,
+      "sha256": "405ad550c5e6fc5e4aa13ad1986bd2aee717e646817a5ecf3d7a8dab251e8fcd"
+    },
+    {
+      "path": "docs/工程规范与路线图.md",
+      "bytes": 8719,
+      "sha256": "35dc452b5b2657e405ff7e4785d58d21fe1056d78279d0f0a171f1feb815acdc"
+    },
+    {
+      "path": "docs/工作簿结构修复.md",
+      "bytes": 1061,
+      "sha256": "774d8556a5b673db151ae7464a7752a47af8a0352df47f32269badd57d915152"
+    },
+    {
+      "path": "docs/界面优化方案.md",
+      "bytes": 18432,
+      "sha256": "b30dbd306734a795a170acbb5a8a7a89feb3631177213877b950f4180054be0e"
+    },
+    {
+      "path": "docs/界面与提示更新.md",
+      "bytes": 2245,
+      "sha256": "31f292757801633067b464323a911a6c3e9989c7c22d9523969028757254993f"
+    },
+    {
+      "path": "docs/界面重构方案-灵动岛.md",
+      "bytes": 32354,
+      "sha256": "81d7537ab457a5b0541414418945eb2feea64cfb1d62b679a4acf5eefe3d2965"
+    },
+    {
+      "path": "docs/开发与验证.md",
+      "bytes": 1406,
+      "sha256": "88c06cdafc1a9d22914074a33b3abbfbd409391c89e3e7386722e7dfd487627b"
+    },
+    {
+      "path": "docs/客户端功能与文件格式核对表-20261008.md",
+      "bytes": 77761,
+      "sha256": "54dacd3b83626d55924f115dfc0dec08cdfd301541f3eab3fdb1cccd56f8af8d"
+    },
+    {
+      "path": "docs/客户端核查报告-20261008.md",
+      "bytes": 17876,
+      "sha256": "2ad72aeaac5c0e02189c0d3856046b899f8d46a43bc781966414327da53b6b62"
+    },
+    {
+      "path": "docs/客户端修复与验证记录-20261008.md",
+      "bytes": 5430,
+      "sha256": "03ac0bdb9954e84e2cfaba0cbf2ccf7932127aae5b1018165a7be4d38a8cf5f9"
+    },
+    {
+      "path": "docs/模型与附件更新.md",
+      "bytes": 1058,
+      "sha256": "42f3d0ffced6c82cf626f213ef14923c4bd16c96ba06c2fa30ee80488742f258"
+    },
+    {
+      "path": "docs/任务与文件格式对照-20261010.md",
+      "bytes": 52892,
+      "sha256": "0fc63ef4db6fdda7e515c04d6342db976533e1a9dc16118f70be5179f3178ddd"
+    },
+    {
+      "path": "docs/审计功能研究与迁移路线.md",
+      "bytes": 9649,
+      "sha256": "ab8dc4d8a8dfb05b9df7e21606c36ff5ea0fb8c75f9d18023f695165d0d842a0"
+    },
+    {
+      "path": "docs/使用说明.md",
+      "bytes": 4991,
+      "sha256": "eb1f749aefb4d51a5d616a4d782607e27b31df9b87721f1d1cebdfc3dee0dd42"
+    },
+    {
+      "path": "docs/数据处理双模式方案.md",
+      "bytes": 17091,
+      "sha256": "8edace80b34b46dff97db49a717b911ab93af20d18d61560ab37e2e85c4e350c"
+    },
+    {
+      "path": "docs/项目方案.md",
+      "bytes": 29229,
+      "sha256": "9c81ad947f649581ae77e1ac3ad80fb5f7076850531dafe21f9f58b7e83c08e0"
+    },
+    {
+      "path": "docs/项目工作台预览-20261008.md",
+      "bytes": 3114,
+      "sha256": "73cf60656e695904688dd4b75ceca39426510fc4e36dbf67ccf481b68542d4ef"
+    },
+    {
+      "path": "docs/需求边界与验收.md",
+      "bytes": 6564,
+      "sha256": "1ed7dbac7a1337de95989125332f8f611620b760704d942e191b152a37a91534"
+    },
+    {
+      "path": "docs/原工具箱全功能迁移清单.md",
+      "bytes": 12695,
+      "sha256": "1c237b6de369e2505d9ae578460878c0a9220f060c9b789789eb0b1ef0aaabf1"
+    },
+    {
+      "path": "docs/桌面版更新.md",
+      "bytes": 960,
+      "sha256": "60efae05908700f34c55e9a6aa5961e468a5cefff377098cb9ff64a11a543ceb"
+    },
+    {
+      "path": "docs/AI审计助手_九类任务工作流详细设计方案.md",
+      "bytes": 20351,
+      "sha256": "d8c43beea3e20ec18a3ba994a26ff393c234982267f9b93bbb959d5dcec2588a"
+    },
+    {
+      "path": "docs/implementation-notes.md",
+      "bytes": 6050,
+      "sha256": "3309a150d4d953135574ac453a71902943867b607883b445bf125e3c4b269f30"
+    },
+    {
+      "path": "docs/JET核心逻辑提取与验证-20261010.md",
+      "bytes": 14325,
+      "sha256": "333a95cf7b9f50e6165ca4cf572c46e885ef5d5342a9f594385f8072c45982ee"
+    },
+    {
+      "path": "docs/spec.md",
+      "bytes": 2781,
+      "sha256": "e0f426abbb3f60aab3f4eb69dff9a10021015578ce264ee660817f794c1efcdc"
+    },
+    {
+      "path": "docs/THIRD_PARTY_NOTICES.md",
+      "bytes": 1981,
+      "sha256": "53d3ce19a69e19fea62f740452211adfc43bd1494e1d9c7eca7a31dc923e62f5"
+    },
+    {
+      "path": "docs/UI设计方案.md",
+      "bytes": 11401,
+      "sha256": "e44f5402fc321b0a1f2cf5211ff1b957ad9c61960b0e7116218c426da6c0d582"
+    },
+    {
+      "path": "docs/Agent方案/审计Agent方案梳理与待细化清单-20261012.md",
+      "bytes": 18771,
+      "sha256": "b79b413fe7b6c7a01e1a854c59ef179f540938b9e779afaaceb3edff16ca9589"
+    },
+    {
+      "path": "docs/Agent方案/审计Agent工作流与准确性设计-20261010.md",
+      "bytes": 83829,
+      "sha256": "508cb126baea837310600003eac8e9c57dadfe1aeb92f891e31b4d662015974b"
+    },
+    {
+      "path": "docs/Agent方案/审计Agent平台项目方案-20261010.md",
+      "bytes": 36450,
+      "sha256": "6d84251f764df19d62aa88f27d8f5aac53cc661eeda140ee95a847b39965fb46"
+    },
+    {
+      "path": "docs/Agent方案/README.md",
+      "bytes": 1272,
+      "sha256": "15fe51b570d8e04b43efa2732e1946b4180f9cdbd7aba4a8325647b13f876cba"
+    },
+    {
+      "path": "docs/core-recovery/add_column.md",
+      "bytes": 7302,
+      "sha256": "2b05f41a6ae8f9fada5316b627edab916db6be888292538b38d15e4a79d3bdbf"
+    },
+    {
+      "path": "docs/core-recovery/address_split.md",
+      "bytes": 5093,
+      "sha256": "42d8360a152194c72d867ffab41d1121f248516638a1b64c3d674ba63b896414"
+    },
+    {
+      "path": "docs/core-recovery/ai_formula_filler.md",
+      "bytes": 12156,
+      "sha256": "bdf299b8fb9ebd72d35111b01ff06c0be5f8479ab5835ad854a616bec1c90b92"
+    },
+    {
+      "path": "docs/core-recovery/announcement.md",
+      "bytes": 5870,
+      "sha256": "a40311d4b7fbc9d5042f289859bf33144235fc9054624ac9bb87a567c2037135"
+    },
+    {
+      "path": "docs/core-recovery/asist_split.md",
+      "bytes": 6366,
+      "sha256": "3a7fc08629e2dab9ed52e6f586d7959f98d771c3c22c12da449e19ca299f4063"
+    },
+    {
+      "path": "docs/core-recovery/auxiliary_selection.md",
+      "bytes": 6657,
+      "sha256": "afbbec3a52bb630bd0cfd4af1a1da652ac7e3277d2844de2d3bf3dd9c6aeeaf2"
+    },
+    {
+      "path": "docs/core-recovery/bank_digit2.md",
+      "bytes": 5439,
+      "sha256": "dce346232b7c691596c5e421e485b5befc20326490ca0a22d6362bee9b17594b"
+    },
+    {
+      "path": "docs/core-recovery/bank_flow.md",
+      "bytes": 25648,
+      "sha256": "dc44e1e10d3782973f5f4bc9d38be8f70030344b767d21f39a35c3ebd0cdeb07"
+    },
+    {
+      "path": "docs/core-recovery/bank_paper1.md",
+      "bytes": 5385,
+      "sha256": "96bbe96798e15f34814a79b0f0d3bf787c6dcf2264aebca97f641127fdc503bb"
+    },
+    {
+      "path": "docs/core-recovery/bank_paper2.md",
+      "bytes": 5385,
+      "sha256": "1364fe5b60b19f2fcc0295231240502d7a18943073034d12bdd8138619cf6161"
+    },
+    {
+      "path": "docs/core-recovery/bankflowmerge.md",
+      "bytes": 14768,
+      "sha256": "b5af9a85dda17cbc0deaaf0f3198b973b5d7e850a9fff99bdf6cd1613fe83606"
+    },
+    {
+      "path": "docs/core-recovery/cicpa_query.md",
+      "bytes": 17452,
+      "sha256": "d3db3ac1e8df54e67db90bb92eb1d3e4e4b384c05fb6ca7d9a94b01f5400e9c1"
+    },
+    {
+      "path": "docs/core-recovery/currency.md",
+      "bytes": 4213,
+      "sha256": "39b1d585025fb4454ad4c9395a34c40be2d978707a54817533b517b987efa827"
+    },
+    {
+      "path": "docs/core-recovery/cutoff_sampling.md",
+      "bytes": 6945,
+      "sha256": "3d1ee4c88ffa0ac04a3ce42f812717b924a0da0f10da7be57e4966c5a4c71191"
+    },
+    {
+      "path": "docs/core-recovery/data_field_check.md",
+      "bytes": 7468,
+      "sha256": "b245dabaaca0f8a97c1dd802d4388ca6721939f89c53762c79b8411e86bbdb08"
+    },
+    {
+      "path": "docs/core-recovery/detailed_table_generate.md",
+      "bytes": 37893,
+      "sha256": "1a6d2342901ae94e956ee42ae8d020405b2433808f2660c23c538dc03485643c"
+    },
+    {
+      "path": "docs/core-recovery/detailed_table_inspect_template.md",
+      "bytes": 37702,
+      "sha256": "ddfbd29646096f6a2a5fe38ee1c01cac50971a76af7718fe82780f38fbf8828f"
+    },
+    {
+      "path": "docs/core-recovery/detailed_table_inspect.md",
+      "bytes": 37613,
+      "sha256": "956fe3907a361afda98935b28853a396461cfe6f601dc0a9671150e230b9597b"
+    },
+    {
+      "path": "docs/core-recovery/detailed_table_save_config.md",
+      "bytes": 39135,
+      "sha256": "eaa68ce66f77bc2b550c51920d95429d1d3bdb77caabc037c37884e334fb3eb3"
+    },
+    {
+      "path": "docs/core-recovery/detailed_table_validate.md",
+      "bytes": 37293,
+      "sha256": "8048ec17a3ea6f10663cddd2a7b321f39d786d885c88b17b859392e047291739"
+    },
+    {
+      "path": "docs/core-recovery/dropsummary.md",
+      "bytes": 5416,
+      "sha256": "251d2350a97d49ba0e329418fd86ab15e8aaf939d9faf77503fd26f698572a9d"
+    },
+    {
+      "path": "docs/core-recovery/extract_disclosure_scope.md",
+      "bytes": 4821,
+      "sha256": "35794afcc25b00198f0ea28956f929aa0cd4c9e260a7cf09279d896273cc6d48"
+    },
+    {
+      "path": "docs/core-recovery/extract_disclosure_tables.md",
+      "bytes": 5613,
+      "sha256": "7cebb0b54a27094855c69a7131479b2d8b0490da4ef6a40203bfd082a288f833"
+    },
+    {
+      "path": "docs/core-recovery/file_classification.md",
+      "bytes": 9586,
+      "sha256": "b84d31121d98135b4a2d784fada38b49022d54aacbc7348f45926e80f7de60b5"
+    },
+    {
+      "path": "docs/core-recovery/fill_column.md",
+      "bytes": 6628,
+      "sha256": "29edbf6109afa328337fda4b17fe1ea0174ab7934d32d7718c494e64b0700603"
+    },
+    {
+      "path": "docs/core-recovery/gross_margin_analysis.md",
+      "bytes": 28181,
+      "sha256": "0f34ea2876654686312dcefe5cfabc49610702b87471aeefeee3516eb47099ba"
+    },
+    {
+      "path": "docs/core-recovery/headers_process.md",
+      "bytes": 6489,
+      "sha256": "8be77a930c9642e96f1d8313cdaa62ed68ff708d416d86c50e0a30079c6b0acf"
+    },
+    {
+      "path": "docs/core-recovery/id_card.md",
+      "bytes": 4572,
+      "sha256": "0a7c458d54b132d9af41f0b0a4c88e253fcdc82b573ffa028fd788eeb6179360"
+    },
+    {
+      "path": "docs/core-recovery/info_extract_multi.md",
+      "bytes": 12645,
+      "sha256": "09057c048d1adde35d8208dc8377b404b2ff1906c795b6e1156096848e139d28"
+    },
+    {
+      "path": "docs/core-recovery/info_extract.md",
+      "bytes": 17125,
+      "sha256": "06b0d325624e3d10dd08e18f5d71e6f760c46cbcc49ce199deb3c21d91f470bf"
+    },
+    {
+      "path": "docs/core-recovery/insert_column.md",
+      "bytes": 11706,
+      "sha256": "b504467f92482437d40427d3bba3556c7186c208e3b581609829b00d3de8d7df"
+    },
+    {
+      "path": "docs/core-recovery/insert_footnote_comments.md",
+      "bytes": 6828,
+      "sha256": "25936567629d9007848f258efe3e7e5d2b9296fe57767b5c290908e8fadfbc94"
+    },
+    {
+      "path": "docs/core-recovery/ipo_bj.md",
+      "bytes": 6623,
+      "sha256": "276caa108df5e46a3342250b455585530de70ca8797bdae3d9ba2e57628b5131"
+    },
+    {
+      "path": "docs/core-recovery/ipo_sh.md",
+      "bytes": 6696,
+      "sha256": "f190f50f29513f41b5b2f3706b6ba0612118f89d8acd090691183ad6e7037f2f"
+    },
+    {
+      "path": "docs/core-recovery/ipo_sz.md",
+      "bytes": 6078,
+      "sha256": "9f415989a0a7649580281fa5937fa8bb463b1e7650d0f63bd764f9b5b96cd6b7"
+    },
+    {
+      "path": "docs/core-recovery/jet_test_execute.md",
+      "bytes": 13205,
+      "sha256": "055c583ea1971fe4b67ac30bf32dae00503487a2b1d4b50dce5be099d0ba5b65"
+    },
+    {
+      "path": "docs/core-recovery/jet_test_inspect.md",
+      "bytes": 10562,
+      "sha256": "f13f8c2147561740a2c7e19a3f60dfc6c4f6097c426620fe18f6f31d47a14ee3"
+    },
+    {
+      "path": "docs/core-recovery/ledger_check.md",
+      "bytes": 7655,
+      "sha256": "43b3838ecdebb832f7edd4289c347add49471409748669200feb5623a025708c"
+    },
+    {
+      "path": "docs/core-recovery/link_extractor.md",
+      "bytes": 10575,
+      "sha256": "00917ed247b64833ace4d19447cc9b7fc443f134ed8e6ac3e1a20adb1d1099b6"
+    },
+    {
+      "path": "docs/core-recovery/link_ref_replace.md",
+      "bytes": 12054,
+      "sha256": "f0a4aead8a5a98ad9b45926cd9ce690d3085fea9044074f5d40c2a4dacdac02e"
+    },
+    {
+      "path": "docs/core-recovery/link_replace_range.md",
+      "bytes": 13311,
+      "sha256": "4021b7b15dbe43b7d523978a0a5912b816475c6241fb4f04208d9ec5e375f8ed"
+    },
+    {
+      "path": "docs/core-recovery/link_replace_text.md",
+      "bytes": 14487,
+      "sha256": "fb5f035b84ed6c6d1a2e6025b8644db68ba445cd6af4407a0a78be8fb85da0c2"
+    },
+    {
+      "path": "docs/core-recovery/link_replace_workbook.md",
+      "bytes": 14152,
+      "sha256": "b12d81ce5023b0ca2715b88dc99390fba8ae350e718440ae240bccd921761567"
+    },
+    {
+      "path": "docs/core-recovery/merge_column.md",
+      "bytes": 8365,
+      "sha256": "d6674d4077f38f0892a5872f02c51defe12efb85ea17e6483596254b0595c275"
+    },
+    {
+      "path": "docs/core-recovery/monthly_ai_analysis.md",
+      "bytes": 17681,
+      "sha256": "51f869e9d467d810bd601538c703b7a1b4ff240b31b40c9de438d759bd00e098"
+    },
+    {
+      "path": "docs/core-recovery/monthly_detect_structure.md",
+      "bytes": 17536,
+      "sha256": "9199767ad1bd3e3b50fb238ad6fd49c0efb344a8aae3aab7084cbb56459ccf9e"
+    },
+    {
+      "path": "docs/core-recovery/monthly_execute.md",
+      "bytes": 18267,
+      "sha256": "17242779b272fb811dede306bf170c90adb85715e07a089dbd68e7687e333b90"
+    },
+    {
+      "path": "docs/core-recovery/monthly_preview.md",
+      "bytes": 16991,
+      "sha256": "0a602fa2afa5ab982eb0720d24ba7157bc717a808eacab9ecd28014b149227d8"
+    },
+    {
+      "path": "docs/core-recovery/multi_collect_file.md",
+      "bytes": 6253,
+      "sha256": "228990403bb3916c5924916bd3507c87276f97c255713b9010c1a0eeedf3f4b8"
+    },
+    {
+      "path": "docs/core-recovery/multi_collect_folder.md",
+      "bytes": 6891,
+      "sha256": "89db2d9a9aef5ca72bcb2a9d5f7d6eb2ecdd4bed88129946236e564e00a4f599"
+    },
+    {
+      "path": "docs/core-recovery/paper_verify.md",
+      "bytes": 31649,
+      "sha256": "75626f055b67ef191436daf23bcc8c2ce1f8614f517be2d98a41c7f17f3d6fe7"
+    },
+    {
+      "path": "docs/core-recovery/photo_rename.md",
+      "bytes": 20641,
+      "sha256": "947b8581e71f5858f5fe1c57266f2708d575f08922ef7c9d34d5dc3573fd5fea"
+    },
+    {
+      "path": "docs/core-recovery/pickup_value.md",
+      "bytes": 5370,
+      "sha256": "12520a11bbb69cb015dd0f125164b4115c3b56daf633c8920afe719dac1821e0"
+    },
+    {
+      "path": "docs/core-recovery/qcc_processor.md",
+      "bytes": 6759,
+      "sha256": "72083a4a2bbfe40d5bf49d21d181f8627eafc94986cab49db0de4217352f84cf"
+    },
+    {
+      "path": "docs/core-recovery/README.md",
+      "bytes": 15508,
+      "sha256": "791afe4bb09e0439a566136855dc1ef6e50b3db9199634b865914663a3f7515e"
+    },
+    {
+      "path": "docs/core-recovery/related_party.md",
+      "bytes": 25830,
+      "sha256": "044dd27ada82adbdd314bab36f87ae23ccae3fa9decce2982f51fb388ad0b700"
+    },
+    {
+      "path": "docs/core-recovery/select_column.md",
+      "bytes": 7125,
+      "sha256": "bd7ee38841ca28d97bbd7a178c7827c9b128b5c0a36c7e5b4105a5e2b68d504c"
+    },
+    {
+      "path": "docs/core-recovery/subject_allocation.md",
+      "bytes": 8455,
+      "sha256": "1d183ec26d0925b2946b0f3e8a0f50d30d08f2e48e58e1c443632d7dcc4abdb7"
+    },
+    {
+      "path": "docs/core-recovery/subject_clean_after.md",
+      "bytes": 5744,
+      "sha256": "1c2c3a1cfa041ad4c7bdbaed8e26378be6be3e0ef62550686230915d598119a7"
+    },
+    {
+      "path": "docs/core-recovery/text_match.md",
+      "bytes": 7691,
+      "sha256": "f7970d1cc56d9fa25210e345104dabd2b5c42f4fa49c852ced14ed3e7ef9c96f"
+    },
+    {
+      "path": "docs/core-recovery/tool_execute.md",
+      "bytes": 19148,
+      "sha256": "aae5dd566b858813993e08447bab8f749175cc9843f5addbe392bc870da04757"
+    },
+    {
+      "path": "docs/core-recovery/tool_preview.md",
+      "bytes": 18990,
+      "sha256": "38002f84003de07f712cea9fd87eb1feffa1b093d17273b52a6f6ceb49a693c0"
+    },
+    {
+      "path": "docs/core-recovery/voucher_check.md",
+      "bytes": 35454,
+      "sha256": "97726cf08b20188c5c0600f32ee6b7c7d3ee056923d03fda1e196e7b845abb80"
+    },
+    {
+      "path": "docs/core-recovery/xlsx_writer.md",
+      "bytes": 13356,
+      "sha256": "67a8e213c5fac881a5e76c6c3d2c2c1de43dc91b93de924ed1a451db6a91567f"
+    },
+    {
+      "path": "docs/research/原工具箱文件盘点.json",
+      "bytes": 53805,
+      "sha256": "04e5af26a0896f519042fb131993e17ccfa86db9753c4dd0f704b795a0241330"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 497,
+      "sha256": "7b4445a9c59dd33a9c3bae34483c767d8667ae893463d3569325fbe40f6b2b04"
+    },
+    {
+      "path": ".gitattributes",
+      "bytes": 20,
+      "sha256": "f80a265ad02e0479291b641abf2ba24d67ea42e3352bd8b23b374327e61e507e"
+    },
+    {
+      "path": "DESIGN.md",
+      "bytes": 1409,
+      "sha256": "268bca7a47e2ba7763c1a2ed87e1a0f143a815d1286e949c0fdaabd7d6805718"
+    },
+    {
+      "path": "README.md",
+      "bytes": 2962,
+      "sha256": "9fd220e48551e42be532ae6afc5277942a79b352beb87b367b8216f93ca25a10"
+    },
+    {
+      "path": "package.json",
+      "bytes": 906,
+      "sha256": "e8b8933b22339b58a2fe4b51d881a3bd0fb8d2d08e469b8233a11091f998da01"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 72016,
+      "sha256": "561fc81a0135e8bce369f2bb80a4f0d621696801392a19a045833c17f62b8272"
+    },
+    {
+      "path": "pnpm-workspace.yaml",
+      "bytes": 64,
+      "sha256": "3f69f25f85362a10476411c9a9d010f17e91c762f66cdbf8da74fb35a3944ecb"
+    },
+    {
+      "path": "requirements.txt",
+      "bytes": 348,
+      "sha256": "b070ffaded1817b4f09e5a425e5f789803cd14cb95a3769be3e91b0f763942ea"
+    },
+    {
+      "path": "tsconfig.json",
+      "bytes": 270,
+      "sha256": "629803f18f76aa0b4eb7b6899b3efac0a36682f46b8c4a974be517bdcc89e50e"
+    },
+    {
+      "path": "vite.config.js",
+      "bytes": 402,
+      "sha256": "84db25facfb98ba857c9d79864d785f0cfc5d53915f820300e93ff26326a4613"
+    },
+    {
+      "path": "启动AI助手.cmd",
+      "bytes": 331,
+      "sha256": "958e2e7983578e7538557b1e5524b14a99a9c64d343a4bae7aceaf8e54fb0289"
+    },
+    {
+      "path": "开发启动AI助手.cmd",
+      "bytes": 867,
+      "sha256": "47a01f667396821604d614c7897e068a3502794a210b34ecaae521a1d862092f"
+    },
+    {
+      "path": "预览项目工作台.cmd",
+      "bytes": 162,
+      "sha256": "7ed68aefaf85e32755b18342e56317128f1feb30d0da9dd615446edbffbd1880"
+    }
+  ],
+  "repositoryAdjustments": [
+    ".gitignore: anchor generated directories at repository root to retain audit-domain/runtime source; exclude output and design cache",
+    "README.md: make Agent design document link relative and add local repository entry",
+    "docs/source-snapshot.json: record captured source hashes",
+    "docs/dependency-lock.json: verify fixed dependencies against installed distributions",
+    "docs/源码仓库说明.md: explain independent runtime, repository setup and validation",
+    "tests/integration/workflow-repair.test.mjs: use current independent argument validation and task catalog instead of removed legacy bridge imports"
+  ],
+  "capturedSourceFileCount": 286,
+  "excludedFromRepository": {
+    "reason": "User explicitly requested that old bridge files not enter the repository",
+    "paths": [
+      "src/legacy-mcp",
+      "src/mcp/client.mjs",
+      "src/mcp/compat.mjs",
+      "src/mcp/legacy-client.mjs",
+      "src/mcp/legacy-bridge.mjs",
+      "src/mcp/original-bridge.mjs",
+      "src/mcp/legacy-runner.py",
+      "src/resources/legacy-inventory.json",
+      "src/resources/legacy-mcp-tools.json",
+      "scripts/inventory.py",
+      "scripts/generate-task-templates.py",
+      "docs/原版MCP迁移.md"
+    ],
+    "excludedCapturedFiles": [
+      "src/legacy-mcp/_mcp_module_registry.py",
+      "src/legacy-mcp/launcher.py",
+      "src/legacy-mcp/mcp_server.bin",
+      "src/legacy-mcp/registry.bin",
+      "src/mcp/client.mjs",
+      "src/mcp/compat.mjs",
+      "src/mcp/legacy-client.mjs",
+      "src/mcp/legacy-bridge.mjs",
+      "src/mcp/original-bridge.mjs",
+      "src/mcp/legacy-runner.py",
+      "src/resources/legacy-inventory.json",
+      "src/resources/legacy-mcp-tools.json",
+      "scripts/inventory.py",
+      "scripts/generate-task-templates.py",
+      "docs/原版MCP迁移.md"
+    ]
+  },
+  "modifiedRepositoryFiles": [
+    {
+      "path": "tests/integration/workflow-repair.test.mjs",
+      "repositorySha256": "20b65720db8f717173c1ac09171898fee336ed98219045d6c060fd983d0d3b47"
+    },
+    {
+      "path": ".gitignore",
+      "repositorySha256": "8b0125060c3b7473e4268187953f8d516252456cb3bdfc71cc0add94c3a2f322"
+    },
+    {
+      "path": "README.md",
+      "repositorySha256": "bbf95e4e3930bc71c74c3d63914e04766ecb19209ec2902820b235195670fc81"
+    }
+  ],
+  "repositorySourceFileCount": 275
+}

@@ -1,0 +1,50 @@
+/node_modules/
+/dist/
+/build/
+/artifacts/
+.env*
+*.key
+*.pem
+*.pfx
+/runtime/
+/logs/
+/models/
+/output/
+/.superdesign/
+真实底稿/
+
+# Local research artifacts; reviewed findings belong in docs/research.
+/research/legacy/raw/
+/research/legacy/extracted/
+/research/legacy/runs/
+
+# Development caches and environments.
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage/
+.local/
+
+.legacy-home/
+
+# Local agent metadata, package caches, and desktop shortcuts.
+.claude/
+.pnpm-store/
+*.lnk
+nul
+
+# Retired toolbox bridges are excluded from the independent source repository.
+/src/legacy-mcp/
+/src/mcp/client.mjs
+/src/mcp/compat.mjs
+/src/mcp/legacy-*
+/src/mcp/original-bridge.mjs
+/src/resources/legacy-inventory.json
+/src/resources/legacy-mcp-tools.json
+/scripts/inventory.py
+/scripts/generate-task-templates.py
+/docs/原版MCP迁移.md
