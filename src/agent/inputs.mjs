@@ -86,6 +86,27 @@ export function captureInputs(store, session, files, runId) {
   return {inputs,workProjectId:workProject.id};
 }
 
+/** Materialize sent attachments in the same run workspace used by every engine. */
+export function captureAttachmentInputs(store, run) {
+  const attachments=run.inputs.filter(input=>input.source==='attachment');
+  if(!attachments.length)return;
+  let project=run.snapshotProjectId&&store.get('projects',run.snapshotProjectId);
+  if(!project){
+    const root=path.join(workspaceRoot(store),run.id);fs.mkdirSync(root,{recursive:true});inside(store.root,root);
+    project=store.create('projects',{name:'对话附件工作副本',root,internal:true,agentRunId:run.id});run.snapshotProjectId=project.id;
+  }
+  for(const input of attachments){
+    const source=inside(store.root,input.sourcePath);
+    if(fileHash(source)!==input.sha256)throw Error('附件副本已改变：'+input.path);
+    const destination=path.resolve(project.root,input.workPath),relative=path.relative(project.root,destination);
+    if(relative==='..'||relative.startsWith('..'+path.sep)||path.isAbsolute(relative))throw Error('附件目标超出工作范围');
+    fs.mkdirSync(path.dirname(destination),{recursive:true});inside(project.root,path.dirname(destination));
+    if(!fs.existsSync(destination))fs.copyFileSync(source,destination,fs.constants.COPYFILE_EXCL);
+    if(fileHash(inside(project.root,destination))!==input.sha256)throw Error('附件工作副本与发送的版本不一致：'+input.path);
+    fs.chmodSync(destination,0o444);input.snapshotPath=destination;
+  }
+}
+
 export function changedInputs(run) {
   return run.inputs.filter(input => {
     try { return fileHash(input.sourcePath)!==input.sha256 || fileHash(input.snapshotPath)!==input.sha256; }
@@ -97,12 +118,23 @@ export function changedInputs(run) {
 export function removeTree(target) {
   if(!fs.existsSync(target)) return;
   const stack = [target];
-  while(stack.length) {
-    const current = stack.pop(), stat = fs.lstatSync(current);
-    if(stat.isDirectory()) for(const entry of fs.readdirSync(current)) stack.push(path.join(current, entry));
-    else if(!stat.isSymbolicLink()) fs.chmodSync(current, 0o644);
+  const sharedReadOnly = [];
+  try {
+    while(stack.length) {
+      const current = stack.pop(), stat = fs.lstatSync(current);
+      if(stat.isDirectory()) for(const entry of fs.readdirSync(current)) stack.push(path.join(current, entry));
+      else if(!stat.isSymbolicLink()) {
+        // chmod affects every hard link. Keep the inode open so surviving
+        // snapshots regain their original permissions after this tree is removed.
+        if(stat.nlink > 1 && !(stat.mode & 0o222)) sharedReadOnly.push({fd:fs.openSync(current,'r'),mode:stat.mode & 0o777});
+        fs.chmodSync(current, 0o644);
+      }
+    }
+    fs.rmSync(target, {recursive:true, force:true});
+  } finally {
+    try { for(const {fd,mode} of sharedReadOnly) fs.fchmodSync(fd,mode); }
+    finally { for(const {fd} of sharedReadOnly) fs.closeSync(fd); }
   }
-  fs.rmSync(target, {recursive:true, force:true});
 }
 
 /** Delete blobs that no remaining run references. */

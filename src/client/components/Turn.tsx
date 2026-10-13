@@ -6,17 +6,18 @@ import {api} from '../api';
 import {fullTime, isResumable, shortTime, statusLabel, statusTone} from '../lib/format';
 import {AUTO_RESUME_PREFIX, toolName, type Turn as TurnData} from '../lib/turns';
 import {useWorkspace} from '../lib/workspace';
-import type {AgentQuestion, AgentRun, PlanStep, SessionRecord, Task, TaskOutput, TextEvent, ToolCall} from '../types';
+import type {AgentQuestion, AgentRun, Attachment, PlanStep, SessionRecord, Task, TaskOutput, TextEvent, ToolCall} from '../types';
 
 interface Props {
   turn: TurnData;
   record: SessionRecord;
   latest: boolean;
+  attachments: Attachment[];
   onReload: () => Promise<unknown>;
 }
 
 /** One request and the Agent's whole response to it, with its results and audit trail underneath. */
-export function Turn({turn, record, latest, onReload}: Props) {
+export function Turn({turn, record, latest, attachments, onReload}: Props) {
   const {run, request} = turn;
   const live = latest && !!record.streaming;
   const autoResume = !!run?.resumeOf && !!request?.text.startsWith(AUTO_RESUME_PREFIX);
@@ -32,17 +33,17 @@ export function Turn({turn, record, latest, onReload}: Props) {
     {turn.blocks.map(block => block.kind === 'steps'
       ? <StepGroup key={block.id} calls={block.calls} />
       : <Message key={block.event.id} event={block.event} />)}
-    {live && <div className="live">
+    {live && <div className="live" aria-busy="true">
       <div className="avatar agent"><Sparkles size={14} /></div>
       <div className="live-body">
         <span className="live-phase"><Loader2 size={14} className="spin" />{record.phase || 'Agent 正在分析…'}</span>
-        {record.turn && <p>{record.turn}</p>}
+        <details className="live-explanation"><summary>查看当前处理说明</summary><p>{record.turn || '正在处理资料…'}</p></details>
       </div>
     </div>}
     {activeTask && <div className="task-progress"><Loader2 size={15} className="spin" /><span>{activeTask.phase || '审计程序正在执行…'}</span><small>写入成果后会显示在这一轮下面。</small></div>}
-    {asking && <QuestionCard run={run!} questions={openQuestions} onReload={onReload} />}
+    {asking && <QuestionCard run={run!} questions={openQuestions} attachments={attachments} onReload={onReload} />}
     {turn.tasks.map(task => <ResultCard key={task.id} task={task} onReload={onReload} />)}
-    {run && !live && latest && !asking && isResumable(run.status) && <ResumeBar run={run} onReload={onReload} />}
+    {run && !live && latest && !asking && isResumable(run.status) && <ResumeBar run={run} attachments={attachments} onReload={onReload} />}
     {run && !live && <RunTrail run={run} record={record} />}
   </section>;
 }
@@ -114,19 +115,18 @@ function PlanCard({run, live}: {run: AgentRun; live: boolean}) {
   </section>;
 }
 
-/** One round of tool calls. Open while running; collapses to a one-line summary when finished. */
+/** Execution updates do not change the user's expansion choice. */
 function StepGroup({calls}: {calls: ToolCall[]}) {
   const running = calls.some(call => call.status === 'running');
   const failed = calls.filter(call => statusTone(call.status) === 'danger').length;
-  const [expanded, setExpanded] = useState<boolean | null>(null);
-  const open = expanded ?? running;
+  const [open, setExpanded] = useState(false);
   const current = calls.filter(call => call.status === 'running').at(-1);
   return <div className={'steps' + (open ? ' open' : '')}>
     <button className="steps-head" aria-expanded={open} onClick={() => setExpanded(!open)}>
       <ChevronRight size={14} className="chevron" />
       {running ? <Loader2 size={13} className="spin" /> : <i className={'dot tone-' + (failed ? 'warning' : 'success')} />}
-      <span>{running ? (current?.label || current?.name || '执行本地步骤') + '…' : `执行了 ${calls.length} 个本地步骤`}</span>
-      {!running && failed > 0 && <small className="steps-note">{failed} 个步骤未完成</small>}
+      <span className="steps-title">本地步骤 · {calls.length}</span>
+      <small className="steps-note" title={current?.label || current?.name}>{running ? (current?.label || current?.name || '执行中') + '…' : failed > 0 ? `${failed} 个步骤未完成` : '步骤已完成'}</small>
     </button>
     {open && <ol className="steps-list">
       {calls.map(call => <li key={call.id} className={'tone-' + statusTone(call.status)}>
@@ -139,7 +139,7 @@ function StepGroup({calls}: {calls: ToolCall[]}) {
 }
 
 /** Open questions from the Agent as a form; the answers resume the same task. */
-function QuestionCard({run, questions, onReload}: {run: AgentRun; questions: AgentQuestion[]; onReload: () => Promise<unknown>}) {
+function QuestionCard({run, questions, attachments, onReload}: {run: AgentRun; questions: AgentQuestion[]; attachments: Attachment[]; onReload: () => Promise<unknown>}) {
   const {onError} = useWorkspace();
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
@@ -148,7 +148,7 @@ function QuestionCard({run, questions, onReload}: {run: AgentRun; questions: Age
     setBusy(true);
     try {
       const text = '补充说明：\n' + questions.map((question, index) => `${index + 1}. ${question.text}\n回答：${answers[question.id].trim()}`).join('\n');
-      await api('agent.resume', {id: run.id, text});
+      await api('agent.resume', {id: run.id, text, attachments: attachments.map(item => item.id)});
       await onReload();
     } catch (error) { onError(error); } finally { setBusy(false); }
   };
@@ -170,12 +170,12 @@ function QuestionCard({run, questions, onReload}: {run: AgentRun; questions: Age
   </section>;
 }
 
-function ResumeBar({run, onReload}: {run: AgentRun; onReload: () => Promise<unknown>}) {
+function ResumeBar({run, attachments, onReload}: {run: AgentRun; attachments: Attachment[]; onReload: () => Promise<unknown>}) {
   const {onError} = useWorkspace();
   const [busy, setBusy] = useState(false);
   const resume = async () => {
     setBusy(true);
-    try { await api('agent.resume', {id: run.id}); await onReload(); } catch (error) { onError(error); } finally { setBusy(false); }
+    try { await api('agent.resume', {id: run.id, attachments: attachments.map(item => item.id)}); await onReload(); } catch (error) { onError(error); } finally { setBusy(false); }
   };
   return <div className={'resume tone-' + statusTone(run.status)}>
     <span>{statusLabel(run.status)}，已保存资料和执行结果。</span>

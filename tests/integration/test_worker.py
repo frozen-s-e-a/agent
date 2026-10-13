@@ -1,4 +1,4 @@
-import importlib.util, unittest, tempfile, csv, json, sys, io
+import importlib.util, unittest, tempfile, csv, json, sys, io, uuid
 from pathlib import Path
 from contextlib import redirect_stdout
 ROOT=Path(__file__).resolve().parents[2]
@@ -13,6 +13,15 @@ class WorkerTests(unittest.TestCase):
   self.rows=[['A','2026-01-05','001','001002',' 银行存款 ','0.1','0','回款','甲','乙'],['A','2026-01-05','001','6001','收入','0.2','0.3','回款','甲','乙'],['A','2026-02-08','002','6602','费用','200','0','调整','甲','甲'],['A','2026-02-08','002','1002','银行','0','100','调整','甲','甲']]
   self.write('a.csv',self.rows[:2]);self.write('b.csv',self.rows[2:])
  def tearDown(self): self.temp.cleanup()
+ def test_uuid_task_publishes_from_a_deep_windows_snapshot(self):
+  padding=180-len(str(self.root))-1
+  if padding<1:self.skipTest('test root is already too deep for this fixture')
+  self.root=self.root/('x'*padding);self.root.mkdir()
+  self.write('a.csv',self.rows[:2]);self.write('b.csv',self.rows[2:])
+  task_id=str(uuid.uuid4())
+  result=self.run_task('select_column',{'columns':'公司,科目编码'},task_id=task_id)
+  self.assertEqual(result['rowCount'],4)
+  self.assertTrue((self.root/'outputs'/task_id/'manifest.json').is_file())
  def test_published_result_can_be_chained_with_verified_provenance(self):
   first=self.run_task('select_column',{'columns':'公司,科目编码'})
   source=Path(first['outputDir'])/next(x['name'] for x in first['outputs'] if x['name'].endswith('.csv'))

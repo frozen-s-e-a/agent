@@ -305,7 +305,9 @@ def run(request):
     if expanded>memory*1024**2*4 and any(f.suffix.lower() in ['.xlsx','.xlsm'] for f in files):raise ValueError('Excel 解压体量超过此适配器预算，请先转换为 CSV')
     output=root/'outputs';output.mkdir(exist_ok=True)
     if not output.resolve().is_relative_to(root):raise ValueError('输出目录指向项目外部')
-    final=output/request['taskId'];stage=output/('.'+request['taskId']+'.'+uuid.uuid4().hex+'.staging')
+    # The task UUID is already in the manifest and final directory. Repeating it
+    # in the random staging name can exceed Windows' path limit inside snapshots.
+    final=output/request['taskId'];stage=output/('.stage-'+uuid.uuid4().hex)
     snapshots=[{'path':f.relative_to(root).as_posix(),'sha256':digest(f),'size':f.stat().st_size} for f in files]
     signature=hashlib.sha256(json.dumps({'tool':tool,'parameters':p,'inputs':snapshots,'ruleVersion':rule_version},sort_keys=True).encode()).hexdigest()
     if final.exists():

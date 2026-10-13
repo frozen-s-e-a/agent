@@ -224,7 +224,10 @@ details[open] > summary > .chevron, [aria-expanded="true"] > .chevron, .steps.op
 .message-error p { color: var(--ink); }
 
 .steps { margin-left: 38px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-xs); animation: fade .2s; }
-.steps-head { display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 12px; border: 0; background: none; cursor: pointer; color: var(--ink-2); font-size: 12.5px; text-align: left; }
+.steps-head { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 36px; padding: 7px 12px; border: 0; background: none; cursor: pointer; color: var(--ink-2); font-size: 12.5px; text-align: left; }
+.steps-title { flex: 1; min-width: 0; white-space: nowrap; }
+.steps-head .steps-note { max-width: 55%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.steps-head > svg, .steps-head > .dot { flex: none; }
 .steps-head:hover { color: var(--ink); }
 .steps-head .chevron { color: var(--ink-3); }
 .steps-head .spin { color: var(--brand); }
@@ -232,7 +235,7 @@ details[open] > summary > .chevron, [aria-expanded="true"] > .chevron, .steps.op
 .steps-head .dot.tone-warning { background: var(--warning); }
 .steps-note { margin-left: auto; font-size: 11px; color: var(--warning); }
 /* A thin rail ties the step dots together like a timeline. */
-.steps-list { position: relative; display: flex; flex-direction: column; gap: 0; margin: 0 12px 10px 33px; padding-top: 2px; border-top: 1px solid var(--line); }
+.steps-list { position: relative; display: flex; flex-direction: column; gap: 0; max-height: 260px; overflow-y: auto; margin: 0 12px 10px 33px; padding-top: 2px; border-top: 1px solid var(--line); }
 .steps-list::before { content: ""; position: absolute; top: 14px; bottom: 12px; left: 2.5px; width: 1px; background: var(--line-strong); }
 .steps-list li, .record-steps li { position: relative; display: flex; align-items: center; gap: 10px; min-height: 26px; font-size: 12.5px; flex-wrap: wrap; }
 .steps-list li small, .record-steps li small { color: var(--ink-3); font-size: 11px; }
@@ -241,7 +244,11 @@ details[open] > summary > .chevron, [aria-expanded="true"] > .chevron, .steps.op
 
 .live { display: flex; gap: 12px; animation: rise .25s var(--ease); }
 .live-body { min-width: 0; padding: 2px 0 0; }
-.live-phase { display: inline-flex; align-items: center; gap: 7px; color: var(--brand-ink); font-weight: 500; }
+.live-phase { display: flex; align-items: center; gap: 7px; height: 24px; overflow: hidden; white-space: nowrap; color: var(--brand-ink); font-weight: 500; }
+.live-phase > svg { flex: none; }
+.live-explanation { margin-top: 4px; color: var(--ink-3); font-size: 12px; }
+.live-explanation summary { cursor: pointer; }
+.live-explanation p { max-height: 160px; overflow: auto; }
 .live-body p { margin-top: 4px; white-space: pre-wrap; color: var(--ink-2); }
 .task-progress { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-left: 38px; padding: 9px 14px; border: 1px solid var(--brand-line); border-radius: 10px; background: var(--brand-soft); color: var(--brand-ink); }
 .task-progress small { color: var(--ink-3); }

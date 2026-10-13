@@ -558,6 +558,12 @@
           "type": "string",
           "description": "指定读取的 Sheet 名称（不传则读取第一个 Sheet）"
         },
+        "header_row": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "实际表头行（1 起）；按文件预览确认，首行空白时不要默认当作表头"
+        },
         "preview_rows": {
           "type": "integer",
           "description": "预览行数（默认5行）"

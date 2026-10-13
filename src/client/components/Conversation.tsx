@@ -44,11 +44,14 @@ export function Conversation(props: Props) {
 
   const scroller = useRef<HTMLDivElement>(null);
   const pinned = useRef(true);
+  const previousHeight = useRef(0);
+  useLayoutEffect(() => { pinned.current = true; previousHeight.current = 0; }, [sessionId]);
   useLayoutEffect(() => {
     const node = scroller.current;
-    if (node && pinned.current) node.scrollTop = node.scrollHeight;
-  });
-  useLayoutEffect(() => { pinned.current = true; }, [sessionId]);
+    if (!node) return;
+    if (pinned.current && node.scrollHeight !== previousHeight.current) node.scrollTop = node.scrollHeight;
+    previousHeight.current = node.scrollHeight;
+  }, [current, sessionId]);
 
   const send = async () => {
     const text = draft.trim();
@@ -94,7 +97,9 @@ export function Conversation(props: Props) {
       </div>
     </header>
 
-    <div className="stream" ref={scroller} onScroll={event => {
+    <div className="stream" ref={scroller} onClickCapture={event => {
+      if ((event.target as HTMLElement).closest('summary, .steps-head')) pinned.current = false;
+    }} onScroll={event => {
       const node = event.currentTarget;
       pinned.current = node.scrollHeight - node.scrollTop - node.clientHeight < 80;
     }}>
@@ -111,7 +116,7 @@ export function Conversation(props: Props) {
             </button>)}
           </div>
         </section>}
-        {current && turns.map((turn, index) => <Turn key={turn.id} turn={turn} record={current} latest={index === turns.length - 1} onReload={reload} />)}
+        {current && turns.map((turn, index) => <Turn key={turn.id} turn={turn} record={current} latest={index === turns.length - 1} attachments={attachments} onReload={reload} />)}
       </div>
     </div>
 

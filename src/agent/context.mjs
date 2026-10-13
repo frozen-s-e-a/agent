@@ -10,9 +10,13 @@ const CJK = /[\u3000-\u303f\u3400-\u9fff\uf900-\ufaff\uff00-\uffef]/g;
  * common tokenizers produce fewer, so the estimate stays an upper bound.
  */
 export function estimateTokens(value) {
-  const text = typeof value === 'string' ? value : JSON.stringify(value);
+  let imageTokens=0;
+  const text = typeof value === 'string' ? value : JSON.stringify(value,(key,item)=>{
+    if(item&&typeof item==='object'&&item.type==='image_url'&&item.image_url?.url){imageTokens+=16384;return {type:'image_url',image_url:{url:'[image payload]',detail:item.image_url.detail}};}
+    return item;
+  });
   const cjk = text.match(CJK)?.length || 0;
-  return Math.ceil(cjk * 1.5 + (text.length - cjk) / 3);
+  return Math.ceil(cjk * 1.5 + (text.length - cjk) / 3)+imageTokens;
 }
 
 export function checkRequestBudget(messages, tools = [], settings = {}) {
@@ -20,7 +24,7 @@ export function checkRequestBudget(messages, tools = [], settings = {}) {
   // Never truncate required evidence: callers rebuild history or fail with CONTEXT_BUDGET.
   const window = settings.contextWindow || 128000;
   const output = settings.maxTokens || 4096;
-  const margin = 8192;
+  const margin = Number.isInteger(settings.contextMargin) ? settings.contextMargin : 8192;
   const budget = {method:'character-estimate', measuredTokenizer:false, inputUpperBound:tokens, outputReserved:output, safetyMargin:margin, contextWindow:window};
   if(tokens + output + margin > window) {
     const error = new Error('当前问题的必要要求与证据超过上下文预算，请缩小资料范围或拆成关联子任务。完整资料和已有成果已保留。');

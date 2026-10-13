@@ -3973,7 +3973,7 @@
       "name": "明细表-检查数据源",
       "engine": "mcp",
       "entry": "detailed_table_inspect",
-      "contractHash": "59bf7f933bd4288bbcc16891544de93e92f052ec2cb1664a7de3d2e623c802f5",
+      "contractHash": "9fbcc4799937a9f1e971d28f7ce3636d7bae0df6676bcaf7efddd0b50e09d954",
       "bindings": [
         {
           "workflowId": "workpaper",
@@ -3996,6 +3996,12 @@
           "label": "指定读取的 Sheet 名称",
           "required": false,
           "type": "string"
+        },
+        {
+          "key": "header_row",
+          "label": "实际表头行",
+          "required": false,
+          "type": "integer"
         },
         {
           "key": "preview_rows",

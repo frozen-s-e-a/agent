@@ -17,61 +17,72 @@ internal static class PortableLauncher {
     const string PayloadHash="__PAYLOAD_HASH__";
     const string ManifestHash="__MANIFEST_HASH__";
     const string Footer="AUDIT-SFX-1-END";
-    static int exitCode=0;
     [STAThread] static int Main() {
         AppContext.SetSwitch("Switch.System.IO.UseLegacyPathHandling",false);
         AppContext.SetSwitch("Switch.System.IO.BlockLongPaths",false);
-        Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
-        var window=new Form {Text="AI 审计助手",Size=new Size(530,215),FormBorderStyle=FormBorderStyle.FixedDialog,MaximizeBox=false,MinimizeBox=false,StartPosition=FormStartPosition.CenterScreen,BackColor=Color.White};
-        var title=new Label {Text="正在准备审计工作台",AutoSize=true,Location=new Point(27,23),Font=new Font("Microsoft YaHei UI",15,FontStyle.Bold),ForeColor=Color.FromArgb(35,68,62)};
-        var hint=new Label {Text="首次打开会自动准备所需文件，无需另外安装环境。",AutoSize=true,Location=new Point(29,70),Font=new Font("Microsoft YaHei UI",10)};
-        var progress=new ProgressBar {Location=new Point(30,109),Size=new Size(458,13),Minimum=0,Maximum=100};
-        window.Controls.Add(title);window.Controls.Add(hint);window.Controls.Add(progress);
-        bool finished=false;
-        window.FormClosing+=(s,e)=>{if(!finished)e.Cancel=true;};
-        window.Shown+=(s,e)=>{
-            var thread=new Thread(()=>{
-                try {
-                    string cacheBase=Environment.GetEnvironmentVariable("AUDIT_PORTABLE_ROOT");
-                    if(String.IsNullOrWhiteSpace(cacheBase))cacheBase=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"AuditAssistant","app");
-                    cacheBase=Path.GetFullPath(cacheBase);Directory.CreateDirectory(cacheBase);
-                    string target=Path.Combine(cacheBase,PayloadHash.Substring(0,12));
-                    using(var mutex=new Mutex(false,"Local\\AuditAssistantPortable-"+PayloadHash.Substring(0,20))) {
-                        bool locked=false;
-                        try {
-                            try {locked=mutex.WaitOne(120000);}catch(AbandonedMutexException){locked=true;}
-                            if(!locked)throw new IOException("另一个窗口仍在准备程序，请稍后再试。");
-                            if(!CacheValid(target)) {
-                                string stage=Path.Combine(cacheBase,"prepare-"+Guid.NewGuid().ToString("N"));
-                                Directory.CreateDirectory(stage);
-                                Extract(stage,value=>window.BeginInvoke(new Action(()=>progress.Value=value)));
-                                if(!CacheValid(stage))throw new IOException("程序文件验证未通过，请重新获取完整程序。");
-                                if(!Directory.Exists(target)) {
-                                    CheckInside(cacheBase,stage);CheckInside(cacheBase,target);
-                                    Directory.Move(stage,target);
-                                } else {
-                                    // Leave any pre-existing damaged cache for inspection.
-                                    target=stage;
-                                }
-                            }
-                        } finally {if(locked)mutex.ReleaseMutex();}
-                    }
-                    string executable=Path.Combine(target,"AI助手.exe");
-                    var info=new ProcessStartInfo(executable) {WorkingDirectory=target,UseShellExecute=false};
-                    info.EnvironmentVariables.Remove("ELECTRON_RUN_AS_NODE");
-                    info.EnvironmentVariables.Remove("AUDIT_NODE");info.EnvironmentVariables.Remove("AUDIT_PYTHON");
-                    info.EnvironmentVariables.Remove("AUDIT_WORKBENCH_PREVIEW");
-                    var app=Process.Start(info);if(app==null)throw new IOException("无法打开审计工作台。");
-                    string record=Environment.GetEnvironmentVariable("AUDIT_PORTABLE_TEST_RECORD");
-                    if(!String.IsNullOrEmpty(record))File.WriteAllText(record,new JavaScriptSerializer().Serialize(new {version=Version,path=target,processId=app.Id}),Encoding.UTF8);
-                    window.BeginInvoke(new Action(()=>{finished=true;window.Close();}));
-                } catch(Exception error) {
-                    exitCode=1;
-                    window.BeginInvoke(new Action(()=>{MessageBox.Show(window,"程序未能打开："+error.Message,"AI 审计助手",MessageBoxButtons.OK,MessageBoxIcon.Error);finished=true;window.Close();}));
+        // The portable EXE contains a compressed application directory. Windows
+        // cannot execute files directly from that appended archive, so a first
+        // launch (or payload update) must release and verify it in the user cache.
+        // Do that synchronously and silently; the preparation form was only a
+        // progress affordance and is intentionally not created anymore.
+        try {LaunchApp(Prepare());return 0;}
+        catch(Exception error) {
+            Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
+            MessageBox.Show("程序未能打开："+error.Message,"AI 审计助手",MessageBoxButtons.OK,MessageBoxIcon.Error);return 1;
+        }
+    }
+    static string GetCacheBase() {
+        string cacheBase=Environment.GetEnvironmentVariable("AUDIT_PORTABLE_ROOT");
+        if(String.IsNullOrWhiteSpace(cacheBase))cacheBase=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"AuditAssistant","app");
+        cacheBase=Path.GetFullPath(cacheBase);Directory.CreateDirectory(cacheBase);return cacheBase;
+    }
+    static string GetCacheTarget(string cacheBase) {
+        string pointer=Path.Combine(cacheBase,"active-"+PayloadHash.Substring(0,12)+".txt");
+        if(File.Exists(pointer)) {
+            try {
+                string name=File.ReadAllText(pointer,Encoding.UTF8).Trim();
+                if(!String.IsNullOrEmpty(name)) {
+                    string candidate=Path.GetFullPath(Path.Combine(cacheBase,name));CheckInside(cacheBase,candidate);
+                    if(Directory.Exists(candidate))return candidate;
                 }
-            });thread.IsBackground=true;thread.Start();
-        };
-        Application.Run(window);return exitCode;
+            } catch(IOException) {} catch(ArgumentException) {}
+        }
+        return Path.Combine(cacheBase,PayloadHash.Substring(0,12));
+    }
+    static string Prepare() {
+        string cacheBase=GetCacheBase();string target=GetCacheTarget(cacheBase);
+        using(var mutex=new Mutex(false,"Local\\AuditAssistantPortable-"+PayloadHash.Substring(0,20))) {
+            bool locked=false;
+            try {
+                try {locked=mutex.WaitOne(120000);}catch(AbandonedMutexException){locked=true;}
+                if(!locked)throw new IOException("另一个窗口仍在准备程序，请稍后再试。");
+                if(!CacheValid(target)) {
+                    string stage=Path.Combine(cacheBase,"prepare-"+Guid.NewGuid().ToString("N"));
+                    Directory.CreateDirectory(stage);
+                    Extract(stage);
+                    if(!CacheValid(stage))throw new IOException("程序文件验证未通过，请重新获取完整程序。");
+                    if(!Directory.Exists(target)) {
+                        CheckInside(cacheBase,stage);CheckInside(cacheBase,target);Directory.Move(stage,target);
+                    } else target=stage;
+                    // Retain a repaired cache as the active directory so an
+                    // old damaged cache does not trigger extraction every time.
+                    string pointer=Path.Combine(cacheBase,"active-"+PayloadHash.Substring(0,12)+".txt"),pending=pointer+".pending";
+                    File.WriteAllText(pending,Path.GetFileName(target),Encoding.UTF8);
+                    if(File.Exists(pointer))File.Replace(pending,pointer,null);else File.Move(pending,pointer);
+                }
+            } finally {if(locked)mutex.ReleaseMutex();}
+        }
+        return target;
+    }
+    static void LaunchApp(string target) {
+        string executable=Path.Combine(target,"AI助手.exe");
+        var info=new ProcessStartInfo(executable) {WorkingDirectory=target,UseShellExecute=false};
+        info.EnvironmentVariables.Remove("ELECTRON_RUN_AS_NODE");
+        info.EnvironmentVariables.Remove("AUDIT_NODE");info.EnvironmentVariables.Remove("AUDIT_PYTHON");
+        info.EnvironmentVariables.Remove("AUDIT_WORKBENCH_PREVIEW");
+        var app=Process.Start(info);if(app==null)throw new IOException("无法打开审计工作台。");
+        string record=Environment.GetEnvironmentVariable("AUDIT_PORTABLE_TEST_RECORD");
+        if(!String.IsNullOrEmpty(record))File.WriteAllText(record,new JavaScriptSerializer().Serialize(new {version=Version,path=target,processId=app.Id,payloadSha256=PayloadHash,launcherHasWindow=Process.GetCurrentProcess().MainWindowHandle!=IntPtr.Zero}),Encoding.UTF8);
     }
     static void CheckInside(string root,string candidate) {
         string prefix=Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar)+Path.DirectorySeparatorChar;
@@ -94,7 +105,7 @@ internal static class PortableLauncher {
             return true;
         } catch {return false;}
     }
-    static void Extract(string target,Action<int> update) {
+    static void Extract(string target) {
         using(var file=File.OpenRead(Application.ExecutablePath)) {
             byte[] marker=Encoding.ASCII.GetBytes(Footer);file.Position=file.Length-marker.Length;
             byte[] actual=new byte[marker.Length];if(file.Read(actual,0,actual.Length)!=actual.Length||Encoding.ASCII.GetString(actual)!=Footer)throw new IOException("程序包不完整。");
@@ -104,8 +115,6 @@ internal static class PortableLauncher {
                 if(Hash(content)!=PayloadHash)throw new IOException("程序包校验失败，请重新获取文件。");
                 content.Position=0;
                 using(var zip=new ZipArchive(content,ZipArchiveMode.Read,true,Encoding.UTF8)) {
-                    long total=0,done=0;foreach(var entry in zip.Entries)total+=entry.Length;
-                    int last=-1;
                     foreach(var entry in zip.Entries) {
                         const string prefix="AI助手/";
                         if(!entry.FullName.StartsWith(prefix,StringComparison.Ordinal))throw new IOException("程序包目录结构无效。");
@@ -114,7 +123,6 @@ internal static class PortableLauncher {
                         if(entry.Name.Length==0){Directory.CreateDirectory(path);continue;}
                         Directory.CreateDirectory(Path.GetDirectoryName(path));
                         using(var input=entry.Open())using(var output=new FileStream(path,FileMode.CreateNew,FileAccess.Write,FileShare.None))input.CopyTo(output);
-                        done+=entry.Length;int value=(int)Math.Min(100,done*100/Math.Max(1,total));if(value!=last){update(value);last=value;}
                     }
                 }
             }

@@ -27,6 +27,11 @@ test('identical project files are stored once across runs and snapshots stay rea
     assert.equal(fs.statSync(first.inputs[0].snapshotPath).mode & 0o222,0);
     store.put('agentRuns',{id:'run-2',sessionId:'s',inputs:second.inputs});
     removeTree(path.join(workspaceRoot(store),'run-1'));assert.equal(collectUnusedBlobs(store),0);
+    assert.equal(fs.statSync(second.inputs[0].snapshotPath).mode & 0o222,0,'surviving snapshot must remain read-only');
+    const blob=path.join(workspaceRoot(store),'blobs',blobs[0]);
+    assert.equal(fs.statSync(blob).mode & 0o222,0,'shared blob must remain read-only');
+    if(process.platform==='win32')assert.throws(()=>fs.writeFileSync(second.inputs[0].snapshotPath,'changed'),{code:'EPERM'});
+    assert.equal(fs.readFileSync(blob,'utf8'),'a,b\n1,2\n');
     store.delete('agentRuns','run-2');assert.equal(collectUnusedBlobs(store),1);
   } finally {store.close();removeTree(dir);fs.rmSync(project,{recursive:true,force:true});}
 });
