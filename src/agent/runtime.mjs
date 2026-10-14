@@ -47,6 +47,15 @@ export const isBareContinue=text=>/^(继续|继续吧|继续处理|继续任务|
 
 const fileArgs=(tool,args)=>tool?.fields.filter(field=>INPUT_PATH_KEYS.has(field.key)).flatMap(field=>Array.isArray(args[field.key])?args[field.key]:args[field.key]?[args[field.key]]:[]).filter(value=>typeof value==='string') || [];
 const sameJson=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+// Models write 0.01 in a plan and "0.01" in the call; tool parameters are text either way.
+const sameValue=(a,b)=>sameJson(a,b)||(a!==null&&b!==null&&typeof a!=='object'&&typeof b!=='object'&&String(a).trim()===String(b).trim());
+const fitsParameters=(planned,actual)=>Object.entries(planned||{}).every(([key,value])=>sameValue(actual?.[key],value));
+/** A parameter object some services send as a JSON string. */
+export const parameterObject=value=>{
+  if(typeof value!=='string')return value;
+  if(!value.trim())return {};
+  try{const parsed=JSON.parse(value);return parsed&&typeof parsed==='object'&&!Array.isArray(parsed)?parsed:value;}catch{return value;}
+};
 
 /**
  * Pick the plan node a tool call executes. The same tool may appear in several
@@ -56,7 +65,7 @@ const sameJson=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 export function matchPlannedStep(plan,toolId,actualFiles,parameters){
   const ready=step=>step.dependsOn.every(id=>plan.steps.find(item=>item.id===id)?.status==='succeeded');
   const candidates=plan.steps.filter(step=>step.toolId===toolId&&step.status!=='succeeded');
-  const fits=step=>step.files.every(file=>actualFiles.includes(file))&&Object.entries(step.parameters).every(([key,value])=>sameJson(parameters[key],value));
+  const fits=step=>step.files.every(file=>actualFiles.includes(file))&&fitsParameters(step.parameters,parameters);
   return candidates.find(step=>ready(step)&&fits(step))||candidates.find(fits)||candidates.find(ready)||candidates[0]||null;
 }
 
@@ -260,8 +269,11 @@ export function createAgentRuntime({store,scheduler,mcpRunner,attachments,catalo
           run.inputVersion=digest(run.inputs.map(({id,sha256})=>({id,sha256})));save(run);return {ok:true,source:'project',files};
         },
         set_agent_plan(args){
-          const plan={...args,steps:args.steps?.map(step=>({...step,toolId:findAgentTool(catalog,step.toolId)?.id||step.toolId}))};
+          const plan={...args,steps:args.steps?.map(step=>({...step,toolId:findAgentTool(catalog,step.toolId)?.id||step.toolId,parameters:parameterObject(step.parameters??{})}))};
           const steps=verifyWorkflowPlan(plan,catalog,workflows).map(step=>({...step,files:step.files.map(file=>resolveInputReference(run,file)),parameters:resolveAuditParameters(run,catalog.find(tool=>tool.id===step.toolId),step.parameters)}));for(const step of steps)for(const file of step.files)if(workProject)inside(workProject.root,file);
+          // A revised plan keeps the nodes that already ran with the same tool, files and parameters.
+          const done=(run.plan.steps || []).filter(step=>step.status==='succeeded');
+          for(const step of steps){const prior=done.find(item=>item.toolId===step.toolId&&sameJson([...item.files].sort(),[...step.files].sort())&&fitsParameters(step.parameters,item.parameters));if(prior)Object.assign(step,{status:'succeeded',taskId:prior.taskId,checkpoint:prior.checkpoint,callId:prior.callId});}
           run.plan={version:'audit-plan/1',status:'ready',steps};run.workflowIds=args.workflowIds;save(run);return {ok:true,plan:run.plan};
         },
         ask_user_questions(args){
@@ -282,9 +294,13 @@ export function createAgentRuntime({store,scheduler,mcpRunner,attachments,catalo
         if(run.plan.status==='ready'){
           const parameters=args.parameters || args,planned=matchPlannedStep(run.plan,toolId,actualFiles,parameters);if(!planned)throw Error('工具未登记在当前计划中');
           if(step){step.planNodeId=planned.id;step.executionKey='plan-'+planned.id;step.nodeId=planned.stageId;}planned.callId=callId;save(run);
-          if(planned.dependsOn.some(id=>run.plan.steps.find(step=>step.id===id)?.status!=='succeeded'))throw Error('前置节点尚未通过');
-          if(Object.entries(planned.parameters).some(([key,value])=>!sameJson(parameters[key],value)))throw Error('实际参数与保存的节点计划不一致，请先保存有依据的修订计划');
-          if(planned.files.some(file=>!actualFiles.includes(file)))throw Error('实际资料与保存的节点计划不一致');
+          const blocked=planned.dependsOn.filter(id=>run.plan.steps.find(step=>step.id===id)?.status!=='succeeded');
+          if(blocked.length)throw Error('前置节点尚未通过：'+blocked.join('、')+'。先执行这些节点，或用 set_agent_plan 保存修订后的计划');
+          // The call is the model's later, better-informed choice; the plan follows it and keeps the revision.
+          if(!fitsParameters(planned.parameters,parameters)||planned.files.some(file=>!actualFiles.includes(file))){
+            planned.revisions=[...(planned.revisions || []),{files:planned.files,parameters:planned.parameters,at:new Date().toISOString()}];
+            planned.files=[...actualFiles];planned.parameters={...parameters};
+          }
           planned.status='running';
         }else{
           const previous=run.plan.steps.at(-1);run.plan.status='observed';
@@ -313,6 +329,7 @@ export function createAgentRuntime({store,scheduler,mcpRunner,attachments,catalo
         return result;
       };
       const execute=async(name,args,callId)=>{
+        if(!name.startsWith('audit_')&&'parameters' in args)args={...args,parameters:parameterObject(args.parameters)};
         const result=await executeTool(name,args,callId),{modelImage,...record}=result,saved=store.create('agentToolResults',{sessionId:session.id,runId:run.id,callId,name,result:record});
         return {...boundedToolResult({...record,resultRef:record.resultRef || {kind:'agentToolResults',id:saved.id}},{limit:24000}),...(modelImage?{modelImage}:{})};
       };
@@ -345,7 +362,7 @@ export function createAgentRuntime({store,scheduler,mcpRunner,attachments,catalo
           const selectedFlows=workflows.filter(flow=>run.workflowIds.includes(flow.id)),stage=pending&&selectedFlows.find(flow=>flow.id===pending.workflowId)?.stages.find(stage=>stage.id===pending.stageId);
           run.nodeContract=stage?{...stage,planNodeId:pending.id,files:pending.files,parameters:pending.parameters,dependencyResults:pending.dependsOn.map(id=>run.plan.steps.find(item=>item.id===id))}:selectedFlows.length?{version:AGENT_WORKFLOW_VERSION,workflowIds:run.workflowIds,allowedToolIds:selectedFlows.flatMap(flow=>flow.toolIds),required:['original_requirements','input_versions','actual_results','unresolved_questions']}:null;
           const allowed=new Set(selectedFlows.flatMap(flow=>flow.toolIds)),requested=new Set(run.requestedContractIds||[]);
-          const available=defs.filter(tool=>!tool.function.name.startsWith('audit_')||!run.workflowIds.length||allowed.has('mcp_'+tool.function.name.slice(6))).map(tool=>{
+          const available=defs.filter(tool=>!tool.function.name.startsWith('audit_')||run.plan.status!=='ready'||allowed.has('mcp_'+tool.function.name.slice(6))).map(tool=>{
             if(!tool.function.name.startsWith('audit_'))return tool;
             const id='mcp_'+tool.function.name.slice(6);
             return (pending?.toolId===id||requested.has(id))?tool:(deferredLegacyDefs.find(item=>item.function.name===tool.function.name)||tool);
