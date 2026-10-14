@@ -261,10 +261,14 @@ def run(request):
     root=Path(request['root']).resolve(strict=True);files=[inside(root,x) for x in request['files']]
     if not files or len(files)>1000 or len(set(files))!=len(files):raise ValueError('文件列表为空、重复或超出上限')
     p=request['parameters'];tool=request['tool'];memory=int(request['limits']['memoryMiB']);threads=int(request['limits']['threads'])
+    workbook_fill=tool=='workbook_fill'
     layout_inspect=tool=='inspect' and any(f.suffix.lower() in ['.xlsx','.xlsm'] for f in files)
-    rule_version='inspect-layout-1' if layout_inspect else 'internal-1'
+    rule_version='workbook-plan-1' if workbook_fill else 'inspect-layout-1' if layout_inspect else 'internal-1'
     if not 256<=memory<=8192 or not 1<=threads<=8:raise ValueError('资源预算无效')
     if not 1<=int(p.get('headerRow',1))<=10000:raise ValueError('表头行超出范围')
+    if tool in ['__workbook_read','__workbook_validate']:
+        from workbook_plan import read_workbook, validate_plan
+        return read_workbook(root,files,p) if tool=='__workbook_read' else validate_plan(root,files,p)
     if tool=='__structure':
         from file_structure import structure
         return structure(files[0],p)
@@ -305,7 +309,9 @@ def run(request):
     if expanded>memory*1024**2*4 and any(f.suffix.lower() in ['.xlsx','.xlsm'] for f in files):raise ValueError('Excel 解压体量超过此适配器预算，请先转换为 CSV')
     output=root/'outputs';output.mkdir(exist_ok=True)
     if not output.resolve().is_relative_to(root):raise ValueError('输出目录指向项目外部')
-    final=output/request['taskId'];stage=output/('.'+request['taskId']+'.'+uuid.uuid4().hex+'.staging')
+    # The task UUID is already in the manifest and final directory. Repeating it
+    # in the random staging name can exceed Windows' path limit inside snapshots.
+    final=output/request['taskId'];stage=output/('.stage-'+uuid.uuid4().hex)
     snapshots=[{'path':f.relative_to(root).as_posix(),'sha256':digest(f),'size':f.stat().st_size} for f in files]
     signature=hashlib.sha256(json.dumps({'tool':tool,'parameters':p,'inputs':snapshots,'ruleVersion':rule_version},sort_keys=True).encode()).hexdigest()
     if final.exists():
@@ -322,7 +328,10 @@ def run(request):
     db.execute(f"SET memory_limit='{max(64,memory//2)}MB'");db.execute(f'SET threads={threads}');db.execute(f"SET temp_directory={lit(str(stage/'spill'))}");db.execute("SET max_temp_directory_size='2GB'")
     started=time.time();warnings=[]
     try:
-        if layout_inspect:
+        if workbook_fill:
+            from workbook_plan import fill_workbook
+            result=fill_workbook(root,files,p,stage);count=result['rowCount'];warnings.extend(result.pop('warnings',[]))
+        elif layout_inspect:
             from inspect_layout import inspect_layout
             count=inspect_layout(db,files,root,p,stage);query='SELECT * FROM data'
             warnings.append('这是工作簿结构概览和有限行列样本，不是全量业务数据导入；首行不自动认定为表头。')
@@ -358,12 +367,12 @@ def run(request):
         else:
             columns,count=import_tables(db,files,root,p,request.get('approvedInputs'));emit('progress',phase='执行计算',rows=count)
             query=run_sql(db,tool,p,columns)
-        result=export_result(db,query,stage)
+        if not workbook_fill:result=export_result(db,query,stage)
         if layout_inspect:
             result['files'].append('结构概览.json');result.update(structureOnly=True,inputUnit='工作表',resultUnit='结构记录')
-        if result['excelSkippedForLongText']:warnings.append('包含超过 Excel 单元格限制的长文本，完整内容已保存在 CSV 与 Parquet，未生成 Excel。')
+        if result.get('excelSkippedForLongText'):warnings.append('包含超过 Excel 单元格限制的长文本，完整内容已保存在 CSV 与 Parquet，未生成 Excel。')
         # Evidence remains separate from user-visible business data.
-        if not layout_inspect and tool not in ['file_inventory','pdf_text','link_extract']:
+        if not workbook_fill and not layout_inspect and tool not in ['file_inventory','pdf_text','link_extract']:
             db.execute(f"COPY data TO {lit(str(stage/'来源数据.parquet'))} (FORMAT PARQUET)");result['files'].append('来源数据.parquet')
         for f,snapshot in zip(files,snapshots):
             if digest(f)!=snapshot['sha256']:raise ValueError('执行中输入文件发生变化，结果未发布')

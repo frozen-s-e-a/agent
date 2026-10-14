@@ -1,6 +1,7 @@
 ---
 name: monthly-analysis-mcp
 description: Use when user requests monthly analysis (月间分析) of chronological ledger data. Triggers on 月间分析, 月度分析, monthly analysis, 序时账分析, 同环比变动. Guides the multi-step MCP tool workflow with user confirmation at each stage.
+triggers: 月间分析, 月度分析, 月度变动, 序时账分析, 同环比, 环比, 同比, monthly analysis
 ---
 
 # 月间分析 MCP 工作流

@@ -85,7 +85,8 @@ export function verifyPlan(plan, catalog, workflows) {
     const id = step.id || 'step-' + (index + 1);
     if(!/^[a-zA-Z0-9_-]{1,64}$/.test(id) || ids.has(id)) throw Error('步骤编号无效或重复');
     if(!allowed.has(step.toolId) || !catalog.some(t => t.id === step.toolId)) throw Error('步骤工具不属于选定工作流：' + step.toolId);
-    const dependencies = step.dependsOn || (index ? [plan.steps[index-1].id || 'step-' + index] : []);
+    // Steps without dependsOn are independent; ordering is only enforced where the model declared it.
+    const dependencies = step.dependsOn || [];
     if(!Array.isArray(dependencies) || dependencies.some(dep => !ids.has(dep))) throw Error('步骤依赖必须指向此前已有步骤');
     if(!Array.isArray(step.files) || step.files.some(file => typeof file !== 'string' || !file.trim()) || !step.parameters || typeof step.parameters !== 'object' || Array.isArray(step.parameters)) throw Error('每个步骤需要资料引用和参数对象');
     ids.add(id);

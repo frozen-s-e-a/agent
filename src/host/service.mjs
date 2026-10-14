@@ -13,9 +13,10 @@ import {workflowService} from '../workflows/state.mjs';
 import {createMcpRunner} from '../workflows/mcp-runner.mjs';
 import {createHash} from 'node:crypto';
 import {buildAgentWorkflows} from '../agent/definitions.mjs';
+import {CONTEXT_BUILDER_VERSION} from '../agent/context-builder.mjs';
 import {verifyTaskArtifacts,recoverPublishedTask} from '../agent/validation.mjs';
 import {createAgentRuntime} from '../agent/runtime.mjs';
-import {fileHash} from '../agent/inputs.mjs';
+import {fileHash,removeTree,workspaceRoot,collectUnusedBlobs} from '../agent/inputs.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const readJSON=p=>JSON.parse(fs.readFileSync(path.join(ROOT,p),'utf8'));
 const tools=readJSON('src/resources/tools.json');
@@ -25,7 +26,7 @@ const agentWorkflows=buildAgentWorkflows(catalog);
 const verificationPath=path.join(ROOT,'src/resources/verification.json');
 const verification=fs.existsSync(verificationPath)?readJSON('src/resources/verification.json'):{};
 const jet=readJSON('src/resources/jet-rules.json');
-const defaults={id:'settings',baseUrl:'https://api.deepseek.com',model:'deepseek-chat',visionModel:'',models:[],temperature:0.2,maxTokens:4096,contextWindow:128000,memoryMiB:2048,threads:2,defaultMode:'auto'};
+const defaults={id:'settings',baseUrl:'',model:'',visionModel:'',models:[],temperature:0.2,maxTokens:4096,contextWindow:128000,memoryMiB:2048,threads:2,defaultMode:'auto'};
 export async function createBackend(options={}){
  const dataRoot=options.dataRoot||process.env.AUDIT_DATA_DIR||path.join(process.env.LOCALAPPDATA||os.homedir(),'AuditAssistant');
  const store=new Store(dataRoot),scheduler=new Scheduler(store);let apiKey='',cicpaCookies='';const streams=new Map();let previews=0;
@@ -35,7 +36,7 @@ export async function createBackend(options={}){
  const legacyCatalog=async()=>{if(legacyMeta)return legacyMeta;legacyMeta=legacyToolMetadata;return legacyMeta;};
  const legacyUiTools=async()=>catalog.filter(t=>t.engine==='mcp');
  for(const c of store.all('toolCalls'))if(c.status==='running')store.put('toolCalls',{...c,status:'cancelled',result:{ok:false,error:'上次应用关闭中断了调用；已产生的结果可在任务卡核对'}});
- const settings=()=>({...defaults,...store.get('settings','settings'),hasKey:!!apiKey,hasCicpaCookies:!!cicpaCookies});
+ const settings=()=>{const value={...defaults,...store.get('settings','settings'),hasKey:!!apiKey,hasCicpaCookies:!!cicpaCookies};return value;};
  const agents=createAgentRuntime({store,scheduler,mcpRunner,attachments,catalog,workflows:agentWorkflows,skills:workflows.skills,settings,secrets:()=>({apiKey}),streams});
  const must=(kind,id)=>{const x=store.get(kind,id);if(!x)throw new Error('找不到指定的'+kind);return x;};
  async function action(method,p={}){
@@ -43,9 +44,16 @@ export async function createBackend(options={}){
   if(method.startsWith('workflow.'))return workflows.action(method,p);
   switch(method){
    case 'templates.copy':{const project=must('projects',p.projectId),tool=catalog.find(t=>t.id===p.tool);if(!tool?.contract.templates?.length)throw Error('此操作没有关联的配置模板');const source=path.join(ROOT,'src/resources/templates'),directory=path.join(project.root,'input');if(fs.existsSync(directory))inside(project.root,directory);else fs.mkdirSync(directory);const files=tool.contract.templates.map(name=>{const src=inside(source,name),target=path.join(directory,name),existed=fs.existsSync(target);if(existed)inside(project.root,target);else fs.copyFileSync(src,target,fs.constants.COPYFILE_EXCL);return {name,path:path.relative(project.root,target),existed,templateHash:createHash('sha256').update(fs.readFileSync(src)).digest('hex')};});return {files};}
-   case 'bootstrap':{const legacy=await legacyUiTools();return {version:readJSON('package.json').version,preview:process.env.AUDIT_WORKBENCH_PREVIEW==='1',build:fs.existsSync(path.join(ROOT,'build/client/index.html'))?fs.statSync(path.join(ROOT,'build/client/index.html')).mtime.toISOString():null,projects:store.all('projects').filter(p=>!p.internal),sessions:store.all('sessions').map(agents.sessionSummary),tools:catalog.filter(t=>t.engine==='builtin'),legacyTools:legacy,settings:settings(),jetRules:jet.rules,counts:{modules:legacy.length,templates:new Set(catalog.flatMap(t=>t.contract.templates||[])).size,skills:workflows.skills.length,mcp:legacy.length,legacyMcp:legacy.length,agentWorkflows:agentWorkflows.length},agentWorkflows:agentWorkflows.map(({id,version,title,goal,toolIds,nodes})=>({id,version,title,goal,toolIds,nodes})),coverage:{implemented:catalog.length,independentTasks:legacy.length,fixtureVerified:verification.localBusiness?.tasksCovered||0,liveServicesVerified:false,verification},activeTurns:[...streams.keys()]};}
+   case 'bootstrap':{const legacy=await legacyUiTools();return {version:readJSON('package.json').version,contextBuilderVersion:CONTEXT_BUILDER_VERSION,preview:process.env.AUDIT_WORKBENCH_PREVIEW==='1',build:fs.existsSync(path.join(ROOT,'build/client/index.html'))?fs.statSync(path.join(ROOT,'build/client/index.html')).mtime.toISOString():null,projects:store.all('projects').filter(p=>!p.internal),sessions:agents.sessionSummaries(store.all('sessions')),tools:catalog.filter(t=>t.engine==='builtin'),legacyTools:legacy,settings:settings(),jetRules:jet.rules,counts:{modules:legacy.length,templates:new Set(catalog.flatMap(t=>t.contract.templates||[])).size,skills:workflows.skills.length,mcp:legacy.length,legacyMcp:legacy.length,agentWorkflows:agentWorkflows.length},agentWorkflows:agentWorkflows.map(({id,version,title,goal,toolIds,nodes})=>({id,version,title,goal,toolIds,nodes})),coverage:{implemented:catalog.length,independentTasks:legacy.length,fixtureVerified:verification.localBusiness?.tasksCovered||0,liveServicesVerified:false,verification},activeTurns:[...streams.keys()]};}
    case 'runtime.status':{const client=new IndependentTaskClient();const excel=[process.env.ProgramFiles,process.env['ProgramFiles(x86)']].filter(Boolean).flatMap(base=>['Microsoft Office/root/Office16/EXCEL.EXE','Microsoft Office/Office16/EXCEL.EXE'].map(x=>path.join(base,x))).find(x=>fs.existsSync(x));return {mcpAvailable:client.available(),mcpPath:null,independent:true,taskCount:63,excel:excel||null,skills:workflows.skills.map(({id,name,description})=>({id,name,description}))};}
    case 'project.create':{const root=fs.realpathSync(p.root);if(!fs.statSync(root).isDirectory())throw new Error('请选择项目文件夹');if(typeof p.name!=='string'||!p.name.trim())throw new Error('请填写项目名称');return store.create('projects',{name:p.name.trim().slice(0,120),root});}
+   case 'project.rename':{const project=must('projects',p.id);if(project.internal)throw Error('项目不存在');if(typeof p.name!=='string'||!p.name.trim())throw Error('请填写项目名称');project.name=p.name.trim().slice(0,120);return store.put('projects',project);}
+   case 'project.remove':{
+    // Removes the project and its conversations from the app; the files in the project folder are not touched.
+    const project=must('projects',p.id);if(project.internal)throw Error('项目不存在');
+    const sessions=store.all('sessions').filter(item=>item.projectId===project.id);if(sessions.some(item=>streams.has(item.id)))throw Error('项目里还有对话在执行，请先停止');
+    for(const item of sessions)await action('session.delete',{id:item.id});store.delete('projects',project.id);return {removed:project.id};
+   }
    case 'session.create':{if(p.projectId)must('projects',p.projectId);if(p.parentSessionId)must('sessions',p.parentSessionId);return store.create('sessions',{projectId:p.projectId||null,title:p.title?.slice(0,100)||'新对话',parentSessionId:p.parentSessionId||null,branchedFromEventId:p.branchedFromEventId||null});}
    case 'session.get':return agents.sessionRecord(p.id);
    case 'session.model':{const s=must('sessions',p.id);if(typeof p.model!=='string'||p.model.length>256)throw Error('模型名称无效');s.model=p.model.trim();return store.put('sessions',s);}
@@ -56,7 +64,16 @@ export async function createBackend(options={}){
    case 'models.list':return listModels({...settings(),...p.settings},p.key?.trim()?normalizeKey(p.key):apiKey);
    case 'connection.test':return testConnection({...settings(),...p.settings},p.key?.trim()?normalizeKey(p.key):apiKey);
    case 'session.rename':{const s=must('sessions',p.id);s.title=String(p.title||'新对话').slice(0,100);return store.put('sessions',s);}
-    case 'session.delete':{const id=p.id;must('sessions',id);fs.rmSync(path.join(dataRoot,'sessions',id+'.jsonl'),{force:true});const toolCalls=store.all('toolCalls').filter(c=>c.sessionId===id);for(const tc of toolCalls)store.delete('toolCalls',tc.id);const tasks=store.all('tasks').filter(t=>t.sessionId===id);for(const t of tasks)store.delete('tasks',t.id);const atts=store.all('attachments').filter(a=>a.sessionId===id);for(const a of atts)store.delete('attachments',a.id);store.delete('sessions',id);return {deleted:id};}
+    case 'session.delete':{
+     const id=p.id;must('sessions',id);if(streams.has(id))throw Error('当前对话仍在执行，请先停止');
+     fs.rmSync(path.join(dataRoot,'sessions',id+'.jsonl'),{force:true});
+     const runIds=new Set(store.all('agentRuns').filter(run=>run.sessionId===id).map(run=>run.id));
+     for(const kind of ['toolCalls','tasks','attachments','agentToolResults','agentModelInputs'])for(const item of store.all(kind).filter(item=>item.sessionId===id))store.delete(kind,item.id);
+     for(const runId of runIds){store.delete('agentRuns',runId);removeTree(path.join(workspaceRoot(store),runId));}
+     for(const project of store.all('projects').filter(item=>item.internal&&(runIds.has(item.agentRunId)||item.attachmentSessionId===id)))store.delete('projects',project.id);
+     for(const directory of ['workspaces','attachments'])removeTree(path.join(dataRoot,directory,id));collectUnusedBlobs(store);
+     store.delete('sessions',id);return {deleted:id};
+    }
    case 'files.list':return listFiles(must('projects',p.projectId).root,p.path||'');
    case 'project.activity':{must('projects',p.projectId);return {sessions:store.all('sessions').filter(s=>s.projectId===p.projectId),tasks:store.all('tasks').filter(t=>t.projectId===p.projectId)};}
    case 'files.preview':{

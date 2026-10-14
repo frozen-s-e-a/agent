@@ -8,7 +8,7 @@ export function publicAttachment(a){const {filePath,children,...rest}=a;return {
 export class Attachments{
  constructor(store){this.store=store;this.root=path.join(store.root,'attachments');fs.mkdirSync(this.root,{recursive:true});}
  get(sessionId,id){const a=this.store.get('attachments',id);if(!a||a.sessionId!==sessionId||a.removed)throw Error('附件不存在或不属于此对话');return a;}
- list(sessionId){return this.store.all('attachments').filter(a=>a.sessionId===sessionId&&!a.used&&!a.removed).map(publicAttachment);}
+ list(sessionId){return this.store.bySession('attachments',sessionId).filter(a=>!a.used&&!a.removed).map(publicAttachment);}
  async import(sessionId,paths){
   if(!this.store.get('sessions',sessionId))throw Error('对话不存在');if(!Array.isArray(paths)||!paths.length||paths.length>20)throw Error('一次最多选择 20 个文件或文件夹');
   const plans=[];let total=0,count=0;const warnings=[];

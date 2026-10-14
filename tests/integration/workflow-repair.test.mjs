@@ -14,11 +14,11 @@ const temporary=()=>fs.mkdtempSync(path.resolve('artifacts','workflow-test-'));
 async function settle(a,id){for(let i=0;i<200;i++){const t=a.store.get('tasks',id);if(!['queued','running','cancelling'].includes(t.status))return t;await new Promise(r=>setTimeout(r,100));}throw Error('Task timeout '+id);}
 fs.mkdirSync('artifacts',{recursive:true});
 
-test('all 79 exact IDs are assigned; semantic collisions stay distinct',()=>{
+test('all registered exact IDs are assigned; semantic collisions stay distinct',()=>{
  const refs=new Set(workflowDefinitions.flatMap(f=>f.stages.flatMap(s=>s.tools)));
  assert.deepEqual(catalog.filter(t=>!refs.has(t.id)).map(t=>t.id),[]);
  assert.deepEqual([...refs].filter(id=>!catalog.some(t=>t.id===id)),[]);
- assert.equal(catalog.length,79);
+ assert.equal(catalog.length,80);
  assert.equal(catalog.find(t=>t.id==='add_column').name,'新增固定值列');
  assert.equal(catalog.find(t=>t.id==='mcp_add_column').name,'合并同名列');
 });

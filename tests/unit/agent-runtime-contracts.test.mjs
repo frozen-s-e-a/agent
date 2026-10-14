@@ -7,7 +7,7 @@ import {Store} from '../../src/conversations/store.mjs';
 import {createAgentRun,transitionAgentRun,recoverAgentRuns} from '../../src/agent/state.mjs';
 import {rebuildContext,requiredStateFingerprint,boundedToolResult,evidenceRequestAllowed} from '../../src/agent/context-builder.mjs';
 import {normalizeToolResult} from '../../src/agent/tool-results.mjs';
-import {assertLocalModel} from '../../src/agent/runtime.mjs';
+import {normalizeBase} from '../../src/harness-adapter/connection.mjs';
 import {buildAgentWorkflows,verifyWorkflowPlan} from '../../src/agent/definitions.mjs';
 import {buildCatalog} from '../../src/workflows/contracts.mjs';
 const catalog=buildCatalog(JSON.parse(fs.readFileSync('src/resources/tools.json','utf8')),JSON.parse(fs.readFileSync('src/resources/audit-task-tools.json','utf8'))),flows=buildAgentWorkflows(catalog);
@@ -31,9 +31,18 @@ test('context rebuilding archives whole old turns and preserves constraints, can
   const next=rebuildContext({messages:result.messages,run,settings:{contextWindow:14000,maxTokens:256}});assert.equal(next.messages.filter(item=>String(item.content).startsWith('以下为应用')).length,1);
 });
 
-test('oversized necessary evidence fails instead of silently truncating the current task',()=>{
+test('context rebuilding compacts a long active tool loop while preserving a recoverable evidence index',()=>{
+  const run={id:'r',objective:'核对大表',requirements:[{id:'scope',text:'只核对 Sheet1',status:'provided'}],inputs:[{id:'i',path:'大表.xlsx',sha256:'abc',status:'captured'}],questions:[],steps:Array.from({length:20},(_,i)=>({id:'c'+i,name:'read_agent_result',status:'succeeded',inputRefs:['i'],result:{ok:true,resultRef:{kind:'agentToolResults',id:'r'+i},previewIsSample:true}})),checkpoints:[]};
+  const messages=[{role:'system',content:'业务约束'},{role:'user',content:'读取大表'}];
+  for(let i=0;i<20;i++){const id='call-'+i;messages.push({role:'assistant',content:null,tool_calls:[{id,function:{name:'read_agent_result',arguments:JSON.stringify({id:'r'+i,section:'previews.0.preview',offset:i})}}]},{role:'tool',tool_call_id:id,content:JSON.stringify({ok:true,resultRef:{kind:'agentToolResults',id:'r'+i},data:Array.from({length:500},(_,j)=>[i,j,'样本'.repeat(30)])})});}
+  const result=rebuildContext({messages,run,settings:{contextWindow:128000,maxTokens:4096},retainTurns:1});
+  assert.equal(result.rebuilt,true);assert.ok(result.changes.some(change=>change.kind==='compact_history'&&change.archivedCycles>0));assert.match(result.messages.find(item=>item.role==='system'&&String(item.content).startsWith('以下为应用')).content,/Sheet1/);assert.match(result.messages.find(item=>String(item.content).startsWith('以下交互已完成')).content,/archivedCycles/);assert.equal(result.snapshot.evidenceIndex.length,20);assert.ok(result.messages.filter(item=>item.role==='tool').length<20);
+});
+
+test('oversized necessary evidence is kept in the local state and sent through a recoverable compact context',()=>{
   const run={id:'r',requirements:[{id:'r1',text:'必需证据'.repeat(4000)}],inputs:[],questions:[],steps:[]};
-  assert.throws(()=>rebuildContext({messages:[{role:'user',content:'当前任务'}],run,settings:{contextWindow:14000,maxTokens:256}}),error=>error.code==='CONTEXT_BUDGET');
+  const result=rebuildContext({messages:[{role:'user',content:'当前任务'}],run,settings:{contextWindow:14000,maxTokens:256}});
+  assert.ok(result.budget.inputUpperBound+result.budget.outputReserved+result.budget.safetyMargin<=result.budget.contextWindow);assert.equal(result.snapshot.requirements[0].text,run.requirements[0].text);assert.ok(result.archiveRef);assert.ok(result.messages.some(message=>String(message.content).includes('readHint')));
 });
 
 test('bounded results preserve status and stable refs, and evidence access rejects foreign refs',()=>{
@@ -48,9 +57,10 @@ test('tool contracts keep failed, pending, waiting and unknown submissions disti
   assert.equal(normalizeToolResult({structuredContent:{needs_confirmation:true}}).status,'awaiting_input');
 });
 
-test('offline execution explicitly rejects external model endpoints',()=>{
-  assertLocalModel({baseUrl:'http://127.0.0.1:1234/v1'});
-  for(const address of ['https://model.example/v1','http://example.com/v1','http://127.0.0.1@outside.example'])assert.throws(()=>assertLocalModel({baseUrl:address}),/本机/);
+test('model endpoints need HTTPS unless they are on this machine or the internal network',()=>{
+  for(const address of ['https://model.example/v1','http://127.0.0.1:1234/v1','http://10.2.3.4:8000/v1','http://192.168.1.20/v1'])assert.doesNotThrow(()=>normalizeBase(address),address);
+  assert.throws(()=>normalizeBase('http://example.com/v1'),/HTTPS/);
+  assert.throws(()=>normalizeBase('http://user:pass@10.2.3.4/v1'),/账号/);
 });
 
 test('metadata transaction commits a complete checkpoint or rolls back both records',()=>{

@@ -20,7 +20,12 @@ export async function modelRequest(settings,key,endpoint,body,signal,onRequest){
   await onRequest?.({url:bases[i]+'/'+endpoint,method:body?'POST':'GET',body,requestedAt:new Date().toISOString()});
   let response;try{response=await fetch(bases[i]+'/'+endpoint,{method:body?'POST':'GET',headers:{...(key?{Authorization:'Bearer '+key}:{}),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined,signal,redirect:'error'});}
   catch(e){if(signal?.aborted)throw e;const code=e.cause?.code;throw Error(code==='ENOTFOUND'?'无法解析服务地址，请检查域名和网络。':code==='ECONNREFUSED'?'无法连接模型服务，请检查端口和服务是否启动。':'无法连接模型服务，请检查网络、代理、证书和服务地址。');}
-  if(!response.ok){if([404,405].includes(response.status)&&i+1<bases.length){await response.body?.cancel();continue;}throw Error(describeHttp(response.status,await errorDetail(response,key)));}
+  if(!response.ok){
+    if([404,405].includes(response.status)&&i+1<bases.length){await response.body?.cancel();continue;}
+    const detail=await errorDetail(response,key),error=Error(describeHttp(response.status,detail));
+    if(response.status===413||/context.{0,40}(length|window|exceed|limit)|maximum.{0,20}tokens|too many tokens|tokens.{0,30}(exceed|limit)|上下文|输入.{0,10}(过长|超出)/i.test(detail))error.code='PROVIDER_CONTEXT_BUDGET';
+    throw error;
+  }
   return {response,baseUrl:bases[i]};
  }
 }

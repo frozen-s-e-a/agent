@@ -24,9 +24,9 @@ function extensionContract(name,builtin){
 }
 export function buildCatalog(builtin,legacy){
  return [...builtin.map(t=>{
-  const extra=!['pdf_text','link_extract','file_inventory'].includes(t.id)?[{key:'headerRow',label:'表头行',type:'integer',default:1},{key:'sheets',label:'工作表名称',help:'多个名称用逗号分隔；留空读取全部工作表',type:'string'},{key:'encoding',label:'CSV 编码',type:'string',enum:['utf-8-sig','utf-8','gb18030'],default:'utf-8-sig'}]:[];
+  const extra=!['pdf_text','link_extract','file_inventory','workbook_fill'].includes(t.id)?[{key:'headerRow',label:'表头行',type:'integer',default:1},{key:'sheets',label:'工作表名称',help:'多个名称用逗号分隔；留空读取全部工作表',type:'string'},{key:'encoding',label:'CSV 编码',type:'string',enum:['utf-8-sig','utf-8','gb18030'],default:'utf-8-sig'}]:[];
   const jet=t.id==='jet_test'?[{key:'mapping',label:'JET 标准字段映射',type:'string',kind:'json',help:'将标准字段映射到源表列名；同名字段可以不填。',default:'{}'},{key:'keys',label:'凭证分组列',type:'string',help:'借贷不平规则需要完整凭证键，例如公司、凭证日期、凭证编号'}]:[];
-  return {...t,engine:'builtin',fields:[...t.fields.map(f=>({...f,type:'string'})),...extra,...jet],contract:{...extensionContract(t.id,true),inputMode:'files',mutates:false}};
+  return {...t,engine:'builtin',fields:[...t.fields.map(f=>({...f,type:f.type||'string'})),...extra,...jet],contract:{...extensionContract(t.id,true),inputMode:'files',mutates:false}};
  }),...legacy.map(t=>{
   const props=t.inputSchema?.properties||{};
   const fields=Object.entries(props).filter(([key])=>!OUTPUT_PATH_KEYS.has(key)&&!['cookie_json','api_key','base_url','model_name','visual_model_name','confirmed'].includes(key)).map(([key,v])=>{const desc=v.description||key;return {key,label:labels[key]||desc.split(/[:：]/)[0].split(/[（(]/)[0].slice(0,36),help:desc,type:v.type||'string',items:v.items,enum:v.enum,default:v.default,required:(t.inputSchema.required||[]).includes(key),allowBlank:/留空|不填|为空|可选|选填/.test(desc)||['gl_partner_direct_col','gl_partner_col'].includes(key),kind:INPUT_PATH_KEYS.has(key)?(directories.has(key)?'directory':/文件或文件夹|文件路径或文件夹|文件夹路径列表/.test(desc)?'path':'file'):/api_key|cookie/.test(key)?'secret':/JSON/i.test(desc)?'json':/列名|日期列|金额列/.test(desc)?'column':undefined};});

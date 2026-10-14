@@ -20,12 +20,16 @@ export function createMcpRunner(store,options={}){
  function launch(task,args,settings={}){
   let modelInputId=null;
   const clientOptions={workDir:task.root,taskId:task.id,settings,onProgress:event=>{if(!closed&&task.status==='running'){task.phase=event.phase;store.put('tasks',task);}},onModelEvent:event=>{
+   if(event.type==='model_context'&&!closed){
+    for(const key of ['inputPath','progressPath'])if(event[key])inside(task.root,event[key]);
+    task.contextArchives=[...(task.contextArchives||[]),{inputHash:event.inputHash,inputLength:event.inputLength,inputPath:event.inputPath,progressPath:event.progressPath}];store.put('tasks',task);return;
+   }
    if(!task.agentRunId||closed)return;
    const run=store.get('agentRuns',task.agentRunId);if(!run)return;
    if(event.type==='model_input'){
     const input=recordRequest(store,run,'task-model-'+task.id,event.messages,event.tools||[],{...settings,model:event.model,maxTokens:event.maxTokens,contextWindow:event.contextWindow});input.taskId=task.id;input.layer='task';input.transportRequests=[{url:event.url,body:event.requestBody,requestedAt:new Date().toISOString()}];modelInputId=input.id;
     store.transaction(()=>{store.put('agentModelInputs',input);run.modelInputs=[...new Set([...(run.modelInputs||[]),input.id])];store.put('agentRuns',run);});
-   }else if(modelInputId){const input=store.get('agentModelInputs',modelInputId);input.response={usage:event.usage,finishReason:event.finishReason,receivedAt:new Date().toISOString()};store.put('agentModelInputs',input);run.taskUsage=run.taskUsage||{prompt_tokens:0,completion_tokens:0,total_tokens:0};for(const key of Object.keys(run.taskUsage))run.taskUsage[key]+=Number(event.usage?.[key]||0);store.put('agentRuns',run);}
+   }else if(modelInputId){const input=store.get('agentModelInputs',modelInputId);input.response={text:event.text||'',usage:event.usage,finishReason:event.finishReason,receivedAt:new Date().toISOString()};store.put('agentModelInputs',input);run.taskUsage=run.taskUsage||{prompt_tokens:0,completion_tokens:0,total_tokens:0};for(const key of Object.keys(run.taskUsage))run.taskUsage[key]+=Number(event.usage?.[key]||0);store.put('agentRuns',run);}
   }};
   const client=options.clientFactory?options.clientFactory(clientOptions):new IndependentTaskClient(clientOptions);const state={client,cancelled:false};running.set(task.id,state);
   const before=outputsSnapshot(task.root);task.status='running';task.phase='正在检查资料';task.startedAt=new Date().toISOString();store.put('tasks',task);

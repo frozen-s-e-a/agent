@@ -1,6 +1,6 @@
 # Agent 能力绑定矩阵
 
-由 `scripts/export-agent-contracts.mjs` 从实际程序生成。79 项能力映射到 9 条流程。输入字段、节点依赖、通过条件、失败分支、版本和合同哈希保存在同目录的 `Agent节点与能力合同.json`。登记的远程能力在当前本机测试版本中受网络限制。
+由 `scripts/export-agent-contracts.mjs` 从实际程序生成。80 项能力映射到 9 条流程。输入字段、节点依赖、通过条件、失败分支、版本和合同哈希保存在同目录的 `Agent节点与能力合同.json`。登记的远程能力在当前本机测试版本中受网络限制。
 
 |精确工具编号|能力名称|执行器|流程/节点|
 |---|---|---|---|
@@ -20,6 +20,7 @@
 |file_inventory|文件资料清单|builtin|data/inspect|
 |pdf_text|PDF 文本提取|builtin|data/process、aux/extract|
 |link_extract|Excel 链接提取|builtin|disclosure/links|
+|workbook_fill|填写普通工作簿模板|builtin|workpaper/generate|
 |mcp_add_column|合并同名列|mcp|data/process|
 |mcp_address_split|函证地址拆分成省市区|mcp|aux/extract|
 |mcp_ai_formula_filler|AI 智能公式填充 🎯|mcp|aux/extract|

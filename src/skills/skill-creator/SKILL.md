@@ -2,6 +2,7 @@
 name: skill-creator
 description: "从当前对话上下文中提炼可复用的工作流，创建新的 Skill"
 triggers: "创建skill, 新建skill, create skill, 提炼skill, 保存为skill, 封装skill, 生成skill"
+audience: authoring
 ---
 
 # skill-creator

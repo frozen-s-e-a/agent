@@ -7,7 +7,7 @@ const textValue=value=>{
 };
 
 function addToolCall(calls,part){
- if(!Number.isInteger(part.index)||part.index<0||part.index>7)throw Error('单轮工具调用超过限制');
+ if(!Number.isInteger(part.index)||part.index<0)throw Error('工具调用索引无效');
  const call=calls.get(part.index)||{id:'',type:'function',function:{name:'',arguments:''}};
  if(part.id)call.id+=part.id;
  if(part.type&&part.type!=='function')throw Error('不支持的工具调用类型');
@@ -34,7 +34,7 @@ async function nonStreamingFallback(settings,key,messages,signal,tools,onRequest
  const body={model:settings.model,messages,stream:false,temperature:settings.temperature,max_tokens:settings.maxTokens,...(tools?.length?{tools,tool_choice:'auto'}:{})};
  let response;
  try{({response}=await modelRequest(settings,key,'chat/completions',body,signal,onRequest));}
- catch(e){if(tools?.length&&/HTTP 400|HTTP 422/.test(e.message))throw Error(e.message+'\n本轮包含本地工具定义，请确认所选模型及服务已启用兼容的工具调用。');throw e;}
+ catch(e){if(e.code==='PROVIDER_CONTEXT_BUDGET')throw e;if(tools?.length&&/HTTP 400|HTTP 422/.test(e.message))throw Error(e.message+'\n本轮包含本地工具定义，请确认所选模型及服务已启用兼容的工具调用。');throw e;}
  let data;try{data=JSON.parse(await response.text());}catch{throw Error('模型返回了无效的非流式消息');}
  if(data?.error)throw Error('模型流返回错误，请重试。');
  const choice=data.choices?.[0]||{},message=choice.message||{};
@@ -47,12 +47,12 @@ async function nonStreamingFallback(settings,key,messages,signal,tools,onRequest
 
 export async function streamChat(settings,key,messages,signal,onDelta,tools,onRequest){
  const body={model:settings.model,messages,stream:true,stream_options:{include_usage:true},temperature:settings.temperature,max_tokens:settings.maxTokens,...(tools?.length?{tools,tool_choice:'auto'}:{})};
- let response;try{({response}=await modelRequest(settings,key,'chat/completions',body,signal,onRequest));}catch(e){if(tools?.length&&/HTTP 400|HTTP 422/.test(e.message))throw Error(e.message+'\n本轮包含本地工具定义，请确认所选模型及服务已启用兼容的工具调用。');throw e;}
+ let response;try{({response}=await modelRequest(settings,key,'chat/completions',body,signal,onRequest));}catch(e){if(e.code==='PROVIDER_CONTEXT_BUDGET')throw e;if(tools?.length&&/HTTP 400|HTTP 422/.test(e.message))throw Error(e.message+'\n本轮包含本地工具定义，请确认所选模型及服务已启用兼容的工具调用。');throw e;}
  const reader=response.body.getReader(),decoder=new TextDecoder(),calls=new Map();let buffer='',text='',reasoningContent='',usage=null,finished=false,finishReason=null;
  function line(raw){
   const value=raw.trim();if(!value.startsWith('data:'))return;const data=value.slice(5).trim();if(data==='[DONE]'){finished=true;return;}
   let v;try{v=JSON.parse(data);}catch{throw Error('模型返回了无效的流式消息');}
-  if(v.error)throw Error('模型流返回错误，请重试。');if(v.usage)usage=v.usage;
+  if(v.error){const e=Error('模型流返回错误，请重试。');if(/context.{0,40}(length|window|exceed|limit)|too many tokens|上下文/i.test(String(v.error.message||'')))e.code='PROVIDER_CONTEXT_BUDGET';throw e;}if(v.usage)usage=v.usage;
   const choice=v.choices?.[0],delta=choice?.delta||choice?.message||{};
   if(choice?.finish_reason){finishReason=choice.finish_reason;finished=true;}
   const chunk=textValue(delta.content);if(chunk){text+=chunk;if(text.length>1_000_000)throw Error('模型回复超出限制');onDelta(chunk);}
