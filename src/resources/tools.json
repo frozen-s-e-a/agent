@@ -270,5 +270,25 @@
     "fields": [],
     "legacy": "link_extractor",
     "status": "implemented"
+  },
+  {
+    "id": "workbook_fill",
+    "name": "填写普通工作簿模板",
+    "group": "底稿与明细表",
+    "description": "根据已验证的来源映射和必填区域计算全量资料，生成新工作簿并独立重读；保留模板原有格式、公式和其他包部件，无需批注。",
+    "fields": [
+      {
+        "key": "plan",
+        "label": "填写计划",
+        "required": true,
+        "kind": "json"
+      },
+      {
+        "key": "expectedPlanHash",
+        "label": "已验证计划版本",
+        "required": true
+      }
+    ],
+    "status": "implemented"
   }
 ]

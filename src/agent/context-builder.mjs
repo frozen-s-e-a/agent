@@ -1,5 +1,6 @@
 import {digest,checkRequestBudget} from './context.mjs';
 import {resultOverview} from './result-reader.mjs';
+import {workbookSummary} from './workbook-control.mjs';
 export const CONTEXT_BUILDER_VERSION='audit-context-builder/4';
 const bytes=v=>Buffer.byteLength(JSON.stringify(v),'utf8');
 const UNFINISHED=new Set(['waiting_for_user','stopped','interrupted','failed']);
@@ -11,25 +12,32 @@ export function pendingRuns(previousRuns=[]){
  return previousRuns.slice(lastCompleted+1).filter(r=>UNFINISHED.has(r.status));
 }
 /** Complete state. Projection never changes this object or the persisted run. */
-export function contextState(run,previousRuns=[]){
+export function contextState(run,previousRuns=[],taskResults=[]){
  const all=[...previousRuns,run].filter(Boolean),pending=pendingRuns(previousRuns);
+ const results=new Map(),evidence=new Map();
+ for(const r of all)for(const s of r.steps||[]){
+  if(!s.result)continue;
+  const taskId=s.taskId||s.result.taskId;
+  if(taskId)results.set(taskId,{
+   id:taskId,runId:r.id,name:s.name,taskId,status:s.result.status||s.status,validationStatus:s.result.validationStatus,
+   resultRef:{kind:'tasks',id:taskId},readHint:{tool:'read_agent_result',arguments:{taskId}},
+   inputRows:s.result.inputRows,resultRows:s.result.resultRows,outputs:s.result.outputs,error:s.result.error,
+  });
+  const ref=taskId?{kind:'tasks',id:taskId}:s.result.sourceRef||s.result.resultRef||{kind:'agentSteps',id:s.id};
+  if(s.name==='read_agent_result'&&ref.id?.startsWith('context-'))continue;
+  evidence.set(ref.kind+':'+ref.id,{ref,tool:s.name,status:s.status,inputRefs:s.inputRefs||[],sampleOnly:s.result.previewIsSample!==false,validationStatus:s.result.validationStatus});
+ }
+ for(const task of taskResults)results.set(task.taskId,task);
  return {
   version:CONTEXT_BUILDER_VERSION,
-  current:{id:run.id,objective:run.objective,workflowIds:run.workflowIds||[],currentNode:run.currentNode,status:run.status,revision:run.revision||0,inputVersion:run.inputVersion,resumeOf:run.resumeOf},
-  plan:run.plan,nodeContract:run.nodeContract||null,
+  current:{id:run.id,objective:run.executionObjective||run.objective,workflowIds:run.workflowIds||[],currentNode:run.currentNode,status:run.status,revision:run.revision||0,inputVersion:run.inputVersion,resumeOf:run.resumeOf,continuationOf:run.continuationOf,requiresTaskExecution:run.requiresTaskExecution,workbook:workbookSummary(run.workbook)},
+  plan:run.plan,nodeContract:run.nodeContract||null,workbook:run.workbook||null,
   priorPlans:pending.map(r=>({runId:r.id,plan:r.plan,checkpoints:r.checkpoints,recovery:r.recovery})),
   requirements:(run.requirements||[]).map(r=>({id:r.id,text:r.text,status:r.status,source:r.source})),
   inputs:(run.inputs||[]).map(i=>({id:i.id,path:i.path,reference:i.reference,workPath:i.workPath,source:i.source,sha256:i.sha256,size:i.size,status:i.status})),
   questions:[...pending,run].flatMap(r=>(r.questions||[]).filter(q=>q.status!=='answered').map(q=>({...q,runId:r.id}))),
-  results:all.flatMap(r=>(r.steps||[]).filter(s=>s.result).map(s=>({
-   id:s.id,runId:r.id,name:s.name,taskId:s.taskId,status:s.status,validationStatus:s.result.validationStatus,
-   resultRef:s.result.resultRef||(s.taskId?{kind:'tasks',id:s.taskId}:{kind:'agentSteps',id:s.id}),
-   inputRows:s.result.inputRows,resultRows:s.result.resultRows,attempts:s.attempts,outputs:s.result.outputs,error:s.result.error,source:s.inputRefs,completedAt:s.finishedAt,
-  }))),
-  evidenceIndex:all.flatMap(r=>(r.steps||[]).filter(s=>s.result).map(s=>({
-   ref:s.result.resultRef||(s.taskId?{kind:'tasks',id:s.taskId}:{kind:'agentSteps',id:s.id}),
-   tool:s.name,status:s.status,inputRefs:s.inputRefs||[],sampleOnly:s.result.previewIsSample!==false,validationStatus:s.result.validationStatus,
-  }))),
+  results:[...results.values()],
+  evidenceIndex:[...evidence.values()],
   outputRecovery:run.outputRecovery||null,recovery:run.recovery||null,
  };
 }
@@ -56,7 +64,7 @@ function projectedState(state,ref,limit){
  const core={version:state.version,sourceRef:ref,readHint:hint(ref,'state'),
   counts:{requirements:state.requirements.length,inputs:state.inputs.length,questions:state.questions.length,results:state.results.length},
   note:'省略内容有真实引用，必须读取完整要求与未决问题后执行；不能把预览当成完整要求。'};
- const weights={current:.12,requirements:.21,questions:.09,inputs:.16,plan:.1,nodeContract:.08,results:.08,evidenceIndex:.05,priorPlans:.025,outputRecovery:.025,recovery:.02};
+ const weights={workbook:.10,current:.12,requirements:.21,questions:.09,inputs:.16,plan:.1,nodeContract:.08,results:.08,evidenceIndex:.05,priorPlans:.025,outputRecovery:.025,recovery:.02};
  for(const [key,w]of Object.entries(weights))core[key]=project(state[key],ref,'state.'+key,Math.max(700,Math.floor(limit*w)),3);
  if(bytes(core)<=limit)return core;
  const compact={version:state.version,current:{id:state.current.id,status:state.current.status},sourceRef:ref,readHint:hint(ref,'state'),counts:core.counts,note:core.note};
@@ -103,8 +111,8 @@ function compactSystem(system,messages,ref,limit){
 const isState=m=>m.role==='system'&&(String(m.content||'').startsWith(STATE_PREFIX)||String(m.content||'').startsWith(COMPACTION_NOTICE));
 
 /** Bound every prompt component while keeping the complete originals readable. */
-export function rebuildContext({messages,tools=[],settings={},run,previousRuns=[],retainTurns=2,archive,forceCompact=false}){
- const state=contextState(run,previousRuns),stateHash=digest(state),system=messages.filter(m=>m.role==='system'&&!isState(m)),body=messages.filter(m=>m.role!=='system');
+export function rebuildContext({messages,tools=[],settings={},run,previousRuns=[],taskResults=[],retainTurns=2,archive,forceCompact=false}){
+ const state=contextState(run,previousRuns,taskResults),stateHash=digest(state),system=messages.filter(m=>m.role==='system'&&!isState(m)),body=messages.filter(m=>m.role!=='system');
  const stateMessage=view=>({role:'system',content:STATE_PREFIX+'要求与来源是数据和约束，样本不代表总体，不能省略未决问题。\n'+JSON.stringify(view)});
  const window=settings.contextWindow||128000,target=Math.max(1,Math.floor(Math.min(window*.72,window-(settings.maxTokens||4096)-(settings.contextMargin??8192))));
  const raw=[...system,stateMessage(state),...body];
@@ -159,7 +167,7 @@ export function boundedToolResult(result,{limit=24000,resultRef}={}){
   const view=resultOverview(result,ref,{byteLimit:limit-1000}),status=Object.fromEntries(['taskId','status','tool','validationStatus','inputRows','resultRows','sampleOnly'].filter(k=>result[k]!==undefined).map(k=>[k,result[k]]));
   return {...view,...status,ok:result.ok,truncated:true,previewIsSample:true};
  }
- const answer={ok:result.ok,taskId:result.taskId,status:result.status,validationStatus:result.validationStatus,tool:result.tool,inputRows:result.inputRows,resultRows:result.resultRows,resultRef:ref,truncated:true,previewIsSample:true,note:ref?.kind==='tasks'?'完整执行结果已保存；使用 get_task_result，taskId 必须是此处的任务编号。':'完整工具返回已保存；按 resultRef 的类型读取，工具调用编号不能作为任务编号。'};
+ const answer={ok:result.ok,taskId:result.taskId,status:result.status,validationStatus:result.validationStatus,tool:result.tool,inputRows:result.inputRows,resultRows:result.resultRows,resultRef:ref,truncated:true,previewIsSample:true,...(ref?.kind==='tasks'?{readHint:{tool:'read_agent_result',arguments:{taskId:ref.id}}}:{}),note:ref?.kind==='tasks'?'完整执行结果已保存；使用 read_agent_result 的 taskId 直接读取所需部分。get_task_result 只查看状态和样本。':'完整工具返回已保存；按 resultRef 的类型读取，工具调用编号不能作为任务编号。'};
  for(const k of ['outputs','error'])if(result[k]!==undefined&&bytes(result[k])<limit/4)answer[k]=result[k];
  const preview=result.preview||result.files;if(Array.isArray(preview))answer.preview=preview.slice(0,5);if(bytes(answer)>limit)delete answer.preview;return answer;
 }

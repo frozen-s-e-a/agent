@@ -26,9 +26,9 @@ export class Scheduler{
   this.store.append(session.id,{type:'task',taskId:t.id});this.pump();return t;
  }
  pump(){if(this.closed||this.active)return;const task=this.store.all('tasks').find(t=>t.status==='queued'&&t.engine!=='mcp');if(!task)return;
-  task.status='running';task.startedAt=new Date().toISOString();this.store.put('tasks',task);let result=null;let failure=null;
+  task.status='running';task.startedAt=new Date().toISOString();this.store.put('tasks',task);let result=null;let failure=null;let failureCode=null;
   let child;try{child=worker({protocolVersion:1,taskId:task.id,root:task.root,tool:task.tool,files:task.files,mode:task.mode,parameters:task.parameters,limits:task.limits,approvedInputs:task.approvedInputs || []},ev=>{
-   if(ev.type==='result')result=ev.result;else if(ev.type==='error')failure=ev.message;else if(ev.type==='strategy'){task.selectedMode=ev.mode;task.reason=ev.reason;}else if(ev.type==='progress'){task.phase=ev.phase;task.rows=ev.rows;}this.store.put('tasks',task);
+   if(ev.type==='result')result=ev.result;else if(ev.type==='error'){failure=ev.message;failureCode=ev.code;}else if(ev.type==='strategy'){task.selectedMode=ev.mode;task.reason=ev.reason;}else if(ev.type==='progress'){task.phase=ev.phase;task.rows=ev.rows;}this.store.put('tasks',task);
   });}catch(e){task.status='failed';task.error=e.message;this.store.put('tasks',task);queueMicrotask(()=>this.pump());return;}
   this.active={id:task.id,child,task};
   const finish=async()=>{
@@ -38,7 +38,7 @@ export class Scheduler{
     const completed=path.join(task.root,'outputs',task.id,'manifest.json');
     // Publication may win the race with cancellation. A published manifest is recovered, never silently retried.
     if(fs.existsSync(completed)){try{inside(task.root,completed);const manifest=JSON.parse(fs.readFileSync(completed,'utf8'));if(manifest.taskId!==task.id||manifest.status!=='succeeded')throw Error();for(const x of manifest.outputs){const filename=inside(path.dirname(completed),x.name);const h=createHash('sha256');for await(const b of fs.createReadStream(filename))h.update(b);if(h.digest('hex')!==x.sha256)throw Error();}task.result=manifest;task.status='succeeded';task.phase='已恢复并校验发布记录';}catch{task.status='interrupted';task.error='发现结果发布记录，需校验后恢复';}}
-    else{task.status=task.status==='cancelling'?'cancelled':'failed';task.error=failure||(task.status==='cancelled'?'任务已取消，未发布结果':'执行进程退出，未发布完整结果');}
+    else{task.status=task.status==='cancelling'?'cancelled':failureCode==='NeedsInput'?'awaiting_input':'failed';if(task.status==='awaiting_input')task.result={status:'awaiting_input',message:failure};task.error=failure||(task.status==='cancelled'?'任务已取消，未发布结果':'执行进程退出，未发布完整结果');}
    }
    task.finishedAt=new Date().toISOString();this.store.put('tasks',task);this.active=null;this.pump();
   };child.once('close',finish);

@@ -1381,13 +1381,14 @@
         "mcp_detailed_table_save_config",
         "mcp_detailed_table_validate",
         "mcp_detailed_table_generate",
-        "mcp_xlsx_writer"
+        "mcp_xlsx_writer",
+        "workbook_fill"
       ],
       "skillIds": [
         "detailed-table-generation"
       ],
       "inputHint": "源数据、模板文件夹、工作目录",
-      "note": "明细表生成依赖本机 64 位 Excel。配置需按工具要求保存完整后再校验。",
+      "note": "普通模板可按受控来源映射直接填写并重读，无需批注。旧明细表工具仍需按原配置合同执行。",
       "stages": [
         {
           "id": "input",
@@ -1611,7 +1612,8 @@
           ],
           "toolIds": [
             "mcp_detailed_table_generate",
-            "mcp_xlsx_writer"
+            "mcp_xlsx_writer",
+            "workbook_fill"
           ],
           "version": "audit-workflows/1",
           "context": {
@@ -3187,6 +3189,41 @@
         }
       ],
       "inputs": [],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "workbook_fill",
+      "name": "填写普通工作簿模板",
+      "engine": "builtin",
+      "entry": "workbook_fill",
+      "contractHash": "e2b2107f346723b547441be071196c49d73bf42f60556fd35814031a553352b7",
+      "bindings": [
+        {
+          "workflowId": "workpaper",
+          "stageId": "generate",
+          "stageTitle": "生成底稿",
+          "required": true,
+          "toolId": "workbook_fill"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "plan",
+          "label": "填写计划",
+          "kind": "json",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "expectedPlanHash",
+          "label": "已验证计划版本",
+          "required": true,
+          "type": "string"
+        }
+      ],
       "resultContract": "audit-tool-result/1",
       "validator": "verifyTaskArtifacts",
       "retry": "first_execution_plus_two_recorded_repairs",

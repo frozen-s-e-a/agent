@@ -1,4 +1,5 @@
 import {streamChat} from './model.mjs';
+import {repeatedOutput,createReadProgressTracker} from '../agent/progress.mjs';
 
 /**
  * Gateways differ in how they encode arguments: an empty string for a call
@@ -31,7 +32,7 @@ export function textToolCalls(text,tools){
 const SAME_FAILURE_LIMIT=3,FAILURE_STREAK_LIMIT=12,FINAL_REPAIR_LIMIT=4;
 
 export async function runAgent({settings,key,messages,signal,tools,execute,onDelta,onStep,onRound,beforeRequest,afterResponse,onRequest,prepareRequest,shouldStop,isToolAuthorized,validateFinal,onContextRejected}){
- let history=[...messages],calls=0,usage=null,usageIncomplete=false,finalText='',lastContinuation='',failureStreak=0,finalRepairs=0;const failures=new Map();
+ let history=[...messages],calls=0,usage=null,usageIncomplete=false,finalText='',lastContinuation='',failureStreak=0,finalRepairs=0;const failures=new Map(),readProgress=createReadProgressTracker();
  for(let round=0;;round++){
   signal.throwIfAborted();onRound?.(round,{continuation:!!lastContinuation});
   let response,requestRef;
@@ -39,14 +40,22 @@ export async function runAgent({settings,key,messages,signal,tools,execute,onDel
    const prepared=await prepareRequest?.(history,tools,round,{contextRetry});
    if(prepared?.messages)history=prepared.messages;if(prepared?.tools)tools=prepared.tools;
    requestRef=await beforeRequest?.(history,tools,round,prepared);
-   try{response=await streamChat(settings,key,history,signal,onDelta,tools,request=>onRequest?.(request,requestRef));break;}
+   let liveText='',checkedAt=0;
+   const delta=text=>{
+    liveText+=text;
+    if(liveText.length-checkedAt>=192){checkedAt=liveText.length;if(repeatedOutput(liveText,lastContinuation)){const error=Error('模型重复输出相同内容，没有执行进展；已停止生成，任务尚未完成，已有资料和成果保留。');error.code='MODEL_NO_PROGRESS';error.partialText=liveText;throw error;}}
+    onDelta?.(text);
+   };
+   try{response=await streamChat(settings,key,history,signal,delta,tools,request=>onRequest?.(request,requestRef));break;}
    catch(error){
+    if(error.code==='MODEL_NO_PROGRESS'){await afterResponse?.({text:error.partialText,toolCalls:[],finishReason:'repetition',error:error.message},requestRef);throw error;}
     if(error.code!=='PROVIDER_CONTEXT_BUDGET'||!prepareRequest)throw error;
     await onContextRejected?.(error,requestRef);
     if(contextRetry>=2)throw Error('模型网关拒绝了已缩减到最小上下文的请求；请核对服务实际窗口与输出配置。任务状态和原始资料已保留。');
    }
   }
   await afterResponse?.(response,requestRef);
+  if(repeatedOutput(response.text,lastContinuation))throw Error('模型重复输出相同内容，任务尚未完成；已停止生成并保留真实执行结果。');
   if(response.usage){usage??={prompt_tokens:0,completion_tokens:0,total_tokens:0};for(const k of ['prompt_tokens','completion_tokens','total_tokens'])usage[k]+=Number(response.usage[k]||0);}else usageIncomplete=true;
   if(response.finishReason==='length'&&!response.toolCalls.length){
    if(!response.text)throw Error('模型输出被截断且没有可续写内容；已保存实际步骤和结果，请缩小输出范围后继续');
@@ -77,10 +86,12 @@ export async function runAgent({settings,key,messages,signal,tools,execute,onDel
    await onStep?.({phase:'start',name,id:call.id,args,text:response.text});
    if(!result)try{if(!(isToolAuthorized?.(name)??tools.some(t=>t.function.name===name)))throw Error('工具未获授权');result=await execute(name,args,call.id);}catch(error){if(signal.aborted)throw error;result={ok:false,error:error.message};}
    const {modelImage,...visible}=result;
+   const progress=readProgress(name,args,visible);if(progress)visible.readProgress=progress;
    if(modelImage)viewedImages.push(modelImage);
    const content=JSON.stringify(visible);
    if(content.length>100000)throw Error('工具返回没有生成有界视图；完整记录已保留');
    history.push({role:'tool',tool_call_id:call.id,content});await onStep?.({phase:'end',name,id:call.id,args,result:visible});
+   if(progress?.stop)throw Error(`同一证据范围已重复读取 ${progress.repeated} 次且没有新增数据，任务尚未完成；已停止空转：${name}。已有资料和成果保留。`);
    if(visible.ok===false){
     const key=name+'\u0000'+JSON.stringify(args)+'\u0000'+String(visible.error||''),count=(failures.get(key)||0)+1;failures.set(key,count);failureStreak++;
     if(count>=SAME_FAILURE_LIMIT)throw Error(`同一工具调用已 ${count} 次以相同原因失败，已停止避免空转：${name}：${String(visible.error||'').slice(0,300)}`);

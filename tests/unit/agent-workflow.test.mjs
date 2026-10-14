@@ -12,7 +12,7 @@ const catalog=buildCatalog(JSON.parse(fs.readFileSync('src/resources/tools.json'
 const workflows=buildAgentWorkflows(catalog);
 
 test('all registered capabilities are bound to a built-in Agent workflow',()=>{
-  assert.equal(catalog.length,79);
+  assert.equal(catalog.length,80);
   assert.equal(workflows.length,9);
   assert.deepEqual(catalog.filter(tool=>!workflows.some(flow=>flow.toolIds.includes(tool.id))),[]);
 });

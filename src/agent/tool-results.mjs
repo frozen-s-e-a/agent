@@ -36,9 +36,10 @@ export function taskSummary(task) {
     error:task.error || undefined, errorCode:task.errorCode || undefined,
     inputRows:result.inputRows, resultRows:result.rowCount, columns:result.columns,
     preview:result.preview?.slice(0,20), previewIsSample:true, structureOnly:!!result.structureOnly,
-    outputs:result.outputs || [], warnings:result.warnings || [],
+    outputs:result.outputs || [], warnings:result.warnings || [],workbookValidation:result.workbookValidation,
     remoteTaskId:task.remoteTaskId, retryPolicy:task.retryPolicy,
     resultRef:{kind:'tasks',id:task.id},
+    readHint:{tool:'read_agent_result',arguments:{taskId:task.id}},
     note:'执行状态与文件完整性检查已记录；尚未实现的逐任务业务语义验收不包含在此验证级别。',
   };
 }
