@@ -62,8 +62,9 @@ test('plan nodes that reuse a tool are matched by files and parameters', () => {
   ]};
   assert.equal(matchPlannedStep(plan,'voucher_check',['3月.csv'],{debit:'借方'}).id,'mar');
   assert.equal(matchPlannedStep(plan,'voucher_check',['2月.csv'],{debit:'借方'}).id,'feb');
-  // No exact fit: the first runnable node comes back so the caller can name the mismatch.
-  assert.equal(matchPlannedStep(plan,'voucher_check',['4月.csv'],{debit:'借方'}).id,'feb');
+  // Other files never take over a node; the caller names the mismatch.
+  assert.equal(matchPlannedStep(plan,'voucher_check',['4月.csv'],{debit:'借方'}),null);
+  assert.equal(matchPlannedStep(plan,'voucher_check',['2月.csv'],{debit:'贷方'}).id,'feb');
   assert.equal(matchPlannedStep(plan,'select_column',['x.csv'],{}),null);
 });
 

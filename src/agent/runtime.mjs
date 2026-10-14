@@ -69,8 +69,10 @@ export const parameterObject=value=>{
 export function matchPlannedStep(plan,toolId,actualFiles,parameters){
   const ready=step=>step.dependsOn.every(id=>plan.steps.find(item=>item.id===id)?.status==='succeeded');
   const candidates=plan.steps.filter(step=>step.toolId===toolId&&step.status!=='succeeded');
-  const fits=step=>step.files.every(file=>actualFiles.includes(file))&&fitsParameters(step.parameters,parameters);
-  return candidates.find(step=>ready(step)&&fits(step))||candidates.find(fits)||candidates.find(ready)||candidates[0]||null;
+  // Files identify the node; a call on other files never takes over another node.
+  const sameFiles=step=>step.files.every(file=>actualFiles.includes(file)),fits=step=>sameFiles(step)&&fitsParameters(step.parameters,parameters);
+  const own=candidates.filter(sameFiles);
+  return own.find(step=>ready(step)&&fits(step))||own.find(fits)||own.find(ready)||own[0]||null;
 }
 
 export function createAgentRuntime({store,scheduler,mcpRunner,attachments,catalog,workflows,skills,settings,secrets=()=>({apiKey:''}),streams}) {
@@ -251,7 +253,8 @@ export function createAgentRuntime({store,scheduler,mcpRunner,attachments,catalo
           ].filter(Boolean))];
           const files=workbookFiles(plan);
           const captured=new Set(run.inputs.map(input=>path.normalize(input.workPath||input.path)));
-          if(!files.length||files.some(file=>!captured.has(path.normalize(file))))throw Error('填写计划只能引用已保存的输入或已验证成果');
+          const unknown=files.filter(file=>!captured.has(path.normalize(file)));
+          if(!files.length||unknown.length)throw Error('填写计划只能引用已保存的输入或已验证成果。'+(files.length?'无法识别的 file_path：'+unknown.join('、')+'。':'计划缺少 file_path。')+'可用引用（附件编号、文件名或工作路径均可）：'+JSON.stringify(run.inputs.filter(input=>/\.xls[xm]$/i.test(input.path)).slice(0,20).map(input=>({name:input.path,reference:input.reference||input.path}))));
           const targetCount=run.workbook.targetCount??requestedSheetCount(run.executionObjective);
           if(targetCount){
             const inventory=await workbookProbe(workProject.root,[plan.file_path],'__workbook_read',{limit:1},controller.signal);
@@ -259,6 +262,8 @@ export function createAgentRuntime({store,scheduler,mcpRunner,attachments,catalo
             if(expected.length!==targetCount||!sameJson(plan.targetSheets,expected))throw Error('本任务需要填写 '+expected.join('、')+'；计划不能遗漏、替换或增加目标工作表');
           }
           const prepared=await workbookProbe(workProject.root,files,'__workbook_validate',{plan},controller.signal);
+          // A plan defect goes back to the model to correct; only business ambiguity waits for the user.
+          if(prepared.status==='plan_revision'){run.workbook.planIssues=[...(run.workbook.planIssues||[]),{issue:prepared.issue,at:new Date().toISOString()}].slice(-20);save(run);return {ok:false,status:'plan_revision',error:'填写计划未通过校验：'+prepared.issue,hint:prepared.hint,nextAction:'修订计划后重新调用 save_workbook_plan；只有业务口径或资料确实缺失时才调用 ask_user_questions'};}
           if(!prepared.ok){for(const text of prepared.questions||[])run=addAgentQuestion(run,{text,source:'workbook_validation'});run.workbook.phase='waiting_for_user';waiting=true;save(run);return prepared;}
           run.workbook={...run.workbook,phase:'ready',plan,files,prepared,targetSheets:plan.targetSheets,taskId:undefined};
           const result=handlers.set_agent_plan({workflowIds:['workpaper'],steps:[{id:'fill-workbook',toolId:'workbook_fill',stageId:'generate',files,parameters:{plan:JSON.stringify(plan),expectedPlanHash:prepared.planHash},dependsOn:[]}]});
@@ -366,14 +371,20 @@ export function createAgentRuntime({store,scheduler,mcpRunner,attachments,catalo
         const step=run.steps.find(step=>step.id===callId),actualFiles=args.files || fileArgs(catalog.find(tool=>tool.id===toolId),args);
         if(step){step.toolId=toolId;step.workflowIds=matching.map(binding=>binding.workflowId);step.nodeId=matching[0].stageId;step.executionKey=digest({toolId,files:actualFiles,source:args.source});}
         if(run.plan.status==='ready'){
-          const parameters=args.parameters || args,planned=matchPlannedStep(run.plan,toolId,actualFiles,parameters);if(!planned)throw Error('工具未登记在当前计划中');
-          if(step){step.planNodeId=planned.id;step.executionKey='plan-'+planned.id;step.nodeId=planned.stageId;}planned.callId=callId;save(run);
+          const parameters=args.parameters || args,planned=matchPlannedStep(run.plan,toolId,actualFiles,parameters);
+          if(!planned){
+            const nodes=run.plan.steps.filter(item=>item.toolId===toolId);
+            if(!nodes.length)throw Error('工具未登记在当前计划中');
+            if(nodes.some(item=>item.status==='succeeded'&&item.files.every(file=>actualFiles.includes(file))))throw Error('计划中处理这些资料的节点已经完成，结果可用 get_task_result 读取；如需重做，先用 set_agent_plan 保存修订计划');
+            throw Error('实际资料与保存的节点计划不一致。计划中该工具处理的资料为：'+nodes.map(item=>item.id+'='+item.files.join('、')).join('；')+'。如需改用其他资料，先用 set_agent_plan 保存修订计划');
+          }
           const blocked=planned.dependsOn.filter(id=>run.plan.steps.find(step=>step.id===id)?.status!=='succeeded');
           if(blocked.length)throw Error('前置节点尚未通过：'+blocked.join('、')+'。先执行这些节点，或用 set_agent_plan 保存修订后的计划');
-          // The call is the model's later, better-informed choice; the plan follows it and keeps the revision.
-          if(!fitsParameters(planned.parameters,parameters)||planned.files.some(file=>!actualFiles.includes(file))){
-            planned.revisions=[...(planned.revisions || []),{files:planned.files,parameters:planned.parameters,at:new Date().toISOString()}];
-            planned.files=[...actualFiles];planned.parameters={...parameters};
+          if(step){step.planNodeId=planned.id;step.executionKey='plan-'+planned.id;step.nodeId=planned.stageId;}planned.callId=callId;
+          // Same node, same files: the call's parameters are the model's later choice; the plan keeps the revision.
+          if(!fitsParameters(planned.parameters,parameters)){
+            planned.revisions=[...(planned.revisions || []),{parameters:planned.parameters,at:new Date().toISOString()}];
+            planned.parameters={...parameters};
           }
           planned.status='running';
         }else{

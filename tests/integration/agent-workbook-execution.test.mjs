@@ -80,3 +80,21 @@ test('restart and continue recover the validated mapping and execute without rea
   assert.deepEqual(state.calls.filter(call=>call.runId===state.agentRuns.at(-1).id).map(call=>call.name),['execute_workbook_plan']);
  }finally{backend.close();await server.close();}
 });
+
+test('a plan defect goes back to the model, which corrects it and fills without asking the user',async()=>{
+ const dir=fs.mkdtempSync(path.join(resultRoot,'workbook-revise-')),fixture=createFixture(dir);let attachment;
+ const incomplete={...fixture.plan,periodChecks:[]};
+ const server=await model((index,body)=>[
+  {name:'save_workbook_plan',args:{plan:references(incomplete,attachment)}},
+  {name:'save_workbook_plan',args:{plan:references(fixture.plan,attachment)}},
+  {name:'execute_workbook_plan',args:{planHash:savedPlan(body)?.planHash}},
+ ][index]);const backend=await createBackend({dataRoot:path.join(dir,'state')});
+ try{
+  const session=await backend.action('session.create');attachment=(await backend.action('attachments.import',{sessionId:session.id,paths:[fixture.file]})).attachments[0].id;
+  await backend.action('settings.save',{baseUrl:server.url,model:'local-scripted-contract'});await backend.action('chat.send',{sessionId:session.id,text:'用 Sheet1 填写前三个 sheet',attachments:[attachment]});
+  const state=await settle(backend,session.id),run=state.agentRuns.at(-1);
+  const first=JSON.parse(server.requests[1].messages.filter(message=>message.role==='tool').at(-1).content);
+  assert.equal(first.status,'plan_revision');assert.match(first.error,/计划没有核对来源期间/);assert.match(first.hint,/periodChecks/);
+  assert.equal(run.status,'completed',JSON.stringify(state.events.at(-1)));assert.equal(run.questions.length,0);assert.equal(state.tasks[0].status,'succeeded');
+ }finally{backend.close();await server.close();}
+});

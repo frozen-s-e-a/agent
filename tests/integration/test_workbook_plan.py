@@ -58,10 +58,10 @@ class WorkbookPlanTests(unittest.TestCase):
     def test_duplicate_lookup_cannot_pick_first(self):
         self.plan['writes'][0]['expr']['op']='lookup';result=self.validate();self.assertFalse(result['ok']);self.assertIn('120 行',result['questions'][0])
     def test_missing_required_mapping_cannot_pass(self):
-        self.plan['writes'].pop();result=self.validate();self.assertFalse(result['ok']);self.assertIn('缺少映射',result['questions'][0])
+        self.plan['writes'].pop();result=self.validate();self.assertFalse(result['ok']);self.assertEqual(result['status'],'plan_revision');self.assertIn('缺少映射',result['issue']);self.assertTrue(result['hint'])
     def test_numeric_data_row_cannot_be_header(self):
         self.plan['headers'][0]={'file_path':self.file.name,'sheet':'Sheet1','row':3,'columns':{'C':'1'}}
-        result=self.validate();self.assertFalse(result['ok']);self.assertIn('不能当作表头',result['questions'][0])
+        result=self.validate();self.assertFalse(result['ok']);self.assertEqual(result['status'],'plan_revision');self.assertIn('不能当作表头',result['issue']);self.assertTrue(result['hint'])
     def test_duplicate_and_merged_targets_rejected(self):
         bad=copy.deepcopy(self.plan);bad['writes'].append(copy.deepcopy(bad['writes'][0]));self.assertRaisesRegex(ValueError,'重复写入',self.validate,bad)
         bad=copy.deepcopy(self.plan);bad['required'].append({'sheet':'Lead Schedule','range':'C1'});bad['writes'][0]['cell']='C1';self.assertRaisesRegex(ValueError,'合并区域内部',self.validate,bad)
@@ -87,5 +87,20 @@ class WorkbookPlanTests(unittest.TestCase):
         fill_workbook(self.root,self.files,{'plan':self.plan,'expectedPlanHash':prepared['planHash']},stage)
         actual=load_workbook(stage/'填写成果.xlsx',data_only=True)
         self.assertEqual([actual['Lead Schedule'][f'C{r}'].value for r in range(3,6)],[2460,2380,2420]);actual.close()
+
+
+class TemplateFormulaTests(unittest.TestCase):
+    """Template formulas recompute with Excel semantics: blanks are 0, IF/IFERROR choose a branch."""
+    def calc(self,formula,cells):
+        from workbook_plan import calculate_formula
+        return calculate_formula(formula,'S',lambda sheet,cell:cells.get(cell))
+    def test_blank_adjustment_counts_as_zero(self):
+        self.assertEqual(self.calc('B4+C4',{'B4':Decimal(5)}),Decimal(5))
+    def test_if_skips_the_division_by_zero_branch(self):
+        self.assertEqual(self.calc('IF(E4=0,"",F4/E4)',{'F4':Decimal(3)}),'')
+        self.assertEqual(self.calc('IF(E4=0,"",F4/E4)',{'E4':Decimal(2),'F4':Decimal(3)}),Decimal('1.5'))
+        self.assertEqual(self.calc('IFERROR(F4/E4,0)',{'F4':Decimal(3)}),Decimal(0))
+    def test_unhandled_division_by_zero_still_asks(self):
+        with self.assertRaises(NeedsInput): self.calc('F4/E4',{'F4':Decimal(3)})
 
 if __name__=='__main__':unittest.main()

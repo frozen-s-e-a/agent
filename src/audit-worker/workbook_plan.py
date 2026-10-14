@@ -5,7 +5,7 @@ coverage are compiled before writing; the saved file is independently reopened.
 """
 from __future__ import annotations
 import hashlib, json, re, zipfile, posixpath, html
-from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP, ROUND_UP, ROUND_DOWN
 from pathlib import Path
 from xml.etree import ElementTree as ET
 from openpyxl.utils.cell import range_boundaries, get_column_letter, coordinate_to_tuple
@@ -19,6 +19,11 @@ VERSION = 'workbook-plan/1'
 
 class NeedsInput(ValueError):
     pass
+
+class PlanIssue(NeedsInput):
+    """A defect in the model's plan that it can correct itself; only business ambiguity goes to the user."""
+    def __init__(self, message, hint=''):
+        super().__init__(message); self.hint=hint
 
 def sha(file):
     h = hashlib.sha256()
@@ -149,9 +154,9 @@ class Compiler:
             if not isinstance(row,int) or row<1 or not columns: raise ValueError('已确认表头需要行号与实际列文字')
             for col, expected in columns.items():
                 ref=f'{col}{row}'; actual=book.cell(name,ref)
-                if str(actual)!=str(expected): raise NeedsInput(f'{name}!{ref} 实际表头 {actual} 与计划 {expected} 不一致')
+                if str(actual)!=str(expected): raise PlanIssue(f'{name}!{ref} 实际表头 {actual} 与计划 {expected} 不一致','headers.columns 填写该单元格的实际文字；不确定时先用 read_workbook_range 读取表头行')
                 if isinstance(actual,Decimal) and not (actual==actual.to_integral_value() and 1900<=actual<=2100):
-                    raise NeedsInput(f'{name}!{ref} 是数据数值 {actual}，不能当作表头，请重新确认表头行')
+                    raise PlanIssue(f'{name}!{ref} 是数据数值 {actual}，不能当作表头','用 read_workbook_range 找到真正的表头行，再修订 headers.row')
             self.headers[(book.ref,name,row)]=columns
         self.period_targets=set()
         for check in plan.get('periodChecks',[]):
@@ -162,7 +167,7 @@ class Compiler:
                 if len(years)!=1:
                     confirmed=str(source.get('confirmedYear','')); statement=source.get('confirmation')
                     if not confirmed or statement not in plan.get('_userStatements',[]) or confirmed not in re.findall(r'(?<!\d)(?:19|20)\d{2}(?!\d)',str(statement)) or (years and confirmed not in years):
-                        raise NeedsInput(f'{source["sheet"]}!{source["cell"]} 的期间标签 {value} 无法唯一确定年份，请确认口径')
+                        raise PlanIssue(f'{source["sheet"]}!{source["cell"]} 的期间标签 {value} 无法唯一确定年份','改用含唯一年份的标签单元格（如来源标题“2025年1-12月”）；资料中确实没有期间标示时，用 ask_user_questions 请用户确认年份')
                     years={confirmed}
                 labels.append(years)
             if labels[0]!=labels[1]: raise NeedsInput('来源期间与目标期间不同，不能直接填入；请确认年份和应采用的金额列')
@@ -188,13 +193,13 @@ class Compiler:
         if op in ('sum','lookup','count'):
             book=self.book(expr.get('file_path',self.plan['file_path'])); sheet=expr['sheet']; header=expr.get('headerRow')
             declared=self.headers.get((book.ref,sheet,header))
-            if not declared: raise NeedsInput(f'{sheet} 的汇总或匹配需要先保存并核对实际表头')
+            if not declared: raise PlanIssue(f'{sheet} 第 {header} 行没有在 headers 中声明表头','在 headers 中加入 {file_path,sheet:"'+str(sheet)+'",row:'+str(header)+',columns:{列字母:实际表头文字}}，headerRow 与 row 保持一致')
             first=expr.get('startRow',header+1); last=expr.get('endRow')
             if last=='auto' or last is None: last=range_boundaries(book.sheet(sheet)['dataRange'])[3]
             if not isinstance(first,int) or not isinstance(last,int) or first<=header or last<first or last-first>200000: raise ValueError('全量行范围无效或超出预算')
             col=expr.get('column'); filters=expr.get('filters',[])
             for column in ([col] if col else [])+[f.get('column') for f in filters]:
-                if column not in declared: raise NeedsInput(f'{sheet} 的计算列 {column} 没有已验证表头')
+                if column not in declared: raise PlanIssue(f'{sheet} 的计算列 {column} 没有已验证表头',f'在 {sheet} 的 headers.columns 中加入 {column} 列的实际表头文字')
             selected=[]
             for row in range(first,last+1):
                 self.scanned+=1
@@ -214,7 +219,7 @@ class Compiler:
                 if matched: selected.append(row)
             if op=='count':
                 self.refs.append({'file_path':book.ref,'sha256':book.hash,'sheet':sheet,'rows':selected,'operation':'count'}); return Decimal(len(selected))
-            if not selected: raise NeedsInput(f'{sheet} 第 {first}–{last} 行没有符合条件的来源，不能填零代替缺失')
+            if not selected: raise PlanIssue(f'{sheet} 第 {first}–{last} 行没有符合条件的来源，不能填零代替缺失','核对 filters 的列和取值是否与来源实际文字一致；确认来源确实没有该项时，用 ask_user_questions 请用户说明如何处理')
             if op=='lookup' and len(selected)!=1: raise NeedsInput(f'{sheet} 匹配到 {len(selected)} 行，不能擅自取第一行；需确认汇总或唯一匹配口径')
             values=[book.cell(sheet,f'{col}{r}') for r in selected]
             self.refs.append({'file_path':book.ref,'sha256':book.hash,'sheet':sheet,'column':col,'rows':selected,'sourceCount':len(selected),'scannedRows':last-first+1,'operation':op})
@@ -279,7 +284,7 @@ class Compiler:
                 for header_row in range(1,min(row,4)):
                     header_cell=f'{get_column_letter(col)}{header_row}';label=s['cells'].get(header_cell,{}).get('value')
                     if re.search(r'(?<!\d)(?:19|20)\d{2}(?!\d)',str(label)) and (sheet,header_cell) not in self.period_targets:
-                        raise NeedsInput(f'{sheet}!{header_cell} 标示期间 {label}，需明确同期间来源或取得用户期间确认，不能擅自选择年份')
+                        raise PlanIssue(f'{sheet}!{header_cell} 标示期间 {label}，计划没有核对来源期间',f'在 periodChecks 中加入 {{source:{{file_path,sheet,cell:来源中标示同一年份的单元格，如标题或年度表头}},target:{{file_path,sheet:"{sheet}",cell:"{header_cell}"}}}}；来源没有任何期间标示时，用 ask_user_questions 请用户确认')
                 if not (a<=col<=c and b<=row<=d): raise ValueError(f'{sheet}!{cell} 超出模板现有范围')
                 for merge in s['merges']:
                     x,y,z,w=range_boundaries(merge)
@@ -296,8 +301,8 @@ class Compiler:
         # Existing formula outputs can satisfy a required position after deterministic recalculation.
         formulas=sorted(key for key in missing if self.template.sheet(key[0])['cells'].get(key[1],{}).get('formula') is not None)
         missing-=set(formulas)
-        if missing: raise NeedsInput('必填位置缺少映射：'+', '.join(f'{s}!{c}' for s,c in sorted(missing)[:12]))
-        if any(not any(w['sheet']==name for w in writes) for name in self.target_sheets): raise NeedsInput('有目标工作表尚未提供实际写入映射')
+        if missing: raise PlanIssue('必填位置缺少映射：'+', '.join(f'{s}!{c}' for s,c in sorted(missing)[:12]),'为这些位置补充 writes，或从 required 中去掉确实不需要填写的位置')
+        if any(not any(w['sheet']==name for w in writes) for name in self.target_sheets): raise PlanIssue('有目标工作表尚未提供实际写入映射：'+'、'.join(name for name in self.target_sheets if not any(w['sheet']==name for w in writes)),'为每张目标表加入 writes')
         snapshots=[{'path':b.ref,'sha256':b.hash} for b in self.books.values()]
         prepared={'version':VERSION,'plan':self.plan,'inputs':snapshots,'writes':writes,'required':sorted([list(k) for k in required]),'requiredFormulas':[list(k) for k in formulas],'targetSheets':self.target_sheets}
         prepared['planHash']=hashlib.sha256(encode(prepared).encode('utf-8')).hexdigest()
@@ -308,6 +313,7 @@ def validate_plan(root, files, p):
     try:
         compiler=Compiler(root,files,plan); prepared=compiler.compile()
         return {'ok':True,'planHash':prepared['planHash'],'inputHashes':prepared['inputs'],'targetSheets':prepared['targetSheets'],'writeCount':len(prepared['writes']),'requiredCount':len(prepared['required']),'preview':[{'sheet':w['sheet'],'cell':w['cell'],'expected':w['value'],'valueType':w['valueType'],'sourceCount':len(w['sources'])} for w in prepared['writes'][:20]],'version':VERSION}
+    except PlanIssue as e: return {'ok':False,'status':'plan_revision','issue':str(e),'hint':e.hint}
     except NeedsInput as e: return {'ok':False,'status':'waiting_for_user','questions':[str(e)]}
 
 def patch_cell(raw, ref, value, typ, formula_cache=False):
@@ -352,13 +358,42 @@ def formula_refs(formula, default_sheet):
             refs.extend((sheet,c) for c in coords(span,MAX_CELLS))
     return refs
 
+class FormulaError(Exception):
+    """An Excel error value (#DIV/0!, #VALUE!) that IF/IFERROR may still handle."""
+
 def calculate_formula(formula, sheet, value):
     tokens=[t for t in Tokenizer('='+formula).items if t.type!='WHITE-SPACE']; index=0
+    # Excel semantics inside template formulas: a blank cell is 0 in arithmetic and "" in text.
+    def num(v):
+        if isinstance(v,FormulaError): raise v
+        if v is None: return Decimal(0)
+        if isinstance(v,bool): return Decimal(int(v))
+        if isinstance(v,str) and not v.strip(): raise FormulaError('#VALUE!')
+        return number(v,'公式')
+    def truth(v):
+        if isinstance(v,FormulaError): raise v
+        if isinstance(v,str): raise FormulaError('#VALUE!')
+        return bool(v) if isinstance(v,bool) else num(v)!=0
+    def compare(op,left,right):
+        for v in (left,right):
+            if isinstance(v,FormulaError): raise v
+        if left is None: left=Decimal(0) if not isinstance(right,str) else ''
+        if right is None: right=Decimal(0) if not isinstance(left,str) else ''
+        if isinstance(left,str) or isinstance(right,str):
+            if not (isinstance(left,str) and isinstance(right,str)): return op in ('<>',)
+            left,right=left.lower(),right.lower()
+        else: left,right=num(left),num(right)
+        return {'=':left==right,'<>':left!=right,'<':left<right,'>':left>right,'<=':left<=right,'>=':left>=right}[op]
+    def guarded():
+        # Arguments are evaluated eagerly; an error is carried as a value so IF/IFERROR can discard it.
+        try: return expression(0)
+        except FormulaError as e: return e
+        except NeedsInput as e: return FormulaError(str(e))
     def atom():
         nonlocal index
         if index>=len(tokens): raise ValueError('公式不完整')
         t=tokens[index];index+=1
-        if t.type=='OPERATOR-PREFIX': return -number(atom(),'公式') if t.value=='-' else number(atom(),'公式')
+        if t.type=='OPERATOR-PREFIX': return -num(atom()) if t.value=='-' else num(atom())
         if t.type=='PAREN' and t.subtype=='OPEN':
             result=expression(0)
             if index>=len(tokens) or tokens[index].type!='PAREN' or tokens[index].subtype!='CLOSE': raise ValueError('公式括号不完整')
@@ -366,49 +401,75 @@ def calculate_formula(formula, sheet, value):
         if t.type=='FUNC' and t.subtype=='OPEN':
             name=t.value[:-1].upper();args=[]
             while index<len(tokens) and tokens[index].subtype!='CLOSE':
-                args.append(expression(0))
+                args.append(guarded())
                 if index<len(tokens) and tokens[index].type=='SEP': index+=1
                 else: break
             if index>=len(tokens) or tokens[index].type!='FUNC' or tokens[index].subtype!='CLOSE': raise ValueError('公式函数不完整')
             index+=1;flat=[v for a in args for v in (a if isinstance(a,list) else [a])]
+            if name=='IF' and len(args) in (2,3):
+                chosen=args[1] if truth(args[0]) else (args[2] if len(args)==3 else False)
+                if isinstance(chosen,FormulaError): raise chosen
+                return chosen
+            if name=='IFERROR' and len(args)==2:
+                chosen=args[1] if isinstance(args[0],FormulaError) else args[0]
+                if isinstance(chosen,FormulaError): raise chosen
+                return chosen
+            for v in flat:
+                if isinstance(v,FormulaError): raise v
+            if name in ('AND','OR') and flat:
+                values=[truth(v) for v in flat if v is not None]
+                return all(values) if name=='AND' else any(values)
+            if name=='NOT' and len(args)==1: return not truth(args[0])
             if name in ('SUM','MIN','MAX'):
-                nums=[number(v,'公式') for v in flat if v is not None]
+                # Ranges skip blanks and text, as Excel does.
+                nums=[num(v) for v in flat if v is not None and not isinstance(v,str)]
+                if not nums: return Decimal(0)
                 return sum(nums,Decimal(0)) if name=='SUM' else min(nums) if name=='MIN' else max(nums)
-            if name=='ABS' and len(args)==1: return abs(number(args[0],'公式'))
-            if name=='ROUND' and len(args)==2:
-                digits=int(number(args[1],'公式精度'))
+            if name=='ABS' and len(args)==1: return abs(num(args[0]))
+            if name in ('ROUND','ROUNDUP','ROUNDDOWN') and len(args)==2:
+                digits=int(num(args[1]))
                 if not -10<=digits<=10: raise ValueError('公式精度超范围')
-                return number(args[0],'公式').quantize(Decimal(10)**-digits,rounding=ROUND_HALF_UP)
+                mode={'ROUND':ROUND_HALF_UP,'ROUNDUP':ROUND_UP,'ROUNDDOWN':ROUND_DOWN}[name]
+                return num(args[0]).quantize(Decimal(10)**-digits,rounding=mode)
             raise ValueError('暂不支持计算此模板函数：'+name)
         if t.type=='OPERAND':
             if t.subtype=='NUMBER': return Decimal(t.value)
             if t.subtype=='TEXT': return t.value[1:-1].replace('""','"')
+            if t.subtype=='LOGICAL': return t.value.upper()=='TRUE'
             if t.subtype=='RANGE':
                 source,span=t.value.rsplit('!',1) if '!' in t.value else (sheet,t.value);source=source.strip("'").replace("''", "'")
                 values=[value(source,c) for c in coords(span)]
                 return values[0] if len(values)==1 else values
         raise ValueError('暂不支持此模板公式结构')
-    ranks={'+':1,'-':1,'*':2,'/':2,'^':3}
+    ranks={'=':1,'<>':1,'<':1,'>':1,'<=':1,'>=':1,'&':2,'+':3,'-':3,'*':4,'/':4,'^':5}
     def expression(minimum):
         nonlocal index
         result=atom()
         while index<len(tokens):
             t=tokens[index]
-            if t.type=='OPERATOR-POSTFIX' and t.value=='%': index+=1;result=number(result,'公式')/100;continue
+            if t.type=='OPERATOR-POSTFIX' and t.value=='%': index+=1;result=num(result)/100;continue
             rank=ranks.get(t.value,0) if t.type=='OPERATOR-INFIX' else 0
             if not rank or rank<minimum: break
-            index+=1;right=number(expression(rank if t.value=='^' else rank+1),'公式');left=number(result,'公式')
+            index+=1;right=expression(rank if t.value=='^' else rank+1);left=result
+            if t.value in ('=','<>','<','>','<=','>='): result=compare(t.value,left,right);continue
+            if t.value=='&':
+                for v in (left,right):
+                    if isinstance(v,FormulaError): raise v
+                text=lambda v:'' if v is None else ('TRUE' if v is True else 'FALSE' if v is False else (format(v.normalize(),'f') if isinstance(v,Decimal) else str(v)))
+                result=text(left)+text(right);continue
+            right=num(right);left=num(left)
             if t.value=='+': result=left+right
             elif t.value=='-': result=left-right
             elif t.value=='*': result=left*right
             elif t.value=='/':
-                if right==0: raise NeedsInput('模板公式分母为零，需确认不适用处理')
+                if right==0: raise FormulaError('#DIV/0!')
                 result=left/right
             elif t.value=='^':
                 if right!=right.to_integral_value() or abs(right)>10: raise ValueError('公式指数超出预算')
                 result=left**int(right)
         return result
-    result=expression(0)
+    try: result=expression(0)
+    except FormulaError as e: raise NeedsInput(f'模板公式结果为 Excel 错误 {e}，需确认不适用处理')
     if index!=len(tokens) or isinstance(result,list): raise ValueError('模板公式无法完整计算')
     return result
 
@@ -448,7 +509,9 @@ def fill_workbook(root, files, p, stage):
             v=get_value(*key);typ='number' if isinstance(v,Decimal) else 'boolean' if isinstance(v,bool) else 'text';part=template.sheet(key[0])['part']
             changes[part]=patch_cell(changes.get(part,template.sheet(key[0])['raw']),key[1],str(v) if isinstance(v,Decimal) else v,typ,True)
         except Exception as e: pending[key]=str(e)
-    blockers={k:v for k,v in pending.items() if k[0] in prepared['targetSheets']}
+    # Only required positions must be computed here; other affected formulas lose their stale cache and Excel recalculates them on open.
+    needed={tuple(k) for k in prepared['required']}
+    blockers={k:v for k,v in pending.items() if k in needed}
     if blockers: raise NeedsInput('目标表公式无法核对：'+'；'.join(f'{s}!{c}: {v}' for (s,c),v in list(blockers.items())[:5]))
     # Unsupported affected formulas outside the requested views have stale caches removed.
     for sheet,cell in pending:
