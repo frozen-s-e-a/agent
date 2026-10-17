@@ -4,7 +4,7 @@ import { useSyncExternalStore } from "react";
 import type { HostClient } from "../host/client";
 import type { AuditEvent, Card, Project, SessionSummary } from "../protocol/types";
 import type { SheetMode } from "../components/sheet/paint";
-import { emptyState, reduce, reduceAll, type EventState } from "./reduce";
+import { emptyState, isOpen, reduce, reduceAll, type EventState } from "./reduce";
 
 export type ChatMode = "float" | "left" | "right" | "full";
 
@@ -57,6 +57,8 @@ export interface UiState {
   page: "main" | "settings";
   settingsDirty: boolean;
   leftTab: "sessions" | "files" | "outputs";
+  /** 正在切换到的项目（宿主换进程，约 2 秒） */
+  switching: string | null;
   connected: boolean;
   modelReady: boolean | null; // null：还没查
   attach: string[]; // 待随下一条消息发送的 F- 编号
@@ -113,6 +115,7 @@ export class AppStore {
         page: "main",
         settingsDirty: false,
         leftTab: "sessions",
+        switching: null,
         connected: true,
         modelReady: null,
         attach: [],
@@ -163,9 +166,8 @@ export class AppStore {
     try {
       for (const s of Object.values(this.snap.ev.sessions)) {
         const { events } = await this.host.request("session.events", { session: s.session, after: s.lastSeq });
-        const ev = reduceAll(this.snap.ev, events);
-        this.snap = { ...this.snap, ev };
-        this.emit();
+        // 逐条走 onEvent：漏掉的卡片、成果也要触发界面联动（切视图、开成果）
+        for (const e of events) this.onEvent(e);
       }
       void this.refreshSessions();
     } finally {
@@ -211,6 +213,7 @@ export class AppStore {
         }
         break;
       case "task.finished":
+      case "card.closed":
         void this.refreshSessions();
         break;
     }
@@ -368,11 +371,28 @@ export class AppStore {
     await this.refreshSessions();
   }
 
+  async switchProject(project: string) {
+    if (project === this.snap.ui.project) return;
+    this.setUi({ switching: project, session: null, sessions: [], tabs: [], activeTab: null, page: "main" });
+    try {
+      await this.host.request("project.open", { project });
+      this.setUi({ project });
+      await this.refreshSessions();
+    } finally {
+      this.setUi({ switching: null });
+    }
+  }
+
   async refreshSessions() {
     const project = this.snap.ui.project;
     if (!project) return;
-    const { sessions } = await this.host.request("session.list", { project });
-    this.setUi({ sessions });
+    try {
+      const { sessions } = await this.host.request("session.list", { project });
+      this.setUi({ sessions });
+    } catch (e) {
+      // 断线时不刷，重连补取后再刷
+      if ((e as { code?: string }).code !== "ENV_DISCONNECTED") throw e;
+    }
   }
 
   async openSession(session: string) {
@@ -386,7 +406,8 @@ export class AppStore {
     const t = s && Object.values(s.tasks).at(-1);
     if (t?.workpaperFile) {
       const out = t.outputs.find((o) => o.kind === "workpaper");
-      this.openSheet(out?.file ?? t.workpaperFile, { task: t.task, mode: out ? "filled" : "regions" });
+      const writing = Object.values(s.cards).some((c) => isOpen(c) && c.card.kind === "write_confirmation" && c.card.task === t.task);
+      this.openSheet(out?.file ?? t.workpaperFile, { task: t.task, mode: out ? "filled" : writing && t.plan ? "plan" : "regions" });
     }
   }
 

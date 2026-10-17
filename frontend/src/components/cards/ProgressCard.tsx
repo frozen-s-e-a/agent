@@ -42,8 +42,10 @@ export function ProgressCard({ task }: { task: TaskState }) {
 
   const stageIdx = STAGES.findIndex((s) => s.stage === task.stage);
   const regions = Object.values(task.regions);
-  const passed = task.checks.filter((c) => c.passed).length;
-  const failed = task.checks.filter((c) => !c.passed).length;
+  // 区域重做后同一项核对会再报一次，计数只看每项最新一次
+  const latest = [...new Map(task.checks.map((c) => [`${c.check}|${c.region ?? ""}`, c])).values()];
+  const passed = latest.filter((c) => c.passed).length;
+  const failed = latest.filter((c) => !c.passed).length;
   const current = [...task.nodes].reverse().find((n) => !n.finishedAt);
   const idle = running && now - Date.parse(task.lastEventAt) > IDLE_MS;
 

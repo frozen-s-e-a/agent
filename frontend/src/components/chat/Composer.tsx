@@ -10,7 +10,7 @@ import {
 } from "@ant-design/icons";
 import { Sender } from "@ant-design/x";
 import { Button, Checkbox, Popover, Segmented, Tooltip } from "antd";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import type { ProjectFile } from "../../protocol/types";
 import { regionShort, since } from "../../lib/format";
 import { REGION_STATE_LABEL } from "../../lib/tokens";
@@ -27,9 +27,14 @@ export function ComposerZone({ sheetOpen }: { sheetOpen: boolean }) {
   const ui = useApp((x) => x.ui);
   const pending = useMemo(() => (s ? Object.values(s.cards).filter((c) => isOpen(c) && c.card.kind !== "result_summary") : []), [s]);
   const floating = sheetOpen && ui.chatMode === "float" && !ui.collapsed;
+  const docked = sheetOpen && !ui.collapsed && (ui.chatMode === "left" || ui.chatMode === "right");
+  // 停靠时输入区跟着对话栏走，不盖在表上
+  const dockStyle: CSSProperties | undefined = docked
+    ? { transform: "none", width: ui.dockWidth - 24, [ui.chatMode === "left" ? "left" : "right"]: 12, [ui.chatMode === "left" ? "right" : "left"]: "auto" }
+    : undefined;
 
   return (
-    <div className="composer-zone">
+    <div className="composer-zone" style={dockStyle}>
       {floating && s && !ui.historyOpen && <FloatPanel s={s} hasPending={pending.length > 0} />}
       {pending.length > 0 && (
         <div className="pending-stack">
@@ -54,6 +59,16 @@ function FloatPanel({ s, hasPending }: { s: SessionState; hasPending: boolean })
   const [hover, setHover] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>();
   const turnKey = turn.map((x) => x.id).join("|");
+  // 用户开始在表上点格子，就把悬浮回复收起，不挡表
+  const selected = useApp((x) => {
+    const t = x.ui.tabs.find((t) => t.id === x.ui.activeTab);
+    return t?.kind === "sheet" && t.selected ? `${t.id}:${t.selected.row},${t.selected.col}` : null;
+  });
+  const firstSel = useRef(selected);
+  useEffect(() => {
+    if (selected && selected !== firstSel.current) setHidden(turnKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected]);
 
   useEffect(() => {
     clearTimeout(timer.current);

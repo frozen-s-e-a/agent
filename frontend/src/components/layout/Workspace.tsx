@@ -1,6 +1,6 @@
 // 工作区：顶部文件标签 + 表格；对话按显示方式悬浮、停靠左右或铺满。没有打开文件时对话占满。
 import { CloseOutlined, FileExcelOutlined, InboxOutlined, TableOutlined } from "@ant-design/icons";
-import { Button, Empty } from "antd";
+import { Button, Empty, Spin } from "antd";
 import { useRef, useState } from "react";
 import { useApp, useAppStore, useSession } from "../../store/context";
 import { ChatThread } from "../chat/ChatThread";
@@ -15,6 +15,14 @@ export function Workspace() {
   const active = ui.tabs.find((t) => t.id === ui.activeTab) ?? null;
   const sheetOpen = !!active && !ui.collapsed;
   const docked = sheetOpen && (ui.chatMode === "left" || ui.chatMode === "right");
+  if (ui.switching)
+    return (
+      <section className="workspace" style={{ display: "grid", placeItems: "center" }}>
+        <Spin tip={`正在打开「${ui.projects.find((p) => p.project === ui.switching)?.name ?? "项目"}」…`}>
+          <div style={{ width: 240, height: 80 }} />
+        </Spin>
+      </section>
+    );
 
   return (
     <section className="workspace">

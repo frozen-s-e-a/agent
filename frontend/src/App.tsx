@@ -1,7 +1,7 @@
 // 应用入口：主题、状态、宿主连接。现在接的是假宿主（回放事件文件）；接真宿主只换 host 这一层。
 import { App as AntApp, ConfigProvider, theme as antTheme } from "antd";
 import zhCN from "antd/locale/zh_CN";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FakeHost } from "./host/fake/FakeHost";
 import { cssVars, DARK, LIGHT } from "./lib/tokens";
 import { AppStore, useStore } from "./store/appStore";
@@ -17,10 +17,14 @@ const params = new URLSearchParams(location.search);
 export function App() {
   const host = useMemo(() => new FakeHost({ connected: !params.has("onboarding") }), []);
   const store = useMemo(() => new AppStore(host), [host]);
+  if (import.meta.env.DEV) Object.assign(window, { __store: store, __host: host });
   const ui = useStore(store, (s) => s.ui);
   const [booted, setBooted] = useState(false);
 
+  const bootedOnce = useRef(false);
   useEffect(() => {
+    if (bootedOnce.current) return; // StrictMode 下 effect 会跑两次，只启动一次
+    bootedOnce.current = true;
     if (params.get("theme") === "dark" || params.get("theme") === "light") store.setUi({ theme: params.get("theme") as "dark" | "light" });
     if (params.get("chat")) store.setUi({ chatMode: params.get("chat") as never });
     void (async () => {

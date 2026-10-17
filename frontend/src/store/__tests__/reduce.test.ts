@@ -50,3 +50,15 @@ describe("按事件累积状态", () => {
     expect(s.tools.c1.resultSummary).toBe("7 行");
   });
 });
+
+describe("卡片撤回", () => {
+  it("一轮取消后等待中的卡片收到 withdrawn，不再算待处理", () => {
+    const upto = events.filter((e) => (e.seq ?? 0) <= 29); // 停在底稿理解卡打开
+    const before = reduceAll(emptyState, upto).sessions["S-41d2"];
+    expect(openCards(before).map((c) => c.card.card)).toEqual(["C-001"]);
+    const withdrawn = { ...upto[upto.length - 1], seq: 30, type: "card.closed", data: { card: "C-001", withdrawn: true } } as AuditEvent;
+    const after = reduceAll(emptyState, [...upto, withdrawn]).sessions["S-41d2"];
+    expect(openCards(after)).toEqual([]);
+    expect(after.cards["C-001"].withdrawn).toBe(true);
+  });
+});

@@ -576,7 +576,7 @@ function ResultCard({ c, body }: { c: CardState; body: ResultSummaryBody }) {
 
 function ActionCard({ c, body }: { c: CardState; body: ActionConfirmationBody }) {
   const { answer, busy, err } = useAnswer(c);
-  const irreversible = !body.reversible;
+  const irreversible = body.reversible !== true; // null 也按不可撤销
   return (
     <CardShell
       c={c}
@@ -619,7 +619,7 @@ function ActionCard({ c, body }: { c: CardState; body: ActionConfirmationBody })
         <span className="k">操作</span>
         <span>{body.operation}</span>
         <span className="k">对象</span>
-        <span>{body.target}</span>
+        <span className={body.target ? undefined : "faint"}>{body.target ?? "宿主没能识别"}</span>
         {body.argsSummary.map((a) => (
           <FragmentKV key={a.label} k={a.label} v={a.value} />
         ))}

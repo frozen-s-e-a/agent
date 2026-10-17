@@ -133,6 +133,7 @@ export class FakeHost implements HostClient {
     this.addSession({ session: "S-52e1", project: "P-7f3a", title: "前五大客户回款情况", lastActive: "2026-10-16T09:20:00Z", tasks: [] });
     this.addSession({ session: "S-3a07", project: "P-7f3a", title: "存货监盘计划", lastActive: "2026-10-15T02:10:00Z", tasks: [{ task: "T-09aa", status: "completed" }] });
     this.seedChat("S-52e1");
+    this.sessions.get("S-52e1")!.summary.lastActive = "2026-10-16T09:20:00Z"; // 预置内容不算新活动
   }
 
   // ---------- HostClient ----------
@@ -445,7 +446,8 @@ export class FakeHost implements HostClient {
       this.projects.unshift(pr);
       return pr;
     },
-    "project.open": (p) => this.projects.find((x) => x.project === p.project)!,
+    // 真宿主切换项目要换 Harness 进程，约 2 秒
+    "project.open": async (p) => (await delay(1500), this.projects.find((x) => x.project === p.project)!),
     "project.rename": (p) => {
       const pr = this.projects.find((x) => x.project === p.project)!;
       pr.name = p.name;
@@ -543,6 +545,13 @@ export class FakeHost implements HostClient {
         return { accepted: true };
       }
       this.answers.set(p.card, answer);
+      // 回放里没录这张卡的关闭（比如不阻塞的结果卡）：直接关
+      const session = [...this.sessions.values()].find((r) => r.log.some((e) => e.type === "card.opened" && e.data.card === p.card));
+      if (!REPLAY.slice(this.cursor).some((e) => e.type === "card.closed" && e.data.card === p.card)) {
+        this.openCards.delete(p.card);
+        if (session) this.ev(session.summary.session, "card.closed", { card: p.card, answer });
+        return { accepted: true };
+      }
       // 回放正停在这张卡上：继续
       if (this.playing) this.schedule();
       else if (REPLAY[this.cursor]?.type === "card.closed") this.emitNext();
@@ -559,6 +568,7 @@ export class FakeHost implements HostClient {
     "cell.trace": (p) => this.trace(p.cell),
     "mcp.list": () => ({ servers: this.mcp.map((s) => ({ ...s })) }),
     "mcp.add": async (p) => {
+      if (p.name.toLowerCase() === "audit") throw new HostError("MCP_NAME_RESERVED", "服务名 audit 留给内置审计工具");
       const { token, secrets, ...cfg } = p;
       void secrets;
       const s: McpServer = { ...cfg, hasToken: !!token || cfg.hasToken, state: "connecting", tools: [] };
@@ -614,6 +624,7 @@ export class FakeHost implements HostClient {
         { item: "webSearch", label: "联网搜索", state: "off" },
         { item: "account", label: "DeepSeek 账号服务", state: "off" },
         { item: "autoUpdate", label: "自动更新", state: "off" },
+        { item: "pluginInstall", label: "插件安装", state: "off" },
       ],
       shell: "off",
       verifiedAt: new Date().toISOString(),
@@ -682,12 +693,11 @@ export class FakeHost implements HostClient {
           cell: addr,
           value,
           valueType: base.t ?? (value != null && base.fmt ? "number" : value == null ? "blank" : "string"),
-          text: fl ? cellText({ ...base, v: fl.v }) : cellText(base),
+          text: fl ? cellText({ ...base, t: base.fmt ? undefined : base.t, v: fl.v }) : cellText(base),
           numFmt: base.fmt ?? null,
           formula: base.f ?? null,
         };
-        if (fl && base.f) cell.valueType = "number";
-        if (fl && !base.fmt) cell.valueType = "string";
+        if (fl) cell.valueType = base.fmt ? "number" : "string";
         if (base.stale && !fl) cell.stale = true;
         if (base.style) cell.style = base.style;
         if (pc) cell.plan = { value: pc.value, stale: pc.stale, from: pc.from, overwrite: pc.overwrite, manual: pc.manual };

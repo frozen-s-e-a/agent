@@ -40,13 +40,25 @@ export function TableTab({ tab }: { tab: Tab }) {
   useEffect(() => {
     rows.current.clear();
     pages.current.clear();
+    let live = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     void store.host.request("table.view", { table: tab.table, offset: 0, limit: PAGE, locate: tab.locate }).then((v) => {
+      if (!live) return; // 被新一次加载取代（GDG 的 scrollTo 是相对滚动，滚两次会翻倍）
       setMeta(v);
       ingest(v);
       setHighlight(v.highlight ?? null);
-      if (v.highlight != null) setTimeout(() => ref.current?.scrollTo(0, v.highlight!, "vertical", 0, 0, { vAlign: "center" }), 50);
+      // 等表格挂上再滚；定位行放在靠上的位置，上面留几行上下文
+      if (v.highlight != null) timer = setTimeout(() => ref.current?.scrollTo(0, Math.max(0, v.highlight! - 4), "vertical", 0, 0, { vAlign: "start" }), 150);
     });
+    return () => {
+      live = false;
+      clearTimeout(timer);
+    };
   }, [store, tab.table, tab.locate, tab.nonce, ingest]);
+
+  // 资料表的行号显示源文件行号，和"已定位：源文件第 N 行"对得上
+  const src0 = meta?.rows[0]?.source?.row;
+  const markerStart = src0 != null && meta ? src0 - meta.offset : 1;
 
   const columns: GridColumn[] = useMemo(
     () =>
@@ -128,12 +140,14 @@ export function TableTab({ tab }: { tab: Tab }) {
             getCellContent={getCellContent}
             theme={theme}
             headerHeight={46}
-            rowMarkers={{ kind: "number", startIndex: 1, width: 64 }}
+            rowHeight={28}
+            rowMarkers={{ kind: "number", startIndex: markerStart, width: 64 }}
             smoothScrollX
             smoothScrollY
             getRowThemeOverride={(r) => (r === highlight ? { bgCell: alpha(t.warning, 0.18) } : undefined)}
-            drawHeader={(args) => {
+            drawHeader={(args, drawContent) => {
               const { ctx, rect, column, columnIndex } = args;
+              if (columnIndex < 0) return drawContent(); // 行号列用默认画法
               const c = meta.columns[columnIndex];
               ctx.save();
               ctx.fillStyle = t.gridHeaderBg;

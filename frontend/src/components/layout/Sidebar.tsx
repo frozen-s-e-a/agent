@@ -44,8 +44,7 @@ export function Sidebar() {
           onClick: ({ key }) => {
             if (key === "_new") return store.setUi({ page: "main" }), Modal.info({ title: "新建项目", content: "选择一个本机文件夹作为项目目录（Electron 外壳里弹出系统选择框）。" });
             if (key.startsWith("_")) return;
-            store.setUi({ project: key, session: null, tabs: [], activeTab: null });
-            void store.refreshSessions();
+            void store.switchProject(key);
           },
         }}
       >

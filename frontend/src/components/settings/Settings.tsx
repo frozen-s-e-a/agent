@@ -315,7 +315,8 @@ function McpDrawer({ server, onClose }: { server: McpServer | "new" | null; onCl
     }
   }, [server, existing]);
 
-  const nameOk = /^[A-Za-z0-9_]+$/.test(cfg.name);
+  const reserved = cfg.name.toLowerCase() === "audit"; // 留给内置审计工具服务
+  const nameOk = /^[A-Za-z0-9_]+$/.test(cfg.name) && !reserved;
   const runTest = async () => {
     setTesting(true);
     try {
@@ -396,7 +397,7 @@ function McpDrawer({ server, onClose }: { server: McpServer | "new" | null; onCl
             label="服务名"
             style={{ flex: 1 }}
             validateStatus={cfg.name && !nameOk ? "error" : undefined}
-            help={cfg.name && !nameOk ? "只能用字母、数字和下划线" : "模型看到的工具名是 mcp__服务名__工具名"}
+            help={cfg.name && !nameOk ? (reserved ? "audit 是内置审计工具的服务名，换一个" : "只能用字母、数字和下划线") : "模型看到的工具名是 mcp__服务名__工具名"}
           >
             <Input value={cfg.name} disabled={!isNew} placeholder="oa" onChange={(e) => setCfg({ ...cfg, name: e.target.value })} />
           </Form.Item>

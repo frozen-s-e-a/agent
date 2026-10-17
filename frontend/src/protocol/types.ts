@@ -242,9 +242,11 @@ export interface ResultSummaryBody {
 export interface ActionConfirmationBody {
   system: string;
   operation: string;
-  target: string;
+  /** 取不到时为 null */
+  target: string | null;
   argsSummary: { label: string; value: string }[];
-  reversible: boolean;
+  /** 取不到时为 null，按不可撤销处理 */
+  reversible: boolean | null;
   reverseHow?: string | null;
   tool: string;
   call: string;

@@ -910,6 +910,9 @@ button {
 .composer-zone > * {
   pointer-events: auto;
 }
+.float-panel > * {
+  flex-shrink: 0;
+}
 .float-panel {
   max-height: 52vh;
   overflow: auto;
@@ -1127,8 +1130,8 @@ button {
 /* ---------- 开发面板 ---------- */
 .devpanel {
   position: fixed;
-  left: 12px;
-  bottom: 12px;
+  right: 12px;
+  top: 48px;
   z-index: 1000;
   background: #111827;
   color: #e5e7eb;
