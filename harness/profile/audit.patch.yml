@@ -172,6 +172,8 @@
         # 需要用户逐次确认的工具（外部系统中会改数据的工具）。宿主按设置里的 sideEffect 生成，
         # 内置审计工具只写新文件，不在这里。
         confirmTools: !!js JSON.parse(process.env.AUDIT_CONFIRM_TOOLS || '[]')
+        # 用户在设置里停用的工具：对模型隐藏，调用也会被拦下
+        disabledTools: !!js JSON.parse(process.env.AUDIT_DISABLED_TOOLS || '[]')
 
     - id: tool-ask-user
       name: '@deepseek-ai/dsh-tool-ask-user'

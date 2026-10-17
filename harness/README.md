@@ -25,7 +25,7 @@
 ```sh
 cd harness
 npm ci
-npm test                                   # 34 项：配置、外连、端到端、取消、续跑、确认、追问、卡片、编排流程
+npm test                                   # 37 项：配置、外连、端到端、取消、续跑、确认、追问、卡片、编排流程
 cd .. && python -m unittest tests/unit/test_audit_mcp.py   # 审计工具 MCP 服务 8 项
 ```
 
@@ -39,7 +39,8 @@ const launch = harnessLaunch({
   projectRoot, dataDir,              // 一个进程服务一个项目
   baseURL, apiKey, model,            // 用户填的地址和 Key，模型名从 /models 里选
   python, pythonPath,                // 内置 Python 及其依赖目录
-  confirmTools: ['mcp__oa__approve'], // 外部系统中会改数据的工具
+  confirmTools: ['mcp__oa__*', '!mcp__oa__query_*'], // 外部系统中会改数据的工具；! 开头为排除项
+  disabledTools: ['mcp__erp__*'],     // 设置里停用的工具：模型看不到，也调不了
   patches: [externalMcpPatch],       // 用户添加的外部 MCP 服务（宿主生成的配置层）
 })
 const child = spawn(launch.command, launch.args, launch.options)
@@ -60,7 +61,7 @@ const child = spawn(launch.command, launch.args, launch.options)
 | `card/answer` | `{ card, action, edits?, note? }` | 回答卡片（接口约定 5.1） |
 | `bridge/status` | `{}` | 实际生效的插件、模型路由、模型可见的工具、未答卡片 |
 | `task/create` | `{ sessionId, text, files, message? }` | 宿主直接登记底稿任务，返回 `{ task }`；`message` 是触发它的消息编号 |
-| `task/get` | `{ task }` | 任务快照：状态、阶段、交付物、各区域状态、未答卡片、输出编号、阻塞原因 |
+| `task/get` | `{ task }` | 任务快照：状态、阶段、交付物、各区域（范围、类型、用途、表头行、合计行、人工填写的格、状态）、未答卡片、输出编号、阻塞原因 |
 | `task/list` | `{}` | 本项目的所有任务 |
 | `task/message` | `{ task, text }` | 任务进行中用户补充的话；影响已算完的区域时发卡片问是否重跑 |
 | `task/cancel` | `{ task }` | 取消，返回 `{ cancelled }`；未答卡片撤回 |
@@ -77,10 +78,10 @@ const child = spawn(launch.command, launch.args, launch.options)
 | `session.event` | 落盘的会话事件（`user/message`、`assistant/message`、`tool/call`、`tool/result`、`turn/end` 等） |
 | `session.status` | `running` / `idle` |
 | `assistant.stream` | 回复的流式片段，`frame.chunk.type === 'text-delta'` 时取 `text` |
-| `approval.request` / `approval.closed` | 动作确认，带 `toolName`、`callId` |
-| `question.request` / `question.closed` | 模型追问 |
+| `approval.request` / `approval.closed` | 动作确认，带 `toolName`、`callId`；关闭通知带 `sessionId` |
+| `question.request` / `question.closed` | 模型追问，带 `callId`；关闭通知带 `sessionId` |
 | `card.opened` / `card.closed` | 编排插件发出的卡片；`withdrawn: true` 表示撤回；任务的卡片两条通知都带 `task` |
-| `task.event` | `{ sessionId, task, type, data, ts }`，流程事件（接口约定第四节），`seq` 由宿主加 |
+| `task.event` | `{ sessionId, task, type, data, ts }`，流程事件（接口约定第四节），`seq` 由宿主加。应用正常退出时进行中的任务发 `task.blocked`（`paused: true`）；继续时发 `task.resumed { from, stage }` |
 
 ## 环境变量（由 `launch.mjs` 设置）
 
@@ -91,7 +92,8 @@ const child = spawn(launch.command, launch.args, launch.options)
 | `AUDIT_LLM_BASE_URL` / `AUDIT_LLM_API_KEY` / `AUDIT_LLM_MODEL` | 企业模型 |
 | `AUDIT_LLM_CONTEXT_WINDOW` / `AUDIT_LLM_MAX_TOKENS` | 默认 131072 / 8192 |
 | `AUDIT_PYTHON` / `AUDIT_PYTHONPATH` | 内置 Python |
-| `AUDIT_CONFIRM_TOOLS` | 需逐次确认的工具，JSON 数组，支持 `前缀*` |
+| `AUDIT_CONFIRM_TOOLS` | 需逐次确认的工具，JSON 数组，支持 `前缀*` 和 `!` 开头的排除项 |
+| `AUDIT_DISABLED_TOOLS` | 设置里停用的工具，写法同上；对模型隐藏，调用被拦下 |
 | `AUDIT_MCP_TOOLS` / `AUDIT_MCP_DENY` / `AUDIT_MCP_ALLOW_NETWORK` | 审计工具的白名单、黑名单、是否提供联网工具 |
 | `AUDIT_STATE_DIR` | 编排状态目录：`<数据目录>/harness/audit-projects/<项目路径哈希>` |
 | `AUDIT_SEMANTICS_SAMPLES` | 区域语义的独立采样次数，默认 3（经 `options.env` 传） |
