@@ -16,7 +16,7 @@ export function completionGap(run,tasks){
  if(!run.requiresTaskExecution)return null;
  if(run.workbook&&run.requiresWorkbookOutput){
   const task=tasks.find(task=>task.id===run.workbook.taskId),validation=task?.result?.workbookValidation;
-  if(task?.status!=='succeeded'||task.validationStatus!=='passed'||validation?.status!=='passed'||validation.planHash!==run.workbook.prepared?.planHash||validation.verifiedCount!==validation.requiredCount)return '填写任务尚未完成。先用 read_workbook_range 识别实际模板和来源，再 save_workbook_plan 保存映射并 execute_workbook_plan 生成、重读真实成果。口径缺失用 ask_user_questions 集中提问。';
+  if(task?.status!=='succeeded'||task.validationStatus!=='passed'||validation?.status!=='passed'||validation.planHash!==run.workbook.prepared?.planHash||validation.verifiedCount+(validation.recalcCount||0)!==validation.requiredCount)return '填写任务尚未完成。先用 read_workbook_range 识别实际模板和来源，再 save_workbook_plan 保存映射并 execute_workbook_plan 生成、重读真实成果。口径缺失用 ask_user_questions 集中提问。';
   if(!run.workbook.plan.targetSheets.every(sheet=>validation.targetSheets.includes(sheet)))return '填写成果遗漏了目标工作表，不能结束。';
  }
  const execution=run.steps.filter(step=>step.name==='execute_workbook_plan'||step.name==='run_audit_tool'||String(step.name).startsWith('audit_'));

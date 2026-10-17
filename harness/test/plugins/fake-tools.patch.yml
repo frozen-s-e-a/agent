@@ -1,0 +1,17 @@
+# 测试用配置层：用假审计工具服务（test/fake-audit-tools.mjs）替换内置审计工具服务，服务名同为 audit。
+- id: mcp-audit
+  disabled: true
+- insert:
+    - id: mcp-audit-fake
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: audit
+        transport: stdio
+        command: !!js process.execPath
+        args:
+          - !!js process.getBuiltinModule('node:path').join(process.env.AUDIT_APP_ROOT, 'harness', 'test', 'fake-audit-tools.mjs')
+        env:
+          FAKE_TOOLS_SCENARIO: !!js process.env.FAKE_TOOLS_SCENARIO
+          FAKE_TOOLS_OPTIONS: !!js process.env.FAKE_TOOLS_OPTIONS || '{}'
+          FAKE_TOOLS_LOG: !!js process.env.FAKE_TOOLS_LOG || ''
+          FAKE_TOOLS_STATE: !!js process.env.FAKE_TOOLS_STATE || ''

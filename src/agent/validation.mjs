@@ -28,7 +28,7 @@ export function verifyTaskArtifacts(task, store) {
     const report=outputs.find(output=>output.name==='填写核对.json');
     if(!report)throw Error('填写成果缺少独立重读核对记录');
     workbookValidation=JSON.parse(fs.readFileSync(inside(root,report.path),'utf8'));
-    if(workbookValidation.status!=='passed'||!workbookValidation.requiredCount||workbookValidation.verifiedCount!==workbookValidation.requiredCount||workbookValidation.planHash!==task.parameters.expectedPlanHash)throw Error('填写成果与已验证计划或必填覆盖不一致');
+    if(workbookValidation.status!=='passed'||!workbookValidation.requiredCount||workbookValidation.verifiedCount+(workbookValidation.recalcCount||0)!==workbookValidation.requiredCount||workbookValidation.planHash!==task.parameters.expectedPlanHash)throw Error('填写成果与已验证计划或必填覆盖不一致');
     if(JSON.stringify(task.result.workbookValidation)!==JSON.stringify(Object.fromEntries(Object.entries(workbookValidation).filter(([key])=>key!=='cells'))))throw Error('填写核对摘要与实际文件不一致');
   }
   const validation = {status:'passed', level:'execution_and_file_integrity', checkedAt:new Date().toISOString(), checks:['business_status','project_scope','actual_file_read','file_format','sha256'], semanticReview:'task_specific_business_rules_are_not_implied_by_file_integrity'};

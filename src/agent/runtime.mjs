@@ -20,7 +20,7 @@ import {readSavedResult,originalResult} from './result-reader.mjs';
 import {archiveContext,recordVisibleRequirements,recordContextRead,missingContextRequirements} from './context-archive.mjs';
 import {executionIntent,statusRequest,continuationRequirements,executionObjective,completionGap} from './task-intent.mjs';
 import {repeatedOutput} from './progress.mjs';
-import {workbookControls,workbookLabels,workbookProbe,workbookFiles,requestedSheetCount,workbookGuide} from './workbook-control.mjs';
+import {workbookControls,workbookLabels,workbookProbe,workbookFiles,requestedSheetCount,expectedTargetSheets,workbookGuide} from './workbook-control.mjs';
 
 const define=(name,description,properties,required=[])=>({type:'function',function:{name,description,parameters:{type:'object',properties,required,additionalProperties:false}}});
 const controls=[
@@ -169,6 +169,14 @@ export function createAgentRuntime({store,scheduler,mcpRunner,attachments,catalo
 
   /** Validate a send request and create the run record with its input snapshot. */
   function startRun(session,p,items,text,config) {
+    if(p.resumeOf&&p.answerProvided&&text){
+      // The question form submits one answer per open question; they are answered by this reply.
+      const asked=must('agentRuns',p.resumeOf);
+      if(asked.sessionId===session.id&&(asked.questions||[]).some(question=>question.status==='open')){
+        for(const question of asked.questions.filter(question=>question.status==='open'))Object.assign(question,{status:'answered',resolution:'用户在问题表单中回答',responseText:text,answeredAt:new Date().toISOString()});
+        store.put('agentRuns',asked);
+      }
+    }
     const selected=Array.isArray(p.projectFiles)?p.projectFiles.filter(file=>typeof file==='string').slice(0,200):[];
     const previousRuns=runsOf(session.id).slice(-20),requirements=new Map();
     for(const old of pendingRuns(previousRuns))for(const item of old.requirements || [])requirements.set(item.id,item);
@@ -192,7 +200,9 @@ export function createAgentRuntime({store,scheduler,mcpRunner,attachments,catalo
       if(run.requiresWorkbookOutput&&run.inputs.some(input=>/\.(xlsx|xlsm)$/i.test(input.path))){
         const prior=continuation?.workbook,hashes=new Map(run.inputs.map(input=>[path.normalize(input.workPath||input.path),input.sha256]));
         const compatible=prior?.prepared?.inputHashes?.every(input=>hashes.get(path.normalize(input.path))===input.sha256);
-        run.workbook=compatible?{...structuredClone(prior),phase:'ready',taskId:undefined}:{version:'workbook-plan/1',phase:'scope',facts:[],targetCount:requestedSheetCount(run.executionObjective)};
+        // A reply typed in the chat instead of the question form still revises the plan that was being written.
+        const draft=prior||pendingRuns(previousRuns).findLast(record=>record.workbook)?.workbook;
+        run.workbook=compatible?{...structuredClone(prior),phase:'ready',taskId:undefined}:{version:'workbook-plan/1',phase:'scope',facts:structuredClone(draft?.facts||[]),...(draft?.lastPlan?{lastPlan:structuredClone(draft.lastPlan)}:{}),targetCount:requestedSheetCount(run.executionObjective)};
       }
       run.inputVersion=digest(run.inputs.map(({id,sha256})=>({id,sha256})));save(run);
     }catch(error){run=transitionAgentRun(run,'failed',{node:'scope',reason:'资料快照失败',error:error.message,store});throw error;}
@@ -226,6 +236,39 @@ export function createAgentRuntime({store,scheduler,mcpRunner,attachments,catalo
       const defs=[...local.definitions,...controls,...legacyDefs],initialDefs=[...local.definitions,...controls,...deferredLegacyDefs];let waiting=false;
       const openQuestions=()=>[...new Map([...previousRuns,run].flatMap(record=>(record.questions||[]).filter(question=>question.status==='open')).map(question=>[question.id,question])).values()];
 
+      /** Validate a fill plan; plan defects go back to the model, business ambiguity becomes a question. */
+      const saveWorkbookPlan=async(args,attempt)=>{
+        const unresolved=openQuestions();
+        if(unresolved.length){
+          if(!hasAnswer){waiting=true;attempt('waiting_for_user');return {ok:false,status:'waiting_for_user',questions:unresolved};}
+          throw Error('先用 resolve_agent_questions 登记当前用户对这些问题的实际回答：'+JSON.stringify(unresolved.map(question=>({id:question.id,text:question.text}))));
+        }
+        const tool=catalog.find(tool=>tool.id==='workbook_fill');
+        const plan=resolveAuditParameters(run,tool,{plan:args.plan}).plan;
+        plan._userStatements=[...new Set([
+          ...run.requirements.filter(item=>item.source==='user').map(item=>item.text),
+          ...previousRuns.flatMap(record=>(record.questions||[]).filter(question=>question.status==='answered').map(question=>question.responseText)),
+        ].filter(Boolean))];
+        const files=workbookFiles(plan);
+        const captured=new Set(run.inputs.map(input=>path.normalize(input.workPath||input.path)));
+        const unknown=files.filter(file=>!captured.has(path.normalize(file)));
+        if(!files.length||unknown.length)throw Error('填写计划只能引用已保存的输入或已验证成果。'+(files.length?'无法识别的 file_path：'+unknown.join('、')+'。':'计划缺少 file_path。')+'可用引用（附件编号、文件名或工作路径均可）：'+JSON.stringify(run.inputs.filter(input=>/\.xls[xm]$/i.test(input.path)).slice(0,20).map(input=>({name:input.path,reference:input.reference||input.path}))));
+        const targetCount=run.workbook.targetCount??requestedSheetCount(run.executionObjective);
+        if(targetCount){
+          const inventory=await workbookProbe(workProject.root,[plan.file_path],'__workbook_read',{limit:1},controller.signal);
+          const expected=expectedTargetSheets(run.executionObjective,inventory.sheets,targetCount);
+          if(expected.length!==targetCount||!Array.isArray(plan.targetSheets)||!sameJson([...plan.targetSheets].sort(),[...expected].sort()))throw Error('本任务需要填写 '+expected.join('、')+'；计划的 targetSheets 不能遗漏、替换或增加目标工作表');
+        }
+        const prepared=await workbookProbe(workProject.root,files,'__workbook_validate',{plan},controller.signal);
+        // A plan defect goes back to the model to correct; only business ambiguity waits for the user.
+        if(prepared.status==='plan_revision'){run.workbook.planIssues=[...(run.workbook.planIssues||[]),{issue:prepared.issue,at:new Date().toISOString()}].slice(-20);attempt('plan_revision',{issue:prepared.issue,hint:prepared.hint});return {ok:false,status:'plan_revision',error:'填写计划未通过校验：'+prepared.issue,hint:prepared.hint,nextAction:'在上次提交的计划上只改这一处，再调用 save_workbook_plan；只有业务口径或资料确实缺失时才调用 ask_user_questions'};}
+        if(!prepared.ok){for(const text of prepared.questions||[])run=addAgentQuestion(run,{text,source:'workbook_validation'});run.workbook.phase='waiting_for_user';attempt('waiting_for_user',{questions:prepared.questions});waiting=true;save(run);return prepared;}
+        attempt('validated',{planHash:prepared.planHash});
+        run.workbook={...run.workbook,phase:'ready',plan,files,prepared,targetSheets:plan.targetSheets,taskId:undefined};
+        const result=handlers.set_agent_plan({workflowIds:['workpaper'],steps:[{id:'fill-workbook',toolId:'workbook_fill',stageId:'generate',files,parameters:{plan:JSON.stringify(plan),expectedPlanHash:prepared.planHash},dependsOn:[]}]});
+        save(run);return {...prepared,nextAction:{tool:'execute_workbook_plan',arguments:{planHash:prepared.planHash}},plan:result.plan};
+      };
+
       // ---- Control tools: each returns the JSON the model sees. ----
       const handlers={
         async read_workbook_range(args){
@@ -240,34 +283,12 @@ export function createAgentRuntime({store,scheduler,mcpRunner,attachments,catalo
         },
         async save_workbook_plan(args){
           if(!run.workbook||!workProject)throw Error('请先读取任务工作簿');
-          const unresolved=openQuestions();
-          if(unresolved.length){
-            if(!hasAnswer){waiting=true;save(run);return {ok:false,status:'waiting_for_user',questions:unresolved};}
-            throw Error('先用 resolve_agent_questions 登记当前用户对这些问题的实际回答：'+JSON.stringify(unresolved.map(question=>({id:question.id,text:question.text}))));
-          }
-          const tool=catalog.find(tool=>tool.id==='workbook_fill');
-          const plan=resolveAuditParameters(run,tool,{plan:args.plan}).plan;
-          plan._userStatements=[...new Set([
-            ...run.requirements.filter(item=>item.source==='user').map(item=>item.text),
-            ...previousRuns.flatMap(record=>(record.questions||[]).filter(question=>question.status==='answered').map(question=>question.responseText)),
-          ].filter(Boolean))];
-          const files=workbookFiles(plan);
-          const captured=new Set(run.inputs.map(input=>path.normalize(input.workPath||input.path)));
-          const unknown=files.filter(file=>!captured.has(path.normalize(file)));
-          if(!files.length||unknown.length)throw Error('填写计划只能引用已保存的输入或已验证成果。'+(files.length?'无法识别的 file_path：'+unknown.join('、')+'。':'计划缺少 file_path。')+'可用引用（附件编号、文件名或工作路径均可）：'+JSON.stringify(run.inputs.filter(input=>/\.xls[xm]$/i.test(input.path)).slice(0,20).map(input=>({name:input.path,reference:input.reference||input.path}))));
-          const targetCount=run.workbook.targetCount??requestedSheetCount(run.executionObjective);
-          if(targetCount){
-            const inventory=await workbookProbe(workProject.root,[plan.file_path],'__workbook_read',{limit:1},controller.signal);
-            const expected=inventory.sheets.slice(0,targetCount).map(sheet=>sheet.name);
-            if(expected.length!==targetCount||!sameJson(plan.targetSheets,expected))throw Error('本任务需要填写 '+expected.join('、')+'；计划不能遗漏、替换或增加目标工作表');
-          }
-          const prepared=await workbookProbe(workProject.root,files,'__workbook_validate',{plan},controller.signal);
-          // A plan defect goes back to the model to correct; only business ambiguity waits for the user.
-          if(prepared.status==='plan_revision'){run.workbook.planIssues=[...(run.workbook.planIssues||[]),{issue:prepared.issue,at:new Date().toISOString()}].slice(-20);save(run);return {ok:false,status:'plan_revision',error:'填写计划未通过校验：'+prepared.issue,hint:prepared.hint,nextAction:'修订计划后重新调用 save_workbook_plan；只有业务口径或资料确实缺失时才调用 ask_user_questions'};}
-          if(!prepared.ok){for(const text of prepared.questions||[])run=addAgentQuestion(run,{text,source:'workbook_validation'});run.workbook.phase='waiting_for_user';waiting=true;save(run);return prepared;}
-          run.workbook={...run.workbook,phase:'ready',plan,files,prepared,targetSheets:plan.targetSheets,taskId:undefined};
-          const result=handlers.set_agent_plan({workflowIds:['workpaper'],steps:[{id:'fill-workbook',toolId:'workbook_fill',stageId:'generate',files,parameters:{plan:JSON.stringify(plan),expectedPlanHash:prepared.planHash},dependsOn:[]}]});
-          save(run);return {...prepared,nextAction:{tool:'execute_workbook_plan',arguments:{planHash:prepared.planHash}},plan:result.plan};
+          // Some services send the plan object as JSON text.
+          const given=parameterObject(args.plan);
+          if(!given||typeof given!=='object'||Array.isArray(given))throw Error('plan 必须是填写计划对象');
+          // The validated plan is kept in workbook.plan; failed attempts keep their own copy to revise.
+          const attempt=(status,detail={})=>{const {_userStatements,...plan}=given;run.workbook.lastPlan={...(status==='validated'?{}:{plan}),status,...detail,at:new Date().toISOString()};save(run);};
+          try{return await saveWorkbookPlan({...args,plan:given},attempt);}catch(error){attempt('rejected',{error:error.message});throw error;}
         },
         async execute_workbook_plan(args,callId){
           const book=run.workbook;
@@ -295,10 +316,12 @@ export function createAgentRuntime({store,scheduler,mcpRunner,attachments,catalo
         resolve_agent_questions(args){
           if(!Array.isArray(args.ids)||!args.ids.length||typeof args.resolution!=='string'||!args.resolution.trim())throw Error('问题解决需要问题编号和实际依据');
           if(!hasAnswer)throw Error('问题解决需要当前用户回答或新增资料作为依据；“继续”之类的回复不能代替缺失资料');
-          const records=[...previousRuns,run],questions=args.ids.map(id=>records.flatMap(record=>(record.questions || []).map(question=>({record,question}))).find(item=>item.question.id===id&&item.question.status==='open'));
-          if(questions.some(item=>!item))throw Error('问题不存在或已经解决');
+          const records=[...previousRuns,run],known=args.ids.map(id=>records.flatMap(record=>(record.questions || []).map(question=>({record,question}))).find(item=>item.question.id===id));
+          if(known.some(item=>!item))throw Error('问题不存在：'+args.ids.filter((id,index)=>!known[index]).join('、'));
+          // Answers given in the question form are already recorded; registering them again is harmless.
+          const questions=known.filter(item=>item.question.status==='open');
           for(const {record,question} of questions){question.status='answered';question.resolution=args.resolution;question.responseText=text;question.userEventId=user.id;question.answerInputRefs=run.inputs.filter(input=>input.source==='attachment').map(input=>input.id);question.answeredAt=new Date().toISOString();store.put('agentRuns',record);}
-          return {ok:true,resolvedQuestions:args.ids};
+          return {ok:true,resolvedQuestions:args.ids,...(questions.length<known.length?{alreadyAnswered:known.filter(item=>item.question.status==='answered'&&!questions.includes(item)).map(item=>item.question.id)}:{})};
         },
         read_agent_result(args){
           return readSavedResult(store,session.id,args);
