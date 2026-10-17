@@ -272,8 +272,11 @@ export class AppStore {
   openSheet(file: string, opts: { task?: string; mode?: SheetMode; title?: string; sheet?: string; select?: { row: number; col: number }; focusRegion?: string | null } = {}) {
     let tab = this.findSheetTab(file);
     if (!tab) {
+      // 成果就绪后标签换成了成果文件，编号还是底稿的；同一份底稿再开一个任务时另起编号
+      let id = `sheet:${file}`;
+      for (let n = 2; this.snap.ui.tabs.some((t) => t.id === id); n++) id = `sheet:${file}#${n}`;
       tab = {
-        id: `sheet:${file}`,
+        id,
         kind: "sheet",
         title: opts.title ?? this.fileName(file),
         file,

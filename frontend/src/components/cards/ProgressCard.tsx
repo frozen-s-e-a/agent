@@ -6,6 +6,7 @@ import {
   LoadingOutlined,
   MinusCircleOutlined,
   MoreOutlined,
+  PlayCircleOutlined,
   RedoOutlined,
   RightOutlined,
 } from "@ant-design/icons";
@@ -19,6 +20,7 @@ import { nodeLabel, type TaskState } from "../../store/reduce";
 
 const STATUS: Record<TaskStatus, { label: string; color: string }> = {
   running: { label: "进行中", color: "processing" },
+  paused: { label: "已中断", color: "warning" },
   completed: { label: "已完成", color: "success" },
   partial: { label: "部分完成", color: "warning" },
   cancelled: { label: "已停止", color: "default" },
@@ -55,6 +57,10 @@ export function ProgressCard({ task }: { task: TaskState }) {
   const current = [...task.nodes].reverse().find((n) => !n.finishedAt);
   const idle = running && now - Date.parse(task.lastEventAt) > IDLE_MS;
 
+  const stalled = task.status === "blocked" || task.status === "paused";
+  const resume = () =>
+    store.host.request("task.resume", { task: task.task }).catch((e: Error) => Modal.error({ title: "没能继续", content: e.message }));
+
   const rerun = (region?: string) => {
     let note = "";
     Modal.confirm({
@@ -83,10 +89,12 @@ export function ProgressCard({ task }: { task: TaskState }) {
           trigger={["click"]}
           menu={{
             items: [
+              ...(stalled ? [{ key: "resume", icon: <PlayCircleOutlined />, label: "从检查点继续" }] : []),
               { key: "rerun", icon: <RedoOutlined />, label: "改口径后重跑…", disabled: running && !task.finishedAt && regions.length === 0 },
               { key: "cancel", icon: <MinusCircleOutlined />, label: "停止任务", danger: true, disabled: !running },
             ],
             onClick: ({ key }) => {
+              if (key === "resume") resume();
               if (key === "rerun") rerun();
               if (key === "cancel")
                 Modal.confirm({
@@ -154,8 +162,13 @@ export function ProgressCard({ task }: { task: TaskState }) {
         )}
         {task.blocked && (
           <div className="danger-text">
-            卡在 {task.blocked.where}：{task.blocked.why}
+            卡在{STAGES.find((s) => s.stage === task.blocked?.where)?.label ?? ` ${task.blocked.where}`}：{task.blocked.why}
             {task.blocked.suggest && <div className="muted">建议：{task.blocked.suggest}</div>}
+            {stalled && (
+              <Button size="small" icon={<PlayCircleOutlined />} style={{ marginTop: 6 }} onClick={resume}>
+                从检查点继续
+              </Button>
+            )}
           </div>
         )}
 

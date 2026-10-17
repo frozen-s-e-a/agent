@@ -20,6 +20,19 @@ export class HostError extends Error {
 }
 
 const now = () => new Date().toISOString()
+const quoteSheet = name => (/^[\p{L}\p{N}_]+$/u.test(name) ? name : `'${name.replace(/'/g, "''")}'`)
+const unquoteSheet = name => (/^'.*'$/.test(name) ? name.slice(1, -1).replace(/''/g, "'") : name)
+
+/** 拟写值的显示文字：数值按单元格格式的小数位加千分位。 */
+function planText(value, valueType, numFmt) {
+  if (value === null || value === undefined) return ''
+  if (valueType !== 'number' || !/^-?\d+(\.\d+)?$/.test(String(value))) return String(value)
+  const percent = /%/.test(numFmt ?? '')
+  const decimals = (/0\.(0+)/.exec(numFmt ?? '')?.[1].length) ?? (percent ? 0 : 2)
+  const n = Number(value) * (percent ? 100 : 1)
+  const text = Math.abs(n).toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return (n < 0 ? '-' : '') + text + (percent ? '%' : '')
+}
 const EXCEL = /\.(xlsx|xlsm)$/i
 const TABLE_FILE = /\.(xlsx|xlsm|csv)$/i
 
@@ -88,6 +101,8 @@ export class AppHost {
     const promise = (async () => {
       if (this.starting) await this.starting.promise.catch(() => {})
       await this.stopHarness()
+      // 上一个进程退出后的收尾（撤回卡片、任务标为中断）做完再起新进程
+      await this.draining
       if (!this.modelReady()) throw new HostError('ENV_MODEL', '模型还没连上，先到设置里连接模型')
       const p = this.store.project(project)
       if (!p) throw new HostError('REF_PROJECT', `没有项目 ${project}`)
@@ -105,18 +120,23 @@ export class AppHost {
         patches: [...(this.options.patches ?? []), ...(patch ? [patch] : [])],
         env: { ...patchEnv(settings.mcp, this.store.secrets), ...this.options.harnessEnv },
       })
-      proc.on('notification', (method, params) => this.onHarness(project, method, params))
+      // 通知按到达顺序逐条处理：有的要先向编排插件取号（ids/allocate），后面的通知等它处理完
+      proc.queue = Promise.resolve()
+      proc.on('notification', (method, params) => {
+        proc.queue = proc.queue.then(() => this.onHarness(project, method, params)).catch(error => console.error(`[host] ${method}:`, error))
+      })
       proc.on('exit', ({ code, signal, stderr }) => {
         if (this.active?.proc === proc) this.active = null
         const reason = code === 0 ? 'Harness 已退出' : `Harness 进程意外退出（${signal ?? code}）`
-        for (const c of this.conversations.values()) if (c.project === project) c.harnessGone(reason)
-        this.saveState(project)
         if (code !== 0 && !proc.stopping) console.error(`[host] Harness exited (${signal ?? code})\n${stderr.slice(-2000)}`)
+        proc.queue = proc.queue.then(() => this.harnessGone(project, reason)).catch(error => console.error('[host] exit:', error))
+        this.draining = proc.queue
       })
       await proc.start()
       this.active = { project, proc }
       this.lastBridgeStatus = await proc.request('bridge/status', {}).catch(() => null)
       this.lastBridgeStatus && (this.lastBridgeStatus.at = now())
+      await this.syncTasks(project, proc)
       return proc
     })()
     this.starting = { project, promise }
@@ -143,21 +163,74 @@ export class AppHost {
     if (project && this.modelReady()) this.harnessFor(project).catch(() => {})
   }
 
-  onHarness(project, method, params) {
-    const conv = params.sessionId ? this.conversations.get(params.sessionId) : undefined
+  /** Harness 进程没了：进行中的回复结束、未答的卡撤回；在跑的任务标为中断，等用户从检查点继续。 */
+  harnessGone(project, reason) {
+    for (const c of this.conversations.values()) if (c.project === project) c.harnessGone(reason)
+    for (const t of this.store.state(project).tasks) {
+      if (t.status !== 'running') continue
+      const conv = this.convOf(t.session)
+      conv?.emit('task.blocked', { where: t.stage ?? 'understand', why: '应用重启或切换了项目，任务中断', suggest: '继续任务' }, t.task)
+    }
+    this.saveState(project)
+  }
+
+  /**
+   * Harness 启动后对一遍任务状态：编排插件把上次没跑完的任务标为暂停（paused），
+   * 宿主这边还记着“进行中”的，补一条 task.blocked，前端据此显示“从检查点继续”。
+   */
+  async syncTasks(project, proc) {
+    const list = await proc.request('task/list', {}).catch(() => null)
+    if (!Array.isArray(list)) return
+    const state = this.store.state(project)
+    for (const item of list) {
+      const t = state.tasks.find(x => x.task === item.task)
+      if (!t) continue
+      if (t.status === 'running' && ['paused', 'blocked'].includes(item.status)) {
+        const snap = await proc.request('task/get', { task: item.task }).catch(() => null)
+        const blocked = snap?.blocked ?? { where: t.stage ?? 'understand', why: '应用重启，任务中断', suggest: '继续任务' }
+        this.convOf(t.session)?.emit('task.blocked', blocked, t.task)
+      }
+    }
+    this.saveState(project)
+  }
+
+  /** 项目内唯一的 C-、O- 号：从编排插件的项目计数取（接口约定 2.1）。Harness 不在时退回宿主自己的序号。 */
+  async allocate(project, prefix) {
+    const proc = this.active?.project === project ? this.active.proc : null
+    if (proc && !proc.closed) {
+      try {
+        return (await proc.request('ids/allocate', { prefix })).id
+      } catch {}
+    }
+    const n = this.store.next(project, prefix === 'C' ? 'card' : 'output')
+    return `${prefix}-h${String(n).padStart(prefix === 'C' ? 3 : 4, '0')}`
+  }
+
+  /** 按会话编号找对话；后台任务的事件可能在对话还没加载时到达。 */
+  convOf(sessionId) {
+    if (!sessionId) return undefined
+    try {
+      return this.conversation(sessionId)
+    } catch {
+      return undefined
+    }
+  }
+
+  async onHarness(project, method, params) {
+    const conv = this.convOf(params.sessionId)
     switch (method) {
       case 'session.event':
-        conv?.onSessionEvent(params.event)
+        await conv?.onSessionEvent(params.event)
         if (params.event?.type === 'turn/end' && conv) this.saveState(conv.project)
         return
       case 'assistant.stream':
         conv?.onStream(params.frame)
         return
       case 'approval.request':
-        conv?.onApproval(params)
+        await conv?.onApproval(params)
         return
       case 'question.request':
-        conv?.onQuestion(params)
+        await conv?.onQuestion(params)
         return
       case 'approval.closed':
       case 'question.closed':
@@ -168,13 +241,27 @@ export class AppHost {
         conv?.emit('card.opened', { ...params.card, session: params.sessionId }, params.card.task)
         return
       case 'card.closed':
-        conv?.emit('card.closed', params.withdrawn ? { card: params.card, withdrawn: true } : { card: params.card, answer: params.answer })
+        // 宿主已经撤回过的卡（进程退出时），编排插件续跑时会再撤回一次，不重复推
+        if (!conv?.open.has(params.card)) return
+        conv.emit('card.closed', params.withdrawn ? { card: params.card, withdrawn: true } : { card: params.card, answer: params.answer }, params.task)
         return
-      case 'audit.event':
-        // 编排插件的流程事件（task.*、stage.*、node.*、region.state、check.result、output.ready …）。
-        // 桥接插件还没有这条通知，格式见 app-host/README.md「还缺的」。
-        if (conv && params.event?.type) conv.emit(params.event.type, params.event.data ?? {}, params.event.task)
+      case 'task.event': {
+        // 编排插件的流程事件（4.2）：宿主补 seq 和外层信封；task.created 补 project、message、文件名
+        if (!conv || !params.type) return
+        let data = params.data ?? {}
+        if (params.type === 'task.created') {
+          const files = this.store.state(project).files
+          data = {
+            ...data,
+            project,
+            message: data.message ?? conv.lastUserMessage,
+            files: (data.files ?? []).map(f => ({ ...f, name: f.name ?? files.find(x => x.file === f.file)?.name ?? f.file })),
+          }
+        }
+        conv.emit(params.type, data, params.task)
+        if (['task.created', 'task.finished', 'task.blocked', 'output.ready'].includes(params.type)) this.saveState(project)
         return
+      }
     }
   }
 
@@ -198,36 +285,73 @@ export class AppHost {
     this.store.saveState(project)
   }
 
-  /** 编排插件的任务事件累积成 task.get / task.list 的快照（4.4）。 */
+  /**
+   * 任务事件累积成本地快照（4.4）。Harness 在跑时 task.get 以编排插件的快照为准，
+   * 这份用于 Harness 不在时的 task.list / session.get，以及表格叠加（底稿区域、写入计划）。
+   */
   trackTask(conv, event) {
     if (!event.task) return
     const state = this.store.state(conv.project)
     let t = state.tasks.find(x => x.task === event.task)
     if (!t) {
       if (event.type !== 'task.created') return
-      t = { task: event.task, session: conv.id, status: 'running', stage: 'understand', deliverables: event.data.deliverables ?? [], regions: [], openCards: [], outputs: [], createdAt: event.ts }
+      t = { task: event.task, session: conv.id, status: 'running', stage: null, blocked: null, text: event.data.text, deliverables: [], regions: [], openCards: [], outputs: [], createdAt: event.ts, finishedAt: null, workpaper: null, plan: null, layout: {} }
       state.tasks.push(t)
     }
     t.lastSeq = event.seq
+    // 中断或阻塞后又有进展（从检查点继续、重跑）：回到进行中
+    if (['paused', 'blocked'].includes(t.status) && ['stage.changed', 'node.started', 'region.state', 'task.rerun'].includes(event.type)) {
+      t.status = 'running'
+      t.blocked = null
+    }
+    const d = event.data
     switch (event.type) {
-      case 'stage.changed': t.stage = event.data.stage; break
-      case 'region.state': {
-        const r = t.regions.find(x => x.region === event.data.region)
-        if (r) Object.assign(r, event.data)
-        else t.regions.push({ ...event.data })
-        break
-      }
-      case 'card.opened': t.openCards.push(event.data.card); break
-      case 'card.closed': t.openCards = t.openCards.filter(c => c !== event.data.card); break
-      case 'output.ready':
-        t.outputs.push(event.data.output)
-        if (!state.outputs.some(o => o.output === event.data.output)) {
-          state.outputs.push({ output: event.data.output, file: event.data.file, name: path.basename(event.data.file), kind: event.data.kind, session: conv.id, task: event.task, checks: event.data.checks, at: event.ts })
+      case 'task.understood': t.deliverables = d.deliverables ?? []; break
+      case 'stage.changed': t.stage = d.stage; break
+      case 'node.finished':
+        for (const ref of d.refs ?? []) {
+          if (ref.startsWith('W-')) t.workpaper = ref
+          if (ref.startsWith('FP-')) t.plan = ref
         }
         break
-      case 'task.blocked': t.status = 'blocked'; break
-      case 'task.finished': t.status = event.data.status; t.finishedAt = event.ts; break
-      case 'task.rerun': t.status = 'running'; break
+      case 'region.state': {
+        const r = t.regions.find(x => x.region === d.region)
+        if (r) Object.assign(r, d)
+        else t.regions.push({ ...d })
+        break
+      }
+      case 'card.opened':
+        t.openCards.push(d.card)
+        // 底稿理解卡里有各区域的范围和用途，sheet.view 叠加区域时用
+        if (d.kind === 'workpaper_understanding' && d.body?.workpaper) {
+          t.layout ??= {}
+          t.layout[d.body.workpaper] = (d.body.regions ?? []).map(r => ({ region: r.region, range: r.range, type: r.type, purpose: r.purpose, manual: r.manual ?? [] }))
+        }
+        break
+      case 'card.closed': {
+        t.openCards = t.openCards.filter(c => c !== d.card)
+        const opened = conv.log.find(e => e.type === 'card.opened' && e.data.card === d.card)
+        if (opened?.data.kind === 'workpaper_understanding' && d.answer?.edits?.regions) {
+          const layout = t.layout?.[opened.data.body.workpaper] ?? []
+          for (const edit of d.answer.edits.regions) {
+            const r = edit.region && layout.find(x => x.region === edit.region)
+            if (r) Object.assign(r, Object.fromEntries(['range', 'type', 'purpose'].filter(k => edit[k] !== undefined).map(k => [k, edit[k]])))
+          }
+        }
+        break
+      }
+      case 'output.ready':
+        t.outputs.push(d.output)
+        if (!state.outputs.some(o => o.output === d.output)) {
+          state.outputs.push({ output: d.output, file: d.file, name: path.basename(d.file), kind: d.kind, session: conv.id, task: event.task, checks: d.checks, at: event.ts })
+        }
+        break
+      case 'task.blocked': t.status = 'blocked'; t.blocked = d; break
+      case 'task.finished':
+        t.status = d.status
+        t.finishedAt = event.ts
+        if (d.deliverables) t.deliverables = d.deliverables
+        break
     }
   }
 
@@ -450,7 +574,7 @@ export class AppHost {
     },
     'session.get'(p) {
       const conv = this.conversation(p.session)
-      const tasks = this.store.state(conv.project).tasks.filter(t => t.session === p.session)
+      const tasks = this.store.state(conv.project).tasks.filter(t => t.session === p.session).map(t => this.taskSnapshot(t))
       return { session: p.session, title: conv.rec.title, tasks, openCards: [...conv.open.values()], lastSeq: conv.seq }
     },
     'session.rename'(p) {
@@ -508,39 +632,60 @@ export class AppHost {
       return { accepted: true }
     },
 
-    // ---------- 底稿任务：由编排插件推进，这里只按事件给快照 ----------
-    'task.list'(p) {
-      return { tasks: this.store.state(p.project).tasks.map(t => this.taskSnapshot(t)) }
+    // ---------- 底稿任务：由编排插件推进（task/* 请求，接口约定 1.2） ----------
+    async 'task.list'(p) {
+      const tasks = this.store.state(p.project).tasks
+      const live = this.active?.project === p.project && !this.active.proc.closed ? await this.active.proc.request('task/list', {}).catch(() => null) : null
+      return {
+        tasks: tasks.map((t) => {
+          const l = live?.find(x => x.task === t.task)
+          // 编排插件那边的 paused 是“应用退出时中断”，宿主已经按 task.blocked 推给前端，这里保持一致
+          return { ...this.taskSnapshot(t), ...(l ? { status: l.status === 'paused' && t.status === 'blocked' ? 'blocked' : l.status, deliverables: l.deliverables, finishedAt: l.finishedAt } : {}) }
+        }),
+      }
     },
-    'task.get'(p) {
-      return this.taskSnapshot(this.findTask(p.task))
+    async 'task.get'(p) {
+      const { project, task } = this.findTask(p.task)
+      if (this.active?.project === project && !this.active.proc.closed) {
+        const snap = await this.active.proc.request('task/get', { task: p.task }).catch(() => null)
+        if (snap) return { ...snap, status: snap.status === 'paused' && task.status === 'blocked' ? 'blocked' : snap.status, lastSeq: task.lastSeq ?? 0 }
+      }
+      return this.taskSnapshot(task)
     },
     'task.events'(p) {
-      const t = this.findTask(p.task)
-      return { events: this.conversation(t.session).log.filter(e => e.task === p.task && e.seq > (p.after ?? 0)) }
+      const { task } = this.findTask(p.task)
+      return { events: this.conversation(task.session).log.filter(e => e.task === p.task && e.seq > (p.after ?? 0)) }
     },
     async 'task.create'(p) {
-      await this.commands['message.send'].call(this, { session: p.session, text: p.text, files: p.files })
-      throw new HostError('ENV_NOT_READY', '底稿任务由编排插件登记，任务编号随 task.created 推送')
+      const conv = this.conversation(p.session)
+      if (!p.text?.trim()) throw new HostError('ARG_TEXT', '任务说明不能为空')
+      const harness = await this.harnessFor(conv.project)
+      const state = this.store.state(conv.project)
+      const files = (p.files ?? []).map((id) => {
+        const f = state.files.find(x => x.file === id)
+        if (!f) throw new HostError('REF_FILE', `没有资料 ${id}`)
+        return { file: id, name: f.name }
+      })
+      if (conv.rec.title === '新对话') conv.rec.title = p.text.replace(/\s+/g, ' ').slice(0, 20)
+      const { task } = await this.taskRequest(harness, 'task/create', { sessionId: conv.id, text: p.text, files, ...(p.message ? { message: p.message } : {}) })
+      return { task }
     },
     async 'task.message'(p) {
-      // 编排插件接手前，补充的话作为普通消息发给 Agent
-      const t = this.findTask(p.task)
-      const conv = this.conversation(t.session)
-      conv.emit('user.message', { text: p.text, regions: [] }, p.task)
-      await this.commands['message.send'].call(this, { session: t.session, text: p.text })
-      return { accepted: true }
+      const { harness } = await this.taskHarness(p.task)
+      const r = await this.taskRequest(harness, 'task/message', { task: p.task, text: p.text })
+      return { accepted: true, ...r }
     },
     async 'task.cancel'(p) {
-      const t = this.findTask(p.task)
-      await this.commands['message.stop'].call(this, { session: t.session })
-      return { cancelled: true }
+      const { harness } = await this.taskHarness(p.task)
+      return this.taskRequest(harness, 'task/cancel', { task: p.task })
     },
-    'task.resume'() {
-      throw new HostError('ENV_NOT_READY', '从检查点继续要等编排插件')
+    async 'task.resume'(p) {
+      const { harness } = await this.taskHarness(p.task)
+      return this.taskRequest(harness, 'task/resume', { task: p.task })
     },
-    'task.rerun'() {
-      throw new HostError('ENV_NOT_READY', '重跑要等编排插件')
+    async 'task.rerun'(p) {
+      const { harness } = await this.taskHarness(p.task)
+      return this.taskRequest(harness, 'task/rerun', { task: p.task, scope: p.scope ?? {}, ...(p.note ? { note: p.note } : {}) })
     },
 
     // ---------- 表格 ----------
@@ -548,17 +693,32 @@ export class AppHost {
       const project = this.projectOfFile(p.file)
       const file = this.resolveFile(project, p.file)
       if (!TABLE_FILE.test(file)) throw new HostError('ARG_FILE', '只能打开 Excel 或 CSV 文件')
-      return this.sheets.call('sheet.view', { path: file, sheet: p.sheet, range: p.range })
+      const view = await this.sheets.call('sheet.view', { path: file, sheet: p.sheet, range: p.range })
+      if (p.overlay) await this.overlay(project, view, p.overlay)
+      return view
     },
     async 'table.view'(p) {
-      if (!/^[FO]-/.test(p.table)) throw new HostError('REF_TABLE', '资料表和结果表要等审计工具线的 table_view')
+      if (/^[DR]-/.test(p.table)) {
+        // 资料表、结果表：审计工具的 table_view
+        const project = this.active?.project
+        if (!project) throw new HostError('REF_TABLE', `没有表 ${p.table}`)
+        const harness = await this.harnessFor(project)
+        return this.auditTool(harness, 'table_view', { table: p.table, offset: p.offset ?? 0, limit: p.limit ?? 200, ...(p.locate !== undefined ? { locate: p.locate } : {}), ...(p.columns ? { columns: p.columns } : {}) })
+      }
+      if (!/^[FO]-/.test(p.table)) throw new HostError('REF_TABLE', `没有表 ${p.table}`)
       const project = this.projectOfFile(p.table)
       const file = this.resolveFile(project, p.table)
       const view = await this.sheets.call('table.view', { path: file, file: p.table, offset: p.offset, limit: p.limit, locate: p.locate })
       return { table: p.table, title: path.basename(file), ...view }
     },
-    'cell.trace'() {
-      throw new HostError('ENV_NOT_READY', '单元格来源要等审计工具线的 trace_cell')
+    async 'cell.trace'(p) {
+      const project = this.projectOfFile(p.output)
+      const rec = this.store.state(project).outputs.find(o => o.output === p.output)
+      if (!rec) throw new HostError('REF_FILE', `没有产出 ${p.output}`)
+      if (!rec.task) return { cell: p.cell, value: null, from: null }
+      const harness = await this.harnessFor(project)
+      const sheet = p.cell.includes('!') ? '' : (p.sheet ? quoteSheet(p.sheet) + '!' : '')
+      return this.auditTool(harness, 'trace_cell', { output: rec.file, cell: sheet + p.cell })
     },
 
     // ---------- 外部 MCP 服务 ----------
@@ -671,14 +831,92 @@ export class AppHost {
 
   findTask(id) {
     for (const p of this.store.projects) {
-      const t = this.store.state(p.project).tasks.find(x => x.task === id)
-      if (t) return t
+      const task = this.store.state(p.project).tasks.find(x => x.task === id)
+      if (task) return { project: p.project, task }
     }
     throw new HostError('REF_TASK', `没有任务 ${id}`)
   }
 
+  async taskHarness(id) {
+    const { project, task } = this.findTask(id)
+    return { project, task, harness: await this.harnessFor(project) }
+  }
+
+  /** 编排插件的请求：参数错误（-32602）转成前端看得懂的错误。 */
+  async taskRequest(harness, method, params) {
+    try {
+      return await harness.request(method, params)
+    } catch (error) {
+      if (error.code === -32602) throw new HostError(/unknown task/.test(error.message) ? 'REF_TASK' : 'ARG_INVALID', error.message)
+      if (error.code === -32601) throw new HostError('ENV_NOT_READY', '编排插件没有加载')
+      throw error
+    }
+  }
+
+  /** 宿主专用的审计工具（audit/tool）：成功返回 data，失败按工具的错误码抛出。 */
+  async auditTool(harness, name, args) {
+    const env = await this.taskRequest(harness, 'audit/tool', { name, arguments: args })
+    if (!env?.ok) throw new HostError(env?.error?.code ?? 'TOOL_FAILED', env?.error?.message ?? `${name} 失败`)
+    return env.data
+  }
+
   taskSnapshot(t) {
-    return { task: t.task, status: t.status, stage: t.stage, lastSeq: t.lastSeq ?? 0, deliverables: t.deliverables, regions: t.regions, openCards: t.openCards, outputs: t.outputs }
+    return { task: t.task, session: t.session, status: t.status, blocked: t.blocked ?? null, stage: t.stage, lastSeq: t.lastSeq ?? 0, deliverables: t.deliverables, regions: t.regions, openCards: t.openCards, outputs: t.outputs, createdAt: t.createdAt, finishedAt: t.finishedAt ?? null }
+  }
+
+  /**
+   * sheet.view 的叠加（4.5）：
+   * - workpaper：区域范围、用途、人工格取自底稿理解卡（含用户的修改），状态取自任务的 region.state；
+   * - plan：fill_preview 的拟写值；
+   * - output：产出文件里由任务写入的格，按产出所属任务的写入计划标出。
+   * 依赖拟写格的公式重算要本机 Excel，浏览器开发版不做，这些格不带 plan。
+   */
+  async overlay(project, view, overlay) {
+    const tasks = this.store.state(project).tasks
+    const onSheet = (ref) => {
+      const i = String(ref).lastIndexOf('!')
+      if (i < 0) return ref
+      return unquoteSheet(ref.slice(0, i)) === view.sheet ? ref.slice(i + 1) : null
+    }
+    if (overlay.workpaper) {
+      const t = [...tasks].reverse().find(x => x.layout?.[overlay.workpaper])
+      const regions = []
+      for (const r of t?.layout[overlay.workpaper] ?? []) {
+        const range = onSheet(r.range)
+        if (!range || r.type === 'none') continue
+        const state = t.regions.find(x => x.region === r.region)?.state ?? 'pending'
+        regions.push({ region: r.region, range, type: r.type, purpose: r.purpose, manual: (r.manual ?? []).map(onSheet).filter(Boolean), state })
+      }
+      view.overlay = { ...view.overlay, regions }
+    }
+    const plan = overlay.plan ?? (overlay.output ? tasks.find(t => t.task === this.store.state(project).outputs.find(o => o.output === overlay.output)?.task)?.plan : null)
+    if (!plan) return
+    let preview
+    try {
+      const harness = await this.harnessFor(project)
+      preview = await this.auditTool(harness, 'fill_preview', { plan, range: `${quoteSheet(view.sheet)}!${view.range}` })
+    } catch (error) {
+      // 叠加拿不到时照常显示表格
+      console.error('[host] fill_preview:', error.message)
+      return
+    }
+    const byCell = new Map(view.cells.map(c => [c.cell, c]))
+    const task = tasks.find(t => t.plan === plan)?.task
+    for (const p of preview?.cells ?? []) {
+      const cell = onSheet(p.cell)
+      if (!cell) continue
+      let c = byCell.get(cell)
+      if (!c) {
+        c = { cell, value: null, valueType: 'blank', text: '', formula: null }
+        view.cells.push(c)
+        byCell.set(cell, c)
+      }
+      if (overlay.output) {
+        if (!p.manual && p.from) c.written = { from: p.from, ...(task ? { task } : {}) }
+      } else {
+        c.plan = p.manual ? { manual: true } : { value: p.value, text: planText(p.value, p.valueType, c.numFmt), from: p.from, overwrite: Boolean(p.overwrite) }
+      }
+    }
   }
 
   checkMcpName(name) {
@@ -722,6 +960,7 @@ export class AppHost {
   async close() {
     await this.mcpReady
     await this.stopHarness()
+    await this.draining
     this.sheets.stop()
   }
 }

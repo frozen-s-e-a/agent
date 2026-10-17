@@ -27,7 +27,8 @@ export type RegionState =
   | "failed"
   | "skipped";
 
-export type TaskStatus = "running" | "completed" | "partial" | "cancelled" | "failed" | "blocked";
+/** paused：应用退出时中断，等“从检查点继续” */
+export type TaskStatus = "running" | "paused" | "completed" | "partial" | "cancelled" | "failed" | "blocked";
 
 // ---------- 4.1 事件信封 ----------
 

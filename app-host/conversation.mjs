@@ -80,9 +80,12 @@ export class Conversation {
     this.hostCards = new Map()
     /** 未关闭的卡片编号 → 卡片 */
     this.open = new Map()
+    /** 最近一条用户消息（对话中登记的任务，task.created 的 message 由宿主补） */
+    this.lastUserMessage = null
     for (const e of this.log) {
       if (e.type === 'card.opened') this.open.set(e.data.card, e.data)
       if (e.type === 'card.closed') this.open.delete(e.data.card)
+      if (e.type === 'message.created') this.lastUserMessage = e.data.message
     }
   }
 
@@ -110,6 +113,7 @@ export class Conversation {
 
   userMessage(text, files) {
     const message = 'M-' + pad(this.host.store.next(this.project, 'message'))
+    this.lastUserMessage = message
     this.emit('message.created', { message, text, ...(files?.length ? { files } : {}) })
     if (this.rec.title === '新对话') this.rec.title = clip(text.replace(/\s+/g, ' '), 20)
     return message
@@ -161,7 +165,7 @@ export class Conversation {
     this.emit('message.delta', { message: turn.message, text })
   }
 
-  onSessionEvent(event) {
+  async onSessionEvent(event) {
     switch (event.type) {
       case 'turn/start':
         this.beginTurn()
@@ -198,7 +202,7 @@ export class Conversation {
         if (!info) return
         info.finished = true
         const { ok, summary, paths } = readEnvelope(message)
-        const refs = ok ? this.registerOutputs(paths) : []
+        const refs = ok ? await this.registerOutputs(paths) : []
         if (this.turn) this.turn.refs.push(...refs)
         this.emit('tool.finished', { call: callId, ok, resultSummary: summary, refs, durationMs: Date.now() - info.startedAt })
         return
@@ -212,8 +216,8 @@ export class Conversation {
     }
   }
 
-  /** 工具产出的文件登记为对话产出（4.9），推送 output.ready。 */
-  registerOutputs(paths) {
+  /** 工具产出的文件登记为对话产出（4.9），推送 output.ready。O- 号从编排插件的项目计数取。 */
+  async registerOutputs(paths) {
     const root = this.host.store.project(this.project).folder
     const state = this.host.store.state(this.project)
     const ids = []
@@ -227,7 +231,7 @@ export class Conversation {
         ids.push(known.output)
         continue
       }
-      const output = 'O-' + pad(this.host.store.next(this.project, 'output'))
+      const output = await this.host.allocate(this.project, 'O')
       const kind = OUTPUT_KIND[path.extname(norm).toLowerCase()] ?? 'other'
       const rec = { output, file: norm, name: path.basename(norm), kind, session: this.id, at: now() }
       state.outputs.push(rec)
@@ -239,8 +243,8 @@ export class Conversation {
   }
 
   /** 动作确认（5.8）：approval.request → action_confirmation 卡。 */
-  onApproval(params) {
-    const card = 'C-h' + pad(this.host.store.next(this.project, 'card'), 3)
+  async onApproval(params) {
+    const card = await this.host.allocate(this.project, 'C')
     const call = this.calls.get(params.callId)
     const args = call?.args ?? {}
     const tool = params.toolName
@@ -268,8 +272,8 @@ export class Conversation {
   }
 
   /** 模型追问（5.6）：question.request → question 卡。 */
-  onQuestion(params) {
-    const card = 'C-h' + pad(this.host.store.next(this.project, 'card'), 3)
+  async onQuestion(params) {
+    const card = await this.host.allocate(this.project, 'C')
     this.hostCards.set(card, { kind: 'question', bridgeId: params.id, questions: params.questions })
     const questions = (params.questions ?? []).slice(0, 3).map((q, i) => ({
       id: q.id ?? 'q' + (i + 1),
