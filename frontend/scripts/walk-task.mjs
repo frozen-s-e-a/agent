@@ -1,6 +1,6 @@
 // 底稿任务连真实宿主走一遍：真实的 Harness + 桥接插件 + 编排插件 + 假审计工具服务（harness/test/scenarios/receivables.mjs）+ 假模型。
 // 发消息登记任务 → 底稿理解卡 → 口径卡 → 写入确认 → 完成后看区域和成果；
-// 再开一个任务停在口径卡，重启宿主 → 任务显示卡住 → 从检查点继续 → 完成。
+// 再开一个任务停在口径卡，重启宿主 → 任务显示已中断 → 从检查点继续 → 完成。
 // 先 cd ../harness && npm ci。用法：node scripts/walk-task.mjs <截图目录> [light|dark]
 import { execFileSync, spawn } from "node:child_process";
 import fs from "node:fs";
@@ -158,10 +158,10 @@ try {
   ({ host, server } = await startHost());
   await page.reload();
   const progress2 = page.locator(`[data-progress="${task2}"]`);
-  await progress2.getByText("卡住了").waitFor({ timeout: 30000 });
+  await progress2.getByText("已中断").waitFor({ timeout: 30000 });
   await page.waitForTimeout(500);
   await progress2.scrollIntoViewIfNeeded();
-  await shot("6-重启后卡住");
+  await shot("6-重启后中断");
 
   step("从检查点继续");
   await progress2.getByRole("button", { name: "从检查点继续" }).click();

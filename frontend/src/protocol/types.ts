@@ -97,7 +97,8 @@ export type AuditEvent =
       "output.ready",
       { output: string; file: string; kind: string; checks?: { passed: number; failed: number } }
     >
-  | EventEnvelope<"task.blocked", { where: string; why: string; suggest?: string }>
+  | EventEnvelope<"task.blocked", { where: string | null; why: string; suggest?: string; paused?: boolean }>
+  | EventEnvelope<"task.resumed", { from: "paused" | "blocked"; stage: Stage | null }>
   | EventEnvelope<
       "task.finished",
       { status: TaskStatus; deliverables?: (Deliverable & { status?: string; output?: string })[] }

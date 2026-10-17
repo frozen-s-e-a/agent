@@ -114,9 +114,16 @@ export function patchEnv(servers, secrets) {
 export function confirmTools(servers) {
   const out = []
   for (const s of servers.filter(x => x.enabled)) {
-    const readonly = (s.tools ?? []).filter(t => t.sideEffect === 'readonly').map(t => t.tool)
-    if (!readonly.length) out.push(`mcp__${s.name}__*`)
-    else for (const t of s.tools ?? []) if (t.sideEffect !== 'readonly') out.push(`mcp__${s.name}__${t.tool}`)
+    // 整个服务都要确认，标了只读的排除；之后服务端新出现的工具默认也要确认
+    out.push(`mcp__${s.name}__*`)
+    for (const t of s.tools ?? []) if (t.sideEffect === 'readonly') out.push(`!mcp__${s.name}__${t.tool}`)
   }
+  return out
+}
+
+/** 设置里停用的工具（启动参数 disabledTools）：对模型隐藏，调用也会被拦下。 */
+export function disabledTools(servers) {
+  const out = []
+  for (const s of servers.filter(x => x.enabled)) for (const t of s.tools ?? []) if (t.enabled === false) out.push(`mcp__${s.name}__${t.tool}`)
   return out
 }

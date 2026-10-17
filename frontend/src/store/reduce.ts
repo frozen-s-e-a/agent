@@ -86,7 +86,7 @@ export interface TaskState {
   checks: CheckRun[];
   outputs: { output: string; file: string; kind: string; checks?: { passed: number; failed: number } }[];
   userMessages: string[];
-  blocked?: { where: string; why: string; suggest?: string };
+  blocked?: { where: string | null; why: string; suggest?: string; paused?: boolean };
   createdAt: string;
   lastEventAt: string;
   finishedAt?: string;
@@ -291,14 +291,12 @@ function apply(s: SessionState, ev: AuditEvent) {
       return;
     case "stage.changed":
       patchTask(s, ev.task, ts, (t) => {
-        resumed(t);
         t.stage = ev.data.stage;
         if (!t.stages.includes(ev.data.stage)) t.stages.push(ev.data.stage);
       });
       return;
     case "node.started":
       patchTask(s, ev.task, ts, (t) => {
-        resumed(t);
         t.nodes.push({ node: ev.data.node, kind: ev.data.kind, region: ev.data.region, startedAt: ts });
         if (ev.data.region) patchRegion(t, ev.data.region, (r) => (r.activity = nodeLabel(ev.data.node)));
       });
@@ -381,8 +379,15 @@ function apply(s: SessionState, ev: AuditEvent) {
       return;
     case "task.blocked":
       patchTask(s, ev.task, ts, (t) => {
-        t.status = "blocked";
+        // paused：应用退出时中断，可以从检查点继续
+        t.status = ev.data.paused ? "paused" : "blocked";
         t.blocked = ev.data;
+      });
+      return;
+    case "task.resumed":
+      patchTask(s, ev.task, ts, (t) => {
+        t.status = "running";
+        t.blocked = undefined;
       });
       return;
     case "task.finished":
@@ -393,13 +398,6 @@ function apply(s: SessionState, ev: AuditEvent) {
       });
       return;
   }
-}
-
-/** 卡住或中断后又有进展（从检查点继续）：回到进行中。 */
-function resumed(t: TaskState) {
-  if (t.status !== "blocked" && t.status !== "paused") return;
-  t.status = "running";
-  t.blocked = undefined;
 }
 
 function findOpenNode(t: TaskState, node: string | undefined, region: string | undefined): NodeRun | undefined {

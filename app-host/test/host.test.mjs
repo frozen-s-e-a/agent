@@ -241,6 +241,7 @@ describe('停止和动作确认', () => {
         { text: '已按你的意思不审批。' },
         { tools: [{ name: 'mcp__oa__query_expense', args: { billNo: 'BX-2025-1188' } }, { name: 'mcp__oa__approve', args: { billNo: 'BX-2025-1188', opinion: '同意' } }] },
         { text: '已审批。' },
+        (body) => ({ text: (body.tools ?? []).some(t => (t.function?.name ?? t.name) === 'mcp__oa__approve') ? '还能看到审批工具' : '审批工具已停用' }),
       ],
     })
     const { host, rec } = await setup(model, { options: { harnessEnv: { FAKE_MCP_LOG: log } } })
@@ -280,6 +281,12 @@ describe('停止和动作确认', () => {
       const second = await rec.wait(e => e.type === 'message.completed' && e.seq > first.seq, 'second done')
       assert.equal(second.data.text, '已审批。')
       assert.equal(fs.readFileSync(log, 'utf8').trim().split('\n').length, 1)
+
+      // 设置里停用的工具：重启 Harness 后模型看不到
+      await host.dispatch('mcp.update', { name: 'oa', tools: [{ tool: 'approve', enabled: false }] })
+      await host.dispatch('message.send', { session, text: '还有别的要审批吗' })
+      const third = await rec.wait(e => e.type === 'message.completed' && e.seq > second.seq, 'third done')
+      assert.equal(third.data.text, '审批工具已停用')
 
       const privacy = await host.dispatch('privacy.status', {})
       const byItem = Object.fromEntries(privacy.outbound.map(o => [o.item, o]))

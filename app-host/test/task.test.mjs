@@ -163,6 +163,7 @@ describe('底稿任务（编排插件）', () => {
       const regions = await host.dispatch('sheet.view', { file: FILES.workpaper.file, sheet: '应收账款', overlay: { workpaper: 'W-003' } })
       assert.deepEqual(regions.overlay.regions.map(r => [r.region, r.range, r.state]), [[R5, 'A5:E11', 'written'], ['W-003#R6', 'A15:D20', 'written']])
       assert.deepEqual(regions.overlay.regions[0].manual, ['E7:E10'])
+      assert.deepEqual([regions.overlay.regions[0].headerRows, regions.overlay.regions[0].totals], [[5, 6], [11]])
       const plan = await host.dispatch('sheet.view', { file: FILES.workpaper.file, sheet: '应收账款', overlay: { workpaper: 'W-003', plan: 'FP-001' } })
       assert.deepEqual(plan.cells.find(c => c.cell === 'C7').plan, { value: '1200000.00', text: '1,200,000.00', from: 'R-014#1', overwrite: false })
 
@@ -199,15 +200,21 @@ describe('底稿任务（编排插件）', () => {
       await host.close()
     }
     assert.equal(rec.events.find(e => e.type === 'card.closed' && e.data.card === held.data.card)?.data.withdrawn, true)
-    assert.equal(rec.events.find(e => e.type === 'task.blocked')?.data.suggest, '继续任务')
+    // 正常退出：编排插件自己发 task.blocked（paused），宿主不再补
+    const blocked = rec.events.filter(e => e.type === 'task.blocked')
+    assert.equal(blocked.length, 1)
+    assert.deepEqual([blocked[0].data.paused, blocked[0].data.suggest], [true, '继续任务'])
 
     ;({ host, rec } = await openHost(dataDir, model))
     stop = autoAnswer(host, rec)
     try {
       await host.dispatch('project.open', { project })
-      assert.equal((await host.dispatch('task.get', { task })).status, 'blocked')
+      assert.equal((await host.dispatch('task.get', { task })).status, 'paused')
+      assert.equal((await host.dispatch('task.list', { project })).tasks[0].status, 'paused')
       assert.equal((await host.dispatch('session.get', { session })).openCards.length, 0)
       assert.deepEqual(await host.dispatch('task.resume', { task }), { resumed: true })
+      const resumed = await rec.wait(e => e.type === 'task.resumed', 'task.resumed')
+      assert.deepEqual([resumed.task, resumed.data.from], [task, 'paused'])
       const finished = await rec.wait(e => e.type === 'task.finished', 'task.finished')
       assert.equal(finished.data.status, 'completed')
       // 续跑出的新卡用新编号

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url'
 import { DSH_VERSION, normalizeBaseURL } from '../harness/launch.mjs'
 import { Conversation } from './conversation.mjs'
 import { HarnessProcess } from './harness.mjs'
-import { NAME_PATTERN, confirmTools, patchEnv, testServer, writePatch } from './mcp.mjs'
+import { NAME_PATTERN, confirmTools, disabledTools, patchEnv, testServer, writePatch } from './mcp.mjs'
 import { SheetReader } from './sheets.mjs'
 import { Store, shortId } from './store.mjs'
 
@@ -117,6 +117,7 @@ export class AppHost {
         python: this.python,
         pythonPath: this.options.pythonPath,
         confirmTools: confirmTools(settings.mcp),
+        disabledTools: disabledTools(settings.mcp),
         patches: [...(this.options.patches ?? []), ...(patch ? [patch] : [])],
         env: { ...patchEnv(settings.mcp, this.store.secrets), ...this.options.harnessEnv },
       })
@@ -129,7 +130,7 @@ export class AppHost {
         if (this.active?.proc === proc) this.active = null
         const reason = code === 0 ? 'Harness 已退出' : `Harness 进程意外退出（${signal ?? code}）`
         if (code !== 0 && !proc.stopping) console.error(`[host] Harness exited (${signal ?? code})\n${stderr.slice(-2000)}`)
-        proc.queue = proc.queue.then(() => this.harnessGone(project, reason)).catch(error => console.error('[host] exit:', error))
+        proc.queue = proc.queue.then(() => this.harnessGone(project, reason, !proc.stopping)).catch(error => console.error('[host] exit:', error))
         this.draining = proc.queue
       })
       await proc.start()
@@ -163,20 +164,24 @@ export class AppHost {
     if (project && this.modelReady()) this.harnessFor(project).catch(() => {})
   }
 
-  /** Harness 进程没了：进行中的回复结束、未答的卡撤回；在跑的任务标为中断，等用户从检查点继续。 */
-  harnessGone(project, reason) {
+  /**
+   * Harness 进程没了：进行中的回复结束、未答的卡撤回。
+   * 正常关闭时编排插件自己把进行中的任务暂停并发 task.blocked（paused: true）；
+   * 进程意外退出时没有这条，宿主替它补，前端据此显示“从检查点继续”。
+   */
+  harnessGone(project, reason, crashed) {
     for (const c of this.conversations.values()) if (c.project === project) c.harnessGone(reason)
-    for (const t of this.store.state(project).tasks) {
-      if (t.status !== 'running') continue
-      const conv = this.convOf(t.session)
-      conv?.emit('task.blocked', { where: t.stage ?? 'understand', why: '应用重启或切换了项目，任务中断', suggest: '继续任务' }, t.task)
+    if (crashed) {
+      for (const t of this.store.state(project).tasks) {
+        if (t.status === 'running') this.convOf(t.session)?.emit('task.blocked', { where: t.stage ?? null, why: reason + '，任务中断', suggest: '继续任务', paused: true }, t.task)
+      }
     }
     this.saveState(project)
   }
 
   /**
-   * Harness 启动后对一遍任务状态：编排插件把上次没跑完的任务标为暂停（paused），
-   * 宿主这边还记着“进行中”的，补一条 task.blocked，前端据此显示“从检查点继续”。
+   * Harness 启动后对一遍任务状态：上次进程被强行结束时，编排插件把没跑完的任务标为暂停，
+   * 宿主这边还记着“进行中”的，补一条 task.blocked。
    */
   async syncTasks(project, proc) {
     const list = await proc.request('task/list', {}).catch(() => null)
@@ -187,7 +192,7 @@ export class AppHost {
       if (!t) continue
       if (t.status === 'running' && ['paused', 'blocked'].includes(item.status)) {
         const snap = await proc.request('task/get', { task: item.task }).catch(() => null)
-        const blocked = snap?.blocked ?? { where: t.stage ?? 'understand', why: '应用重启，任务中断', suggest: '继续任务' }
+        const blocked = snap?.blocked ?? { where: t.stage ?? null, why: '应用重启，任务中断', suggest: '继续任务', paused: item.status === 'paused' }
         this.convOf(t.session)?.emit('task.blocked', blocked, t.task)
       }
     }
@@ -234,8 +239,7 @@ export class AppHost {
         return
       case 'approval.closed':
       case 'question.closed':
-        // 这两个通知不带会话编号，按桥接编号找
-        for (const c of this.conversations.values()) if (c.project === project) c.onBridgeClosed(params.id, params.withdrawn)
+        conv?.onBridgeClosed(params.id, params.withdrawn)
         return
       case 'card.opened':
         conv?.emit('card.opened', { ...params.card, session: params.sessionId }, params.card.task)
@@ -299,13 +303,13 @@ export class AppHost {
       state.tasks.push(t)
     }
     t.lastSeq = event.seq
-    // 中断或阻塞后又有进展（从检查点继续、重跑）：回到进行中
-    if (['paused', 'blocked'].includes(t.status) && ['stage.changed', 'node.started', 'region.state', 'task.rerun'].includes(event.type)) {
-      t.status = 'running'
-      t.blocked = null
-    }
     const d = event.data
     switch (event.type) {
+      case 'task.resumed':
+      case 'task.rerun':
+        t.status = 'running'
+        t.blocked = null
+        break
       case 'task.understood': t.deliverables = d.deliverables ?? []; break
       case 'stage.changed': t.stage = d.stage; break
       case 'node.finished':
@@ -346,7 +350,7 @@ export class AppHost {
           state.outputs.push({ output: d.output, file: d.file, name: path.basename(d.file), kind: d.kind, session: conv.id, task: event.task, checks: d.checks, at: event.ts })
         }
         break
-      case 'task.blocked': t.status = 'blocked'; t.blocked = d; break
+      case 'task.blocked': t.status = d.paused ? 'paused' : 'blocked'; t.blocked = d; break
       case 'task.finished':
         t.status = d.status
         t.finishedAt = event.ts
@@ -639,8 +643,7 @@ export class AppHost {
       return {
         tasks: tasks.map((t) => {
           const l = live?.find(x => x.task === t.task)
-          // 编排插件那边的 paused 是“应用退出时中断”，宿主已经按 task.blocked 推给前端，这里保持一致
-          return { ...this.taskSnapshot(t), ...(l ? { status: l.status === 'paused' && t.status === 'blocked' ? 'blocked' : l.status, deliverables: l.deliverables, finishedAt: l.finishedAt } : {}) }
+          return { ...this.taskSnapshot(t), ...(l ? { status: l.status, deliverables: l.deliverables, finishedAt: l.finishedAt } : {}) }
         }),
       }
     },
@@ -648,7 +651,7 @@ export class AppHost {
       const { project, task } = this.findTask(p.task)
       if (this.active?.project === project && !this.active.proc.closed) {
         const snap = await this.active.proc.request('task/get', { task: p.task }).catch(() => null)
-        if (snap) return { ...snap, status: snap.status === 'paused' && task.status === 'blocked' ? 'blocked' : snap.status, lastSeq: task.lastSeq ?? 0 }
+        if (snap) return { ...snap, lastSeq: task.lastSeq ?? 0 }
       }
       return this.taskSnapshot(task)
     },
@@ -866,7 +869,7 @@ export class AppHost {
 
   /**
    * sheet.view 的叠加（4.5）：
-   * - workpaper：区域范围、用途、人工格取自底稿理解卡（含用户的修改），状态取自任务的 region.state；
+   * - workpaper：区域范围、表头行、合计行、人工格取自编排插件的任务快照（Harness 不在时取底稿理解卡）；
    * - plan：fill_preview 的拟写值；
    * - output：产出文件里由任务写入的格，按产出所属任务的写入计划标出。
    * 依赖拟写格的公式重算要本机 Excel，浏览器开发版不做，这些格不带 plan。
@@ -879,13 +882,19 @@ export class AppHost {
       return unquoteSheet(ref.slice(0, i)) === view.sheet ? ref.slice(i + 1) : null
     }
     if (overlay.workpaper) {
-      const t = [...tasks].reverse().find(x => x.layout?.[overlay.workpaper])
+      const t = [...tasks].reverse().find(x => x.workpaper === overlay.workpaper || x.layout?.[overlay.workpaper])
+      // 区域的范围、表头行、合计行、人工格以编排插件的快照为准；Harness 不在时用底稿理解卡里的
+      let source = t?.layout?.[overlay.workpaper] ?? []
+      if (t && this.active?.project === project && !this.active.proc.closed) {
+        const snap = await this.active.proc.request('task/get', { task: t.task }).catch(() => null)
+        if (snap?.regions?.some(r => r.range)) source = snap.regions
+      }
       const regions = []
-      for (const r of t?.layout[overlay.workpaper] ?? []) {
-        const range = onSheet(r.range)
+      for (const r of source) {
+        const range = r.range && onSheet(r.range)
         if (!range || r.type === 'none') continue
-        const state = t.regions.find(x => x.region === r.region)?.state ?? 'pending'
-        regions.push({ region: r.region, range, type: r.type, purpose: r.purpose, manual: (r.manual ?? []).map(onSheet).filter(Boolean), state })
+        const state = r.state ?? t.regions.find(x => x.region === r.region)?.state ?? 'pending'
+        regions.push({ region: r.region, range, type: r.type, purpose: r.purpose ?? undefined, ...(r.headerRows?.length ? { headerRows: r.headerRows } : {}), ...(r.totals?.length ? { totals: r.totals } : {}), manual: (r.manual ?? []).map(onSheet).filter(Boolean), state })
       }
       view.overlay = { ...view.overlay, regions }
     }

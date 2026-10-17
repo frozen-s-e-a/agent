@@ -162,7 +162,8 @@ export function ProgressCard({ task }: { task: TaskState }) {
         )}
         {task.blocked && (
           <div className="danger-text">
-            卡在{STAGES.find((s) => s.stage === task.blocked?.where)?.label ?? ` ${task.blocked.where}`}：{task.blocked.why}
+            {task.blocked.where && `卡在${STAGES.find((s) => s.stage === task.blocked?.where)?.label ?? ` ${task.blocked.where}`}：`}
+            {task.blocked.why}
             {task.blocked.suggest && <div className="muted">建议：{task.blocked.suggest}</div>}
             {stalled && (
               <Button size="small" icon={<PlayCircleOutlined />} style={{ marginTop: 6 }} onClick={resume}>

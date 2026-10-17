@@ -52,25 +52,22 @@ cd frontend && node scripts/walk-task.mjs screens/task          # 浏览器里�
 | 编排卡片 | `card.opened` / `card.closed` 原样转；任务的卡片信封带 `task` |
 | 流程事件（`task.*`、`stage.changed`、`node.*`、`check.result`、`region.state`、`user.message`、任务的 `tool.*` 和 `output.ready`） | `task.event`，宿主补 `seq` 和信封；`task.created` 补 `project`、`message`（这一轮的用户消息）和文件名 |
 | 卡片撤回 | Harness 进程退出（切项目、改设置、崩溃、宿主重启）时，未答的卡都推 `card.closed`（`withdrawn: true`）；插件续跑时再撤回同一张卡不重复推 |
-| 任务中断 | Harness 进程退出时还在跑的任务推 `task.blocked`（建议“继续任务”）；重启后编排插件报 `paused` 的也一样。前端“从检查点继续”调 `task.resume`，之后有进展事件就回到进行中 |
+| 任务中断 | 正常关闭时编排插件自己发 `task.blocked`（`paused: true`，状态 `paused`）；进程意外退出时宿主替它补，重启后 `task/list` 报 `paused` 而宿主还记着进行中的也补。前端“从检查点继续”调 `task.resume`，插件发 `task.resumed` 后回到进行中 |
 
 `C-`、`O-` 号：宿主出的卡（动作确认、追问）和对话产出从 `ids/allocate` 取，和编排插件共用项目计数。Harness 不在时退回宿主自己的 `C-h001` / `O-h0001`。
 
 通知按到达顺序逐条处理（要取号的会等），进程退出后的收尾做完才起新进程。
 
-**表格叠加**（`sheet.view` 的 `overlay`）：区域的范围、用途、人工格取自底稿理解卡（含用户的修改），状态取自 `region.state`；写入计划和“已写入”标记来自 `fill_preview`（`output` 按产出所属任务的写入计划）。依赖拟写格的公式重算要本机 Excel，浏览器开发版不做，这些格不带 `plan`。
+**表格叠加**（`sheet.view` 的 `overlay`）：区域的范围、用途、表头行、合计行、人工格和状态取自编排插件的 `task/get`（Harness 不在时取底稿理解卡和 `region.state`）；写入计划和“已写入”标记来自 `fill_preview`（`output` 按产出所属任务的写入计划）。依赖拟写格的公式重算要本机 Excel，浏览器开发版不做，这些格不带 `plan`。
+
+## 外部服务的确认和停用
+
+之前提给桥接插件和编排插件的缺口（续跑事件、快照里的区域信息、`confirmTools` 排除项、停用工具、追问和关闭通知的编号）已在 PR #3 补上，宿主已按《接口补充（二）》对接：
+
+- 外部服务的确认名单写成 `mcp__<服务>__*` 加只读工具的排除项（`!mcp__<服务>__<工具>`），服务端之后新出现的工具默认要确认；
+- 设置里停用的工具作为 `disabledTools` 传给 Harness，改动后重启 Harness。
 
 ## 还缺的
-
-**要桥接插件或编排线补的**（已转给 Harness 接入线程）：
-
-1. **`task/resume` 之后没有事件。** 任务从暂停或阻塞回到进行中，前端只能等下一个进展事件才知道。建议续跑开始时发一条事件（例如重发当前的 `stage.changed`，或约定一个 `task.resumed`）。
-2. **区域的表头行、合计行拿不到。** `sheet.view` 叠加区域时宿主从底稿理解卡取范围和用途，卡里没有 `headerRows`、`totals`。建议 `task/get` 的区域带上 `range`、`type`、`purpose`、`headerRows`、`totals`、`manual`，宿主就不用从卡片里拼。
-3. **`confirmTools` 不能排除。** 只支持精确名和 `前缀*`。一个服务里有工具标了只读时，宿主只能逐个列出会改数据的工具，之后服务端新出现的工具就不会出确认卡。建议支持排除写法（如 `!mcp__oa__query_expense`）。
-4. **停用的外部工具还在模型面前。** `dsh-mcp-client` 没有按工具过滤的配置，设置里停用的工具模型仍然能看到、能调。需要桥接插件按名单过滤工具注册，或 `dsh-mcp-client` 加白名单。
-5. 小问题：`question.request` 没带 `callId`（这一版 dsh 的 `request.wait` 为空）；`approval.closed`、`question.closed` 没带 `sessionId`，宿主按编号在所有对话里找。
-
-**宿主自己还没做的：**
 
 - API Key 和令牌现在存在数据目录的 `secrets.json`（权限 600），Windows 版要换成 DPAPI 加密。
 - `output.open`（用本机 Excel 打开）、`logs.export`、Electron IPC 外壳。
