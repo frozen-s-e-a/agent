@@ -2,3 +2,4 @@ node_modules
 dist
 *.local
 screens/
+*.tsbuildinfo

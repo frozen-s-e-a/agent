@@ -39,7 +39,9 @@ export interface SheetGridProps {
   errorCells?: Set<string>;
   /** 在区域上叠加的 DOM（标签、拖拽柄），按区域的屏幕位置给出 */
   renderRegionOverlay?: (region: RegionBox, rect: { x: number; y: number; width: number; height: number }) => ReactNode;
-  onContextMenu?: (row: number, col: number, x: number, y: number) => void;
+  onContextMenu?: (box: RangeBox, x: number, y: number) => void;
+  /** 拖动区域边框时，用鼠标所在格更新预览 */
+  onHover?: (row: number, col: number) => void;
   /** 让某个格滚到可见 */
   scrollTo?: { row: number; col: number; nonce: number } | null;
   onRangeSelect?: (box: RangeBox) => void;
@@ -51,6 +53,7 @@ export function SheetGrid(props: SheetGridProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [, setTick] = useState(0);
   const [size, setSize] = useState({ w: 800, h: 600 });
+  const rangeRef = useRef<RangeBox | null>(null);
   const fr = model.freezeRows;
   const paintOpts: PaintOptions = useMemo(
     () => ({ t, mode, showFormulas, focusRegion, manualOverride: props.manualOverride, errorCells: props.errorCells }),
@@ -174,9 +177,11 @@ export function SheetGrid(props: SheetGridProps) {
     [model, fr, t, selected, paintOpts, props.version],
   );
 
+  const [dragRange, setDragRange] = useState<Rectangle | null>(null);
   const gridSelection: GridSelection = useMemo(() => {
     const empty = { columns: CompactSelection.empty(), rows: CompactSelection.empty() };
     if (!selected || selected.row < fr) return empty;
+    if (dragRange) return { ...empty, current: { cell: [dragRange.x, dragRange.y], range: dragRange, rangeStack: [] } };
     const m = model.merge(selected.row, selected.col);
     const box = m ?? { r0: selected.row, r1: selected.row, c0: selected.col, c1: selected.col };
     return {
@@ -187,7 +192,7 @@ export function SheetGrid(props: SheetGridProps) {
         rangeStack: [],
       },
     };
-  }, [selected, model, fr]);
+  }, [selected, model, fr, dragRange]);
 
   const onSelectionChange = useCallback(
     (sel: GridSelection) => {
@@ -195,14 +200,16 @@ export function SheetGrid(props: SheetGridProps) {
       if (!cur) return;
       const [c, r] = cur.cell;
       if (c === 0) return;
+      if (cur.range.width > 1 || cur.range.height > 1) setDragRange(cur.range);
+      else setDragRange(null);
       const sheetRow = r + fr;
       const m = model.merge(sheetRow, c - 1);
       const row = m ? m.r0 : sheetRow;
       const col = m ? m.c0 : c - 1;
       const range = cur.range;
-      if (range.width > 1 || range.height > 1) {
-        props.onRangeSelect?.({ c0: range.x - 1, r0: range.y + fr, c1: range.x + range.width - 2, r1: range.y + range.height - 1 + fr });
-      }
+      const box = { c0: Math.max(0, range.x - 1), r0: range.y + fr, c1: range.x + range.width - 2, r1: range.y + range.height - 1 + fr };
+      rangeRef.current = range.width > 1 || range.height > 1 ? box : null;
+      if (rangeRef.current) props.onRangeSelect?.(box);
       props.onSelect(row, col, ref.current?.getBounds(col + 1, row - fr));
     },
     [model, fr, props],
@@ -253,7 +260,9 @@ export function SheetGrid(props: SheetGridProps) {
       onContextMenu={(e) => {
         if (!props.onContextMenu || !selected) return;
         e.preventDefault();
-        props.onContextMenu(selected.row, selected.col, e.clientX, e.clientY);
+        const m = model.merge(selected.row, selected.col);
+        const box = rangeRef.current ?? m ?? { r0: selected.row, r1: selected.row, c0: selected.col, c1: selected.col };
+        props.onContextMenu(box, e.clientX, e.clientY);
       }}
     >
       <DataEditor
@@ -279,6 +288,9 @@ export function SheetGrid(props: SheetGridProps) {
         rowSelect="none"
         columnSelect="none"
         rangeSelect={props.onRangeSelect ? "rect" : "cell"}
+        onItemHovered={(a) => {
+          if (a.kind === "cell" && props.onHover) props.onHover(a.location[1] + fr, a.location[0] - 1);
+        }}
         smoothScrollX
         smoothScrollY
         getCellsForSelection
