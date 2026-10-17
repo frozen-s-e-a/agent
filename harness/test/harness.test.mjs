@@ -9,6 +9,7 @@ import { after, before, describe, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { fakeModel } from './fake-model.mjs'
 import { startHarness, waitIdle } from './client.mjs'
+import { matchesPatterns } from '../plugins/host-bridge.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const python = process.env.AUDIT_TEST_PYTHON ?? (process.platform === 'win32' ? 'python' : 'python3')
@@ -174,6 +175,8 @@ describe('宿主控制', () => {
       assert.equal(ask1.params.sessionId, 'S-approve')
       assert.ok(ask1.params.callId)
       await harness.request('approval/respond', { id: ask1.params.id, outcome: 'rejected' })
+      const closed1 = await harness.waitFor(n => n.method === 'approval.closed' && n.params.id === ask1.params.id)
+      assert.equal(closed1.params.sessionId, 'S-approve')
       await harness.request('session/wait', { sessionId: 'S-approve' })
       assert.ok(!fs.existsSync(path.join(projectRoot, 'outputs')) || fs.readdirSync(path.join(projectRoot, 'outputs')).length === 0)
       const rejected = toolResults(harness.events('S-approve'))[0]
@@ -189,6 +192,31 @@ describe('宿主控制', () => {
     } finally { await harness.stop(); await model.close() }
   })
 
+  test('工具名匹配：前缀和排除项', () => {
+    const patterns = ['mcp__oa__*', '!mcp__oa__query_*', 'mcp__erp__post']
+    assert.equal(matchesPatterns(patterns, 'mcp__oa__approve'), true)
+    assert.equal(matchesPatterns(patterns, 'mcp__oa__query_expense'), false)
+    assert.equal(matchesPatterns(patterns, 'mcp__erp__post'), true)
+    assert.equal(matchesPatterns(patterns, 'mcp__erp__get'), false)
+    assert.equal(matchesPatterns(['!mcp__oa__x'], 'mcp__oa__x'), false)
+  })
+
+  test('设置里停用的工具：模型看不到，调用也被拦下', async () => {
+    const model = await fakeModel({ script: [{ tools: [SELECT] }, { text: '这个工具不能用。' }] })
+    const projectRoot = makeProject()
+    const harness = await open(model, { projectRoot, disabledTools: ['mcp__audit__select_*'] })
+    try {
+      await harness.request('session/prompt', { sessionId: 'S-off', contentBlocks: [{ type: 'text', text: '提取' }] })
+      await harness.request('session/wait', { sessionId: 'S-off' })
+      const names = (model.chats()[0].tools ?? []).map(t => t.function?.name ?? t.name)
+      assert.ok(!names.includes('mcp__audit__select_column'))
+      assert.ok(names.some(name => name.startsWith('mcp__audit__')), names.join())
+      const result = toolResults(harness.events('S-off'))[0]
+      assert.equal(result.isError, true)
+      assert.ok(!fs.existsSync(path.join(projectRoot, 'outputs')) || fs.readdirSync(path.join(projectRoot, 'outputs')).length === 0)
+    } finally { await harness.stop(); await model.close() }
+  })
+
   test('模型追问转给宿主，回答回到模型', async () => {
     const question = { id: 'q1', question: '账龄从哪一天开始算？', options: [{ label: '凭证日期' }, { label: '发票日期' }] }
     const model = await fakeModel({ script: [{ tools: [{ name: 'ask_user_question', args: { questions: [question] } }] }, { text: '按凭证日期计算。' }] })
@@ -197,7 +225,12 @@ describe('宿主控制', () => {
       await harness.request('session/prompt', { sessionId: 'S-ask', contentBlocks: [{ type: 'text', text: '做账龄分析' }] })
       const ask = await harness.waitFor(n => n.method === 'question.request')
       assert.equal(ask.params.questions[0].question, question.question)
+      assert.ok(ask.params.callId)
       await harness.request('question/respond', { id: ask.params.id, answers: [{ id: 'q1', selected: ['凭证日期'] }] })
+      const closed = await harness.waitFor(n => n.method === 'question.closed' && n.params.id === ask.params.id)
+      assert.equal(closed.params.sessionId, 'S-ask')
+      await harness.request('session/wait', { sessionId: 'S-ask' })
+      assert.equal(toolResults(harness.events('S-ask'))[0].toolCallId, ask.params.callId)
       await harness.request('session/wait', { sessionId: 'S-ask' })
       const toolMessage = model.chats()[1].messages.find(m => m.role === 'tool')
       assert.match(toolMessage.content, /凭证日期/)

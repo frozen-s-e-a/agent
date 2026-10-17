@@ -17,9 +17,9 @@
  *   session.event / session.status / subagent.*        与 dsh SDK 相同
  *   assistant.stream { sessionId, frame }              回复的流式片段（dsh SDK 不转发，前端逐字显示要用）
  *   approval.request { id, sessionId, toolName, callId, reason }
- *   approval.closed  { id, outcome }
+ *   approval.closed  { id, sessionId, outcome | withdrawn }
  *   question.request { id, sessionId, callId, questions }
- *   question.closed  { id }
+ *   question.closed  { id, sessionId, withdrawn? }
  *   card.opened      { sessionId, card }
  *   card.closed      { sessionId, card, task?, answer | withdrawn }
  *   其他插件经 `auditBridge.notify(method, params)` 发出的通知（编排插件的 task.event）
@@ -35,16 +35,24 @@ import { JsonRpcLineTransport } from '@deepseek-ai/dsh-sdk-protocol'
 import { HarnessSdkJsonRpcServer } from '@deepseek-ai/dsh-sdk-jsonrpc-server'
 
 export const name = 'audit-host-bridge'
-export const inject = ['agents', 'workingDirectory']
+export const inject = ['agents', 'workingDirectory', 'tools']
 
 export const Config = Schema.object({
   maxTokensAsSuccess: Schema.boolean().default(true),
   confirmTools: Schema.array(Schema.string()).default([]),
+  disabledTools: Schema.array(Schema.string()).default([]),
 })
 
-/** 工具名匹配：精确名，或以 `*` 结尾的前缀（如 `mcp__oa__*`）。 */
-export function matchesAny(patterns, toolName) {
-  return patterns.some(pattern => pattern.endsWith('*') ? toolName.startsWith(pattern.slice(0, -1)) : pattern === toolName)
+const matchOne = (pattern, toolName) => pattern.endsWith('*') ? toolName.startsWith(pattern.slice(0, -1)) : pattern === toolName
+
+/**
+ * 工具名匹配：精确名，或以 `*` 结尾的前缀（如 `mcp__oa__*`）；以 `!` 开头的是排除项（如 `!mcp__oa__query_*`）。
+ * 命中任一普通项、且不命中任何排除项时算匹配。
+ */
+export function matchesPatterns(patterns, toolName) {
+  const exclude = patterns.filter(p => p.startsWith('!')).map(p => p.slice(1))
+  const include = patterns.filter(p => !p.startsWith('!'))
+  return include.some(p => matchOne(p, toolName)) && !exclude.some(p => matchOne(p, toolName))
 }
 
 function invalidParams(message) {
@@ -83,7 +91,7 @@ export function apply(ctx, config) {
       }
       const onAbort = () => {
         if (!pending.delete(id)) return
-        transport.notify(closed, { id, withdrawn: true })
+        transport.notify(closed, { id, sessionId: payload.sessionId, withdrawn: true })
         reject(signal.reason ?? new Error('withdrawn'))
       }
       if (signal?.aborted) return reject(signal.reason ?? new Error('withdrawn'))
@@ -99,9 +107,26 @@ export function apply(ctx, config) {
     transport.notify('assistant.stream', { sessionId: sessionOf(agent), frame })
   })
 
+  // ---------- 设置里停用的工具：模型看不到，也调不了 ----------
+  if (config.disabledTools.length) {
+    const tools = ctx.tools
+    ctx.effect(() => tools.guard(exec => matchesPatterns(config.disabledTools, exec.name) ? '这个工具已在设置里停用' : undefined), 'audit-host-bridge.disabled-guard')
+    ctx.on('agent/created', ({ agent }) => {
+      const deny = tools.schemas().map(schema => schema.name).filter(name => matchesPatterns(config.disabledTools, name))
+      if (deny.length) agent.ctx.tools.restrict({ deny })
+    })
+  }
+
+  // ---------- 追问的调用编号：dsh 只在限时追问里带 wait.callId，普通追问按调用的 signal 找回 ----------
+  const questionCalls = new WeakMap()
+  ctx.on('tools/pre-execute', (exec, next) => {
+    if (exec.name === 'ask_user_question' && exec.signal) questionCalls.set(exec.signal, exec.callId)
+    return next()
+  })
+
   // ---------- 动作确认：外部系统中会改数据的工具，每次调用都问 ----------
   ctx.on('tools/pre-execute', (exec, next) => {
-    if (exec.agent === undefined || !matchesAny(config.confirmTools, exec.name)) return next()
+    if (exec.agent === undefined || !matchesPatterns(config.confirmTools, exec.name)) return next()
     return Promise.resolve(next()).then(decision => decision.kind === 'allow' ? { kind: 'ask', reason: 'confirm:' + exec.name } : decision)
   })
 
@@ -120,7 +145,8 @@ export function apply(ctx, config) {
   // ---------- 模型追问 ----------
   ctx.on('user-questions/request', (request, next) => {
     if (request.agent === undefined) return next()
-    const payload = { sessionId: sessionOf(request.agent), callId: request.wait?.callId, questions: request.questions }
+    const callId = request.wait?.callId ?? (request.signal ? questionCalls.get(request.signal) : undefined)
+    const payload = { sessionId: sessionOf(request.agent), callId, questions: request.questions }
     return ask('question', 'question.request', 'question.closed', payload, request.signal)
   })
 
@@ -169,6 +195,7 @@ export function apply(ctx, config) {
 
   // ---------- 供其他插件扩展的请求和通知 ----------
   const extraMethods = new Map()
+  const shutdownHooks = new Set()
   ctx.provide('auditBridge', {
     notify: (method, params) => transport.notify(method, params),
     /** 注册一个宿主请求；返回注销函数。 */
@@ -176,6 +203,11 @@ export function apply(ctx, config) {
       if (extraMethods.has(method)) throw new Error('method already handled: ' + method)
       extraMethods.set(method, fn)
       return () => { if (extraMethods.get(method) === fn) extraMethods.delete(method) }
+    },
+    /** 宿主发 shutdown 时、输出关闭之前同步调用（例如把进行中的任务标为暂停并通知宿主）；返回注销函数。 */
+    onShutdown(fn) {
+      shutdownHooks.add(fn)
+      return () => shutdownHooks.delete(fn)
     },
   })
 
@@ -218,11 +250,11 @@ export function apply(ctx, config) {
         if (kind === 'approval') {
           if (!['allowed-once', 'rejected'].includes(params.outcome)) throw invalidParams('outcome must be allowed-once or rejected')
           item.resolve(params.outcome)
-          transport.notify('approval.closed', { id: params.id, outcome: params.outcome })
+          transport.notify('approval.closed', { id: params.id, sessionId: item.sessionId, outcome: params.outcome })
         } else {
           if (!Array.isArray(params.answers)) throw invalidParams('answers must be an array')
           item.resolve({ answers: params.answers })
-          transport.notify('question.closed', { id: params.id })
+          transport.notify('question.closed', { id: params.id, sessionId: item.sessionId })
         }
         return {}
       }
@@ -252,6 +284,11 @@ export function apply(ctx, config) {
   }
 
   transport.onRequest(async (method, params) => {
+    if (method === 'shutdown') {
+      for (const hook of shutdownHooks) {
+        try { hook() } catch (error) { ctx.logger?.('audit-host-bridge')?.error?.(error) }
+      }
+    }
     const result = await handle(method, params)
     if (method === 'shutdown') setImmediate(() => { void disposeAndExit() })
     return result

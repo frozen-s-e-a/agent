@@ -165,7 +165,14 @@ export function apply(ctx, config) {
   }
   for (const [method, fn] of Object.entries(methods)) ctx.effect(() => ctx.auditBridge.handle(method, fn), `audit-orchestrator.${method}`)
 
-  ctx.effect(() => () => {
-    for (const runner of runners.values()) runner.controller?.abort(new TaskShutdown('harness shutting down'))
-  }, 'audit-orchestrator.shutdown')
+  // 应用退出：进行中的任务暂停并发 task.blocked。宿主发 shutdown 时先于输出关闭执行；插件被卸载时再兜一次
+  const pauseAll = () => {
+    for (const runner of runners.values()) {
+      if (!runner.running) continue
+      runner.pause()
+      runner.controller.abort(new TaskShutdown('harness shutting down'))
+    }
+  }
+  ctx.effect(() => ctx.auditBridge.onShutdown(pauseAll), 'audit-orchestrator.pause')
+  ctx.effect(() => pauseAll, 'audit-orchestrator.shutdown')
 }
