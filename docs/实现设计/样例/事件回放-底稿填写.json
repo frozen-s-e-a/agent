@@ -36,8 +36,8 @@
    "C-004"
   ],
   "outputs": [
-   "输出/T-0c21/应收账款底稿-填写成果.xlsx",
-   "输出/T-0c21/填写核对.xlsx"
+   "O-0001",
+   "O-0002"
   ]
  },
  "events": [
@@ -245,6 +245,7 @@
    "data": {
     "check": "semantics",
     "passed": true,
+    "attempt": 1,
     "region": "W-003#R5"
    }
   },
@@ -285,6 +286,7 @@
    "data": {
     "check": "semantics",
     "passed": true,
+    "attempt": 1,
     "region": "W-003#R6"
    }
   },
@@ -401,6 +403,7 @@
    "data": {
     "check": "data_quality",
     "passed": true,
+    "attempt": 1,
     "detail": {
      "items": [
       "序时账借贷平衡",
@@ -641,6 +644,7 @@
    "data": {
     "check": "basis_complete",
     "passed": true,
+    "attempt": 1,
     "region": "W-003#R5"
    }
   },
@@ -681,6 +685,7 @@
    "data": {
     "check": "basis_complete",
     "passed": true,
+    "attempt": 1,
     "region": "W-003#R6"
    }
   },
@@ -787,6 +792,7 @@
    "data": {
     "check": "conservation",
     "passed": true,
+    "attempt": 1,
     "region": "W-003#R6"
    }
   },
@@ -800,6 +806,7 @@
    "data": {
     "check": "control",
     "passed": true,
+    "attempt": 1,
     "region": "W-003#R6",
     "detail": {
      "left": {
@@ -855,6 +862,7 @@
    "data": {
     "check": "compare",
     "passed": true,
+    "attempt": 1,
     "region": "W-003#R6",
     "detail": {
      "left": "R-011",
@@ -946,6 +954,7 @@
    "data": {
     "check": "conservation",
     "passed": true,
+    "attempt": 1,
     "region": "W-003#R5"
    }
   },
@@ -975,6 +984,7 @@
    "data": {
     "check": "control",
     "passed": false,
+    "attempt": 1,
     "region": "W-003#R5",
     "detail": {
      "left": {
@@ -1056,6 +1066,7 @@
    "data": {
     "check": "basis_complete",
     "passed": true,
+    "attempt": 2,
     "region": "W-003#R5"
    }
   },
@@ -1098,6 +1109,7 @@
    "data": {
     "check": "conservation",
     "passed": true,
+    "attempt": 2,
     "region": "W-003#R5"
    }
   },
@@ -1111,6 +1123,7 @@
    "data": {
     "check": "control",
     "passed": true,
+    "attempt": 2,
     "region": "W-003#R5",
     "detail": {
      "left": {
@@ -1166,6 +1179,7 @@
    "data": {
     "check": "compare",
     "passed": true,
+    "attempt": 2,
     "region": "W-003#R5",
     "detail": {
      "left": "R-014",
@@ -1338,7 +1352,8 @@
    "type": "check.result",
    "data": {
     "check": "readback",
-    "passed": true
+    "passed": true,
+    "attempt": 1
    }
   },
   {
@@ -1350,7 +1365,8 @@
    "type": "check.result",
    "data": {
     "check": "formulas",
-    "passed": true
+    "passed": true,
+    "attempt": 1
    }
   },
   {
@@ -1362,7 +1378,8 @@
    "type": "check.result",
    "data": {
     "check": "crossFoot",
-    "passed": true
+    "passed": true,
+    "attempt": 1
    }
   },
   {
@@ -1374,7 +1391,8 @@
    "type": "check.result",
    "data": {
     "check": "untouched",
-    "passed": true
+    "passed": true,
+    "attempt": 1
    }
   },
   {
@@ -1386,7 +1404,8 @@
    "type": "check.result",
    "data": {
     "check": "completeness",
-    "passed": true
+    "passed": true,
+    "attempt": 1
    }
   },
   {
@@ -1398,7 +1417,8 @@
    "type": "check.result",
    "data": {
     "check": "excel",
-    "passed": true
+    "passed": true,
+    "attempt": 1
    }
   },
   {
@@ -1433,6 +1453,7 @@
    "ts": "2026-10-17T08:02:11.400Z",
    "type": "output.ready",
    "data": {
+    "output": "O-0001",
     "file": "输出/T-0c21/应收账款底稿-填写成果.xlsx",
     "kind": "workpaper",
     "checks": {
@@ -1449,6 +1470,7 @@
    "ts": "2026-10-17T08:02:12.900Z",
    "type": "output.ready",
    "data": {
+    "output": "O-0002",
     "file": "输出/T-0c21/填写核对.xlsx",
     "kind": "report"
    }
@@ -1498,7 +1520,8 @@
    "type": "check.result",
    "data": {
     "check": "traceable",
-    "passed": true
+    "passed": true,
+    "attempt": 1
    }
   },
   {
@@ -1532,16 +1555,18 @@
     "body": {
      "outputs": [
       {
+       "output": "O-0001",
        "file": "输出/T-0c21/应收账款底稿-填写成果.xlsx",
        "kind": "workpaper"
       },
       {
+       "output": "O-0002",
        "file": "输出/T-0c21/填写核对.xlsx",
        "kind": "report"
       }
      ],
      "checks": {
-      "passed": 20,
+      "passed": 18,
       "failed": 0,
       "retried": 1
      },
@@ -1568,7 +1593,7 @@
    "type": "message.completed",
    "data": {
     "message": "M-0002",
-    "text": "应收账款底稿已填写完成，20 项核对全部通过（账龄区域重做 1 次），另有 4 个单元格需人工填写。",
+    "text": "应收账款底稿已填写完成，18 项核对全部通过（账龄区域重做 1 次），另有 4 个单元格需人工填写。",
     "refs": [
      "C-004"
     ]
