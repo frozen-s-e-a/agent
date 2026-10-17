@@ -5,9 +5,10 @@
 //   { tools: [{ name, args }] }    要求调用工具
 //   { hold: true }                 不作答，直到请求被取消（测试中途取消）
 //   (body) => 上面任一种            按请求内容决定
+// respond(body) 用于剧本用完之后的所有请求（按请求内容路由，适合编排节点这类并发的请求）。
 import http from 'node:http'
 
-export async function fakeModel({ script = [], models = ['audit-fixture'] } = {}) {
+export async function fakeModel({ script = [], models = ['audit-fixture'], respond } = {}) {
   const requests = []
   const steps = [...script]
   const server = http.createServer(async (req, res) => {
@@ -23,7 +24,7 @@ export async function fakeModel({ script = [], models = ['audit-fixture'] } = {}
       res.writeHead(404)
       return res.end('{}')
     }
-    let step = steps.length ? steps.shift() : { text: '完成' }
+    let step = steps.length ? steps.shift() : respond ?? { text: '完成' }
     if (typeof step === 'function') step = step(body)
     if (step.hold) {
       req.on('close', () => res.destroy())

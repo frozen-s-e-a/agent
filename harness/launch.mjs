@@ -1,5 +1,6 @@
 // 组装启动 Harness 的命令和环境。宿主（Node 后端）和测试共用。
 // 一个 Harness 进程服务一个项目：项目目录决定审计工具能访问的范围。
+import crypto from 'node:crypto'
 import path from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
@@ -42,10 +43,14 @@ export function normalizeBaseURL(value) {
  */
 export function harnessLaunch(options) {
   const projectRoot = path.resolve(options.projectRoot)
+  const harnessHome = path.join(path.resolve(options.dataDir), 'harness')
+  // 编排状态按项目分目录；用项目路径的哈希命名，路径里的中文和符号不进目录名
+  const projectKey = crypto.createHash('sha256').update(process.platform === 'win32' ? projectRoot.toLowerCase() : projectRoot).digest('hex').slice(0, 16)
   const env = {
     ...process.env,
     ...options.env,
-    DSH_HOME: path.join(path.resolve(options.dataDir), 'harness'),
+    DSH_HOME: harnessHome,
+    AUDIT_STATE_DIR: path.join(harnessHome, 'audit-projects', projectKey),
     AUDIT_PROJECT_ROOT: projectRoot,
     AUDIT_APP_ROOT: APP_ROOT,
     AUDIT_LLM_BASE_URL: normalizeBaseURL(options.baseURL),

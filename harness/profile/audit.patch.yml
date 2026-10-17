@@ -8,6 +8,7 @@
 #   AUDIT_LLM_CONTEXT_WINDOW / AUDIT_LLM_MAX_TOKENS   可选，默认 131072 / 8192
 #   AUDIT_PROJECT_ROOT   当前项目目录；一个 Harness 进程只服务一个项目
 #   AUDIT_PYTHON         内置 Python；AUDIT_APP_ROOT 应用根目录（找 src/audit-mcp/server.py）
+#   AUDIT_STATE_DIR      编排插件的状态目录（任务检查点），按项目区分
 #
 # 原则：只有模型请求和用户添加的外部 MCP 服务会外连；不给模型 shell、文件读写和联网工具。
 
@@ -174,6 +175,20 @@
 
     - id: tool-ask-user
       name: '@deepseek-ai/dsh-tool-ask-user'
+
+    # ---------- 编排插件：底稿任务的固定流程 ----------
+    - id: audit-orchestrator
+      name: ../plugins/orchestrator/index.mjs
+      config:
+        provider: enterprise
+        model: !!js process.env.AUDIT_LLM_MODEL
+        # 任务检查点、编号计数、编排的模型调用记录；一个项目一个目录（launch.mjs 生成）
+        stateDir: !!js process.env.AUDIT_STATE_DIR
+        # 区域语义的关键字段独立采样次数（设计 5.3）；双路复算（设计 7.6）
+        samples: !!js Number(process.env.AUDIT_SEMANTICS_SAMPLES || 3)
+        recompute: !!js process.env.AUDIT_RECOMPUTE !== 'off'
+        # 明显微小错报临界值，差异不超过它时记录后通过；项目档案没有时按 0
+        trivialThreshold: !!js process.env.AUDIT_TRIVIAL_THRESHOLD || '0'
 
     # ---------- 内置审计工具服务 ----------
     - id: mcp-audit
