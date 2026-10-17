@@ -465,10 +465,11 @@ export class TaskRunner {
   async dataProblem(key, candidate, fields, error) {
     const answer = await this.card(`card:data:${key}`, { stage: 'data' }, {
       kind: 'question', title: `资料“${candidate.sheet ?? key}”有无法解析的值`, blocking: true,
-      body: { questions: [{ id: 'q1', text: error.message, options: [{ label: '排除这些值所在的行，继续导入' }, { label: '不用这张表' }], suggest: 1, allowText: false }], error },
+      body: { questions: [{ id: 'q1', text: error.message, options: [{ label: '排除这些值所在的行，继续导入' }, { label: '不用这张表' }], suggest: 0, allowText: false }], error },
       actions: ['confirm', 'reject'], defaultAction: 'confirm',
     })
-    if (answer.action === 'reject' || (answer.edits?.q1 ?? 1) === 1) return null
+    // 不改选项直接确认按建议项：排除无效行继续导入（排除的事记进锚点，结果卡里可见）
+    if (answer.action === 'reject' || (answer.edits?.q1 ?? 0) === 1) return null
     return this.step(`data_import:${key}:exclude`, { stage: 'data' }, () => this.node('data_import', 'code', {}, async () => {
       const env = await this.tool('data_import', { candidate: key, kind: fields.kind, fields: fields.fields, excludeInvalid: true }).catch(e => this.blockOn(e, 'data_import'))
       this.state.anchors.push({ text: `资料“${candidate.sheet ?? key}”中无法解析的值所在行已排除`, basis: 'user', card: answer.card })
