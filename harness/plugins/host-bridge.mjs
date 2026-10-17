@@ -11,6 +11,7 @@
  *   question/respond { id, answers }                   回答模型的追问（ask_user_question）
  *   card/answer      { card, action, edits?, note? }   回答编排插件发出的卡片
  *   bridge/status    {}                                实际生效的插件、模型路由、模型可见工具
+ *   其他插件经 `auditBridge.handle(method, fn)` 注册的请求（编排插件的 task/*、ids/allocate、audit/tool）
  *
  * Harness → 宿主（通知）
  *   session.event / session.status / subagent.*        与 dsh SDK 相同
@@ -20,9 +21,11 @@
  *   question.request { id, sessionId, callId, questions }
  *   question.closed  { id }
  *   card.opened      { sessionId, card }
- *   card.closed      { card, answer | withdrawn }
+ *   card.closed      { sessionId, card, task?, answer | withdrawn }
+ *   其他插件经 `auditBridge.notify(method, params)` 发出的通知（编排插件的 task.event）
  *
- * 编排插件通过本插件提供的 `auditCards` 服务出卡片：`await ctx.auditCards.open(agent, card, signal)`。
+ * 编排插件通过本插件提供的 `auditCards` 服务出卡片：`await ctx.auditCards.open(target, card, signal)`，
+ * target 是 Agent 或 `{ sessionId }`（后台进行的底稿任务不在某一轮对话里）。
  * 卡片回答走宿主请求直接送达等待中的插件，不经过会话消息，也就不会先排进 Agent 的收件箱。
  *
  * 本文件依赖 dsh 的 SDK 服务类和传输类，与 harness/package.json 固定的 dsh 版本一起升级。
@@ -123,37 +126,57 @@ export function apply(ctx, config) {
 
   // ---------- 卡片 ----------
   const cards = new Map()
+  const sessionOfTarget = target => typeof target?.sessionId === 'string' ? target.sessionId : sessionOf(target)
   ctx.provide('auditCards', {
     /**
      * 发出一张卡片并等用户回答。回答格式见《接口约定》5.1：{ card, action, edits, note }。
      * signal 中止（任务取消、轮次取消）时撤回卡片，并以中止原因拒绝。
      */
-    open(agent, card, signal) {
+    open(target, card, signal) {
       if (typeof card?.card !== 'string') throw new TypeError('card.card is required')
       if (cards.has(card.card)) throw new Error('card already open: ' + card.card)
-      const sessionId = sessionOf(agent)
+      const sessionId = sessionOfTarget(target)
+      const task = card.task
       return new Promise((resolve, reject) => {
         const onAbort = () => {
           if (!cards.delete(card.card)) return
-          transport.notify('card.closed', { sessionId, card: card.card, withdrawn: true })
+          transport.notify('card.closed', { sessionId, card: card.card, ...(task ? { task } : {}), withdrawn: true })
           reject(signal.reason ?? new Error('withdrawn'))
         }
         if (signal?.aborted) return reject(signal.reason ?? new Error('withdrawn'))
         signal?.addEventListener('abort', onAbort, { once: true })
         cards.set(card.card, {
           sessionId,
+          task,
           resolve: (answer) => {
             cards.delete(card.card)
             signal?.removeEventListener('abort', onAbort)
-            transport.notify('card.closed', { sessionId, card: card.card, answer })
+            transport.notify('card.closed', { sessionId, card: card.card, ...(task ? { task } : {}), answer })
             resolve(answer)
           },
         })
         transport.notify('card.opened', { sessionId, card })
       })
     },
+    /** 撤回一张已不在内存里的卡片（Harness 重启前发出、续跑时作废的卡片）。 */
+    withdraw(sessionId, cardId, task) {
+      if (cards.has(cardId)) return
+      transport.notify('card.closed', { sessionId, card: cardId, ...(task ? { task } : {}), withdrawn: true })
+    },
     /** 当前未回答的卡片编号。 */
     openCards: () => [...cards.keys()],
+  })
+
+  // ---------- 供其他插件扩展的请求和通知 ----------
+  const extraMethods = new Map()
+  ctx.provide('auditBridge', {
+    notify: (method, params) => transport.notify(method, params),
+    /** 注册一个宿主请求；返回注销函数。 */
+    handle(method, fn) {
+      if (extraMethods.has(method)) throw new Error('method already handled: ' + method)
+      extraMethods.set(method, fn)
+      return () => { if (extraMethods.get(method) === fn) extraMethods.delete(method) }
+    },
   })
 
   function status() {
@@ -213,6 +236,7 @@ export function apply(ctx, config) {
       case 'bridge/status':
         return status()
       default:
+        if (extraMethods.has(method)) return extraMethods.get(method)(params ?? {})
         return server.handleRequest(method, params)
     }
   }
