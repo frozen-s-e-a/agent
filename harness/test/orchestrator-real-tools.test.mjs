@@ -170,8 +170,8 @@ print(json.dumps([[ws['B%d' % r].value for r in range(7, 12)], [ws['B%d' % r].va
     assert.deepEqual(preview.data.cells.map(c => [c.cell, c.value]), [['应收账款!B15', '甲公司'], ['应收账款!C15', '500000']])
   })
 
-  test('序时账有无法解析的值：问用户后排除该行继续', async () => {
-    const { events, cards } = await runTask('invalid', { invalid: true, answers: { question: { action: 'confirm', edits: { q1: 0 } } } })
+  test('序时账有无法解析的值：追问卡默认排除该行，确认后继续', async () => {
+    const { events, cards } = await runTask('invalid', { invalid: true })
     const question = cards.find(c => c.kind === 'question')
     assert.equal(question.body.error.code, 'DATA_INVALID_VALUES')
     assert.equal(question.body.error.detail.invalid[0].samples[0].value, '12万')
