@@ -3,7 +3,9 @@
 标准输入输出上的 MCP 服务器，供 DeepSeek Harness 的 dsh-mcp-client 挂载。只用标准库，
 随应用内置的 Python 直接运行，不需要安装 mcp 包。
 
-- 工具清单来自 src/resources/audit-task-tools.json，每次调用启动一个 task_worker.py 进程执行，
+- 底稿任务的新工具（《接口约定》第三节）在 audit_tools 包里，在本进程内执行：编号、结构图和
+  分析库放在项目状态目录（AUDIT_STATE_DIR），服务重启后仍然有效。
+- 旧工具清单来自 src/resources/audit-task-tools.json，每次调用启动一个 task_worker.py 进程执行，
   沿用现有的项目目录限制、输出目录和结果清单。
 - 每个结果都按《接口约定》2.4 包成信封 {ok, data, warnings, refs, truncated, next}，
   返回给模型的文字按 2.5 控制在约 2,000 token 以内。
@@ -39,12 +41,23 @@ def env_list(name):
     return {item.strip() for item in os.environ.get(name, '').split(',') if item.strip()}
 
 
+def new_tools():
+    """audit_tools 包；依赖（duckdb、openpyxl）缺失时只提供旧工具。"""
+    try:
+        import audit_tools
+        return audit_tools
+    except ImportError as error:
+        sys.stderr.write('audit_tools 不可用：%s\n' % error)
+        return None
+
+
 def load_tools():
     contracts = json.loads(CONTRACTS.read_text(encoding='utf-8-sig'))
     allow, deny = env_list('AUDIT_MCP_TOOLS'), env_list('AUDIT_MCP_DENY')
     if os.environ.get('AUDIT_MCP_ALLOW_NETWORK') != '1':
         deny |= NETWORK_TOOLS
-    tools = []
+    package = new_tools()
+    tools = [tool for tool in (package.listing() if package else []) if not (allow and tool['name'] not in allow) and tool['name'] not in deny]
     for item in contracts:
         name = item['name']
         if (allow and name not in allow) or name in deny:
@@ -131,6 +144,7 @@ class Server:
         self.running = {}
         self.calls = []
         self.tools = {tool['name']: tool for tool in load_tools()}
+        self.package = new_tools()
         root = os.environ.get('AUDIT_PROJECT_ROOT')
         self.root = Path(root).resolve() if root else None
 
@@ -196,7 +210,9 @@ class Server:
             return {'tools': list(self.tools.values())}
         if method == 'notifications/cancelled':
             process = self.running.get(params.get('requestId'))
-            if process:
+            if process == 'in-process':
+                self.package.interrupt(self.root)
+            elif process:
                 process.kill()
             return None
         if method.startswith('notifications/'):
@@ -210,6 +226,12 @@ class Server:
             envelope = failure('ARG_UNKNOWN_TOOL', '未知工具：%s' % name, retryable=True)
         elif self.root is None or not self.root.is_dir():
             envelope = failure('ENV_NO_PROJECT', '没有打开项目目录（AUDIT_PROJECT_ROOT）')
+        elif self.package and name in self.package.TOOLS:
+            self.running[rid] = 'in-process'
+            try:
+                envelope = self.package.call(self.root, name, params.get('arguments') or {})
+            finally:
+                self.running.pop(rid, None)
         else:
             envelope = self.run_task(rid, name, params.get('arguments') or {}, token)
         text = dumps(envelope)
