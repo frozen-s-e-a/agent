@@ -1,5 +1,4 @@
 // 接口约定-20261017 的前端侧类型：流程事件 audit-events/1、前端命令 audit-app/1、界面卡片 audit-cards/1。
-// 标 "provisional" 的字段是接口约定没写清、前端先自定的形状，汇总在 docs/接口缺口.md。
 
 export type Decimal = string; // 十进制字符串，前端不转浮点数计算
 
@@ -347,7 +346,7 @@ export interface TableView {
   highlight?: number | null;
 }
 
-// ---------- 3.9 cell.trace（provisional 返回形状） ----------
+// ---------- cell.trace ----------
 
 export interface CellTrace {
   cell: string;
@@ -404,7 +403,7 @@ export interface McpTestResult {
   error?: { code: string; message: string };
 }
 
-// ---------- 项目、对话、文件、产出（provisional 返回形状） ----------
+// ---------- 项目、对话、文件、产出 ----------
 
 export interface Project {
   project: string;
@@ -419,7 +418,7 @@ export interface SessionSummary {
   title: string;
   lastActive: string;
   tasks: { task: string; status: TaskStatus }[];
-  /** provisional：左栏状态点要的"等你处理" */
+  /** 未处理卡片数，左栏状态点用 */
   openCards?: number;
 }
 
