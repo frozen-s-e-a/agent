@@ -190,11 +190,26 @@ export class TaskRunner {
     this.controller = new AbortController()
     for (const card of this.state.openCards) this.cards.withdraw(this.state.sessionId, card, this.state.task)
     this.state.openCards = []
+    const from = this.state.status
     this.state.status = 'running'
     this.state.blocked = null
     this.save()
+    // 暂停或阻塞后继续：宿主据此马上把任务显示回进行中，不用等下一条进度
+    if (['paused', 'blocked'].includes(from)) this.emit('task.resumed', { from, stage: this.state.stage ?? null })
     this.running = this.loop().finally(() => { this.running = undefined })
     return this.running
+  }
+
+  /**
+   * 应用退出时暂停：存盘并发 task.blocked（paused: true）。
+   * 宿主发 shutdown 时在输出关闭前同步调用；之后流程收到中止再调一次时不重复发。
+   */
+  pause() {
+    if (this.state.status === 'paused') return
+    this.state.status = 'paused'
+    this.state.blocked = { where: this.state.stage ?? null, why: '应用退出，任务中断', suggest: '继续任务', paused: true }
+    this.save()
+    this.emit('task.blocked', this.state.blocked)
   }
 
   cancel() {
@@ -214,9 +229,7 @@ export class TaskRunner {
       }
     } catch (error) {
       if (this.signal?.reason instanceof TaskShutdown) {
-        this.state.status = 'paused'
-        this.state.blocked = { where: this.state.stage, why: '应用退出，任务中断', suggest: '继续任务' }
-        this.save()
+        this.pause()
         return
       }
       if (error instanceof TaskStop || isAbort(error, this.signal)) {
@@ -1142,7 +1155,13 @@ export class TaskRunner {
     return {
       task: s.task, session: s.sessionId, status: s.status, stage: s.stage ?? null,
       deliverables: s.deliverables.map(d => ({ kind: d.kind, file: d.file ?? null, status: d.status, ...(d.output ? { output: d.output } : {}) })),
-      regions: Object.values(s.regions).map(r => ({ region: r.region, state: r.state, attempt: r.attempt, refs: r.refs ?? [], card: r.card ?? null, ...(r.failure ? { reason: r.failure } : {}) })),
+      regions: Object.values(s.regions).map(r => ({
+        region: r.region, range: r.range, type: r.type, purpose: r.semantics?.purpose ?? null,
+        // 宿主画 sheet.view 的区域覆盖层要用（《接口约定》overlay.regions）：表头行、合计行行号、人工填写的格
+        headerRows: r.parsed?.headerRows ?? [], totals: (r.parsed?.totals ?? []).map(t => t.row),
+        manual: [...new Set([...(r.semantics?.manual ?? []), ...(r.basis?.manual ?? [])])],
+        state: r.state, attempt: r.attempt, refs: r.refs ?? [], card: r.card ?? null, ...(r.failure ? { reason: r.failure } : {}),
+      })),
       openCards: [...s.openCards],
       outputs: s.outputs.map(o => o.output),
       ...(s.blocked ? { blocked: s.blocked } : {}),

@@ -117,6 +117,14 @@ describe('编排插件（真实 Harness）', () => {
       // 快照、列表
       const snapshot = await harness.request('task/get', { task })
       assert.deepEqual(snapshot.regions.filter(r => r.region !== 'W-003#R7').map(r => [r.region, r.state, r.attempt]), [[R5, 'written', 2], [R6, 'written', 1]])
+      // 区域覆盖层要用的字段
+      const r5 = snapshot.regions.find(r => r.region === R5)
+      assert.equal(r5.range, '应收账款!A5:E11')
+      assert.equal(r5.type, 'fixed_table')
+      assert.equal(typeof r5.purpose, 'string')
+      assert.deepEqual(r5.headerRows, [5, 6])
+      assert.deepEqual(r5.totals, [11])
+      assert.ok(Array.isArray(r5.manual))
       assert.deepEqual(snapshot.outputs, ['O-0001', 'O-0002'])
       assert.deepEqual(snapshot.openCards, [opened.at(-1).card])
       const list = await harness.request('task/list', {})
@@ -191,6 +199,42 @@ describe('编排插件（真实 Harness）', () => {
       const stages = taskEvents(harness, task).filter(e => e.type === 'stage.changed').map(e => e.data.stage)
       assert.deepEqual(stages.slice(-3), ['fill', 'notes', 'review'])
       assert.ok(!stages.some(s => ['understand', 'workpaper', 'data', 'basis'].includes(s)), stages.join())
+    } finally {
+      stop()
+      await harness.stop()
+      await model.close()
+    }
+  })
+
+  test('正常退出：进行中的任务暂停并通知宿主；继续时发 task.resumed', async () => {
+    const dataDir = fs.mkdtempSync(path.join(scratch, 'data-'))
+    const project = fs.mkdtempSync(path.join(scratch, 'project-'))
+    let { harness, model } = await open({ dataDir, project })
+    let stop = answerCards(harness, { basis_confirmation: null })
+    let task
+    try {
+      ;({ task } = await harness.request('task/create', { sessionId: 'S-e2e4', text: PROMPT, files: Object.values(FILES) }))
+      await harness.waitFor(n => n.method === 'card.opened' && n.params.card.kind === 'basis_confirmation', 60000, 'basis card')
+    } finally {
+      stop()
+      await harness.stop()
+      await model.close()
+    }
+    const paused = taskEvents(harness, task).filter(e => e.type === 'task.blocked')
+    assert.equal(paused.length, 1)
+    assert.equal(paused[0].data.paused, true)
+    assert.equal(paused[0].data.suggest, '继续任务')
+
+    ;({ harness, model } = await open({ dataDir, project }))
+    stop = answerCards(harness)
+    try {
+      assert.deepEqual((await harness.request('task/list', {})).map(t => [t.task, t.status]), [[task, 'paused']])
+      await harness.request('task/resume', { task })
+      const resumed = await harness.waitFor(n => n.method === 'task.event' && n.params.type === 'task.resumed', 10000, 'task.resumed')
+      assert.equal(resumed.params.data.from, 'paused')
+      assert.equal(resumed.params.data.stage, 'compute')
+      const finished = await finishedEvent(harness, task)
+      assert.equal(finished.params.data.status, 'completed')
     } finally {
       stop()
       await harness.stop()
