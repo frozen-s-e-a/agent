@@ -48,3 +48,6 @@ nul
 /scripts/inventory.py
 /scripts/generate-task-templates.py
 /docs/原版MCP迁移.md
+
+# Harness 接入的依赖由 harness/package-lock.json 固定。
+/harness/node_modules/
