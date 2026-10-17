@@ -1,0 +1,93 @@
+{
+  "date": "2026-10-10",
+  "localBusiness": {
+    "cases": 83,
+    "passedCases": 83,
+    "tasksCovered": 63
+  },
+  "clientPipeline": {
+    "passed": 75,
+    "total": 75
+  },
+  "publicServices": {
+    "passed": 5,
+    "total": 5,
+    "tasks": [
+      "ipo_sz",
+      "ipo_sh",
+      "ipo_bj",
+      "currency",
+      "announcement"
+    ]
+  },
+  "liveModels": {
+    "passed": 2,
+    "total": 2,
+    "syntheticInputOnly": true
+  },
+  "cicpa": {
+    "status": "skipped-by-user",
+    "protocolFixturesPassed": true,
+    "liveVerified": false
+  },
+  "ui": {
+    "materials": true,
+    "contextualActions": true,
+    "actualPreview": true,
+    "all79Searchable": true,
+    "ipo3Visible": true,
+    "ipoTypedSetup": true,
+    "favorites": true,
+    "realBuiltinRuns": 2,
+    "resultChaining": true,
+    "historyRestored": true,
+    "resultLibrary": true,
+    "optionalTemplates": 3,
+    "narrowResultsVisible": true,
+    "settings": true
+  },
+  "allRemoteServicesVerified": false,
+  "evidence": {
+    "本地业务验收": {
+      "path": "artifacts/independent-validation/run-8dcee8e7e2/验收记录.json",
+      "sha256": "ba5b477308b5db971ad3ede3af949338f71e28ab62278317077a81d546e1bef1"
+    },
+    "客户端入口验收": {
+      "path": "artifacts/client-pipeline-5PjqWk/客户端任务入口验收.json",
+      "sha256": "8bc44a92396cf8ba62ea9e86da7b32f01a26d28458b59ac62e9dd3f744fac57c"
+    },
+    "公开服务验收": {
+      "path": "artifacts/public-client-jZ5TOw/公开服务客户端验收.json",
+      "sha256": "74c821304474d49dc662bb3e62f3183661b0ef4483088715731eab4e20437887"
+    },
+    "界面操作验收": {
+      "path": "artifacts/workbench-preview-20261008/verification.json",
+      "sha256": "77f59350d476d8e711b3aec6ccc2fc4121f03008124c0e72a35a1efef41be765"
+    },
+    "模型实测": {
+      "path": "artifacts/independent-live-validation/模型实测记录.json",
+      "sha256": "21f5174db0dc14101a4bd5992b59fa8a8c68b74bc85b38cc1f1b3a6fc19c5f49"
+    },
+    "包内业务验收": {
+      "path": "artifacts\\independent-validation\\run-bc308643c5\\验收记录.json",
+      "sha256": "20a89736f99249a7fc316b1261cd3df250834c55ab1f9d03fc2e03e011f13602"
+    },
+    "独立程序启动验收": {
+      "path": "artifacts\\package-validation-qOVHfT\\程序包启动验收.json",
+      "sha256": "4939c8cb4c400fca7b4adfa81467a8ca0e07bad6b4c18d22cbc4f8cc5b18b922"
+    },
+    "启动方式验收": {
+      "path": "artifacts\\launcher-validation-ba652d35\\启动方式验收.json",
+      "sha256": "366529916cc292214635854157056c3640d98c31ea4291fb496a1cc864999943"
+    }
+  },
+  "packagedRuntime": {
+    "cases": 83,
+    "passedCases": 83,
+    "tasksCovered": 63,
+    "desktopCases": 6,
+    "launchers": 2,
+    "shortcutVerified": true,
+    "version": "0.1.0-internal.29"
+  }
+}

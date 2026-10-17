@@ -1,0 +1,3 @@
+- insert:
+    - id: audit-card-demo
+      name: ./card-demo.mjs

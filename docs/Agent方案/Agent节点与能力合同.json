@@ -1,0 +1,5984 @@
+{
+  "workflowVersion": "audit-workflows/1",
+  "planVersion": "audit-plan/1",
+  "stateVersion": "audit-agent-state/1",
+  "runStates": [
+    "running",
+    "waiting_for_user",
+    "completed",
+    "failed",
+    "stopped",
+    "interrupted"
+  ],
+  "workflows": [
+    {
+      "id": "data",
+      "version": "audit-workflows/1",
+      "planVersion": "audit-plan/1",
+      "title": "表格与资料整理",
+      "goal": "检查结构、整理字段，形成可追溯的数据副本。",
+      "toolIds": [
+        "inspect",
+        "file_inventory",
+        "merge_files",
+        "select_column",
+        "fill_column",
+        "merge_column",
+        "add_column",
+        "dropsummary",
+        "text_match",
+        "duplicates",
+        "pdf_text",
+        "mcp_headers_process",
+        "mcp_select_column",
+        "mcp_fill_column",
+        "mcp_merge_column",
+        "mcp_add_column",
+        "mcp_dropsummary",
+        "mcp_text_match",
+        "mcp_data_field_check",
+        "mcp_file_classification",
+        "mcp_insert_column",
+        "mcp_multi_collect_file",
+        "mcp_multi_collect_folder",
+        "mcp_pickup_value"
+      ],
+      "skillIds": [],
+      "inputHint": "Excel、CSV、PDF、资料文件夹",
+      "stages": [
+        {
+          "id": "input",
+          "kind": "input",
+          "title": "确认资料范围",
+          "description": "选择本任务允许使用的文件和文件夹；可以预览内容后再确认。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "输入范围快照"
+          ],
+          "completion": "scope_recorded",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "inspect",
+          "kind": "execute",
+          "title": "检查数据结构",
+          "description": "查看工作表、原始行和列信息。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "input"
+          ],
+          "toolIds": [
+            "inspect",
+            "file_inventory"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "结构报告",
+            "输入清单"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "process",
+          "kind": "execute",
+          "title": "整理资料",
+          "description": "选择本次需要的整理动作，设置字段后执行。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "inspect"
+          ],
+          "toolIds": [
+            "merge_files",
+            "select_column",
+            "fill_column",
+            "merge_column",
+            "add_column",
+            "dropsummary",
+            "text_match",
+            "duplicates",
+            "pdf_text",
+            "mcp_headers_process",
+            "mcp_select_column",
+            "mcp_fill_column",
+            "mcp_merge_column",
+            "mcp_add_column",
+            "mcp_dropsummary",
+            "mcp_text_match",
+            "mcp_data_field_check",
+            "mcp_file_classification",
+            "mcp_insert_column",
+            "mcp_multi_collect_file",
+            "mcp_multi_collect_folder",
+            "mcp_pickup_value"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "整理文件",
+            "处理统计"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "review",
+          "kind": "review",
+          "title": "复核与归档",
+          "description": "查看各阶段实际产物，记录复核意见并归档。疑点和 AI 解释不自动成为审计结论。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "process"
+          ],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "阶段成果汇总",
+            "复核意见",
+            "任务记录包"
+          ],
+          "completion": "review_record_saved",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "scope",
+          "role": "coordinator",
+          "completionRule": "requirements_and_input_scope_saved",
+          "required": true
+        },
+        {
+          "id": "understand",
+          "role": "processor",
+          "completionRule": "parameters_have_sources_or_questions",
+          "required": true
+        },
+        {
+          "id": "execute",
+          "role": "processor",
+          "completionRule": "registered_tool_finished",
+          "required": true
+        },
+        {
+          "id": "validate",
+          "role": "checker",
+          "completionRule": "business_status_and_actual_output_verified",
+          "required": true
+        },
+        {
+          "id": "deliver",
+          "role": "checker",
+          "completionRule": "all_required_steps_verified_no_unresolved_questions",
+          "required": true
+        }
+      ],
+      "contract": {
+        "inputScope": "project_or_conversation_attachments",
+        "outputs": "stage_outputs_and_result_refs",
+        "state": "external_persistent_run",
+        "modelMayOnlyUseRegisteredTools": true
+      }
+    },
+    {
+      "id": "ledger",
+      "version": "audit-workflows/1",
+      "planVersion": "audit-plan/1",
+      "title": "科目、账簿与凭证",
+      "goal": "核对借贷平衡，按 JET 规则识别疑点分录。",
+      "toolIds": [
+        "inspect",
+        "mcp_jet_test_inspect",
+        "mcp_tool_preview",
+        "subject_clean",
+        "mcp_tool_execute",
+        "mcp_asist_split",
+        "mcp_auxiliary_selection",
+        "mcp_subject_allocation",
+        "mcp_subject_clean_after",
+        "voucher_check",
+        "jet_test",
+        "mcp_jet_test_execute",
+        "mcp_ledger_check",
+        "mcp_voucher_check"
+      ],
+      "skillIds": [
+        "jet-test"
+      ],
+      "inputHint": "序时账、总账、科目余额表",
+      "stages": [
+        {
+          "id": "input",
+          "kind": "input",
+          "title": "确认资料范围",
+          "description": "选择本任务允许使用的文件和文件夹；可以预览内容后再确认。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "输入范围快照"
+          ],
+          "completion": "scope_recorded",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "inspect",
+          "kind": "execute",
+          "title": "检查账簿结构",
+          "description": "确认凭证、金额和科目字段。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "input"
+          ],
+          "toolIds": [
+            "inspect",
+            "mcp_jet_test_inspect",
+            "mcp_tool_preview"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "结构检查报告"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "normalize",
+          "kind": "execute",
+          "title": "科目整理（可选）",
+          "description": "仅在字段需要整理时执行，输出可供后续选用。",
+          "required": false,
+          "optional": true,
+          "dependsOn": [
+            "inspect"
+          ],
+          "toolIds": [
+            "subject_clean",
+            "mcp_tool_execute",
+            "mcp_asist_split",
+            "mcp_auxiliary_selection",
+            "mcp_subject_allocation",
+            "mcp_subject_clean_after"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "科目清理结果"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "test",
+          "kind": "execute",
+          "title": "凭证与 JET 测试",
+          "description": "选择借贷核对或 JET 测试，并明确规则和参数。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "normalize"
+          ],
+          "toolIds": [
+            "voucher_check",
+            "jet_test",
+            "mcp_jet_test_execute",
+            "mcp_ledger_check",
+            "mcp_voucher_check"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "疑点分录",
+            "规则命中结果"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "review",
+          "kind": "review",
+          "title": "复核与归档",
+          "description": "查看各阶段实际产物，记录复核意见并归档。疑点和 AI 解释不自动成为审计结论。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "test"
+          ],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "阶段成果汇总",
+            "复核意见",
+            "任务记录包"
+          ],
+          "completion": "review_record_saved",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "scope",
+          "role": "coordinator",
+          "completionRule": "requirements_and_input_scope_saved",
+          "required": true
+        },
+        {
+          "id": "understand",
+          "role": "processor",
+          "completionRule": "parameters_have_sources_or_questions",
+          "required": true
+        },
+        {
+          "id": "execute",
+          "role": "processor",
+          "completionRule": "registered_tool_finished",
+          "required": true
+        },
+        {
+          "id": "validate",
+          "role": "checker",
+          "completionRule": "business_status_and_actual_output_verified",
+          "required": true
+        },
+        {
+          "id": "deliver",
+          "role": "checker",
+          "completionRule": "all_required_steps_verified_no_unresolved_questions",
+          "required": true
+        }
+      ],
+      "contract": {
+        "inputScope": "project_or_conversation_attachments",
+        "outputs": "stage_outputs_and_result_refs",
+        "state": "external_persistent_run",
+        "modelMayOnlyUseRegisteredTools": true
+      }
+    },
+    {
+      "id": "monthly",
+      "version": "audit-workflows/1",
+      "planVersion": "audit-plan/1",
+      "title": "月间分析与测算",
+      "goal": "确认科目和期间口径，分析月度变化与原因线索。",
+      "toolIds": [
+        "inspect",
+        "mcp_monthly_preview",
+        "mcp_monthly_detect_structure",
+        "monthly_analysis",
+        "mcp_monthly_execute",
+        "mcp_gross_margin_analysis",
+        "mcp_monthly_ai_analysis"
+      ],
+      "skillIds": [
+        "monthly-analysis-mcp"
+      ],
+      "inputHint": "本期、上期序时账",
+      "stages": [
+        {
+          "id": "input",
+          "kind": "input",
+          "title": "确认资料范围",
+          "description": "选择本任务允许使用的文件和文件夹；可以预览内容后再确认。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "输入范围快照"
+          ],
+          "completion": "scope_recorded",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "preview",
+          "kind": "execute",
+          "title": "预览期间数据",
+          "description": "读取表头、样本和期间字段。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "input"
+          ],
+          "toolIds": [
+            "inspect",
+            "mcp_monthly_preview"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "数据源概览"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "structure",
+          "kind": "execute",
+          "title": "识别科目结构（可选）",
+          "description": "复杂科目编码可先识别层级，简单数据可直接确认分析字段。",
+          "required": false,
+          "optional": true,
+          "dependsOn": [
+            "preview"
+          ],
+          "toolIds": [
+            "mcp_monthly_detect_structure"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "编码层级报告"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "analysis",
+          "kind": "execute",
+          "title": "确认字段并分析",
+          "description": "确认日期、科目和金额映射后生成月度汇总。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "structure"
+          ],
+          "toolIds": [
+            "monthly_analysis",
+            "mcp_monthly_execute",
+            "mcp_gross_margin_analysis"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "月度汇总表",
+            "变动明细"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "explain",
+          "kind": "execute",
+          "title": "原因分析（可选）",
+          "description": "选择分析结果和原始数据，对确认的科目生成 AI 原因草稿。",
+          "required": false,
+          "optional": true,
+          "dependsOn": [
+            "analysis"
+          ],
+          "toolIds": [
+            "mcp_monthly_ai_analysis"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "AI 原因分析草稿"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "review",
+          "kind": "review",
+          "title": "复核与归档",
+          "description": "查看各阶段实际产物，记录复核意见并归档。疑点和 AI 解释不自动成为审计结论。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "explain"
+          ],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "阶段成果汇总",
+            "复核意见",
+            "任务记录包"
+          ],
+          "completion": "review_record_saved",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "scope",
+          "role": "coordinator",
+          "completionRule": "requirements_and_input_scope_saved",
+          "required": true
+        },
+        {
+          "id": "understand",
+          "role": "processor",
+          "completionRule": "parameters_have_sources_or_questions",
+          "required": true
+        },
+        {
+          "id": "execute",
+          "role": "processor",
+          "completionRule": "registered_tool_finished",
+          "required": true
+        },
+        {
+          "id": "validate",
+          "role": "checker",
+          "completionRule": "business_status_and_actual_output_verified",
+          "required": true
+        },
+        {
+          "id": "deliver",
+          "role": "checker",
+          "completionRule": "all_required_steps_verified_no_unresolved_questions",
+          "required": true
+        }
+      ],
+      "contract": {
+        "inputScope": "project_or_conversation_attachments",
+        "outputs": "stage_outputs_and_result_refs",
+        "state": "external_persistent_run",
+        "modelMayOnlyUseRegisteredTools": true
+      }
+    },
+    {
+      "id": "sampling",
+      "version": "audit-workflows/1",
+      "planVersion": "audit-plan/1",
+      "title": "抽凭与抽样",
+      "goal": "检查总体，按截止测试配置生成样本并留存依据。",
+      "toolIds": [
+        "inspect",
+        "mcp_cutoff_sampling"
+      ],
+      "skillIds": [],
+      "inputHint": "交易明细、凭证、截止抽样配置表",
+      "note": "当前接口提供截止测试抽样；其他抽样方法尚未注册，不能在此执行。",
+      "stages": [
+        {
+          "id": "input",
+          "kind": "input",
+          "title": "确认资料范围",
+          "description": "选择本任务允许使用的文件和文件夹；可以预览内容后再确认。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "输入范围快照"
+          ],
+          "completion": "scope_recorded",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "population",
+          "kind": "execute",
+          "title": "检查总体",
+          "description": "查看数据源结构，复核配置表中的总体和期间范围。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "input"
+          ],
+          "toolIds": [
+            "inspect"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "总体数据预览"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "sample",
+          "kind": "execute",
+          "title": "截止测试抽样",
+          "description": "选择配置表，确认配置中的日期范围、样本条件和输出目录。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "population"
+          ],
+          "toolIds": [
+            "mcp_cutoff_sampling"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "样本清单",
+            "抽样工具报告"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "review",
+          "kind": "review",
+          "title": "复核与归档",
+          "description": "查看各阶段实际产物，记录复核意见并归档。疑点和 AI 解释不自动成为审计结论。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "sample"
+          ],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "阶段成果汇总",
+            "复核意见",
+            "任务记录包"
+          ],
+          "completion": "review_record_saved",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "scope",
+          "role": "coordinator",
+          "completionRule": "requirements_and_input_scope_saved",
+          "required": true
+        },
+        {
+          "id": "understand",
+          "role": "processor",
+          "completionRule": "parameters_have_sources_or_questions",
+          "required": true
+        },
+        {
+          "id": "execute",
+          "role": "processor",
+          "completionRule": "registered_tool_finished",
+          "required": true
+        },
+        {
+          "id": "validate",
+          "role": "checker",
+          "completionRule": "business_status_and_actual_output_verified",
+          "required": true
+        },
+        {
+          "id": "deliver",
+          "role": "checker",
+          "completionRule": "all_required_steps_verified_no_unresolved_questions",
+          "required": true
+        }
+      ],
+      "contract": {
+        "inputScope": "project_or_conversation_attachments",
+        "outputs": "stage_outputs_and_result_refs",
+        "state": "external_persistent_run",
+        "modelMayOnlyUseRegisteredTools": true
+      }
+    },
+    {
+      "id": "bank",
+      "version": "audit-workflows/1",
+      "planVersion": "audit-plan/1",
+      "title": "银行业务",
+      "goal": "汇集银行流水，双向核对账务并生成函证。",
+      "toolIds": [
+        "mcp_bankflowmerge",
+        "mcp_bank_flow",
+        "mcp_bank_digit2",
+        "mcp_bank_paper1",
+        "mcp_bank_paper2"
+      ],
+      "skillIds": [],
+      "inputHint": "银行流水、序时账、函证配置表",
+      "stages": [
+        {
+          "id": "input",
+          "kind": "input",
+          "title": "确认资料范围",
+          "description": "选择本任务允许使用的文件和文件夹；可以预览内容后再确认。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "输入范围快照"
+          ],
+          "completion": "scope_recorded",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "merge",
+          "kind": "execute",
+          "title": "汇集流水（可选）",
+          "description": "按文件确认表头、银行、账户和交易字段。",
+          "required": false,
+          "optional": true,
+          "dependsOn": [
+            "input"
+          ],
+          "toolIds": [
+            "mcp_bankflowmerge"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "合并流水"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "reconcile",
+          "kind": "execute",
+          "title": "双向核对",
+          "description": "分别指定序时账和银行流水，核对金额、日期与对手方。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "merge"
+          ],
+          "toolIds": [
+            "mcp_bank_flow"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "核对报告",
+            "未匹配流水"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "letter",
+          "kind": "execute",
+          "title": "生成函证（可选）",
+          "description": "根据函证配置表选择电子或纸质格式。",
+          "required": false,
+          "optional": true,
+          "dependsOn": [
+            "reconcile"
+          ],
+          "toolIds": [
+            "mcp_bank_digit2",
+            "mcp_bank_paper1",
+            "mcp_bank_paper2"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "银行函证文件"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "review",
+          "kind": "review",
+          "title": "复核与归档",
+          "description": "查看各阶段实际产物，记录复核意见并归档。疑点和 AI 解释不自动成为审计结论。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "letter"
+          ],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "阶段成果汇总",
+            "复核意见",
+            "任务记录包"
+          ],
+          "completion": "review_record_saved",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "scope",
+          "role": "coordinator",
+          "completionRule": "requirements_and_input_scope_saved",
+          "required": true
+        },
+        {
+          "id": "understand",
+          "role": "processor",
+          "completionRule": "parameters_have_sources_or_questions",
+          "required": true
+        },
+        {
+          "id": "execute",
+          "role": "processor",
+          "completionRule": "registered_tool_finished",
+          "required": true
+        },
+        {
+          "id": "validate",
+          "role": "checker",
+          "completionRule": "business_status_and_actual_output_verified",
+          "required": true
+        },
+        {
+          "id": "deliver",
+          "role": "checker",
+          "completionRule": "all_required_steps_verified_no_unresolved_questions",
+          "required": true
+        }
+      ],
+      "contract": {
+        "inputScope": "project_or_conversation_attachments",
+        "outputs": "stage_outputs_and_result_refs",
+        "state": "external_persistent_run",
+        "modelMayOnlyUseRegisteredTools": true
+      }
+    },
+    {
+      "id": "workpaper",
+      "version": "audit-workflows/1",
+      "planVersion": "audit-plan/1",
+      "title": "底稿与明细表",
+      "goal": "检查源数据和模板，保存映射、校验并生成底稿。",
+      "toolIds": [
+        "mcp_detailed_table_inspect",
+        "mcp_detailed_table_inspect_template",
+        "mcp_detailed_table_save_config",
+        "mcp_detailed_table_validate",
+        "mcp_detailed_table_generate",
+        "mcp_xlsx_writer",
+        "workbook_fill"
+      ],
+      "skillIds": [
+        "detailed-table-generation"
+      ],
+      "inputHint": "源数据、模板文件夹、工作目录",
+      "note": "普通模板可按受控来源映射直接填写并重读，无需批注。旧明细表工具仍需按原配置合同执行。",
+      "stages": [
+        {
+          "id": "input",
+          "kind": "input",
+          "title": "确认资料范围",
+          "description": "选择本任务允许使用的文件和文件夹；可以预览内容后再确认。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "输入范围快照"
+          ],
+          "completion": "scope_recorded",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "source",
+          "kind": "execute",
+          "title": "检查源数据",
+          "description": "识别公司、科目和源字段。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "input"
+          ],
+          "toolIds": [
+            "mcp_detailed_table_inspect"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "数据源检查报告"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "template",
+          "kind": "execute",
+          "title": "检查模板",
+          "description": "读取模板工作表与批注字段。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "source"
+          ],
+          "toolIds": [
+            "mcp_detailed_table_inspect_template"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "模板字段清单"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "configure",
+          "kind": "execute",
+          "title": "保存映射配置",
+          "description": "分别保存路径、字段、科目、模板分配等配置，可在本阶段多次保存后确认。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "template"
+          ],
+          "toolIds": [
+            "mcp_detailed_table_save_config"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "配置保存记录"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "validate",
+          "kind": "execute",
+          "title": "校验配置",
+          "description": "验证配置完整性与源数据一致性，查看报告后确认。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "configure"
+          ],
+          "toolIds": [
+            "mcp_detailed_table_validate"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "校验报告"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "generate",
+          "kind": "execute",
+          "title": "生成底稿",
+          "description": "按已确认配置生成文件；覆盖选项默认关闭。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "validate"
+          ],
+          "toolIds": [
+            "mcp_detailed_table_generate",
+            "mcp_xlsx_writer",
+            "workbook_fill"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "底稿文件",
+            "生成报告"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "review",
+          "kind": "review",
+          "title": "复核与归档",
+          "description": "查看各阶段实际产物，记录复核意见并归档。疑点和 AI 解释不自动成为审计结论。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "generate"
+          ],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "阶段成果汇总",
+            "复核意见",
+            "任务记录包"
+          ],
+          "completion": "review_record_saved",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "scope",
+          "role": "coordinator",
+          "completionRule": "requirements_and_input_scope_saved",
+          "required": true
+        },
+        {
+          "id": "understand",
+          "role": "processor",
+          "completionRule": "parameters_have_sources_or_questions",
+          "required": true
+        },
+        {
+          "id": "execute",
+          "role": "processor",
+          "completionRule": "registered_tool_finished",
+          "required": true
+        },
+        {
+          "id": "validate",
+          "role": "checker",
+          "completionRule": "business_status_and_actual_output_verified",
+          "required": true
+        },
+        {
+          "id": "deliver",
+          "role": "checker",
+          "completionRule": "all_required_steps_verified_no_unresolved_questions",
+          "required": true
+        }
+      ],
+      "contract": {
+        "inputScope": "project_or_conversation_attachments",
+        "outputs": "stage_outputs_and_result_refs",
+        "state": "external_persistent_run",
+        "modelMayOnlyUseRegisteredTools": true
+      }
+    },
+    {
+      "id": "disclosure",
+      "version": "audit-workflows/1",
+      "planVersion": "audit-plan/1",
+      "title": "披露、附注与链接",
+      "goal": "提取披露口径与表格，检查引用和附注批注。",
+      "toolIds": [
+        "mcp_extract_disclosure_scope",
+        "mcp_extract_disclosure_tables",
+        "link_extract",
+        "mcp_link_extractor",
+        "mcp_insert_footnote_comments",
+        "mcp_link_ref_replace",
+        "mcp_link_replace_range",
+        "mcp_link_replace_text",
+        "mcp_link_replace_workbook"
+      ],
+      "skillIds": [],
+      "inputHint": "披露配置、附注、Excel 底稿",
+      "stages": [
+        {
+          "id": "input",
+          "kind": "input",
+          "title": "确认资料范围",
+          "description": "选择本任务允许使用的文件和文件夹；可以预览内容后再确认。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "输入范围快照"
+          ],
+          "completion": "scope_recorded",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "scope",
+          "kind": "execute",
+          "title": "提取披露口径（可选）",
+          "description": "从配置表指定的资料提取披露范围。",
+          "required": false,
+          "optional": true,
+          "dependsOn": [
+            "input"
+          ],
+          "toolIds": [
+            "mcp_extract_disclosure_scope"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "披露范围"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "tables",
+          "kind": "execute",
+          "title": "提取披露表（可选）",
+          "description": "按配置提取披露表并核对范围。",
+          "required": false,
+          "optional": true,
+          "dependsOn": [
+            "scope"
+          ],
+          "toolIds": [
+            "mcp_extract_disclosure_tables"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "披露表"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "links",
+          "kind": "execute",
+          "title": "检查链接与批注",
+          "description": "选择链接提取或所需维护动作，执行前核对影响文件。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "tables"
+          ],
+          "toolIds": [
+            "link_extract",
+            "mcp_link_extractor",
+            "mcp_insert_footnote_comments",
+            "mcp_link_ref_replace",
+            "mcp_link_replace_range",
+            "mcp_link_replace_text",
+            "mcp_link_replace_workbook"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "链接或批注处理结果"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "review",
+          "kind": "review",
+          "title": "复核与归档",
+          "description": "查看各阶段实际产物，记录复核意见并归档。疑点和 AI 解释不自动成为审计结论。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "links"
+          ],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "阶段成果汇总",
+            "复核意见",
+            "任务记录包"
+          ],
+          "completion": "review_record_saved",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "scope",
+          "role": "coordinator",
+          "completionRule": "requirements_and_input_scope_saved",
+          "required": true
+        },
+        {
+          "id": "understand",
+          "role": "processor",
+          "completionRule": "parameters_have_sources_or_questions",
+          "required": true
+        },
+        {
+          "id": "execute",
+          "role": "processor",
+          "completionRule": "registered_tool_finished",
+          "required": true
+        },
+        {
+          "id": "validate",
+          "role": "checker",
+          "completionRule": "business_status_and_actual_output_verified",
+          "required": true
+        },
+        {
+          "id": "deliver",
+          "role": "checker",
+          "completionRule": "all_required_steps_verified_no_unresolved_questions",
+          "required": true
+        }
+      ],
+      "contract": {
+        "inputScope": "project_or_conversation_attachments",
+        "outputs": "stage_outputs_and_result_refs",
+        "state": "external_persistent_run",
+        "modelMayOnlyUseRegisteredTools": true
+      }
+    },
+    {
+      "id": "external",
+      "version": "audit-workflows/1",
+      "planVersion": "audit-plan/1",
+      "title": "关联方与外部查询",
+      "goal": "查询主体信息，整理关联线索及来源证据。",
+      "toolIds": [
+        "mcp_cicpa_query",
+        "mcp_qcc_processor",
+        "mcp_announcement",
+        "mcp_ipo_bj",
+        "mcp_ipo_sh",
+        "mcp_ipo_sz",
+        "mcp_related_party"
+      ],
+      "skillIds": [
+        "related-party-identification",
+        "cicpa-query"
+      ],
+      "inputHint": "企业名称、工商资料、关联方名单",
+      "note": "外部查询需要对应服务授权和网络连接，查询时间及原始响应随任务保留。",
+      "stages": [
+        {
+          "id": "input",
+          "kind": "input",
+          "title": "确认资料范围",
+          "description": "选择本任务允许使用的文件和文件夹；可以预览内容后再确认。",
+          "required": false,
+          "optional": true,
+          "dependsOn": [],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "输入范围快照"
+          ],
+          "completion": "scope_recorded",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "query",
+          "kind": "execute",
+          "title": "查询主体信息",
+          "description": "选择工商查询、公告下载或已有企查查报告处理。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "input"
+          ],
+          "toolIds": [
+            "mcp_cicpa_query",
+            "mcp_qcc_processor",
+            "mcp_announcement",
+            "mcp_ipo_bj",
+            "mcp_ipo_sh",
+            "mcp_ipo_sz"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "主体查询结果",
+            "来源记录"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "related",
+          "kind": "execute",
+          "title": "识别关联方（可选）",
+          "description": "指定被审计单位和工商资料目录，识别需要人工确认的关系。",
+          "required": false,
+          "optional": true,
+          "dependsOn": [
+            "query"
+          ],
+          "toolIds": [
+            "mcp_related_party"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "疑似关联方",
+            "匹配依据"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "review",
+          "kind": "review",
+          "title": "复核与归档",
+          "description": "查看各阶段实际产物，记录复核意见并归档。疑点和 AI 解释不自动成为审计结论。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "related"
+          ],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "阶段成果汇总",
+            "复核意见",
+            "任务记录包"
+          ],
+          "completion": "review_record_saved",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "scope",
+          "role": "coordinator",
+          "completionRule": "requirements_and_input_scope_saved",
+          "required": true
+        },
+        {
+          "id": "understand",
+          "role": "processor",
+          "completionRule": "parameters_have_sources_or_questions",
+          "required": true
+        },
+        {
+          "id": "execute",
+          "role": "processor",
+          "completionRule": "registered_tool_finished",
+          "required": true
+        },
+        {
+          "id": "validate",
+          "role": "checker",
+          "completionRule": "business_status_and_actual_output_verified",
+          "required": true
+        },
+        {
+          "id": "deliver",
+          "role": "checker",
+          "completionRule": "all_required_steps_verified_no_unresolved_questions",
+          "required": true
+        }
+      ],
+      "contract": {
+        "inputScope": "project_or_conversation_attachments",
+        "outputs": "stage_outputs_and_result_refs",
+        "state": "external_persistent_run",
+        "modelMayOnlyUseRegisteredTools": true
+      }
+    },
+    {
+      "id": "aux",
+      "version": "audit-workflows/1",
+      "planVersion": "audit-plan/1",
+      "title": "信息提取与辅助处理",
+      "goal": "提取 PDF 与图片内容，解析地址和身份信息。",
+      "toolIds": [
+        "pdf_text",
+        "mcp_info_extract",
+        "mcp_info_extract_multi",
+        "mcp_address_split",
+        "mcp_id_card",
+        "mcp_paper_verify",
+        "mcp_photo_rename",
+        "mcp_ai_formula_filler",
+        "mcp_currency"
+      ],
+      "skillIds": [],
+      "inputHint": "PDF、图片、文本、处理配置表",
+      "stages": [
+        {
+          "id": "input",
+          "kind": "input",
+          "title": "确认资料范围",
+          "description": "选择本任务允许使用的文件和文件夹；可以预览内容后再确认。",
+          "required": false,
+          "optional": true,
+          "dependsOn": [],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "输入范围快照"
+          ],
+          "completion": "scope_recorded",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "extract",
+          "kind": "execute",
+          "title": "选择处理任务",
+          "description": "按资料类型选择提取、解析或辅助核对能力。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "input"
+          ],
+          "toolIds": [
+            "pdf_text",
+            "mcp_info_extract",
+            "mcp_info_extract_multi",
+            "mcp_address_split",
+            "mcp_id_card",
+            "mcp_paper_verify",
+            "mcp_photo_rename",
+            "mcp_ai_formula_filler",
+            "mcp_currency"
+          ],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "verifyTaskArtifacts"
+          },
+          "inputs": {
+            "files": "selected_project_or_attachment_files",
+            "parameters": "tool_contract"
+          },
+          "outputs": [
+            "结构化结果",
+            "处理报告"
+          ],
+          "completion": "task.succeeded_and_result_validated",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        },
+        {
+          "id": "review",
+          "kind": "review",
+          "title": "复核与归档",
+          "description": "查看各阶段实际产物，记录复核意见并归档。疑点和 AI 解释不自动成为审计结论。",
+          "required": true,
+          "optional": false,
+          "dependsOn": [
+            "extract"
+          ],
+          "toolIds": [],
+          "version": "audit-workflows/1",
+          "context": {
+            "required": [
+              "original_requirements",
+              "input_versions",
+              "unresolved_questions",
+              "dependency_results",
+              "actual_execution_status"
+            ],
+            "evidence": "read_saved_inputs_or_validated_task_results",
+            "allowedReadTools": [
+              "list_local_files",
+              "preview_local_file",
+              "get_agent_evidence",
+              "get_task_result",
+              "load_task_outputs",
+              "read_agent_result"
+            ],
+            "outputCheck": "persist_node_record"
+          },
+          "inputs": {
+            "files": "user_selected_scope"
+          },
+          "outputs": [
+            "阶段成果汇总",
+            "复核意见",
+            "任务记录包"
+          ],
+          "completion": "review_record_saved",
+          "failure": "retain_actual_error_and_enter_repair_or_waiting_state"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "scope",
+          "role": "coordinator",
+          "completionRule": "requirements_and_input_scope_saved",
+          "required": true
+        },
+        {
+          "id": "understand",
+          "role": "processor",
+          "completionRule": "parameters_have_sources_or_questions",
+          "required": true
+        },
+        {
+          "id": "execute",
+          "role": "processor",
+          "completionRule": "registered_tool_finished",
+          "required": true
+        },
+        {
+          "id": "validate",
+          "role": "checker",
+          "completionRule": "business_status_and_actual_output_verified",
+          "required": true
+        },
+        {
+          "id": "deliver",
+          "role": "checker",
+          "completionRule": "all_required_steps_verified_no_unresolved_questions",
+          "required": true
+        }
+      ],
+      "contract": {
+        "inputScope": "project_or_conversation_attachments",
+        "outputs": "stage_outputs_and_result_refs",
+        "state": "external_persistent_run",
+        "modelMayOnlyUseRegisteredTools": true
+      }
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "inspect",
+      "name": "查看数据结构",
+      "engine": "builtin",
+      "entry": "inspect",
+      "contractHash": "e78c98899e7aa32b171d24457c293bbe8a3eddb90037fac03c2ac6080fcfa8e4",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "inspect",
+          "stageTitle": "检查数据结构",
+          "required": true,
+          "toolId": "inspect"
+        },
+        {
+          "workflowId": "ledger",
+          "stageId": "inspect",
+          "stageTitle": "检查账簿结构",
+          "required": true,
+          "toolId": "inspect"
+        },
+        {
+          "workflowId": "monthly",
+          "stageId": "preview",
+          "stageTitle": "预览期间数据",
+          "required": true,
+          "toolId": "inspect"
+        },
+        {
+          "workflowId": "sampling",
+          "stageId": "population",
+          "stageTitle": "检查总体",
+          "required": true,
+          "toolId": "inspect"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "headerRow",
+          "label": "表头行",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "sheets",
+          "label": "工作表名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "encoding",
+          "label": "CSV 编码",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "select_column",
+      "name": "选择列",
+      "engine": "builtin",
+      "entry": "select_column",
+      "contractHash": "ab5977538ff199efca7ca57e437e0d54e71f0d586c9228c5926fa8b8c9aab750",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "select_column"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "columns",
+          "label": "列名（逗号分隔）",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "headerRow",
+          "label": "表头行",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "sheets",
+          "label": "工作表名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "encoding",
+          "label": "CSV 编码",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "fill_column",
+      "name": "向下填充空值",
+      "engine": "builtin",
+      "entry": "fill_column",
+      "contractHash": "4f46f1e2857079435d55d73494aba2fda74f634f689cc0c4e61d6a57866abf9c",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "fill_column"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "columns",
+          "label": "需要填充的列名",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "headerRow",
+          "label": "表头行",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "sheets",
+          "label": "工作表名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "encoding",
+          "label": "CSV 编码",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "merge_files",
+      "name": "多表汇集",
+      "engine": "builtin",
+      "entry": "merge_files",
+      "contractHash": "e78c98899e7aa32b171d24457c293bbe8a3eddb90037fac03c2ac6080fcfa8e4",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "merge_files"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "headerRow",
+          "label": "表头行",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "sheets",
+          "label": "工作表名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "encoding",
+          "label": "CSV 编码",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "merge_column",
+      "name": "多列合并",
+      "engine": "builtin",
+      "entry": "merge_column",
+      "contractHash": "0b899009bdeeb73e6515c44b591f79f4f053255cc1011594a1cb8ad6666abda9",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "merge_column"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "columns",
+          "label": "要合并的列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "target",
+          "label": "新列名",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "separator",
+          "label": "分隔符",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "headerRow",
+          "label": "表头行",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "sheets",
+          "label": "工作表名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "encoding",
+          "label": "CSV 编码",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "add_column",
+      "name": "新增固定值列",
+      "engine": "builtin",
+      "entry": "add_column",
+      "contractHash": "8cd4dcc829832d3ec7461b5b15782f44c1b8fd524823cdb1af164762d62c92c1",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "add_column"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "target",
+          "label": "新列名",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "value",
+          "label": "填充值",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "headerRow",
+          "label": "表头行",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "sheets",
+          "label": "工作表名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "encoding",
+          "label": "CSV 编码",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "dropsummary",
+      "name": "删除合计行",
+      "engine": "builtin",
+      "entry": "dropsummary",
+      "contractHash": "b81ac1bd56f11674ad48c5b5b32aa171445f12e35d820239b4cae86d58d05c31",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "dropsummary"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "column",
+          "label": "判断列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "values",
+          "label": "完整匹配值（逗号分隔）",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "headerRow",
+          "label": "表头行",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "sheets",
+          "label": "工作表名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "encoding",
+          "label": "CSV 编码",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "text_match",
+      "name": "文本筛选匹配",
+      "engine": "builtin",
+      "entry": "text_match",
+      "contractHash": "bac1741d104040c806a794570e381fc72bce363d4e98724be04c2fd8d21792b2",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "text_match"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "column",
+          "label": "匹配列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "keyword",
+          "label": "包含文字",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "headerRow",
+          "label": "表头行",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "sheets",
+          "label": "工作表名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "encoding",
+          "label": "CSV 编码",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "subject_clean",
+      "name": "科目字段清理",
+      "engine": "builtin",
+      "entry": "subject_clean",
+      "contractHash": "44e56a0ced690b6ac44240600413073c902ef937fcb0c05aba612975ebd5080e",
+      "bindings": [
+        {
+          "workflowId": "ledger",
+          "stageId": "normalize",
+          "stageTitle": "科目整理（可选）",
+          "required": false,
+          "toolId": "subject_clean"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "columns",
+          "label": "科目代码、名称列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "headerRow",
+          "label": "表头行",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "sheets",
+          "label": "工作表名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "encoding",
+          "label": "CSV 编码",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "voucher_check",
+      "name": "凭证借贷核对",
+      "engine": "builtin",
+      "entry": "voucher_check",
+      "contractHash": "4ba1da4befdddce1499fb88ba0a46f6ec18e19376d79a694e05d3450b545983d",
+      "bindings": [
+        {
+          "workflowId": "ledger",
+          "stageId": "test",
+          "stageTitle": "凭证与 JET 测试",
+          "required": true,
+          "toolId": "voucher_check"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "keys",
+          "label": "凭证分组列（含主体、期间、凭证编号）",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "debit",
+          "label": "借方金额列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "credit",
+          "label": "贷方金额列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "tolerance",
+          "label": "允许差额",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "headerRow",
+          "label": "表头行",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "sheets",
+          "label": "工作表名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "encoding",
+          "label": "CSV 编码",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "monthly_analysis",
+      "name": "月间分析",
+      "engine": "builtin",
+      "entry": "monthly_analysis",
+      "contractHash": "2065a58ca4768b699e89a0ab469b51207e802ee4e1a1ea142fcad43bc19023f8",
+      "bindings": [
+        {
+          "workflowId": "monthly",
+          "stageId": "analysis",
+          "stageTitle": "确认字段并分析",
+          "required": true,
+          "toolId": "monthly_analysis"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "date",
+          "label": "日期列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "subject",
+          "label": "科目代码列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "subjects",
+          "label": "需要分析的科目代码（精确匹配）",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "debit",
+          "label": "借方金额列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "credit",
+          "label": "贷方金额列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "headerRow",
+          "label": "表头行",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "sheets",
+          "label": "工作表名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "encoding",
+          "label": "CSV 编码",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "duplicates",
+      "name": "全局重复检查",
+      "engine": "builtin",
+      "entry": "duplicates",
+      "contractHash": "fbc0d80d66e0bac1f682a973ed21b9cd347fbf607bb5a0c1d5061e6fd29d8f10",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "duplicates"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "keys",
+          "label": "重复判断列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "headerRow",
+          "label": "表头行",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "sheets",
+          "label": "工作表名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "encoding",
+          "label": "CSV 编码",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "jet_test",
+      "name": "JET 会计分录测试",
+      "engine": "builtin",
+      "entry": "jet_test",
+      "contractHash": "0babc0bb321ec5ae0cde5310e858fe67319a9c8277544e39011470d001dfc985",
+      "bindings": [
+        {
+          "workflowId": "ledger",
+          "stageId": "test",
+          "stageTitle": "凭证与 JET 测试",
+          "required": true,
+          "toolId": "jet_test"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "rules",
+          "label": "规则名称（逗号分隔；在下方选择）",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "headerRow",
+          "label": "表头行",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "sheets",
+          "label": "工作表名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "encoding",
+          "label": "CSV 编码",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "mapping",
+          "label": "JET 标准字段映射",
+          "kind": "json",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "keys",
+          "label": "凭证分组列",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "file_inventory",
+      "name": "文件资料清单",
+      "engine": "builtin",
+      "entry": "file_inventory",
+      "contractHash": "e54ba204cc3a922b86de3ef589360375b9335a0c043c2180150928f6f7b31d79",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "inspect",
+          "stageTitle": "检查数据结构",
+          "required": true,
+          "toolId": "file_inventory"
+        }
+      ],
+      "inputs": [],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "pdf_text",
+      "name": "PDF 文本提取",
+      "engine": "builtin",
+      "entry": "pdf_text",
+      "contractHash": "547b713d4516458c64719ae90ac87109072d32ecff66b4e5b4a5d585a81f5ccd",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "pdf_text"
+        },
+        {
+          "workflowId": "aux",
+          "stageId": "extract",
+          "stageTitle": "选择处理任务",
+          "required": true,
+          "toolId": "pdf_text"
+        }
+      ],
+      "inputs": [],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "link_extract",
+      "name": "Excel 链接提取",
+      "engine": "builtin",
+      "entry": "link_extract",
+      "contractHash": "6c61bb5764811581c742bc9e70a4253c1dba8f7fb6dfca9f8c4f81180c4119aa",
+      "bindings": [
+        {
+          "workflowId": "disclosure",
+          "stageId": "links",
+          "stageTitle": "检查链接与批注",
+          "required": true,
+          "toolId": "link_extract"
+        }
+      ],
+      "inputs": [],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "workbook_fill",
+      "name": "填写普通工作簿模板",
+      "engine": "builtin",
+      "entry": "workbook_fill",
+      "contractHash": "e2b2107f346723b547441be071196c49d73bf42f60556fd35814031a553352b7",
+      "bindings": [
+        {
+          "workflowId": "workpaper",
+          "stageId": "generate",
+          "stageTitle": "生成底稿",
+          "required": true,
+          "toolId": "workbook_fill"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "plan",
+          "label": "填写计划",
+          "kind": "json",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "expectedPlanHash",
+          "label": "已验证计划版本",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_add_column",
+      "name": "合并同名列",
+      "engine": "mcp",
+      "entry": "add_column",
+      "contractHash": "659d023d6fe3daf417034b1739e8c13c69b19769e9a34a463b58418c55cbc009",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "mcp_add_column"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "keyword",
+          "label": "文件名关键词",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "column_name",
+          "label": "待合并列名",
+          "kind": "column",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "delimiter",
+          "label": "连接符",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "max_column_num",
+          "label": "最大列数",
+          "kind": "column",
+          "required": true,
+          "type": "number"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_address_split",
+      "name": "函证地址拆分成省市区",
+      "engine": "mcp",
+      "entry": "address_split",
+      "contractHash": "60894abfd132bb5fdc3dd3d85d5c7f4018bde118b955b5da433131379d4a3263",
+      "bindings": [
+        {
+          "workflowId": "aux",
+          "stageId": "extract",
+          "stageTitle": "选择处理任务",
+          "required": true,
+          "toolId": "mcp_address_split"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "address_column",
+          "label": "Excel列名",
+          "kind": "column",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "address_list",
+          "label": "直接查询地址",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_ai_formula_filler",
+      "name": "AI 智能公式填充 🎯",
+      "engine": "mcp",
+      "entry": "ai_formula_filler",
+      "contractHash": "dda2f1af112eca5925fd9abecc099ff47479be380bc9ba8b19c0b8bcedb56c46",
+      "bindings": [
+        {
+          "workflowId": "aux",
+          "stageId": "extract",
+          "stageTitle": "选择处理任务",
+          "required": true,
+          "toolId": "mcp_ai_formula_filler"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_announcement",
+      "name": "公告下载",
+      "engine": "mcp",
+      "entry": "announcement",
+      "contractHash": "dfac8ef05d6721bfd48463a8bb65df968b9264d474a91ebdacb3f851700a539f",
+      "bindings": [
+        {
+          "workflowId": "external",
+          "stageId": "query",
+          "stageTitle": "查询主体信息",
+          "required": true,
+          "toolId": "mcp_announcement"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "stock_codes",
+          "label": "股票代码列表",
+          "required": true,
+          "type": "array"
+        },
+        {
+          "key": "start_date",
+          "label": "开始日期",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "end_date",
+          "label": "结束日期",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "market_type",
+          "label": "市场板块",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "category_name",
+          "label": "公告类型",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "keyword",
+          "label": "标题关键词",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_asist_split",
+      "name": "辅助项拆分工具",
+      "engine": "mcp",
+      "entry": "asist_split",
+      "contractHash": "c859bc0761c795afe48c5608779f8543633ce5dd22d36d9a7bafd2cd45278c75",
+      "bindings": [
+        {
+          "workflowId": "ledger",
+          "stageId": "normalize",
+          "stageTitle": "科目整理（可选）",
+          "required": false,
+          "toolId": "mcp_asist_split"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "keyword",
+          "label": "文件名关键词",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "col_name",
+          "label": "辅助项列名",
+          "kind": "column",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "kv_sep",
+          "label": "辅助项分隔符",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "item_sep",
+          "label": "辅助项拆分符",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_auxiliary_selection",
+      "name": "辅助项智能选择",
+      "engine": "mcp",
+      "entry": "auxiliary_selection",
+      "contractHash": "268766280013e0dfadc7239f67c8d8eff8fa7ebad98bb5682651fb2c1d87f482",
+      "bindings": [
+        {
+          "workflowId": "ledger",
+          "stageId": "normalize",
+          "stageTitle": "科目整理（可选）",
+          "required": false,
+          "toolId": "mcp_auxiliary_selection"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_bank_digit2",
+      "name": "银行函证表格生成-电子格式二",
+      "engine": "mcp",
+      "entry": "bank_digit2",
+      "contractHash": "b8bcf92dc5db7b8b5c3db40b174766cf3190ea851b32b2b194bea102ce9ea5fb",
+      "bindings": [
+        {
+          "workflowId": "bank",
+          "stageId": "letter",
+          "stageTitle": "生成函证（可选）",
+          "required": false,
+          "toolId": "mcp_bank_digit2"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_bank_flow",
+      "name": "序时账与流水双向核对",
+      "engine": "mcp",
+      "entry": "bank_flow",
+      "contractHash": "e891d2d3ebd53b77959e63f6933a4ef4d21ef23f942ba246574ce36592d660ca",
+      "bindings": [
+        {
+          "workflowId": "bank",
+          "stageId": "reconcile",
+          "stageTitle": "双向核对",
+          "required": true,
+          "toolId": "mcp_bank_flow"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "gl_path",
+          "label": "序时账",
+          "kind": "file",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "gl_date_col",
+          "label": "序时账-日期列",
+          "kind": "column",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "gl_voucher_col",
+          "label": "序时账-凭证号列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "gl_subject_col",
+          "label": "序时账-科目列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "gl_bank_subject",
+          "label": "序时账-银行科目值",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "gl_summary_col",
+          "label": "序时账-摘要列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "gl_partner_direct_col",
+          "label": "序时账-交易对手列名",
+          "kind": "column",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "gl_partner_col",
+          "label": "序时账-客商辅助项列名",
+          "kind": "column",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "gl_debit_col",
+          "label": "序时账-借方列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "gl_credit_col",
+          "label": "序时账-贷方列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "bank_path",
+          "label": "银行流水",
+          "kind": "file",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "bank_date_col",
+          "label": "流水-日期列",
+          "kind": "column",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "bank_income_col",
+          "label": "流水-收入列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "bank_expense_col",
+          "label": "流水-支出列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "bank_partner_col",
+          "label": "流水-对方户名列",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "gl_company_col",
+          "label": "序时账公司列名；多公司或多账户需对应填写，留空自动识别常见列名",
+          "kind": "column",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "gl_account_col",
+          "label": "序时账银行账号列名；多公司或多账户需对应填写，留空自动识别常见列名",
+          "kind": "column",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "bank_company_col",
+          "label": "银行流水公司列名；多公司或多账户需对应填写，留空自动识别常见列名",
+          "kind": "column",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "bank_account_col",
+          "label": "银行流水银行账号列名；多公司或多账户需对应填写，留空自动识别常见列名",
+          "kind": "column",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_bank_paper1",
+      "name": "银行函证表格生成-纸质格式一",
+      "engine": "mcp",
+      "entry": "bank_paper1",
+      "contractHash": "f680f70ae48332d9af2050cf5976e11dd34e62551560e2c3992af33ccf0964b6",
+      "bindings": [
+        {
+          "workflowId": "bank",
+          "stageId": "letter",
+          "stageTitle": "生成函证（可选）",
+          "required": false,
+          "toolId": "mcp_bank_paper1"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_bank_paper2",
+      "name": "银行函证表格生成-纸质格式二",
+      "engine": "mcp",
+      "entry": "bank_paper2",
+      "contractHash": "78de71cd178118087843546e3ca1dde0a1454992c5969c1b9e6db41887f23381",
+      "bindings": [
+        {
+          "workflowId": "bank",
+          "stageId": "letter",
+          "stageTitle": "生成函证（可选）",
+          "required": false,
+          "toolId": "mcp_bank_paper2"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_bankflowmerge",
+      "name": "按账户汇集银行流水",
+      "engine": "mcp",
+      "entry": "bankflowmerge",
+      "contractHash": "98b45c06b6c491f5385e77998eb4fd6f301aeda1d8ead9c46cd7c638bf82f4d0",
+      "bindings": [
+        {
+          "workflowId": "bank",
+          "stageId": "merge",
+          "stageTitle": "汇集流水（可选）",
+          "required": false,
+          "toolId": "mcp_bankflowmerge"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "file_paths",
+          "label": "银行流水文件",
+          "kind": "file",
+          "required": true,
+          "type": "array"
+        },
+        {
+          "key": "header_start_cols",
+          "label": "表头起始列列表",
+          "required": true,
+          "type": "array"
+        },
+        {
+          "key": "header_start_rows",
+          "label": "表头起始行列表",
+          "required": true,
+          "type": "array"
+        },
+        {
+          "key": "bank_names",
+          "label": "银行名称列表",
+          "required": true,
+          "type": "array"
+        },
+        {
+          "key": "account_names",
+          "label": "银行户名列表",
+          "required": true,
+          "type": "array"
+        },
+        {
+          "key": "account_numbers",
+          "label": "银行账号列表",
+          "required": true,
+          "type": "array"
+        },
+        {
+          "key": "transaction_date_cols",
+          "label": "交易日期列列表",
+          "kind": "column",
+          "required": true,
+          "type": "array"
+        },
+        {
+          "key": "transaction_time_cols",
+          "label": "交易时间列列表",
+          "kind": "column",
+          "required": true,
+          "type": "array"
+        },
+        {
+          "key": "counterparty_name_cols",
+          "label": "对方账户列列表",
+          "kind": "column",
+          "required": true,
+          "type": "array"
+        },
+        {
+          "key": "counterparty_account_cols",
+          "label": "对方账号列列表",
+          "kind": "column",
+          "required": true,
+          "type": "array"
+        },
+        {
+          "key": "summary_cols",
+          "label": "摘要列列表",
+          "kind": "column",
+          "required": true,
+          "type": "array"
+        },
+        {
+          "key": "income_cols",
+          "label": "收入金额列列表",
+          "kind": "column",
+          "required": true,
+          "type": "array"
+        },
+        {
+          "key": "expense_cols",
+          "label": "支出金额列列表",
+          "kind": "column",
+          "required": true,
+          "type": "array"
+        },
+        {
+          "key": "balance_cols",
+          "label": "余额列列表",
+          "kind": "column",
+          "required": true,
+          "type": "array"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_cicpa_query",
+      "name": "注协系统工商信息获取",
+      "engine": "mcp",
+      "entry": "cicpa_query",
+      "contractHash": "c76ad394fced153d6ca015e278e60cd42cd11d06f9a55b691134c79cfce0f377",
+      "bindings": [
+        {
+          "workflowId": "external",
+          "stageId": "query",
+          "stageTitle": "查询主体信息",
+          "required": true,
+          "toolId": "mcp_cicpa_query"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "query_mode",
+          "label": "查询模式",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "company_name",
+          "label": "企业名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "org_id",
+          "label": "企业org_id",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "subsidiary_threshold",
+          "label": "子公司持股阈值",
+          "required": false,
+          "type": "integer"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_currency",
+      "name": "查询汇率",
+      "engine": "mcp",
+      "entry": "currency",
+      "contractHash": "6182e3ad19b23e8b08597cc48b8a41b893d867201b264deb5c519b182ba2c4b4",
+      "bindings": [
+        {
+          "workflowId": "aux",
+          "stageId": "extract",
+          "stageTitle": "选择处理任务",
+          "required": true,
+          "toolId": "mcp_currency"
+        }
+      ],
+      "inputs": [],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_cutoff_sampling",
+      "name": "截止测试抽样",
+      "engine": "mcp",
+      "entry": "cutoff_sampling",
+      "contractHash": "73dfae54e4b7d5eee23c377ec8d61a056db21dfe998011da0e05d0c3b8cbc4a9",
+      "bindings": [
+        {
+          "workflowId": "sampling",
+          "stageId": "sample",
+          "stageTitle": "截止测试抽样",
+          "required": true,
+          "toolId": "mcp_cutoff_sampling"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_data_field_check",
+      "name": "资料字段检查",
+      "engine": "mcp",
+      "entry": "data_field_check",
+      "contractHash": "249c367d41fa7a6a82b5e6300582f7d5df6be265cf54282de427aead1c1bad9d",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "mcp_data_field_check"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_detailed_table_generate",
+      "name": "明细底稿生成",
+      "engine": "mcp",
+      "entry": "detailed_table_generate",
+      "contractHash": "7e4a51687890a7082c52ec99fbabfffccb9c24ba3171254f0160b8772b49bc4d",
+      "bindings": [
+        {
+          "workflowId": "workpaper",
+          "stageId": "generate",
+          "stageTitle": "生成底稿",
+          "required": true,
+          "toolId": "mcp_detailed_table_generate"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "work_dir",
+          "label": "工作目录",
+          "kind": "directory",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "path",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_detailed_table_inspect",
+      "name": "明细表-检查数据源",
+      "engine": "mcp",
+      "entry": "detailed_table_inspect",
+      "contractHash": "9fbcc4799937a9f1e971d28f7ce3636d7bae0df6676bcaf7efddd0b50e09d954",
+      "bindings": [
+        {
+          "workflowId": "workpaper",
+          "stageId": "source",
+          "stageTitle": "检查源数据",
+          "required": true,
+          "toolId": "mcp_detailed_table_inspect"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "sheet_name",
+          "label": "指定读取的 Sheet 名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "header_row",
+          "label": "实际表头行",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "preview_rows",
+          "label": "预览行数",
+          "required": false,
+          "type": "integer"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_detailed_table_inspect_template",
+      "name": "明细表-检查模板",
+      "engine": "mcp",
+      "entry": "detailed_table_inspect_template",
+      "contractHash": "2b963ba5bd6c3fa4f3124d9df516970c563b5cc042c7e002a36fb7da727849eb",
+      "bindings": [
+        {
+          "workflowId": "workpaper",
+          "stageId": "template",
+          "stageTitle": "检查模板",
+          "required": true,
+          "toolId": "mcp_detailed_table_inspect_template"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "template_dir",
+          "label": "底稿模板目录",
+          "kind": "directory",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_detailed_table_save_config",
+      "name": "明细表-保存配置",
+      "engine": "mcp",
+      "entry": "detailed_table_save_config",
+      "contractHash": "0ba505cf6670cb70a3cb6f82b186aaa838f01ff9ad31549387bd9d80038ea25f",
+      "bindings": [
+        {
+          "workflowId": "workpaper",
+          "stageId": "configure",
+          "stageTitle": "保存映射配置",
+          "required": true,
+          "toolId": "mcp_detailed_table_save_config"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "work_dir",
+          "label": "工作目录",
+          "kind": "directory",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "config_type",
+          "label": "配置类型。固定类型",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "config_data",
+          "label": "配置内容",
+          "kind": "json",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_detailed_table_validate",
+      "name": "明细表-校验配置",
+      "engine": "mcp",
+      "entry": "detailed_table_validate",
+      "contractHash": "ddea89a0b047070d49435a31d80e771cd3f78b2fb85c0a2c5875badc1d9c27cd",
+      "bindings": [
+        {
+          "workflowId": "workpaper",
+          "stageId": "validate",
+          "stageTitle": "校验配置",
+          "required": true,
+          "toolId": "mcp_detailed_table_validate"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "work_dir",
+          "label": "工作目录",
+          "kind": "directory",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_dropsummary",
+      "name": "删除合计行工具",
+      "engine": "mcp",
+      "entry": "dropsummary",
+      "contractHash": "324390d895ec68bf6e2e5a774d7de1fed039eace45c32f2d3a1d38d13e614fbf",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "mcp_dropsummary"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "file",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "keywords",
+          "label": "关键字",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "column_name",
+          "label": "关键字所在列",
+          "kind": "column",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_extract_disclosure_scope",
+      "name": "披露口径提取 📋",
+      "engine": "mcp",
+      "entry": "extract_disclosure_scope",
+      "contractHash": "97d66c0b1f9b8c2819c6416ab3b44871a8c9e24f714df91f14083cd5e7a63b60",
+      "bindings": [
+        {
+          "workflowId": "disclosure",
+          "stageId": "scope",
+          "stageTitle": "提取披露口径（可选）",
+          "required": false,
+          "toolId": "mcp_extract_disclosure_scope"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_extract_disclosure_tables",
+      "name": "披露表提取 📋",
+      "engine": "mcp",
+      "entry": "extract_disclosure_tables",
+      "contractHash": "d19037df3620e1d1ec7221accb2297f538886ae59ae4e238c0e295019e156771",
+      "bindings": [
+        {
+          "workflowId": "disclosure",
+          "stageId": "tables",
+          "stageTitle": "提取披露表（可选）",
+          "required": false,
+          "toolId": "mcp_extract_disclosure_tables"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_file_classification",
+      "name": "文件自动分类",
+      "engine": "mcp",
+      "entry": "file_classification",
+      "contractHash": "d5eba7937976930fc47c213e806ca332edc6b2b04996cd5ed7618ed6c752d136",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "mcp_file_classification"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_fill_column",
+      "name": "向下填充空值工具",
+      "engine": "mcp",
+      "entry": "fill_column",
+      "contractHash": "8d3c7e747c777b7951a1460b9e3523074d81892fb00e91e77775c0dee1e7e93f",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "mcp_fill_column"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "keyword",
+          "label": "文件名关键词",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "column_names",
+          "label": "待填充列名",
+          "kind": "column",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_gross_margin_analysis",
+      "name": "收入成本与毛利率分析",
+      "engine": "mcp",
+      "entry": "gross_margin_analysis",
+      "contractHash": "7e6d7bbdbeba124e06a678c2d62d6bf603f6b37241c1cdefb64a092bcef4a426",
+      "bindings": [
+        {
+          "workflowId": "monthly",
+          "stageId": "analysis",
+          "stageTitle": "确认字段并分析",
+          "required": true,
+          "toolId": "mcp_gross_margin_analysis"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "mode",
+          "label": "执行模式",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "this_data_path",
+          "label": "本期收入成本明细",
+          "kind": "file",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "this_data_sheet",
+          "label": "本期数据表名",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "last_data_path",
+          "label": "上期收入成本明细",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "last_data_sheet",
+          "label": "上期数据表名",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "field_mapping",
+          "label": "字段映射",
+          "kind": "json",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "dimensions",
+          "label": "透视维度",
+          "kind": "json",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "thread_count",
+          "label": "AI并发线程数",
+          "required": false,
+          "type": "integer"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_headers_process",
+      "name": "表头处理工具",
+      "engine": "mcp",
+      "entry": "headers_process",
+      "contractHash": "45ff5d2acd24cdaa16909080ece2f490027e3d1aadb3cf4633a919b6664b5e8a",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "mcp_headers_process"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "keyword",
+          "label": "文件名关键词",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "header_rows",
+          "label": "表头行",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_id_card",
+      "name": "身份证信息解析",
+      "engine": "mcp",
+      "entry": "id_card",
+      "contractHash": "bf902ff4daf9c056a42629d4590d4346fdb7c7148abf25fded0abbf92a3fc98e",
+      "bindings": [
+        {
+          "workflowId": "aux",
+          "stageId": "extract",
+          "stageTitle": "选择处理任务",
+          "required": true,
+          "toolId": "mcp_id_card"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "id_column",
+          "label": "Excel列名",
+          "kind": "column",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "id_list",
+          "label": "直接查询号码",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_info_extract",
+      "name": "文件关键信息提取",
+      "engine": "mcp",
+      "entry": "info_extract",
+      "contractHash": "652ec488fc351e377c685bb6e3d7f21a3c318a83bb71dcc78da6136420c1d29f",
+      "bindings": [
+        {
+          "workflowId": "aux",
+          "stageId": "extract",
+          "stageTitle": "选择处理任务",
+          "required": true,
+          "toolId": "mcp_info_extract"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "role_prompt",
+          "label": "用户提示词",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "folder",
+          "label": "处理文件夹",
+          "kind": "directory",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "max_workers",
+          "label": "并发线程数",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_info_extract_multi",
+      "name": "多公司多类型文件关键信息提取",
+      "engine": "mcp",
+      "entry": "info_extract_multi",
+      "contractHash": "b068d1d0bf68944204cb39654f5559434489f9cc558256ab1351ce40399a0ac5",
+      "bindings": [
+        {
+          "workflowId": "aux",
+          "stageId": "extract",
+          "stageTitle": "选择处理任务",
+          "required": true,
+          "toolId": "mcp_info_extract_multi"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_insert_column",
+      "name": "插入列工具",
+      "engine": "mcp",
+      "entry": "insert_column",
+      "contractHash": "0a1c87c2593a4d4c95eccf4bb3ceca8a69180587094a04c55b0bc52cf04affef",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "mcp_insert_column"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "file",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "insert_position",
+          "label": "插入列位置",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "column_name",
+          "label": "插入列名",
+          "kind": "column",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "fill_value",
+          "label": "插入值",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "sheet_name",
+          "label": "指定表",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_insert_footnote_comments",
+      "name": "插附注批注",
+      "engine": "mcp",
+      "entry": "insert_footnote_comments",
+      "contractHash": "14c52a8c99a24c850d24fd8d7fec1c637f2abae7c619866a85c987f3ce9860e4",
+      "bindings": [
+        {
+          "workflowId": "disclosure",
+          "stageId": "links",
+          "stageTitle": "检查链接与批注",
+          "required": true,
+          "toolId": "mcp_insert_footnote_comments"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_ipo_bj",
+      "name": "北交所IPO披露文件下载",
+      "engine": "mcp",
+      "entry": "ipo_bj",
+      "contractHash": "5507d44ece6700155b58baad06faa1720bbc99e153dbf080c393a246d47742a7",
+      "bindings": [
+        {
+          "workflowId": "external",
+          "stageId": "query",
+          "stageTitle": "查询主体信息",
+          "required": true,
+          "toolId": "mcp_ipo_bj"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "start_date",
+          "label": "开始日期",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "end_date",
+          "label": "结束日期",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "update_mode",
+          "label": "更新模式",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_ipo_sh",
+      "name": "上交所IPO披露文件下载",
+      "engine": "mcp",
+      "entry": "ipo_sh",
+      "contractHash": "5507d44ece6700155b58baad06faa1720bbc99e153dbf080c393a246d47742a7",
+      "bindings": [
+        {
+          "workflowId": "external",
+          "stageId": "query",
+          "stageTitle": "查询主体信息",
+          "required": true,
+          "toolId": "mcp_ipo_sh"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "start_date",
+          "label": "开始日期",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "end_date",
+          "label": "结束日期",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "update_mode",
+          "label": "更新模式",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_ipo_sz",
+      "name": "深交所IPO披露文件下载",
+      "engine": "mcp",
+      "entry": "ipo_sz",
+      "contractHash": "d27a7606a7ba30d8b64f022758632bb7cf383bd32cbba6086b1f8c14e8df86ed",
+      "bindings": [
+        {
+          "workflowId": "external",
+          "stageId": "query",
+          "stageTitle": "查询主体信息",
+          "required": true,
+          "toolId": "mcp_ipo_sz"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "start_date",
+          "label": "开始日期",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "end_date",
+          "label": "结束日期",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "update_mode",
+          "label": "更新模式",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_jet_test_execute",
+      "name": "执行 JET 规则",
+      "engine": "mcp",
+      "entry": "jet_test_execute",
+      "contractHash": "55267a716ffbe77b8c43f0feb6de8f4a12c44f7e0d08bf5744b3617b55b478c0",
+      "bindings": [
+        {
+          "workflowId": "ledger",
+          "stageId": "test",
+          "stageTitle": "凭证与 JET 测试",
+          "required": true,
+          "toolId": "mcp_jet_test_execute"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "features",
+          "label": "特征定义",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "rules",
+          "label": "规则配置",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "column_mapping",
+          "label": "列名映射",
+          "kind": "json",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "settings",
+          "label": "全局设置",
+          "kind": "json",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_jet_test_inspect",
+      "name": "预览 JET 数据",
+      "engine": "mcp",
+      "entry": "jet_test_inspect",
+      "contractHash": "0983436d8bf6782f9945b55ac8dfbb6cb71b92e233f402eebe3ffdd5b7ebc71b",
+      "bindings": [
+        {
+          "workflowId": "ledger",
+          "stageId": "inspect",
+          "stageTitle": "检查账簿结构",
+          "required": true,
+          "toolId": "mcp_jet_test_inspect"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "preview_rows",
+          "label": "预览行数",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "include_templates",
+          "label": "是否同时返回内置特征和规则模板",
+          "required": false,
+          "type": "boolean"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_ledger_check",
+      "name": "小账套校验工具",
+      "engine": "mcp",
+      "entry": "ledger_check",
+      "contractHash": "b97cb2c83b3da201848a9b1833b1e58a7becc50aea5c75be5fdd2263a0e51c7c",
+      "bindings": [
+        {
+          "workflowId": "ledger",
+          "stageId": "test",
+          "stageTitle": "凭证与 JET 测试",
+          "required": true,
+          "toolId": "mcp_ledger_check"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "directory",
+          "label": "处理目录",
+          "kind": "directory",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_link_extractor",
+      "name": "外部链接提取",
+      "engine": "mcp",
+      "entry": "link_extractor",
+      "contractHash": "6b115ffba46dc10a9a792159708f75b7b1bdec8ee55abe4292d9515fb4db0388",
+      "bindings": [
+        {
+          "workflowId": "disclosure",
+          "stageId": "links",
+          "stageTitle": "检查链接与批注",
+          "required": true,
+          "toolId": "mcp_link_extractor"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_link_ref_replace",
+      "name": "链接替换-参考替换",
+      "engine": "mcp",
+      "entry": "link_ref_replace",
+      "contractHash": "5bf504a5fcf9c4579707e9285af373de3988db7f29e39e22677585bb41e59532",
+      "bindings": [
+        {
+          "workflowId": "disclosure",
+          "stageId": "links",
+          "stageTitle": "检查链接与批注",
+          "required": true,
+          "toolId": "mcp_link_ref_replace"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "target_path",
+          "label": "文件或文件夹",
+          "kind": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "sheet_keywords",
+          "label": "工作表关键词",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "ref_axis",
+          "label": "参考列/行",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "target_axis",
+          "label": "处理列/行",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "example_cell",
+          "label": "处理示例单元格",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_link_replace_range",
+      "name": "链接替换-单元格区域替换",
+      "engine": "mcp",
+      "entry": "link_replace_range",
+      "contractHash": "50729536f0a220cf4b966a2d917dc5ccd591cdd96f47b6a67700dfc045ec393c",
+      "bindings": [
+        {
+          "workflowId": "disclosure",
+          "stageId": "links",
+          "stageTitle": "检查链接与批注",
+          "required": true,
+          "toolId": "mcp_link_replace_range"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_link_replace_text",
+      "name": "链接替换-文件夹路径替换",
+      "engine": "mcp",
+      "entry": "link_replace_text",
+      "contractHash": "8dcf17f1dfc9a502b3f61a08b5f3791072f8ba6e60528e7b0ba52fb88be89da2",
+      "bindings": [
+        {
+          "workflowId": "disclosure",
+          "stageId": "links",
+          "stageTitle": "检查链接与批注",
+          "required": true,
+          "toolId": "mcp_link_replace_text"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_link_replace_workbook",
+      "name": "链接替换-文件名替换",
+      "engine": "mcp",
+      "entry": "link_replace_workbook",
+      "contractHash": "868a877117a5e2163d07eed1b14046798a95094a13730a4d736aff4fc878f59a",
+      "bindings": [
+        {
+          "workflowId": "disclosure",
+          "stageId": "links",
+          "stageTitle": "检查链接与批注",
+          "required": true,
+          "toolId": "mcp_link_replace_workbook"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_merge_column",
+      "name": "多列合并工具",
+      "engine": "mcp",
+      "entry": "merge_column",
+      "contractHash": "db9017db5e0ea66fc7603746a82d79521c9e8cbb1dbddade5b406afa9d23a8b8",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "mcp_merge_column"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "keyword",
+          "label": "文件名关键词",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "column_names",
+          "label": "待合并列名",
+          "kind": "column",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "delimiter",
+          "label": "连接符",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "insert_index",
+          "label": "插入位置",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "insert_name",
+          "label": "新列名称",
+          "kind": "column",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_monthly_ai_analysis",
+      "name": "月间分析-AI变动分析",
+      "engine": "mcp",
+      "entry": "monthly_ai_analysis",
+      "contractHash": "b4dacb3db27dedae109f3a364562840782e22ec5f710735cd386c45610970f19",
+      "bindings": [
+        {
+          "workflowId": "monthly",
+          "stageId": "explain",
+          "stageTitle": "原因分析（可选）",
+          "required": false,
+          "toolId": "mcp_monthly_ai_analysis"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "result_file",
+          "label": "月间分析结果",
+          "kind": "file",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "this_year_file",
+          "label": "本期序时账",
+          "kind": "file",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "last_year_file",
+          "label": "上期序时账",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "this_year_sheet",
+          "label": "本期数据 Sheet 名",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "last_year_sheet",
+          "label": "上期数据 Sheet 名",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "column_mapping",
+          "label": "序时账列名映射 JSON",
+          "kind": "json",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "threshold_amt",
+          "label": "变动额阈值",
+          "required": false,
+          "type": "number"
+        },
+        {
+          "key": "threshold_rate",
+          "label": "变动率阈值",
+          "required": false,
+          "type": "number"
+        },
+        {
+          "key": "month_conc_threshold",
+          "label": "月度集中度阈值",
+          "required": false,
+          "type": "number"
+        },
+        {
+          "key": "max_sample_rows",
+          "label": "每个科目最多提取的样本凭证行数",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "generate_procedure",
+          "label": "是否生成审计应对建议",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_monthly_detect_structure",
+      "name": "月间分析-编码结构分析",
+      "engine": "mcp",
+      "entry": "monthly_detect_structure",
+      "contractHash": "0fd0ac3e4a906a6f4d45e9c243e83998aac7e6fcbcfdaec13e5ad12d21679cfb",
+      "bindings": [
+        {
+          "workflowId": "monthly",
+          "stageId": "structure",
+          "stageTitle": "识别科目结构（可选）",
+          "required": false,
+          "toolId": "mcp_monthly_detect_structure"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "file",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "column_mapping",
+          "label": "列名映射 JSON",
+          "kind": "json",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "sheet_name",
+          "label": "Sheet 名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "top_n",
+          "label": "返回前 N 个一级科目",
+          "required": false,
+          "type": "integer"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_monthly_execute",
+      "name": "本期与上期月间分析",
+      "engine": "mcp",
+      "entry": "monthly_execute",
+      "contractHash": "e55f346d7db1b56c8b2812bea0437ffb5732593f409420adf0277ac021e648a2",
+      "bindings": [
+        {
+          "workflowId": "monthly",
+          "stageId": "analysis",
+          "stageTitle": "确认字段并分析",
+          "required": true,
+          "toolId": "mcp_monthly_execute"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "this_year_file",
+          "label": "本期序时账",
+          "kind": "file",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "last_year_file",
+          "label": "上期序时账",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "this_year_sheet",
+          "label": "本期数据 Sheet 名",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "last_year_sheet",
+          "label": "上期数据 Sheet 名",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "subjects",
+          "label": "要分析的科目列表 JSON",
+          "kind": "json",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "column_mapping",
+          "label": "序时账列名映射 JSON",
+          "kind": "json",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "code_structure",
+          "label": "科目编码结构参数 JSON",
+          "kind": "json",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "threshold_amt",
+          "label": "AI变动分析-变动额阈值",
+          "required": false,
+          "type": "number"
+        },
+        {
+          "key": "threshold_rate",
+          "label": "AI变动分析-变动率阈值",
+          "required": false,
+          "type": "number"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_monthly_preview",
+      "name": "月间分析-数据预览",
+      "engine": "mcp",
+      "entry": "monthly_preview",
+      "contractHash": "5a7782899ea1114c337aa60e3f024c02c42945684d299ee755bff28fa9cb6bd3",
+      "bindings": [
+        {
+          "workflowId": "monthly",
+          "stageId": "preview",
+          "stageTitle": "预览期间数据",
+          "required": true,
+          "toolId": "mcp_monthly_preview"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "sheet_name",
+          "label": "Sheet 名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "preview_rows",
+          "label": "预览行数",
+          "required": false,
+          "type": "integer"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_multi_collect_file",
+      "name": "多表汇集-文件",
+      "engine": "mcp",
+      "entry": "multi_collect_file",
+      "contractHash": "476fed52003bf5ee83650bf822e9329e87d2d9a42981a0fcccdad0e9a1371298",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "mcp_multi_collect_file"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_multi_collect_folder",
+      "name": "多表汇集-文件夹",
+      "engine": "mcp",
+      "entry": "multi_collect_folder",
+      "contractHash": "e67a46141c3232e81c7481a60682850cc519f8e3786b120e8bc2bf8aa6e82f6c",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "mcp_multi_collect_folder"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_paper_verify",
+      "name": "纸质信息核对",
+      "engine": "mcp",
+      "entry": "paper_verify",
+      "contractHash": "cc368653323ae8dfa78653002759b527dded4d0edaf84a48c8b9d97dbddffeab",
+      "bindings": [
+        {
+          "workflowId": "aux",
+          "stageId": "extract",
+          "stageTitle": "选择处理任务",
+          "required": true,
+          "toolId": "mcp_paper_verify"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "match_keys",
+          "label": "匹配键",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "max_workers",
+          "label": "并发线程数",
+          "required": true,
+          "type": "integer"
+        },
+        {
+          "key": "extra_prompt",
+          "label": "补充指令",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_photo_rename",
+      "name": "AI图片智能重命名",
+      "engine": "mcp",
+      "entry": "photo_rename",
+      "contractHash": "b86b84bd15b67c1d3a72d981b4dab52e999eb9c1cacac0f49e483c28a4146b85",
+      "bindings": [
+        {
+          "workflowId": "aux",
+          "stageId": "extract",
+          "stageTitle": "选择处理任务",
+          "required": true,
+          "toolId": "mcp_photo_rename"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "directory",
+          "label": "处理目录",
+          "kind": "directory",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "user_prompt",
+          "label": "AI 提示词，描述如何从图片中提取文件名信息",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_pickup_value",
+      "name": "提取值工具",
+      "engine": "mcp",
+      "entry": "pickup_value",
+      "contractHash": "b4f0ce46e4ea8074a66c3a50e771a0c050f4ca9c1daaaf68488f4625f3c97a13",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "mcp_pickup_value"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "folder_path",
+          "label": "资料目录",
+          "kind": "directory",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "field_mappings",
+          "label": "提取字段配置",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_qcc_processor",
+      "name": "企查查信用报告处理工具",
+      "engine": "mcp",
+      "entry": "qcc_processor",
+      "contractHash": "57504ecd290c47000f2f379f1bfd987caf34b6114b300ac04590ac953903cc5c",
+      "bindings": [
+        {
+          "workflowId": "external",
+          "stageId": "query",
+          "stageTitle": "查询主体信息",
+          "required": true,
+          "toolId": "mcp_qcc_processor"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "folder_path",
+          "label": "资料目录",
+          "kind": "directory",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_related_party",
+      "name": "关联方核查",
+      "engine": "mcp",
+      "entry": "related_party",
+      "contractHash": "d88f4fc6b7643f682a43cfe695a6c43a95900c8f384a113db33c8e821b58f00e",
+      "bindings": [
+        {
+          "workflowId": "external",
+          "stageId": "related",
+          "stageTitle": "识别关联方（可选）",
+          "required": false,
+          "toolId": "mcp_related_party"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "audit_target",
+          "label": "被审计单位",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "data_dir",
+          "label": "工商资料目录",
+          "kind": "directory",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "threshold",
+          "label": "持股阈值",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "equity_penetration",
+          "label": "启用股权穿透",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "equity_depth",
+          "label": "穿透深度",
+          "required": false,
+          "type": "integer"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_select_column",
+      "name": "按配置提取 Excel 列",
+      "engine": "mcp",
+      "entry": "select_column",
+      "contractHash": "eb3d2a734fc82165eac4827f5d6bc9263a21c5c2874354c5a172a7d0dee2afbc",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "mcp_select_column"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "folder_path",
+          "label": "资料目录",
+          "kind": "directory",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "should_merge",
+          "label": "是否合并",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "sheet_keywords",
+          "label": "表名",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "columns_to_keep",
+          "label": "选择列配置",
+          "kind": "column",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_subject_allocation",
+      "name": "科目分配派工",
+      "engine": "mcp",
+      "entry": "subject_allocation",
+      "contractHash": "838dd7f88391e401bd83796d9517c433c4bbf5d25103c06c7bf30eefdc718631",
+      "bindings": [
+        {
+          "workflowId": "ledger",
+          "stageId": "normalize",
+          "stageTitle": "科目整理（可选）",
+          "required": false,
+          "toolId": "mcp_subject_allocation"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_tool_execute",
+      "name": "科目余额表处理",
+      "engine": "mcp",
+      "entry": "tool_execute",
+      "contractHash": "a4d406ce0834d09ab6023e4582b2a70b760c6fa2d82bc5b8e635d5dd7287e4e0",
+      "bindings": [
+        {
+          "workflowId": "ledger",
+          "stageId": "normalize",
+          "stageTitle": "科目整理（可选）",
+          "required": false,
+          "toolId": "mcp_tool_execute"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "code_column",
+          "label": "科目编码列名",
+          "kind": "column",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "code_name_column",
+          "label": "科目名称列名",
+          "kind": "column",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "header_row",
+          "label": "表头所在行号",
+          "required": true,
+          "type": "integer"
+        },
+        {
+          "key": "code_name_split",
+          "label": "科目名称分隔符",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "asist_column",
+          "label": "辅助核算列名，留空则跳过辅助处理",
+          "kind": "column",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "asist_name_split",
+          "label": "辅助项键值分隔符",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "asist_item_wrapper",
+          "label": "辅助项包裹符号",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "beginning_balance",
+          "label": "期初余额公式",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "company_name",
+          "label": "公司名称，用于输出文件名",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "grouping_column",
+          "label": "分组汇总列",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_tool_preview",
+      "name": "科目余额表预览",
+      "engine": "mcp",
+      "entry": "tool_preview",
+      "contractHash": "d64b63659bb05747cb209fe065bc0ad53a307ec2ac252227b47afed7c6930288",
+      "bindings": [
+        {
+          "workflowId": "ledger",
+          "stageId": "inspect",
+          "stageTitle": "检查账簿结构",
+          "required": true,
+          "toolId": "mcp_tool_preview"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "file_path",
+          "label": "数据源",
+          "kind": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "key": "sheet_name",
+          "label": "Sheet 名称",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "key": "preview_rows",
+          "label": "预览行数",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "key": "header_row",
+          "label": "表头所在行号",
+          "required": false,
+          "type": "integer"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_subject_clean_after",
+      "name": "科目余额表后处理",
+      "engine": "mcp",
+      "entry": "subject_clean_after",
+      "contractHash": "2d35e207f7bc5ebd5e5fdd0bed7ecdba2f4c882b99be28be52cf4f8c9fefca7b",
+      "bindings": [
+        {
+          "workflowId": "ledger",
+          "stageId": "normalize",
+          "stageTitle": "科目整理（可选）",
+          "required": false,
+          "toolId": "mcp_subject_clean_after"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_text_match",
+      "name": "按配置提取匹配文本",
+      "engine": "mcp",
+      "entry": "text_match",
+      "contractHash": "ea23009cdae8e50533ec446e228e9e54e0318e017608404c8d0aaa84b2e7c716",
+      "bindings": [
+        {
+          "workflowId": "data",
+          "stageId": "process",
+          "stageTitle": "整理资料",
+          "required": true,
+          "toolId": "mcp_text_match"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_voucher_check",
+      "name": "批量凭证检查",
+      "engine": "mcp",
+      "entry": "voucher_check",
+      "contractHash": "a3a07217af9e7d8eb363bdc1f3294d572815ab8a23348d70de83ccc58a7e2b92",
+      "bindings": [
+        {
+          "workflowId": "ledger",
+          "stageId": "test",
+          "stageTitle": "凭证与 JET 测试",
+          "required": true,
+          "toolId": "mcp_voucher_check"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "source_paths",
+          "label": "数据源",
+          "kind": "path",
+          "required": true,
+          "type": "array"
+        },
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    },
+    {
+      "id": "mcp_xlsx_writer",
+      "name": "批量生成小账套",
+      "engine": "mcp",
+      "entry": "xlsx_writer",
+      "contractHash": "6897f9b24380fe2431e3664008f4ed771f561a80f5bcbb0015c7bee800636c36",
+      "bindings": [
+        {
+          "workflowId": "workpaper",
+          "stageId": "generate",
+          "stageTitle": "生成底稿",
+          "required": true,
+          "toolId": "mcp_xlsx_writer"
+        }
+      ],
+      "inputs": [
+        {
+          "key": "config_file",
+          "label": "处理配置表",
+          "kind": "file",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "resultContract": "audit-tool-result/1",
+      "validator": "verifyTaskArtifacts",
+      "retry": "first_execution_plus_two_recorded_repairs",
+      "availability": "local-only; remote endpoints require separate authorization"
+    }
+  ]
+}
