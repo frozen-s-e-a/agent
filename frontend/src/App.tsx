@@ -3,7 +3,7 @@ import { App as AntApp, ConfigProvider, theme as antTheme } from "antd";
 import zhCN from "antd/locale/zh_CN";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FakeHost } from "./host/fake/FakeHost";
-import { cssVars, DARK, LIGHT, PAPER } from "./lib/tokens";
+import { cssVars, DARK, LIGHT } from "./lib/tokens";
 import { AppStore, useStore } from "./store/appStore";
 import { StoreCtx, TokensCtx } from "./store/context";
 import { Sidebar } from "./components/layout/Sidebar";
@@ -35,8 +35,7 @@ export function App() {
     })();
   }, [host, store]);
 
-  // ?skin=paper 试看备选皮肤（风格方向 A），还没放进设置
-  const t = ui.theme === "dark" ? DARK : params.get("skin") === "paper" ? PAPER : LIGHT;
+  const t = ui.theme === "dark" ? DARK : LIGHT;
   useEffect(() => {
     const root = document.documentElement;
     for (const [k, v] of Object.entries(cssVars(t))) root.style.setProperty(k, v);

@@ -19,7 +19,6 @@ npm run build
 |---|---|
 | `?seq=74` | 直接回放到第 74 条事件（途中的卡片用回放里录好的回答） |
 | `?theme=dark` | 深色 |
-| `?skin=paper` | 备选皮肤「纸感」（风格方向 A），只换了颜色 |
 | `?chat=right` | 对话停靠右侧（`left`、`full`、`float`） |
 | `?page=settings` | 打开设置 |
 | `?onboarding` | 模型未连接，走首次使用 |
