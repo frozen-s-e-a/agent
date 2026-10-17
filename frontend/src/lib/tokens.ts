@@ -174,3 +174,30 @@ export function cssVars(t: Tokens): Record<string, string> {
     "--stale-text": t.staleText,
   };
 }
+
+/** 备选皮肤「账本纸感」（风格方向 A）：米色纸面、墨色文字、朱砂红强调。拟写值用墨蓝，避免和红色的覆盖、失败混淆。 */
+export const PAPER: Tokens = {
+  ...LIGHT,
+  font: `13px "Noto Sans SC", -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif`,
+  bg: "#f4efe4",
+  panel: "#fbf8f1",
+  panelAlt: "#ede6d6",
+  border: "#ddd3be",
+  borderStrong: "#c9bfa8",
+  text: "#26231d",
+  textMuted: "#6d6555",
+  textFaint: "#a0977f",
+  accent: "#b5442b",
+  accentSoft: "#f3e3dc",
+  gridBg: "#fffdf8",
+  gridLine: "#e9e1cf",
+  gridHeaderBg: "#f1ebdd",
+  gridHeaderText: "#8a8170",
+  cellHeaderFill: "#f3eddf",
+  formulaTint: "#f7f2e6",
+  manualFill: "#efe9dc",
+  planText: "#2c4f8a",
+  planFill: "#eef1f6",
+  selection: "#b5442b",
+  regionState: { ...LIGHT.regionState, computing: "#2c4f8a", awaiting_confirmation: "#c9781a" },
+};
