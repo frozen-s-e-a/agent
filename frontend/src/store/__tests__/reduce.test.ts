@@ -17,7 +17,7 @@ describe("按事件累积状态", () => {
       expect(t.regions[r.region].refs).toEqual(r.refs);
     }
     expect(openCards(s).map((c) => c.card.card)).toEqual(end.openCards);
-    expect(t.outputs.map((o) => o.file)).toEqual(end.outputs);
+    expect(t.outputs.map((o) => o.output)).toEqual(end.outputs);
     expect(t.workpaper).toBe("W-003");
     expect(t.plan).toBe("FP-001");
     expect(t.regions["W-003#R5"].retries[0].reason).toMatch(/-500.00/);

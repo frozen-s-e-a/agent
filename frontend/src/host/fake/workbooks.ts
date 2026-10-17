@@ -35,7 +35,7 @@ const AMT = "#,##0.00";
 const PCT = "0.00%";
 const bold = { bold: true } as const;
 const center = { align: "center" } as const;
-const head = { bold: true, align: "center", fill: "header" } as const;
+const head = { bold: true, align: "center", fill: "#F2F2F2" } as const;
 
 function sheet(name: string, init: Partial<FixtureSheet>): FixtureSheet {
   return { name, usedRange: "A1:A1", cells: {}, merges: [], rowHeights: {}, colWidths: {}, ...init };
@@ -317,7 +317,35 @@ function journalSheet(): FixtureSheet {
 
 // ---------- 工作簿登记 ----------
 
+// ---------- 输出/T-0c21/填写核对.xlsx（报告类产出） ----------
+
+function checkReportSheet(): FixtureSheet {
+  const rows: [string, string, string, string][] = [
+    ["数据质量", "—", "通过", "序时账借贷平衡；余额表期初加发生等于期末；序时账按科目汇总等于余额表发生额"],
+    ["语义", "R5、R6", "通过", ""],
+    ["口径完整", "R5、R6", "通过", ""],
+    ["守恒", "R5、R6", "通过", ""],
+    ["控制数", "R5", "通过（第 2 次）", "第 1 次账龄合计 1,834,500.00，差 -500.00；改口径后一致"],
+    ["控制数", "R6", "通过", "按客户汇总合计 = 余额表 1122 期末"],
+    ["双路复算", "R5、R6", "通过", ""],
+    ["写入后回读", "—", "通过", ""],
+    ["公式重算", "—", "通过", ""],
+    ["交叉合计", "—", "通过", ""],
+    ["未改动格", "—", "通过", ""],
+    ["完整性", "—", "通过", ""],
+    ["Excel 打开", "—", "通过", ""],
+    ["可追溯", "—", "通过", ""],
+  ];
+  const s = sheet("核对", { usedRange: `A1:D${rows.length + 2}`, colWidths: { A: 14, B: 12, C: 16, D: 60 }, rowHeights: { "3": 32 }, freeze: { rows: 2, cols: 0 } });
+  s.cells.A1 = { v: "应收账款底稿填写核对", style: bold };
+  s.merges.push("A1:D1");
+  ["核对项", "区域", "结果", "说明"].forEach((h, i) => (s.cells[`${"ABCD"[i]}2`] = { v: h, style: head }));
+  rows.forEach((r, i) => r.forEach((v, j) => (s.cells[`${"ABCD"[j]}${i + 3}`] = { v, style: j === 3 ? { wrap: true } : undefined })));
+  return s;
+}
+
 export const WORKBOOKS: Record<string, FixtureWorkbook> = {
+  "OUT-check-report": { file: "OUT-check-report", name: "填写核对.xlsx", sheets: [checkReportSheet()] },
   "F-9a1be04c77d2": { file: "F-9a1be04c77d2", name: "应收账款底稿.xlsx", sheets: [arSheet(), leadSheet()] },
   "F-1c44d0e2a7b9": { file: "F-1c44d0e2a7b9", name: "科目余额表2025.xlsx", sheets: [tbSheet()] },
   "F-6e02f5a1c3d8": { file: "F-6e02f5a1c3d8", name: "序时账2025.xlsx", sheets: [journalSheet()] },
@@ -388,6 +416,7 @@ export function filledCells(): Record<string, { v: string; from?: string }> {
 
 export const OUTPUT_FILES: Record<string, { base: string; name: string }> = {
   "输出/T-0c21/应收账款底稿-填写成果.xlsx": { base: "F-9a1be04c77d2", name: "应收账款底稿-填写成果.xlsx" },
+  "输出/T-0c21/填写核对.xlsx": { base: "OUT-check-report", name: "填写核对.xlsx" },
 };
 
 export function cellText(c: FixtureCell): string {

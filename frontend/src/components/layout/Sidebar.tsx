@@ -238,7 +238,7 @@ function OutputList() {
     <div className="side-list">
       <div className="side-group">项目内全部产出</div>
       {outs.map((o) => (
-        <div key={o.output} className="file-row" onClick={() => store.openSheet(o.file, { mode: o.kind === "workpaper" ? "filled" : "raw", title: o.name })}>
+        <div key={o.output} className="file-row" onClick={() => store.openSheet(o.output, { mode: o.kind === "workpaper" ? "filled" : "raw", title: o.name, task: o.task })}>
           <span className={`file-icon ${o.kind === "report" ? "report" : ""}`}>{o.kind === "report" ? "核" : "XLS"}</span>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.name}</div>

@@ -23,8 +23,11 @@ export function SheetTab({ tab }: { tab: SheetTabState }) {
   const store = useAppStore();
   const t = useTokens();
   const s = useSession();
-  const task = tab.task ? s?.tasks[tab.task] : undefined;
-  const output = task?.outputs.find((o) => o.kind === "workpaper")?.file ?? (/^O-|\.xlsx$/.test(tab.file) && tab.file.includes("/") ? tab.file : null);
+  const tabTask = tab.task ? s?.tasks[tab.task] : undefined;
+  // 只有底稿本身或它的填写成果才叠加任务的区域、计划；同一任务的报告类产出按普通文件显示
+  const task =
+    tabTask && (tab.file === tabTask.workpaperFile || tabTask.outputs.some((o) => o.kind === "workpaper" && o.output === tab.file)) ? tabTask : undefined;
+  const output = task?.outputs.find((o) => o.kind === "workpaper")?.output ?? (tab.file.startsWith("O-") ? tab.file : null);
   const baseFile = task?.workpaperFile ?? tab.file;
   const mode = tab.mode;
   const file = mode === "filled" && output ? output : baseFile;

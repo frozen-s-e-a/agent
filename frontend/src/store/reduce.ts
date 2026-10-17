@@ -53,6 +53,7 @@ export interface NodeRun {
 export interface CheckRun {
   check: string;
   passed: boolean;
+  attempt: number;
   region?: string;
   detail?: CheckDetail;
   ts: string;
@@ -83,7 +84,7 @@ export interface TaskState {
   regions: Record<string, RegionRun>;
   nodes: NodeRun[];
   checks: CheckRun[];
-  outputs: { file: string; kind: string; checks?: { passed: number; failed: number } }[];
+  outputs: { output: string; file: string; kind: string; checks?: { passed: number; failed: number } }[];
   userMessages: string[];
   blocked?: { where: string; why: string; suggest?: string };
   createdAt: string;
@@ -326,7 +327,7 @@ function apply(s: SessionState, ev: AuditEvent) {
       return;
     case "check.result":
       patchTask(s, ev.task, ts, (t) => {
-        t.checks.push({ check: ev.data.check, passed: ev.data.passed, region: ev.data.region, detail: ev.data.detail, ts });
+        t.checks.push({ check: ev.data.check, passed: ev.data.passed, attempt: ev.data.attempt ?? 1, region: ev.data.region, detail: ev.data.detail, ts });
       });
       return;
     case "node.retry":
@@ -374,7 +375,7 @@ function apply(s: SessionState, ev: AuditEvent) {
       s.items = [...s.items, { kind: "note", id: `n-${ev.seq}`, text: `重跑${ev.data.note ? `：${ev.data.note}` : ""}`, task: ev.task, ts }];
       return;
     case "output.ready":
-      patchTask(s, ev.task, ts, (t) => t.outputs.push({ file: ev.data.file, kind: ev.data.kind, checks: ev.data.checks }));
+      patchTask(s, ev.task, ts, (t) => t.outputs.push({ output: ev.data.output, file: ev.data.file, kind: ev.data.kind, checks: ev.data.checks }));
       return;
     case "task.blocked":
       patchTask(s, ev.task, ts, (t) => {

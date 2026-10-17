@@ -80,7 +80,7 @@ export type AuditEvent =
       "node.finished",
       { node: string; outcome: "passed" | "failed" | "skipped"; refs?: string[]; region?: string }
     >
-  | EventEnvelope<"check.result", { check: string; passed: boolean; detail?: CheckDetail; region?: string }>
+  | EventEnvelope<"check.result", { check: string; passed: boolean; attempt?: number; detail?: CheckDetail; region?: string }>
   | EventEnvelope<"node.retry", { node: string; attempt: number; reason: string; region?: string }>
   | EventEnvelope<"card.opened", Card>
   | EventEnvelope<"card.closed", { card: string; answer?: CardAnswer; withdrawn?: boolean }>
@@ -95,7 +95,7 @@ export type AuditEvent =
     >
   | EventEnvelope<
       "output.ready",
-      { file: string; output?: string; kind: string; checks?: { passed: number; failed: number } }
+      { output: string; file: string; kind: string; checks?: { passed: number; failed: number } }
     >
   | EventEnvelope<"task.blocked", { where: string; why: string; suggest?: string }>
   | EventEnvelope<
@@ -187,7 +187,7 @@ export interface UncertainItem {
 export interface UnderstandingRegion {
   region: string;
   range: string;
-  type?: string; // provisional：卡里没写区域类型，修改时又要改 type
+  type?: string;
   purpose: string;
   columns: UnderstandingColumn[];
   rows?: { row: number; text: string; formula?: boolean }[];
@@ -231,7 +231,7 @@ export interface WriteConfirmationBody {
 }
 
 export interface ResultSummaryBody {
-  outputs: { file: string; kind: string }[];
+  outputs: { output?: string; file: string; kind: string }[];
   checks: { passed: number; failed: number; retried?: number };
   manual: number;
   notes?: { section: string; text: string; status: "suggested" | "confirmed" }[];
@@ -289,10 +289,10 @@ export interface SheetCell {
   stale?: boolean;
   array?: string;
   plan?: { value?: string; text?: string; stale?: boolean; from?: string; overwrite?: boolean; manual?: boolean };
-  /** provisional：已写入叠加（overlay.output）时，该格由任务写入 */
-  written?: { from?: string };
-  /** provisional：样式。接口约定没写，前端先只用加粗、对齐和换行 */
-  style?: { bold?: boolean; align?: "left" | "center" | "right"; wrap?: boolean; fill?: string };
+  /** 打开产出文件时，由任务写入的格（overlay.output） */
+  written?: { from: string; task?: string };
+  /** 只在和默认不同时出现；fill 为 #RRGGBB */
+  style?: { bold?: boolean; italic?: boolean; align?: "left" | "center" | "right"; wrap?: boolean; fill?: string };
 }
 
 export interface SheetRegionOverlay {
@@ -308,15 +308,15 @@ export interface SheetRegionOverlay {
 
 export interface SheetView {
   sheet: string;
-  sheets?: { name: string; hidden?: boolean }[]; // provisional：底部工作表标签需要
+  sheets?: { name: string; hidden?: boolean }[];
   range: string;
-  usedRange?: string; // provisional：分块加载前要知道整表大小
+  usedRange?: string;
   cells: SheetCell[];
   merges: string[];
   rowHeights: Record<string, number>;
   colWidths: Record<string, number>;
-  freeze?: { rows: number; cols: number }; // provisional：文件里的冻结窗格
-  overlay?: { regions?: SheetRegionOverlay[] }; // provisional
+  freeze?: { rows: number; cols: number }; // 没有冻结时省略
+  overlay?: { regions?: SheetRegionOverlay[] };
 }
 
 export interface SheetViewParams {
@@ -332,7 +332,8 @@ export interface TableColumn {
   key: string;
   name: string;
   type: "text" | "decimal" | "date" | "integer";
-  meaning?: string; // provisional：识别出的字段含义
+  meaning?: string; // 识别出的字段含义（英文键）
+  meaningLabel?: string; // 给人看的中文名；未识别时和 meaning 一起省略
   group?: string;
 }
 

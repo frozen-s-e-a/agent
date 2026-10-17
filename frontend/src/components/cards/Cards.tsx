@@ -533,13 +533,13 @@ function ResultCard({ c, body }: { c: CardState; body: ResultSummaryBody }) {
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {body.outputs.map((o) => (
-          <div key={o.file} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div key={o.output ?? o.file} style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <FileExcelOutlined style={{ color: "#1f8a50" }} />
             <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{o.file.split("/").pop()}</span>
-            <Button size="small" onClick={() => store.openSheet(o.file, { mode: o.kind === "workpaper" ? "filled" : "raw", task: c.task })}>
+            <Button size="small" onClick={() => store.openSheet(o.output ?? o.file, { mode: o.kind === "workpaper" ? "filled" : "raw", task: c.task, title: o.file.split("/").pop() })}>
               在表上查看
             </Button>
-            <Button size="small" onClick={() => void store.host.request("output.open", { file: o.file })}>
+            <Button size="small" onClick={() => void store.host.request("output.open", { file: o.output ?? o.file })}>
               用 Excel 打开
             </Button>
           </div>

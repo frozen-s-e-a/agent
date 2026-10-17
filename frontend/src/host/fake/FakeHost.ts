@@ -312,10 +312,10 @@ export class FakeHost implements HostClient {
         this.openCards.delete(ev.data.card);
         break;
       case "output.ready": {
-        const n = this.outputs.length + 1;
+        if (this.outputs.some((o) => o.output === ev.data.output)) break;
         const name = ev.data.file.split("/").pop()!;
         this.outputs.push({
-          output: `O-${String(n).padStart(4, "0")}`,
+          output: ev.data.output,
           file: ev.data.file,
           name,
           kind: ev.data.kind,
@@ -665,7 +665,7 @@ export class FakeHost implements HostClient {
       deliverables: [],
       regions: WORKPAPER_REGIONS.map((r) => ({ region: r.region, state: this.regionStates.get(r.region) ?? "pending" })),
       openCards: [...this.openCards.keys()],
-      outputs: this.outputs.map((o) => o.file),
+      outputs: this.outputs.map((o) => o.output),
     };
   }
 
@@ -701,7 +701,7 @@ export class FakeHost implements HostClient {
         if (base.stale && !fl) cell.stale = true;
         if (base.style) cell.style = base.style;
         if (pc) cell.plan = { value: pc.value, stale: pc.stale, from: pc.from, overwrite: pc.overwrite, manual: pc.manual };
-        if (fl && fl.from) cell.written = { from: fl.from };
+        if (fl && fl.from) cell.written = { from: fl.from, task: "T-0c21" };
         cells.push(cell);
       }
     }

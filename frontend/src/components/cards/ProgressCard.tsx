@@ -42,8 +42,14 @@ export function ProgressCard({ task }: { task: TaskState }) {
 
   const stageIdx = STAGES.findIndex((s) => s.stage === task.stage);
   const regions = Object.values(task.regions);
-  // 区域重做后同一项核对会再报一次，计数只看每项最新一次
-  const latest = [...new Map(task.checks.map((c) => [`${c.check}|${c.region ?? ""}`, c])).values()];
+  // 按"核对项 + 区域"取 attempt 最大的那次计数（接口约定 4.2）
+  const best = new Map<string, (typeof task.checks)[number]>();
+  for (const c of task.checks) {
+    const k = `${c.check}|${c.region ?? ""}`;
+    const prev = best.get(k);
+    if (!prev || c.attempt >= prev.attempt) best.set(k, c);
+  }
+  const latest = [...best.values()];
   const passed = latest.filter((c) => c.passed).length;
   const failed = latest.filter((c) => !c.passed).length;
   const current = [...task.nodes].reverse().find((n) => !n.finishedAt);

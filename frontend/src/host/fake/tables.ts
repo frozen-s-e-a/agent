@@ -9,22 +9,23 @@ interface TableDef {
   row: (i: number) => { values: (string | null)[]; source?: { file: string; sheet: string; row: number }; invalid?: number[] };
 }
 
-const JOURNAL_MEANINGS = [
-  "凭证日期",
-  "凭证号",
-  "分录号",
-  "摘要",
-  "科目编码",
-  "科目名称",
-  "辅助核算",
-  "借方金额",
-  "贷方金额",
-  "往来单位",
+// [英文键, 中文名]；null 表示没识别出来
+const JOURNAL_MEANINGS: ([string, string] | null)[] = [
+  ["voucher_date", "凭证日期"],
+  ["voucher_no", "凭证号"],
+  ["line_no", "分录号"],
+  ["summary", "摘要"],
+  ["account_code", "科目编码"],
+  ["account_name", "科目名称"],
+  ["aux_code", "辅助核算"],
+  ["debit", "借方金额"],
+  ["credit", "贷方金额"],
+  ["counterparty", "往来单位"],
   null,
   null,
-  "会计年度",
-  "会计期间",
-];
+  ["fiscal_year", "会计年度"],
+  ["fiscal_period", "会计期间"],
+]
 
 const TB_ROWS: (string | null)[][] = [
   ["1001", "库存现金", "35000.00", "1260000.00", "1248000.00", "47000.00"],
@@ -68,15 +69,15 @@ const TABLES: Record<string, TableDef> = {
   "D-001": {
     title: "科目余额表2025 · 余额表",
     columns: [
-      { key: "code", name: "科目编码", type: "text", meaning: "科目编码" },
-      { key: "name", name: "科目名称", type: "text", meaning: "科目名称" },
-      { key: "open", name: "期初余额", type: "decimal", meaning: "期初余额（借正贷负）" },
-      { key: "dr", name: "本期借方", type: "decimal", meaning: "本期借方发生额" },
-      { key: "cr", name: "本期贷方", type: "decimal", meaning: "本期贷方发生额" },
-      { key: "close", name: "期末余额", type: "decimal", meaning: "期末余额（借正贷负）" },
+      { key: "code", name: "科目编码", type: "text", meaning: "account_code", meaningLabel: "科目编码" },
+      { key: "name", name: "科目名称", type: "text", meaning: "account_name", meaningLabel: "科目名称" },
+      { key: "open", name: "期初余额", type: "decimal", meaning: "opening", meaningLabel: "期初余额（借正贷负）" },
+      { key: "dr", name: "本期借方", type: "decimal", meaning: "period_debit", meaningLabel: "本期借方发生额" },
+      { key: "cr", name: "本期贷方", type: "decimal", meaning: "period_credit", meaningLabel: "本期贷方发生额" },
+      { key: "close", name: "期末余额", type: "decimal", meaning: "closing", meaningLabel: "期末余额（借正贷负）" },
     ],
     total: TB_ROWS.length,
-    row: (i) => ({ values: TB_ROWS[i], source: { file: "科目余额表2025.xlsx", sheet: "余额表", row: i + 4 } }),
+    row: (i) => ({ values: TB_ROWS[i], source: { file: "F-1c44d0e2a7b9", sheet: "余额表", row: i + 4 } }),
   },
   "D-002": {
     title: "序时账2025 · 序时账",
@@ -84,13 +85,13 @@ const TABLES: Record<string, TableDef> = {
       key: `c${i}`,
       name: h,
       type: i === 7 || i === 8 ? "decimal" : i === 0 ? "date" : "text",
-      meaning: JOURNAL_MEANINGS[i] ?? undefined,
+      ...(JOURNAL_MEANINGS[i] ? { meaning: JOURNAL_MEANINGS[i]![0], meaningLabel: JOURNAL_MEANINGS[i]![1] } : {}),
     })),
     total: JOURNAL_ROWS,
     row: (i) => {
       const values = journalRow(i + 1);
       const invalid = values[7] != null && !/^[\d.]+$/.test(values[7]!) ? [7] : undefined;
-      return { values, source: { file: "序时账2025.xlsx", sheet: "序时账", row: i + 2 }, invalid };
+      return { values, source: { file: "F-6e02f5a1c3d8", sheet: "序时账", row: i + 2 }, invalid };
     },
   },
   "R-011": {

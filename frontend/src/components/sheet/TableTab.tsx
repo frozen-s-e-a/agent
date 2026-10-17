@@ -158,10 +158,10 @@ export function TableTab({ tab }: { tab: Tab }) {
               ctx.textAlign = c?.type === "decimal" ? "right" : "left";
               const x = c?.type === "decimal" ? rect.x + rect.width - 8 : rect.x + 8;
               ctx.fillText(column.title, x, rect.y + 15);
-              if (c?.meaning) {
+              if (c?.meaningLabel) {
                 ctx.font = `11px ${theme.fontFamily}`;
                 ctx.fillStyle = t.accent;
-                ctx.fillText(c.meaning, x, rect.y + 32);
+                ctx.fillText(c.meaningLabel, x, rect.y + 32);
               } else {
                 ctx.font = `11px ${theme.fontFamily}`;
                 ctx.fillStyle = t.textFaint;

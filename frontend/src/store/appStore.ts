@@ -209,7 +209,7 @@ export class AppStore {
         if (e.data.kind === "workpaper" && task?.workpaperFile) {
           // 成果就绪：底稿标签换成成果文件，"已填"视图
           const tab = this.findSheetTab(task.workpaperFile);
-          if (tab) this.updateTab(tab.id, { file: e.data.file, mode: "filled", title: e.data.file.split("/").pop()! });
+          if (tab) this.updateTab(tab.id, { file: e.data.output, mode: "filled", title: e.data.file.split("/").pop()! });
         }
         break;
       case "task.finished":
@@ -327,7 +327,14 @@ export class AppStore {
       "F-1c44d0e2a7b9": "科目余额表2025.xlsx",
       "F-6e02f5a1c3d8": "序时账2025.xlsx",
     };
-    return known[file] ?? this.fileNames.get(file) ?? file.split("/").pop() ?? file;
+    if (known[file] ?? this.fileNames.get(file)) return known[file] ?? this.fileNames.get(file)!;
+    if (file.startsWith("O-"))
+      for (const s of Object.values(this.snap.ev.sessions))
+        for (const t of Object.values(s.tasks)) {
+          const o = t.outputs.find((x) => x.output === file);
+          if (o) return o.file.split("/").pop()!;
+        }
+    return file.split("/").pop() ?? file;
   }
   fileNames = new Map<string, string>();
 
@@ -407,7 +414,7 @@ export class AppStore {
     if (t?.workpaperFile) {
       const out = t.outputs.find((o) => o.kind === "workpaper");
       const writing = Object.values(s.cards).some((c) => isOpen(c) && c.card.kind === "write_confirmation" && c.card.task === t.task);
-      this.openSheet(out?.file ?? t.workpaperFile, { task: t.task, mode: out ? "filled" : writing && t.plan ? "plan" : "regions" });
+      this.openSheet(out?.output ?? t.workpaperFile, { task: t.task, mode: out ? "filled" : writing && t.plan ? "plan" : "regions" });
     }
   }
 

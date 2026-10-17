@@ -40,14 +40,20 @@ export interface Display {
 
 const isNumeric = (c?: ModelCell) => c?.valueType === "number";
 
+/** 文件里的底色（#RRGGBB）。浅色主题照用；深色主题改成淡淡一层，免得亮底配浅字看不清；白色当作没有底色 */
+function fileFill(fill: string | undefined, t: PaintOptions["t"]): string | null {
+  if (!fill || !/^#[0-9a-f]{6}$/i.test(fill) || /^#ffffff$/i.test(fill)) return null;
+  return t.mode === "dark" ? alpha(fill, 0.14) : fill;
+}
+
 export function cellDisplay(model: SheetModel, row: number, col: number, o: PaintOptions): Display {
   const { t, mode } = o;
   const c = model.cell(row, col);
   const style = c?.style;
-  let fill: string | null = style?.fill === "header" ? t.cellHeaderFill : null;
+  let fill: string | null = fileFill(style?.fill, t);
   let color = t.text;
   let text = c?.text ?? (c?.value != null ? c.value : "");
-  let italic = false;
+  let italic = !!style?.italic;
   let mono = false;
   let hatch = false;
   let corner: string | null = null;
