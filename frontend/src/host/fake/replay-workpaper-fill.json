@@ -1,0 +1,1597 @@
+{
+ "about": "事件回放样例（audit-events/1、audit-cards/1）：一份底稿两个区域；账龄区域触发一次口径确认（C-002）和一次控制数差异重做（seq 见 node.retry）。前端按顺序回放 events 即可。",
+ "snapshotAtEnd": {
+  "task": "T-0c21",
+  "status": "completed",
+  "stage": "review",
+  "lastSeq": 96,
+  "deliverables": [
+   {
+    "kind": "workpaper",
+    "file": "F-9a1be04c77d2",
+    "status": "completed"
+   }
+  ],
+  "regions": [
+   {
+    "region": "W-003#R5",
+    "state": "written",
+    "attempt": 2,
+    "refs": [
+     "R-014"
+    ],
+    "card": null
+   },
+   {
+    "region": "W-003#R6",
+    "state": "written",
+    "attempt": 1,
+    "refs": [
+     "R-011"
+    ],
+    "card": null
+   }
+  ],
+  "openCards": [
+   "C-004"
+  ],
+  "outputs": [
+   "输出/T-0c21/应收账款底稿-填写成果.xlsx",
+   "输出/T-0c21/填写核对.xlsx"
+  ]
+ },
+ "events": [
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "seq": 1,
+   "ts": "2026-10-17T08:00:00.000Z",
+   "type": "message.created",
+   "data": {
+    "message": "M-0001",
+    "text": "用余额表和序时账填写应收账款底稿，期间2025年",
+    "files": [
+     "F-9a1be04c77d2",
+     "F-1c44d0e2a7b9",
+     "F-6e02f5a1c3d8"
+    ]
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 2,
+   "ts": "2026-10-17T08:00:00.000Z",
+   "type": "task.created",
+   "data": {
+    "message": "M-0001",
+    "text": "用余额表和序时账填写应收账款底稿，期间2025年",
+    "files": [
+     {
+      "file": "F-9a1be04c77d2",
+      "name": "应收账款底稿.xlsx"
+     },
+     {
+      "file": "F-1c44d0e2a7b9",
+      "name": "科目余额表2025.xlsx"
+     },
+     {
+      "file": "F-6e02f5a1c3d8",
+      "name": "序时账2025.xlsx"
+     }
+    ],
+    "project": "P-7f3a"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 3,
+   "ts": "2026-10-17T08:00:00.100Z",
+   "type": "stage.changed",
+   "data": {
+    "stage": "understand"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 4,
+   "ts": "2026-10-17T08:00:00.300Z",
+   "type": "node.started",
+   "data": {
+    "node": "understand",
+    "kind": "model"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 5,
+   "ts": "2026-10-17T08:00:02.300Z",
+   "type": "node.finished",
+   "data": {
+    "node": "understand",
+    "outcome": "passed",
+    "refs": []
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 6,
+   "ts": "2026-10-17T08:00:03.800Z",
+   "type": "task.understood",
+   "data": {
+    "deliverables": [
+     {
+      "kind": "workpaper",
+      "file": "F-9a1be04c77d2"
+     }
+    ],
+    "period": "2025",
+    "scope": {
+     "accounts": [
+      "应收账款"
+     ]
+    },
+    "constraints": [
+     "期间2025年"
+    ],
+    "subtasks": []
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 7,
+   "ts": "2026-10-17T08:00:03.900Z",
+   "type": "stage.changed",
+   "data": {
+    "stage": "workpaper"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 8,
+   "ts": "2026-10-17T08:00:04.100Z",
+   "type": "node.started",
+   "data": {
+    "node": "workpaper_parse",
+    "kind": "code"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 9,
+   "ts": "2026-10-17T08:00:06.100Z",
+   "type": "node.finished",
+   "data": {
+    "node": "workpaper_parse",
+    "outcome": "passed",
+    "refs": [
+     "W-003"
+    ]
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 10,
+   "ts": "2026-10-17T08:00:06.200Z",
+   "type": "region.state",
+   "data": {
+    "region": "W-003#R5",
+    "state": "understanding"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 11,
+   "ts": "2026-10-17T08:00:06.300Z",
+   "type": "region.state",
+   "data": {
+    "region": "W-003#R6",
+    "state": "understanding"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 12,
+   "ts": "2026-10-17T08:00:06.500Z",
+   "type": "node.started",
+   "data": {
+    "node": "region_semantics",
+    "kind": "model",
+    "region": "W-003#R5"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 13,
+   "ts": "2026-10-17T08:00:08.500Z",
+   "type": "node.finished",
+   "data": {
+    "node": "region_semantics",
+    "outcome": "passed",
+    "refs": [],
+    "region": "W-003#R5"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 14,
+   "ts": "2026-10-17T08:00:08.800Z",
+   "type": "check.result",
+   "data": {
+    "check": "semantics",
+    "passed": true,
+    "region": "W-003#R5"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 15,
+   "ts": "2026-10-17T08:00:09.000Z",
+   "type": "node.started",
+   "data": {
+    "node": "region_semantics",
+    "kind": "model",
+    "region": "W-003#R6"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 16,
+   "ts": "2026-10-17T08:00:11.000Z",
+   "type": "node.finished",
+   "data": {
+    "node": "region_semantics",
+    "outcome": "passed",
+    "refs": [],
+    "region": "W-003#R6"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 17,
+   "ts": "2026-10-17T08:00:11.300Z",
+   "type": "check.result",
+   "data": {
+    "check": "semantics",
+    "passed": true,
+    "region": "W-003#R6"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 18,
+   "ts": "2026-10-17T08:00:11.400Z",
+   "type": "stage.changed",
+   "data": {
+    "stage": "data"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 19,
+   "ts": "2026-10-17T08:00:11.600Z",
+   "type": "node.started",
+   "data": {
+    "node": "data_inspect",
+    "kind": "code"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 20,
+   "ts": "2026-10-17T08:00:13.600Z",
+   "type": "node.finished",
+   "data": {
+    "node": "data_inspect",
+    "outcome": "passed",
+    "refs": []
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 21,
+   "ts": "2026-10-17T08:00:13.800Z",
+   "type": "node.started",
+   "data": {
+    "node": "field_semantics",
+    "kind": "model"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 22,
+   "ts": "2026-10-17T08:00:15.800Z",
+   "type": "node.finished",
+   "data": {
+    "node": "field_semantics",
+    "outcome": "passed",
+    "refs": []
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 23,
+   "ts": "2026-10-17T08:00:16.000Z",
+   "type": "node.started",
+   "data": {
+    "node": "data_import",
+    "kind": "code"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 24,
+   "ts": "2026-10-17T08:00:19.000Z",
+   "type": "node.progress",
+   "data": {
+    "node": "data_import",
+    "message": "导入序时账",
+    "done": 24000,
+    "total": 48209
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 25,
+   "ts": "2026-10-17T08:00:25.000Z",
+   "type": "node.finished",
+   "data": {
+    "node": "data_import",
+    "outcome": "passed",
+    "refs": [
+     "D-001",
+     "D-002"
+    ]
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 26,
+   "ts": "2026-10-17T08:00:25.300Z",
+   "type": "check.result",
+   "data": {
+    "check": "data_quality",
+    "passed": true,
+    "detail": {
+     "items": [
+      "序时账借贷平衡",
+      "余额表期初加发生等于期末",
+      "序时账按科目汇总等于余额表发生额"
+     ]
+    }
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 27,
+   "ts": "2026-10-17T08:00:25.400Z",
+   "type": "region.state",
+   "data": {
+    "region": "W-003#R5",
+    "state": "awaiting_confirmation",
+    "card": "C-001"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 28,
+   "ts": "2026-10-17T08:00:25.500Z",
+   "type": "region.state",
+   "data": {
+    "region": "W-003#R6",
+    "state": "awaiting_confirmation",
+    "card": "C-001"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 29,
+   "ts": "2026-10-17T08:00:27.000Z",
+   "type": "card.opened",
+   "data": {
+    "card": "C-001",
+    "kind": "workpaper_understanding",
+    "task": "T-0c21",
+    "title": "请确认对底稿的理解",
+    "blocking": true,
+    "actions": [
+     "confirm",
+     "edit",
+     "reject"
+    ],
+    "defaultAction": "confirm",
+    "body": {
+     "workpaper": "W-003",
+     "template": {
+      "fingerprint": "TPL-51c0e2a9b3f1",
+      "known": false
+     },
+     "regions": [
+      {
+       "region": "W-003#R5",
+       "range": "应收账款!A5:E11",
+       "purpose": "应收账款账龄分析",
+       "columns": [
+        {
+         "col": "C",
+         "measure": "期末余额",
+         "period": "2025-12-31",
+         "unit": "元",
+         "direction": "debit",
+         "basis": "template",
+         "basisRef": "应收账款!C5",
+         "confidence": "high"
+        },
+        {
+         "col": "D",
+         "measure": "占比",
+         "period": "2025-12-31",
+         "unit": "%",
+         "basis": "template",
+         "basisRef": "应收账款!D5",
+         "confidence": "high"
+        }
+       ],
+       "rows": [
+        {
+         "row": 7,
+         "text": "1年以内"
+        },
+        {
+         "row": 8,
+         "text": "1-2年"
+        },
+        {
+         "row": 9,
+         "text": "2-3年"
+        },
+        {
+         "row": 10,
+         "text": "3年以上"
+        },
+        {
+         "row": 11,
+         "text": "合计",
+         "formula": true
+        }
+       ],
+       "manual": [
+        "应收账款!E7:E10"
+       ],
+       "uncertain": []
+      },
+      {
+       "region": "W-003#R6",
+       "range": "应收账款!A15:D20",
+       "purpose": "期末余额前五名客户",
+       "columns": [
+        {
+         "col": "B",
+         "measure": "客户名称",
+         "basis": "template",
+         "basisRef": "应收账款!B15",
+         "confidence": "high"
+        },
+        {
+         "col": "C",
+         "measure": "期末余额",
+         "period": "2025-12-31",
+         "unit": "元",
+         "direction": "debit",
+         "basis": "template",
+         "basisRef": "应收账款!C15",
+         "confidence": "high"
+        },
+        {
+         "col": "D",
+         "measure": "占应收账款期末余额比例",
+         "unit": "%",
+         "basis": "template",
+         "basisRef": "应收账款!D15",
+         "confidence": "high"
+        }
+       ],
+       "manual": [],
+       "uncertain": []
+      }
+     ]
+    }
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 30,
+   "ts": "2026-10-17T08:00:47.000Z",
+   "type": "card.closed",
+   "data": {
+    "card": "C-001",
+    "answer": {
+     "action": "confirm",
+     "edits": {},
+     "note": ""
+    }
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 31,
+   "ts": "2026-10-17T08:00:47.100Z",
+   "type": "stage.changed",
+   "data": {
+    "stage": "basis"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 32,
+   "ts": "2026-10-17T08:00:47.200Z",
+   "type": "region.state",
+   "data": {
+    "region": "W-003#R5",
+    "state": "computing"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 33,
+   "ts": "2026-10-17T08:00:47.300Z",
+   "type": "region.state",
+   "data": {
+    "region": "W-003#R6",
+    "state": "computing"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 34,
+   "ts": "2026-10-17T08:00:47.500Z",
+   "type": "node.started",
+   "data": {
+    "node": "basis",
+    "kind": "model",
+    "region": "W-003#R5"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 35,
+   "ts": "2026-10-17T08:00:49.500Z",
+   "type": "node.finished",
+   "data": {
+    "node": "basis",
+    "outcome": "passed",
+    "refs": [],
+    "region": "W-003#R5"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 36,
+   "ts": "2026-10-17T08:00:49.800Z",
+   "type": "check.result",
+   "data": {
+    "check": "basis_complete",
+    "passed": true,
+    "region": "W-003#R5"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 37,
+   "ts": "2026-10-17T08:00:50.000Z",
+   "type": "node.started",
+   "data": {
+    "node": "basis",
+    "kind": "model",
+    "region": "W-003#R6"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 38,
+   "ts": "2026-10-17T08:00:52.000Z",
+   "type": "node.finished",
+   "data": {
+    "node": "basis",
+    "outcome": "passed",
+    "refs": [],
+    "region": "W-003#R6"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 39,
+   "ts": "2026-10-17T08:00:52.300Z",
+   "type": "check.result",
+   "data": {
+    "check": "basis_complete",
+    "passed": true,
+    "region": "W-003#R6"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 40,
+   "ts": "2026-10-17T08:00:52.400Z",
+   "type": "region.state",
+   "data": {
+    "region": "W-003#R5",
+    "state": "awaiting_confirmation",
+    "card": "C-002"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 41,
+   "ts": "2026-10-17T08:00:53.900Z",
+   "type": "card.opened",
+   "data": {
+    "card": "C-002",
+    "kind": "basis_confirmation",
+    "task": "T-0c21",
+    "title": "账龄口径需要确认",
+    "blocking": false,
+    "actions": [
+     "confirm"
+    ],
+    "defaultAction": "confirm",
+    "body": {
+     "questions": [
+      {
+       "id": "q1",
+       "region": "W-003#R5",
+       "text": "账龄从哪一天开始算？",
+       "options": [
+        {
+         "label": "凭证日期",
+         "impact": "1年以内 1,200,000.00；1-2年 435,000.00"
+        },
+        {
+         "label": "摘要中的发票日期（312 笔可识别，其余用凭证日期）",
+         "impact": "1年以内 1,150,000.00；1-2年 485,000.00"
+        }
+       ],
+       "suggest": 0,
+       "allowText": true
+      }
+     ]
+    }
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 42,
+   "ts": "2026-10-17T08:00:54.000Z",
+   "type": "stage.changed",
+   "data": {
+    "stage": "compute"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 43,
+   "ts": "2026-10-17T08:00:54.200Z",
+   "type": "node.started",
+   "data": {
+    "node": "query",
+    "kind": "code",
+    "region": "W-003#R6"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 44,
+   "ts": "2026-10-17T08:00:56.200Z",
+   "type": "node.finished",
+   "data": {
+    "node": "query",
+    "outcome": "passed",
+    "refs": [
+     "R-011"
+    ],
+    "region": "W-003#R6"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 45,
+   "ts": "2026-10-17T08:00:56.500Z",
+   "type": "check.result",
+   "data": {
+    "check": "conservation",
+    "passed": true,
+    "region": "W-003#R6"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 46,
+   "ts": "2026-10-17T08:00:56.800Z",
+   "type": "check.result",
+   "data": {
+    "check": "control",
+    "passed": true,
+    "region": "W-003#R6",
+    "detail": {
+     "left": {
+      "label": "按客户汇总合计",
+      "value": "1835000.00",
+      "ref": "R-011"
+     },
+     "right": {
+      "label": "余额表 1122 期末",
+      "value": "1835000.00",
+      "ref": "D-001"
+     },
+     "diff": "0.00"
+    }
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 47,
+   "ts": "2026-10-17T08:00:57.000Z",
+   "type": "node.started",
+   "data": {
+    "node": "recompute",
+    "kind": "model",
+    "region": "W-003#R6"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 48,
+   "ts": "2026-10-17T08:00:59.000Z",
+   "type": "node.finished",
+   "data": {
+    "node": "recompute",
+    "outcome": "passed",
+    "refs": [
+     "R-012"
+    ],
+    "region": "W-003#R6"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 49,
+   "ts": "2026-10-17T08:00:59.300Z",
+   "type": "check.result",
+   "data": {
+    "check": "compare",
+    "passed": true,
+    "region": "W-003#R6",
+    "detail": {
+     "left": "R-011",
+     "right": "R-012"
+    }
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 50,
+   "ts": "2026-10-17T08:00:59.400Z",
+   "type": "region.state",
+   "data": {
+    "region": "W-003#R6",
+    "state": "checked",
+    "refs": [
+     "R-011"
+    ]
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 51,
+   "ts": "2026-10-17T08:01:24.400Z",
+   "type": "card.closed",
+   "data": {
+    "card": "C-002",
+    "answer": {
+     "action": "confirm",
+     "edits": {
+      "q1": 0
+     },
+     "note": ""
+    }
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 52,
+   "ts": "2026-10-17T08:01:24.500Z",
+   "type": "region.state",
+   "data": {
+    "region": "W-003#R5",
+    "state": "computing"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 53,
+   "ts": "2026-10-17T08:01:24.700Z",
+   "type": "node.started",
+   "data": {
+    "node": "query",
+    "kind": "code",
+    "region": "W-003#R5"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 54,
+   "ts": "2026-10-17T08:01:26.700Z",
+   "type": "node.finished",
+   "data": {
+    "node": "query",
+    "outcome": "passed",
+    "refs": [
+     "R-013"
+    ],
+    "region": "W-003#R5"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 55,
+   "ts": "2026-10-17T08:01:27.000Z",
+   "type": "check.result",
+   "data": {
+    "check": "conservation",
+    "passed": true,
+    "region": "W-003#R5"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 56,
+   "ts": "2026-10-17T08:01:27.100Z",
+   "type": "region.state",
+   "data": {
+    "region": "W-003#R5",
+    "state": "checking",
+    "attempt": 1,
+    "refs": [
+     "R-013"
+    ]
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 57,
+   "ts": "2026-10-17T08:01:27.400Z",
+   "type": "check.result",
+   "data": {
+    "check": "control",
+    "passed": false,
+    "region": "W-003#R5",
+    "detail": {
+     "left": {
+      "label": "账龄合计",
+      "value": "1834500.00",
+      "ref": "R-013"
+     },
+     "right": {
+      "label": "余额表 1122 期末",
+      "value": "1835000.00",
+      "ref": "D-001"
+     },
+     "diff": "-500.00",
+     "explainedBy": []
+    }
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 58,
+   "ts": "2026-10-17T08:01:28.900Z",
+   "type": "node.retry",
+   "data": {
+    "node": "basis",
+    "region": "W-003#R5",
+    "attempt": 2,
+    "reason": "控制数差额 -500.00：期间条件写成凭证日期 < 2025-12-31，漏掉 12 月 31 日 1 笔 500.00"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 59,
+   "ts": "2026-10-17T08:01:29.000Z",
+   "type": "region.state",
+   "data": {
+    "region": "W-003#R5",
+    "state": "computing",
+    "attempt": 2
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 60,
+   "ts": "2026-10-17T08:01:29.200Z",
+   "type": "node.started",
+   "data": {
+    "node": "basis",
+    "kind": "model",
+    "region": "W-003#R5"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 61,
+   "ts": "2026-10-17T08:01:31.200Z",
+   "type": "node.finished",
+   "data": {
+    "node": "basis",
+    "outcome": "passed",
+    "refs": [],
+    "region": "W-003#R5"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 62,
+   "ts": "2026-10-17T08:01:31.500Z",
+   "type": "check.result",
+   "data": {
+    "check": "basis_complete",
+    "passed": true,
+    "region": "W-003#R5"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 63,
+   "ts": "2026-10-17T08:01:31.700Z",
+   "type": "node.started",
+   "data": {
+    "node": "query",
+    "kind": "code",
+    "region": "W-003#R5"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 64,
+   "ts": "2026-10-17T08:01:33.700Z",
+   "type": "node.finished",
+   "data": {
+    "node": "query",
+    "outcome": "passed",
+    "refs": [
+     "R-014"
+    ],
+    "region": "W-003#R5"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 65,
+   "ts": "2026-10-17T08:01:34.000Z",
+   "type": "check.result",
+   "data": {
+    "check": "conservation",
+    "passed": true,
+    "region": "W-003#R5"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 66,
+   "ts": "2026-10-17T08:01:34.300Z",
+   "type": "check.result",
+   "data": {
+    "check": "control",
+    "passed": true,
+    "region": "W-003#R5",
+    "detail": {
+     "left": {
+      "label": "账龄合计",
+      "value": "1835000.00",
+      "ref": "R-014"
+     },
+     "right": {
+      "label": "余额表 1122 期末",
+      "value": "1835000.00",
+      "ref": "D-001"
+     },
+     "diff": "0.00"
+    }
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 67,
+   "ts": "2026-10-17T08:01:34.500Z",
+   "type": "node.started",
+   "data": {
+    "node": "recompute",
+    "kind": "model",
+    "region": "W-003#R5"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 68,
+   "ts": "2026-10-17T08:01:36.500Z",
+   "type": "node.finished",
+   "data": {
+    "node": "recompute",
+    "outcome": "passed",
+    "refs": [
+     "R-015"
+    ],
+    "region": "W-003#R5"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 69,
+   "ts": "2026-10-17T08:01:36.800Z",
+   "type": "check.result",
+   "data": {
+    "check": "compare",
+    "passed": true,
+    "region": "W-003#R5",
+    "detail": {
+     "left": "R-014",
+     "right": "R-015"
+    }
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 70,
+   "ts": "2026-10-17T08:01:36.900Z",
+   "type": "region.state",
+   "data": {
+    "region": "W-003#R5",
+    "state": "checked",
+    "attempt": 2,
+    "refs": [
+     "R-014"
+    ]
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 71,
+   "ts": "2026-10-17T08:01:37.000Z",
+   "type": "stage.changed",
+   "data": {
+    "stage": "fill"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 72,
+   "ts": "2026-10-17T08:01:37.200Z",
+   "type": "node.started",
+   "data": {
+    "node": "fill_compile",
+    "kind": "code"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 73,
+   "ts": "2026-10-17T08:01:39.200Z",
+   "type": "node.finished",
+   "data": {
+    "node": "fill_compile",
+    "outcome": "passed",
+    "refs": [
+     "FP-001"
+    ]
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 74,
+   "ts": "2026-10-17T08:01:40.700Z",
+   "type": "card.opened",
+   "data": {
+    "card": "C-003",
+    "kind": "write_confirmation",
+    "task": "T-0c21",
+    "title": "确认写入底稿",
+    "blocking": true,
+    "actions": [
+     "confirm",
+     "reject"
+    ],
+    "defaultAction": "confirm",
+    "body": {
+     "plan": "FP-001",
+     "target": "应收账款底稿.xlsx",
+     "output": "输出/T-0c21/应收账款底稿-填写成果.xlsx",
+     "regions": [
+      {
+       "region": "W-003#R5",
+       "cells": 8,
+       "sources": [
+        "R-014"
+       ],
+       "basis": "账龄按凭证日期起算；单位元"
+      },
+      {
+       "region": "W-003#R6",
+       "cells": 15,
+       "sources": [
+        "R-011"
+       ],
+       "basis": "按客户汇总期末余额，取前五名；单位元"
+      }
+     ],
+     "manual": [
+      "应收账款!E7:E10"
+     ],
+     "overwrites": []
+    }
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 75,
+   "ts": "2026-10-17T08:01:55.700Z",
+   "type": "card.closed",
+   "data": {
+    "card": "C-003",
+    "answer": {
+     "action": "confirm",
+     "edits": {},
+     "note": ""
+    }
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 76,
+   "ts": "2026-10-17T08:01:55.900Z",
+   "type": "node.started",
+   "data": {
+    "node": "fill_apply",
+    "kind": "code"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 77,
+   "ts": "2026-10-17T08:01:59.900Z",
+   "type": "node.progress",
+   "data": {
+    "node": "fill_apply",
+    "message": "用 Excel 重算比对",
+    "done": 1,
+    "total": 2
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 78,
+   "ts": "2026-10-17T08:02:07.900Z",
+   "type": "node.finished",
+   "data": {
+    "node": "fill_apply",
+    "outcome": "passed",
+    "refs": []
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 79,
+   "ts": "2026-10-17T08:02:08.200Z",
+   "type": "check.result",
+   "data": {
+    "check": "readback",
+    "passed": true
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 80,
+   "ts": "2026-10-17T08:02:08.500Z",
+   "type": "check.result",
+   "data": {
+    "check": "formulas",
+    "passed": true
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 81,
+   "ts": "2026-10-17T08:02:08.800Z",
+   "type": "check.result",
+   "data": {
+    "check": "crossFoot",
+    "passed": true
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 82,
+   "ts": "2026-10-17T08:02:09.100Z",
+   "type": "check.result",
+   "data": {
+    "check": "untouched",
+    "passed": true
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 83,
+   "ts": "2026-10-17T08:02:09.400Z",
+   "type": "check.result",
+   "data": {
+    "check": "completeness",
+    "passed": true
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 84,
+   "ts": "2026-10-17T08:02:09.700Z",
+   "type": "check.result",
+   "data": {
+    "check": "excel",
+    "passed": true
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 85,
+   "ts": "2026-10-17T08:02:09.800Z",
+   "type": "region.state",
+   "data": {
+    "region": "W-003#R5",
+    "state": "written"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 86,
+   "ts": "2026-10-17T08:02:09.900Z",
+   "type": "region.state",
+   "data": {
+    "region": "W-003#R6",
+    "state": "written"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 87,
+   "ts": "2026-10-17T08:02:11.400Z",
+   "type": "output.ready",
+   "data": {
+    "file": "输出/T-0c21/应收账款底稿-填写成果.xlsx",
+    "kind": "workpaper",
+    "checks": {
+     "passed": 6,
+     "failed": 0
+    }
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 88,
+   "ts": "2026-10-17T08:02:12.900Z",
+   "type": "output.ready",
+   "data": {
+    "file": "输出/T-0c21/填写核对.xlsx",
+    "kind": "report"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 89,
+   "ts": "2026-10-17T08:02:13.000Z",
+   "type": "stage.changed",
+   "data": {
+    "stage": "notes"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 90,
+   "ts": "2026-10-17T08:02:13.200Z",
+   "type": "node.started",
+   "data": {
+    "node": "notes",
+    "kind": "model"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 91,
+   "ts": "2026-10-17T08:02:15.200Z",
+   "type": "node.finished",
+   "data": {
+    "node": "notes",
+    "outcome": "passed",
+    "refs": []
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 92,
+   "ts": "2026-10-17T08:02:15.500Z",
+   "type": "check.result",
+   "data": {
+    "check": "traceable",
+    "passed": true
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 93,
+   "ts": "2026-10-17T08:02:15.600Z",
+   "type": "stage.changed",
+   "data": {
+    "stage": "review"
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 94,
+   "ts": "2026-10-17T08:02:17.100Z",
+   "type": "card.opened",
+   "data": {
+    "card": "C-004",
+    "kind": "result_summary",
+    "task": "T-0c21",
+    "title": "底稿已填写",
+    "blocking": false,
+    "actions": [
+     "confirm"
+    ],
+    "defaultAction": "confirm",
+    "body": {
+     "outputs": [
+      {
+       "file": "输出/T-0c21/应收账款底稿-填写成果.xlsx",
+       "kind": "workpaper"
+      },
+      {
+       "file": "输出/T-0c21/填写核对.xlsx",
+       "kind": "report"
+      }
+     ],
+     "checks": {
+      "passed": 20,
+      "failed": 0,
+      "retried": 1
+     },
+     "manual": 4,
+     "notes": [
+      {
+       "section": "审计说明",
+       "text": "应收账款期末余额 1,835,000.00 元，与科目余额表一致；1 年以内占 65.39%。",
+       "status": "suggested"
+      }
+     ],
+     "computedBy": "code",
+     "suggestedBy": [
+      "notes"
+     ]
+    }
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "seq": 95,
+   "ts": "2026-10-17T08:02:17.600Z",
+   "type": "message.completed",
+   "data": {
+    "message": "M-0002",
+    "text": "应收账款底稿已填写完成，20 项核对全部通过（账龄区域重做 1 次），另有 4 个单元格需人工填写。",
+    "refs": [
+     "C-004"
+    ]
+   }
+  },
+  {
+   "v": "audit-events/1",
+   "session": "S-41d2",
+   "task": "T-0c21",
+   "seq": 96,
+   "ts": "2026-10-17T08:02:19.100Z",
+   "type": "task.finished",
+   "data": {
+    "status": "completed",
+    "deliverables": [
+     {
+      "kind": "workpaper",
+      "file": "F-9a1be04c77d2",
+      "status": "completed",
+      "output": "输出/T-0c21/应收账款底稿-填写成果.xlsx"
+     }
+    ]
+   }
+  }
+ ]
+}
