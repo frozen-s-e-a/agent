@@ -10,7 +10,7 @@ import {
   SwapOutlined,
 } from "@ant-design/icons";
 import { Button, Dropdown, Empty, Input, Modal, Tooltip } from "antd";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { OutputFile, ProjectFile, SessionSummary } from "../../protocol/types";
 import { relTime } from "../../lib/format";
 import { useApp, useAppStore } from "../../store/context";
@@ -184,14 +184,35 @@ function FileList() {
   const store = useAppStore();
   const project = useApp((s) => s.ui.project);
   const attach = useApp((s) => s.ui.attach);
+  const filesVersion = useApp((s) => s.ui.filesVersion);
   const [files, setFiles] = useState<ProjectFile[]>([]);
+  const picker = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (project) void store.host.request("files.list", { project }).then((r) => setFiles(r.files));
-  }, [store, project]);
+  }, [store, project, filesVersion]);
   return (
     <>
       <div className="side-actions">
-        <Button block icon={<FolderOpenOutlined />} onClick={() => Modal.info({ title: "添加资料", content: "在 Electron 外壳里弹出系统文件选择框，选中的文件用 files.add 加入项目。" })}>
+        <input
+          ref={picker}
+          type="file"
+          multiple
+          hidden
+          onChange={(e) => {
+            const list = [...(e.target.files ?? [])];
+            e.target.value = "";
+            store.addBrowserFiles(list).catch((err: Error) => Modal.error({ title: "加不进项目", content: err.message }));
+          }}
+        />
+        <Button
+          block
+          icon={<FolderOpenOutlined />}
+          onClick={() =>
+            store.host.addFiles
+              ? picker.current?.click()
+              : Modal.info({ title: "添加资料", content: "在 Electron 外壳里弹出系统文件选择框，选中的文件用 files.add 加入项目。" })
+          }
+        >
           添加资料
         </Button>
       </div>
@@ -229,11 +250,11 @@ function OutputList() {
   const store = useAppStore();
   const project = useApp((s) => s.ui.project);
   const sessions = useApp((s) => s.ui.sessions);
-  const evVersion = useApp((s) => s.ev);
+  const outputsVersion = useApp((s) => s.ui.outputsVersion);
   const [outs, setOuts] = useState<OutputFile[]>([]);
   useEffect(() => {
     if (project) void store.host.request("outputs.list", { project }).then((r) => setOuts(r.outputs));
-  }, [store, project, evVersion]);
+  }, [store, project, outputsVersion]);
   return (
     <div className="side-list">
       <div className="side-group">项目内全部产出</div>

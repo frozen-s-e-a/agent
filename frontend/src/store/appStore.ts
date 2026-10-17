@@ -59,6 +59,10 @@ export interface UiState {
   leftTab: "sessions" | "files" | "outputs";
   /** 正在切换到的项目（宿主换进程，约 2 秒） */
   switching: string | null;
+  /** 产出列表变了（对话产出就绪），左栏据此重新取 outputs.list */
+  outputsVersion: number;
+  /** 项目资料变了（加了文件） */
+  filesVersion: number;
   connected: boolean;
   modelReady: boolean | null; // null：还没查
   attach: string[]; // 待随下一条消息发送的 F- 编号
@@ -116,6 +120,8 @@ export class AppStore {
         settingsDirty: false,
         leftTab: "sessions",
         switching: null,
+        outputsVersion: 0,
+        filesVersion: 0,
         connected: true,
         modelReady: null,
         attach: [],
@@ -206,6 +212,8 @@ export class AppStore {
         break;
       }
       case "output.ready":
+        this.fileNames.set(e.data.output, e.data.file.split(/[\\/]/).pop()!);
+        this.setUi((u) => ({ outputsVersion: u.outputsVersion + 1 }));
         if (e.data.kind === "workpaper" && task?.workpaperFile) {
           // 成果就绪：底稿标签换成成果文件，"已填"视图
           const tab = this.findSheetTab(task.workpaperFile);
@@ -373,21 +381,41 @@ export class AppStore {
   // ---------- 项目、对话 ----------
 
   async loadProjects() {
+    void this.loadMcp();
     const { projects } = await this.host.request("project.list", {});
     this.setUi({ projects, project: this.snap.ui.project ?? projects[0]?.project ?? null });
     await this.refreshSessions();
   }
 
-  async switchProject(project: string) {
-    if (project === this.snap.ui.project) return;
+  /** 打开项目（真宿主要为它启动 Harness），再打开最近的对话；没有对话时新建一个 */
+  /** 外部 MCP 服务的当前状态（之后的变化由 mcp.status 事件推送） */
+  async loadMcp() {
+    const { servers } = await this.host.request("mcp.list", {});
+    const events = servers.map((s): AuditEvent => ({
+      v: "audit-events/1",
+      ts: new Date().toISOString(),
+      type: "mcp.status",
+      data: { name: s.name, state: s.state, error: s.error, toolCount: s.tools.filter((t) => t.enabled !== false).length },
+    }));
+    this.snap = { ...this.snap, ev: reduceAll(this.snap.ev, events) };
+    this.emit();
+  }
+
+  async switchProject(project: string, force = false) {
+    if (project === this.snap.ui.project && !force) return;
     this.setUi({ switching: project, session: null, sessions: [], tabs: [], activeTab: null, page: "main" });
     try {
       await this.host.request("project.open", { project });
       this.setUi({ project });
       await this.refreshSessions();
+      const { files } = await this.host.request("files.list", { project });
+      for (const f of files) this.fileNames.set(f.file, f.name);
     } finally {
       this.setUi({ switching: null });
     }
+    const latest = this.snap.ui.sessions[0];
+    if (latest) await this.openSession(latest.session);
+    else await this.newSession();
   }
 
   async refreshSessions() {
@@ -406,6 +434,7 @@ export class AppStore {
     this.setUi({ session, tabs: [], activeTab: null, historyOpen: false, focusCard: null, attach: [] });
     const known = this.snap.ev.sessions[session];
     const { events } = await this.host.request("session.events", { session, after: known?.lastSeq ?? 0 });
+    for (const e of events) if (e.type === "output.ready") this.fileNames.set(e.data.output, e.data.file.split(/[\\/]/).pop()!);
     this.snap = { ...this.snap, ev: reduceAll(this.snap.ev, events) };
     this.emit();
     // 重新打开对话时，恢复进行中任务的底稿
@@ -425,6 +454,17 @@ export class AppStore {
     const { session } = await this.host.request("session.create", { project: this.snap.ui.project! });
     await this.refreshSessions();
     await this.openSession(session);
+  }
+
+  /** 浏览器里选或拖进来的文件加入项目，并附到下一条消息 */
+  async addBrowserFiles(files: File[]) {
+    const project = this.snap.ui.project;
+    if (!project || !files.length) return;
+    const added = this.host.addFiles
+      ? await this.host.addFiles(project, files)
+      : (await this.host.request("files.add", { project, paths: files.map((f) => f.name) })).files;
+    for (const f of added) this.fileNames.set(f.file, f.name);
+    this.setUi((u) => ({ attach: [...new Set([...u.attach, ...added.map((f) => f.file)])], filesVersion: u.filesVersion + 1 }));
   }
 
   async send(text: string) {

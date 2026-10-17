@@ -95,7 +95,7 @@ function AssistantTurn({ it, s }: { it: Extract<ChatItem, { kind: "assistant" }>
                 className="chip ref"
                 onClick={() => (card ? document.querySelector(`[data-card="${r}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" }) : store.openRef(r))}
               >
-                {card ? `${KIND_LABEL[card.card.kind]}卡` : r}
+                {card ? `${KIND_LABEL[card.card.kind]}卡` : store.fileName(r)}
               </span>
             );
           })}
@@ -134,7 +134,7 @@ function ToolCalls({ tools }: { tools: ToolCall[] }) {
             {t.ok === undefined ? t.argsSummary ?? t.tool : t.resultSummary ?? t.argsSummary}
             {t.refs?.map((r) => (
               <span key={r} className="chip ref" style={{ marginLeft: 6 }} onClick={() => store.openRef(r)}>
-                {r}
+                {store.fileName(r)}
               </span>
             ))}
           </span>

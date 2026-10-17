@@ -141,12 +141,7 @@ function Welcome() {
         onDrop={async (e) => {
           e.preventDefault();
           setOver(false);
-          const project = store.get().ui.project;
-          if (!project) return;
-          const paths = [...e.dataTransfer.files].map((f) => f.name);
-          const { files } = await store.host.request("files.add", { project, paths });
-          for (const f of files) store.fileNames.set(f.file, f.name);
-          store.setUi((u) => ({ attach: [...u.attach, ...files.map((f) => f.file)] }));
+          await store.addBrowserFiles([...e.dataTransfer.files]);
         }}
       >
         <InboxOutlined style={{ fontSize: 28, color: "var(--accent)" }} />

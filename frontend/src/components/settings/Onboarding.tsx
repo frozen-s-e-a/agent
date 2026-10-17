@@ -1,23 +1,27 @@
-// 首次使用：先接模型（测试通过才能往下），再新建项目或打开示例项目。
+// 首次使用：先接模型（测试通过才能往下），再新建项目（回放模式下也可以先看示例项目）。
 import { CheckCircleFilled, FolderOpenOutlined } from "@ant-design/icons";
 import { Button, Input, Steps } from "antd";
 import { useState } from "react";
 import { useAppStore } from "../../store/context";
 import { ModelForm } from "./Settings";
 
-export function Onboarding({ onDone }: { onDone: () => void }) {
+export function Onboarding({ onDone, startAt = 0, sample = true }: { onDone: () => void; startAt?: number; sample?: boolean }) {
   const store = useAppStore();
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(startAt);
+  const [err, setErr] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [folder, setFolder] = useState("");
   const [busy, setBusy] = useState(false);
 
   const create = async () => {
     setBusy(true);
+    setErr(null);
     try {
       const p = await store.host.request("project.create", { name: name.trim(), folder: folder.trim() });
-      store.setUi({ project: p.project });
+      store.setUi({ project: p.project, projects: [p, ...store.get().ui.projects] });
       onDone();
+    } catch (e) {
+      setErr((e as Error).message);
     } finally {
       setBusy(false);
     }
@@ -51,8 +55,9 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
               <div className="faint" style={{ fontSize: 12 }}>
                 原文件只读；产出写到这个文件夹下的「输出」。
               </div>
+              {err && <div style={{ color: "var(--danger)", fontSize: 12 }}>{err}</div>}
               <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                <Button onClick={onDone}>先看示例项目</Button>
+                {sample && <Button onClick={onDone}>先看示例项目</Button>}
                 <Button type="primary" disabled={!name.trim() || !folder.trim()} loading={busy} onClick={() => void create()}>
                   创建
                 </Button>
