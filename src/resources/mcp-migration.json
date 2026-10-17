@@ -1,0 +1,143 @@
+{
+  "runtime": "independent-python",
+  "taskCount": 63,
+  "originalExeRequired": false,
+  "originalBusinessPydRequired": false,
+  "implemented": [
+    "add_column",
+    "address_split",
+    "ai_formula_filler",
+    "announcement",
+    "asist_split",
+    "auxiliary_selection",
+    "bank_digit2",
+    "bank_flow",
+    "bank_paper1",
+    "bank_paper2",
+    "bankflowmerge",
+    "cicpa_query",
+    "currency",
+    "cutoff_sampling",
+    "data_field_check",
+    "detailed_table_generate",
+    "detailed_table_inspect",
+    "detailed_table_inspect_template",
+    "detailed_table_save_config",
+    "detailed_table_validate",
+    "dropsummary",
+    "extract_disclosure_scope",
+    "extract_disclosure_tables",
+    "file_classification",
+    "fill_column",
+    "gross_margin_analysis",
+    "headers_process",
+    "id_card",
+    "info_extract",
+    "info_extract_multi",
+    "insert_column",
+    "insert_footnote_comments",
+    "ipo_bj",
+    "ipo_sh",
+    "ipo_sz",
+    "jet_test_execute",
+    "jet_test_inspect",
+    "ledger_check",
+    "link_extractor",
+    "link_ref_replace",
+    "link_replace_range",
+    "link_replace_text",
+    "link_replace_workbook",
+    "merge_column",
+    "monthly_ai_analysis",
+    "monthly_detect_structure",
+    "monthly_execute",
+    "monthly_preview",
+    "multi_collect_file",
+    "multi_collect_folder",
+    "paper_verify",
+    "photo_rename",
+    "pickup_value",
+    "qcc_processor",
+    "related_party",
+    "select_column",
+    "subject_allocation",
+    "subject_clean_after",
+    "text_match",
+    "tool_execute",
+    "tool_preview",
+    "voucher_check",
+    "xlsx_writer"
+  ],
+  "verification": {
+    "date": "2026-10-10",
+    "localBusiness": {
+      "cases": 83,
+      "passedCases": 83,
+      "tasksCovered": 63
+    },
+    "clientPipeline": {
+      "passed": 75,
+      "total": 75
+    },
+    "publicServices": {
+      "passed": 5,
+      "total": 5,
+      "tasks": [
+        "ipo_sz",
+        "ipo_sh",
+        "ipo_bj",
+        "currency",
+        "announcement"
+      ]
+    },
+    "liveModels": {
+      "passed": 2,
+      "total": 2,
+      "syntheticInputOnly": true
+    },
+    "cicpa": {
+      "status": "skipped-by-user",
+      "protocolFixturesPassed": true,
+      "liveVerified": false
+    },
+    "ui": {
+      "materials": true,
+      "contextualActions": true,
+      "actualPreview": true,
+      "all79Searchable": true,
+      "ipo3Visible": true,
+      "ipoTypedSetup": true,
+      "favorites": true,
+      "realBuiltinRuns": 2,
+      "resultChaining": true,
+      "historyRestored": true,
+      "resultLibrary": true,
+      "optionalTemplates": 3,
+      "narrowResultsVisible": true,
+      "settings": true
+    },
+    "allRemoteServicesVerified": false,
+    "evidence": {
+      "本地业务验收": {
+        "path": "artifacts/independent-validation/run-8dcee8e7e2/验收记录.json",
+        "sha256": "ba5b477308b5db971ad3ede3af949338f71e28ab62278317077a81d546e1bef1"
+      },
+      "客户端入口验收": {
+        "path": "artifacts/client-pipeline-5PjqWk/客户端任务入口验收.json",
+        "sha256": "8bc44a92396cf8ba62ea9e86da7b32f01a26d28458b59ac62e9dd3f744fac57c"
+      },
+      "公开服务验收": {
+        "path": "artifacts/public-client-jZ5TOw/公开服务客户端验收.json",
+        "sha256": "74c821304474d49dc662bb3e62f3183661b0ef4483088715731eab4e20437887"
+      },
+      "界面操作验收": {
+        "path": "artifacts/workbench-preview-20261008/verification.json",
+        "sha256": "77f59350d476d8e711b3aec6ccc2fc4121f03008124c0e72a35a1efef41be765"
+      },
+      "模型实测": {
+        "path": "artifacts/independent-live-validation/模型实测记录.json",
+        "sha256": "21f5174db0dc14101a4bd5992b59fa8a8c68b74bc85b38cc1f1b3a6fc19c5f49"
+      }
+    }
+  }
+}

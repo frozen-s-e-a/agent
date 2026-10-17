@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+let service=fs.readFileSync('src/host/server.mjs','utf8');
+service=service.replace("import http from 'node:http';\n",'').replace("import {randomBytes} from 'node:crypto';\n",'').replace('export async function startServer(options={})','export async function createBackend(options={})').replace(",token=options.token||randomBytes(32).toString('hex')",'');
+service=service.slice(0,service.indexOf(' const server=http.createServer'))+" return {store,action,close:()=>{scheduler.stop();for(const x of streams.values())x.controller.abort();store.close();}};\n}\n";
+fs.writeFileSync('src/host/service.mjs',service);fs.unlinkSync('src/host/server.mjs');
+fs.copyFileSync('src/host/electron-desktop.cjs','src/host/electron.cjs');fs.unlinkSync('src/host/electron-desktop.cjs');fs.copyFileSync('src/client/desktop-api.ts','src/client/api.ts');fs.unlinkSync('src/client/desktop-api.ts');
+const p=JSON.parse(fs.readFileSync('package.json'));p.version='0.1.0-internal.3';delete p.scripts.preview;fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n');
+fs.writeFileSync('启动AI助手.cmd',fs.readFileSync('启动AI助手.cmd','utf8').replaceAll('0.1.0-internal.2','0.1.0-internal.3'));
+let tests=fs.readFileSync('tests/unit/host.test.mjs','utf8').replaceAll('startServer','createBackend').replace('../../src/host/server.mjs','../../src/host/service.mjs').replace('HTTP API requires bearer, validates tasks, and persists projects','desktop backend validates tasks and persists projects');
+tests=tests.replace("const res=await fetch(`http://127.0.0.1:${a.port}/api/bootstrap`,{method:'POST'});assert.equal(res.status,401);",'assert.equal(a.server,undefined);assert.equal(a.port,undefined);');fs.writeFileSync('tests/unit/host.test.mjs',tests);
+fs.writeFileSync('tests/e2e/smoke.mjs',"// Desktop-only smoke entry. Pass the packaged exe path if desired.\nimport './desktop.mjs';\n");

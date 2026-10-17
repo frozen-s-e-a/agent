@@ -1,0 +1,16 @@
+import fs from 'node:fs';
+import {buildCatalog} from '../src/workflows/contracts.mjs';
+import {buildAgentWorkflows,workflowForTool,AGENT_WORKFLOW_VERSION,AGENT_PLAN_VERSION} from '../src/agent/definitions.mjs';
+import {AGENT_STATE_VERSION,AGENT_RUN_STATES} from '../src/agent/state.mjs';
+import {digest} from '../src/agent/context.mjs';
+import {TOOL_RESULT_VERSION} from '../src/agent/tool-results.mjs';
+const read=file=>JSON.parse(fs.readFileSync(file,'utf8'));
+const catalog=buildCatalog(read('src/resources/tools.json'),read('src/resources/audit-task-tools.json'));
+const workflows=buildAgentWorkflows(catalog);
+const capabilities=catalog.map(tool=>({id:tool.id,name:tool.name,engine:tool.engine,entry:tool.mcpName || tool.id,contractHash:digest({schema:tool.inputSchema,fields:tool.fields,contract:tool.contract}),bindings:workflowForTool(tool.id,workflows),inputs:tool.fields.map(({key,label,kind,required,type})=>({key,label,kind,required:!!required,type})),resultContract:TOOL_RESULT_VERSION,validator:'verifyTaskArtifacts',retry:'first_execution_plus_two_recorded_repairs',availability:'local-only; remote endpoints require separate authorization'}));
+const directory='docs/Agent方案';
+fs.writeFileSync(directory+'/Agent节点与能力合同.json',JSON.stringify({workflowVersion:AGENT_WORKFLOW_VERSION,planVersion:AGENT_PLAN_VERSION,stateVersion:AGENT_STATE_VERSION,runStates:AGENT_RUN_STATES,workflows,capabilities},null,2)+'\n');
+const cell=value=>String(value).replaceAll('|','\\|').replaceAll('\n',' ');
+const rows=capabilities.map(tool=>`|${cell(tool.id)}|${cell(tool.name)}|${tool.engine}|${tool.bindings.map(binding=>binding.workflowId+'/'+binding.stageId).join('、')}|`);
+fs.writeFileSync(directory+'/Agent能力绑定矩阵.md','# Agent 能力绑定矩阵\n\n由 `scripts/export-agent-contracts.mjs` 从实际程序生成。'+catalog.length+' 项能力映射到 '+workflows.length+' 条流程。输入字段、节点依赖、通过条件、失败分支、版本和合同哈希保存在同目录的 `Agent节点与能力合同.json`。登记的远程能力在当前本机测试版本中受网络限制。\n\n|精确工具编号|能力名称|执行器|流程/节点|\n|---|---|---|---|\n'+rows.join('\n')+'\n');
+console.log(JSON.stringify({workflows:workflows.length,capabilities:capabilities.length}));

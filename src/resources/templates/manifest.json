@@ -1,0 +1,147 @@
+[
+  {
+    "name": "公式填充配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "关联方核查配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "凭证检查配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "多类型文件信息提取配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "多表汇集-来源文件.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "多表汇集-来源文件夹.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "小账套-模板.xlsm",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "截止测试配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "批量生成小账套.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "披露口径提取配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "披露表提取配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "插附注批注配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "文件分类配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "文本提取匹配配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "科目余额表后处理配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "科目分配派工.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "纸质信息核对配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "询证函模板-电子格式二.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "询证函模板-纸质格式一.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "询证函模板-纸质格式二.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "资料字段检查配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "辅助项选择配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "银行函证表格生成-电子格式二配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "银行函证表格生成-纸质格式一配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "银行函证表格生成-纸质格式二配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "链接提取配置表.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "链接替换-单元格区域替换.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "链接替换-文件名替换.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  },
+  {
+    "name": "链接替换-文件夹路径替换.xlsx",
+    "source": "public-template-layout",
+    "examplesRemoved": true
+  }
+]

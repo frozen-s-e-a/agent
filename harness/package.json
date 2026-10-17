@@ -1,0 +1,16 @@
+{
+  "name": "audit-harness",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "审计助手的 DeepSeek Harness 接入：固定版本、配置层、宿主桥接插件和测试",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "scripts": {
+    "test": "node --test --test-concurrency=1 test/*.test.mjs"
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh": "0.2.1-rc.2"
+  }
+}
