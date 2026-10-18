@@ -211,5 +211,7 @@
           AUDIT_LLM_API_KEY: !!js process.env.AUDIT_LLM_API_KEY || ''
           AUDIT_LLM_MODEL: !!js process.env.AUDIT_LLM_MODEL || ''
           PYTHONPATH: !!js process.env.AUDIT_PYTHONPATH || ''
+          # 新工具的编号、结构图和分析库存在这里（宿主按项目分目录），服务重启后仍然有效。
+          AUDIT_STATE_DIR: !!js process.env.AUDIT_STATE_DIR || ''
         # 审计工具可能处理几十万行资料，单次调用放宽到 30 分钟。
         toolCallTimeoutMs: 1800000

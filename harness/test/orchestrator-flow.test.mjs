@@ -193,13 +193,14 @@ describe('失败矩阵', () => {
     assert.equal(finished(kit.events()).status, 'completed')
   })
 
-  test('数据问题：出卡片，选择排除无效值后重新导入', async () => {
+  test('数据问题：出卡片，直接确认即按建议排除无效值后重新导入', async () => {
     const kit = makeKit({ options: { invalidValues: true } })
-    autoAnswer(kit.cards, { question: card => ({ action: 'confirm', edits: { q1: 0 } }) })
+    autoAnswer(kit.cards, { question: card => ({ action: 'confirm' }) })
     const runner = kit.create()
     await runner.start()
     const card = kit.cardsOpened().find(c => c.kind === 'question')
     assert.match(card.body.questions[0].text, /无法解析/)
+    assert.equal(card.body.questions[0].suggest, 0)
     const imports = kit.toolCalls.filter(c => c.tool === 'data_import' && c.args.candidate.includes('序时账'))
     assert.deepEqual(imports.map(c => !!c.args.excludeInvalid), [false, true])
     assert.equal(finished(kit.events()).status, 'completed')

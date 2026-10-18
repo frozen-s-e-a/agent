@@ -37,7 +37,9 @@ class AuditMcpTests(unittest.TestCase):
         names={t['name'] for t in replies[2]['result']['tools']}
         self.assertIn('select_column',names)
         self.assertFalse(names & audit_mcp.NETWORK_TOOLS,'联网工具默认不提供')
-        self.assertEqual(len(names),63-len(audit_mcp.NETWORK_TOOLS))
+        import audit_tools
+        self.assertTrue(set(audit_tools.TOOLS)<=names,'底稿任务的新工具都在清单里')
+        self.assertEqual(len(names),63-len(audit_mcp.NETWORK_TOOLS)+len(audit_tools.TOOLS))
 
     def test_unknown_protocol_version_answers_latest(self):
         replies,_=run([{**INIT,'params':{**INIT['params'],'protocolVersion':'2099-01-01'}}],self.project)
