@@ -31,7 +31,7 @@
 |certifi|2025.8.3|MPL-2.0|
 |idna|3.10|见随包许可证文件及来源元数据|
 |zipfile36|0.1.3|UNKNOWN|
-|PyYAML|6.0.2|MIT|
+|PyYAML|6.0.3|MIT|
 
 PyMuPDF 的 COPYING 与来源链接随发行包保留，使用其 AGPL／商业许可条件。构建工具为 Vite 7.1.3、TypeScript 5.9.2、Playwright 1.55.0；Node 直接及间接依赖由 pnpm-lock.yaml 固定。
 

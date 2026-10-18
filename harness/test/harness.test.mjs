@@ -6,7 +6,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { after, before, describe, test } from 'node:test'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { fakeModel } from './fake-model.mjs'
 import { startHarness, waitIdle } from './client.mjs'
 import { matchesPatterns } from '../plugins/host-bridge.mjs'
@@ -64,7 +64,7 @@ describe('配置与端到端', () => {
   before(async () => {
     model = await fakeModel({ script: [{ tools: [SELECT] }, { text: '已提取 3 行。' }] })
     project = makeProject()
-    harness = await open(model, { projectRoot: project, env: { AUDIT_EGRESS_LOG: egressLog } }, `--import=${guard}`)
+    harness = await open(model, { projectRoot: project, env: { AUDIT_EGRESS_LOG: egressLog } }, `--import=${pathToFileURL(guard).href}`)
   })
   after(async () => { await harness.stop(); await model.close() })
 

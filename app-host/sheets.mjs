@@ -17,7 +17,10 @@ export class SheetReader {
   start() {
     const env = { ...process.env, PYTHONIOENCODING: 'utf-8' }
     if (this.pythonPath) env.PYTHONPATH = this.pythonPath
-    this.child = spawn(this.python, ['-I', WORKER], { stdio: ['pipe', 'pipe', 'pipe'], env, windowsHide: true })
+    // 与审计工具服务一致用 -X utf8：-I 会忽略 PYTHONIOENCODING 和 PYTHONPATH，
+    // 中文 Windows 上标准输入按 GBK 解码，中文路径就找不到文件；内置依赖目录也不生效。
+    // -s 不加载用户目录的包；当前目录不在 sys.path 里（运行脚本时加的是脚本所在目录）。
+    this.child = spawn(this.python, ['-X', 'utf8', '-s', '-B', WORKER], { stdio: ['pipe', 'pipe', 'pipe'], env, windowsHide: true })
     let buffer = ''
     this.child.stdout.setEncoding('utf8')
     this.child.stdout.on('data', (chunk) => {
