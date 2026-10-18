@@ -50,6 +50,7 @@ export const Config = Schema.object({
   maxReidentify: Schema.natural().default(2),
   trivialThreshold: Schema.string().default('0'),
   inputBudget: Schema.natural().default(4000),
+  maxOutput: Schema.natural().default(8192),
   maxRows: Schema.natural().default(5000),
 })
 
@@ -59,7 +60,7 @@ function invalidParams(message) {
 
 export function apply(ctx, config) {
   const store = new Store(path.resolve(config.stateDir))
-  const model = createModel({ llm: ctx.llm, provider: config.provider, model: config.model, store, inputBudget: config.inputBudget })
+  const model = createModel({ llm: ctx.llm, provider: config.provider, model: config.model, store, inputBudget: config.inputBudget, maxOutput: config.maxOutput })
   const tools = createToolCaller({ tools: ctx.tools, server: config.server })
   const notify = (method, params) => ctx.auditBridge.notify(method, params)
   const runners = new Map()

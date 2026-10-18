@@ -2,6 +2,10 @@
 // 输出 schema 同时作为 submit 工具的参数 schema，字段与《接口约定》第三、五节一致。
 
 const BASIS = { type: 'string', enum: ['user', 'confirmed', 'template', 'profile', 'data', 'inferred'] }
+// 底稿坐标：可带工作表名，单格或区域
+const CELL_REF = '^(?:[^!]+!)?\\$?[A-Z]{1,3}\\$?[0-9]+(?::\\$?[A-Z]{1,3}\\$?[0-9]+)?$'
+// 资料表类型，与审计工具 data_import 的 kind 一致
+const TABLE_KINDS = ['trial_balance', 'journal', 'bank_statement', 'ledger_detail', 'aging', 'contract', 'other']
 const STEP = {
   type: 'object',
   required: ['sql', 'inputs', 'purpose'],
@@ -12,6 +16,8 @@ const STEP = {
   },
 }
 const STEPS = { type: 'array', minItems: 1, items: STEP, description: '受控查询，按顺序执行；最后一步的结果即本区域结果' }
+// 待问选项的查询：建议项沿用上面的 steps，可以不写或写空数组
+const OPTION_STEPS = { type: 'array', items: STEP, description: '选这一项时的受控查询；建议项沿用 steps，可留空' }
 
 const COMMON = [
   '你是审计助手编排流程中的一个节点，只完成这一步，不做别的事。',
@@ -39,8 +45,8 @@ export const NODES = {
   },
 
   region_semantics: {
-    role: 'extractor', version: 'region_semantics/1',
-    prompt: `${COMMON}\n\n任务：判断底稿中一个区域要填什么。给出区域用途；每个待填列的指标、期间、单位、方向，以及判断所依据的标签坐标（basisRef）；固定项目表的每个行标签对应什么科目或项目；哪些位置留给人工（manual）。判断不了的放进 uncertain，每项给选项和建议。区域确实不需要填写时 type 写 none。`,
+    role: 'extractor', version: 'region_semantics/2',
+    prompt: `${COMMON}\n\n任务：判断底稿中一个区域要填什么。给出区域用途；每个待填列的指标、期间、单位、方向，以及判断所依据的标签坐标（basisRef）；固定项目表的每个行标签对应什么科目或项目；哪些位置留给人工（manual）。判断不了的放进 uncertain，每项给选项和建议。区域确实不需要填写时 type 写 none。\n这些字段会逐项和底稿核对，写法要严格：basisRef 是一个文字标签单元格的坐标（如 应收账款!B6）；rows 只列有行标签的行，text 照抄该行行标签原文，对应的科目或说明写在 account，明细表和文字区域不列 rows；manual 每项只写坐标（如 应收账款!E7 或 应收账款!C7:C10），不写说明。说明、理由和提醒写进 purpose 或 uncertain。`,
     schema: {
       type: 'object',
       required: ['region', 'type', 'purpose', 'columns', 'manual', 'uncertain'],
@@ -58,21 +64,21 @@ export const NODES = {
             },
           },
         },
-        rows: { type: 'array', items: { type: 'object', required: ['row', 'text'], properties: { row: { type: 'integer' }, text: { type: 'string' }, account: { type: 'string' }, formula: { type: 'boolean' } } } },
-        manual: { type: 'array', items: { type: 'string' } },
+        rows: { type: 'array', description: '只列固定项目表有行标签的行', items: { type: 'object', required: ['row', 'text'], properties: { row: { type: 'integer' }, text: { type: 'string', description: '照抄该行行标签原文' }, account: { type: 'string', description: '对应的科目或项目' }, formula: { type: 'boolean' } } } },
+        manual: { type: 'array', items: { type: 'string', pattern: CELL_REF, description: '只写单元格坐标，如 应收账款!E7 或 应收账款!C7:C10' } },
         uncertain: { type: 'array', items: { type: 'object', required: ['item', 'options', 'suggest'], properties: { item: { type: 'string' }, options: { type: 'array', items: { type: 'string' } }, suggest: { type: 'integer' }, why: { type: 'string' } } } },
       },
     },
   },
 
   field_semantics: {
-    role: 'extractor', version: 'field_semantics/1',
-    prompt: `${COMMON}\n\n任务：判断一张资料表每一列的含义和整张表的类型（科目余额表 trial_balance、序时账 journal、银行流水 bank_statement、往来明细 ledger_detail、其他 other）。只根据表头、列统计和样例判断；meaning 用英文键（如 voucher_date、account_code、debit、credit、opening、closing、counterparty、summary），type 取 date、decimal、text、integer。`,
+    role: 'extractor', version: 'field_semantics/2',
+    prompt: `${COMMON}\n\n任务：判断一张资料表每一列的含义和整张表的类型，表类型写在 kind（科目余额表 trial_balance、序时账 journal、银行流水 bank_statement、往来明细 ledger_detail、账龄表 aging、合同台账 contract、其他 other）。只根据表头、列统计和样例判断；fields 每项对应资料表里的一列，col 写列字母；meaning 用英文键（如 voucher_date、account_code、debit、credit、opening、closing、counterparty、summary），type 取 date、decimal、text、integer。`,
     schema: {
       type: 'object',
       required: ['kind', 'fields'],
       properties: {
-        kind: { type: 'string' },
+        kind: { type: 'string', enum: TABLE_KINDS, description: '整张资料表的类型' },
         fields: {
           type: 'array', minItems: 1,
           items: { type: 'object', required: ['col', 'name', 'meaning', 'type', 'basis'], properties: { col: { type: 'string' }, name: { type: 'string' }, meaning: { type: 'string' }, type: { type: 'string', enum: ['date', 'decimal', 'text', 'integer'] }, basis: BASIS } },
@@ -108,7 +114,7 @@ export const NODES = {
             type: 'object', required: ['id', 'text', 'options', 'suggest'],
             properties: {
               id: { type: 'string' }, item: { type: 'string' }, text: { type: 'string' }, suggest: { type: 'integer' },
-              options: { type: 'array', minItems: 2, items: { type: 'object', required: ['label'], properties: { label: { type: 'string' }, steps: STEPS } } },
+              options: { type: 'array', minItems: 2, items: { type: 'object', required: ['label'], properties: { label: { type: 'string' }, steps: OPTION_STEPS } } },
             },
           },
         },

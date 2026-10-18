@@ -148,9 +148,10 @@ export class TaskRunner {
 
   ask(node, region, input, check) {
     const spec = NODES[node]
+    const fixed = region && spec.schema?.properties?.region ? { region } : undefined
     return this.model.call({
       task: this.state.task, node, region, role: spec.role, prompt: spec.prompt, version: spec.version, schema: spec.schema,
-      input: { anchors: this.state.anchors, ...input }, check, signal: this.signal,
+      input: { anchors: this.state.anchors, ...input }, check, fixed, signal: this.signal,
     })
   }
 
@@ -768,7 +769,7 @@ export class TaskRunner {
       for (const q of open) {
         out[q.id] = []
         for (const [index, option] of q.options.entries()) {
-          const steps = option.steps ?? (index === q.suggest ? basis.steps : undefined)
+          const steps = option.steps?.length ? option.steps : (index === q.suggest ? basis.steps : undefined)
           if (!steps) { out[q.id].push(null); continue }
           try { out[q.id].push(impactText(await this.runSteps(steps, id))) } catch (error) {
             if (error instanceof QueryError) out[q.id].push(null)
@@ -781,7 +782,8 @@ export class TaskRunner {
     const key = `card:basis:${id}:${attempt}`
     const pending = !this.state.steps[key]
     const opened = await this.card(key, { stage: 'basis', region: id }, {
-      kind: 'basis_confirmation', title: `${r.semantics?.purpose ?? id}的口径需要确认`, blocking: false,
+      // 用途是一整段说明，放标题里太长；标题用区域的标题或范围
+      kind: 'basis_confirmation', title: `${id.split('#').at(-1)} ${r.parsed?.caption ?? r.range ?? ''} 的口径需要确认`.replace(/\s+/g, ' '), blocking: false,
       body: { questions: open.map(q => ({ id: q.id, region: id, text: q.text, options: q.options.map((o, i) => ({ label: o.label, impact: impacts[q.id]?.[i] ?? null })), suggest: q.suggest, allowText: true })) },
       actions: ['confirm'], defaultAction: 'confirm',
     }, { wait: false })
@@ -795,7 +797,7 @@ export class TaskRunner {
       const option = typeof picked === 'number' ? q.options[picked] : undefined
       r.confirmed.push({ item: q.item ?? q.text, value: option ? option.label : String(picked), basis: 'user' })
       if (option && picked !== q.suggest) {
-        if (option.steps) next = { ...next, steps: option.steps }
+        if (option.steps?.length) next = { ...next, steps: option.steps }
         else replan = true
       }
       if (!option) replan = true

@@ -1,4 +1,4 @@
-// 模型输出的结构校验：支持编排用到的 JSON Schema 子集（type、properties、required、items、enum、minItems、maxItems）。
+// 模型输出的结构校验：支持编排用到的 JSON Schema 子集（type、properties、required、items、enum、pattern、minItems、maxItems）。
 // 返回错误清单，每条带路径，直接回填给模型修正。
 
 const typeOf = value => value === null ? 'null' : Array.isArray(value) ? 'array' : Number.isInteger(value) ? 'integer' : typeof value
@@ -18,6 +18,9 @@ export function validate(schema, value, path = '$', errors = []) {
   }
   if (schema.enum !== undefined && !schema.enum.some(item => item === value)) {
     errors.push(`${path} 只能取 ${schema.enum.map(v => JSON.stringify(v)).join('、')}`)
+  }
+  if (schema.pattern !== undefined && typeof value === 'string' && !new RegExp(schema.pattern, 'u').test(value)) {
+    errors.push(`${path} 格式不对：${JSON.stringify(value.length > 60 ? value.slice(0, 60) + '…' : value)}${schema.description ? `（${schema.description}）` : ''}`)
   }
   if (typeOf(value) === 'object') {
     for (const key of schema.required ?? []) {

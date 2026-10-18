@@ -6,7 +6,9 @@ import path from 'node:path'
 import { describe, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { mergeSamples } from '../plugins/orchestrator/flow.mjs'
-import { fitInput } from '../plugins/orchestrator/model.mjs'
+import { createModel, fitInput } from '../plugins/orchestrator/model.mjs'
+import { NODES } from '../plugins/orchestrator/prompts.mjs'
+import { validate } from '../plugins/orchestrator/schema.mjs'
 import { autoAnswer, makeKit } from './orchestrator-kit.mjs'
 import { R5, R6 } from './scenarios/receivables.mjs'
 
@@ -324,6 +326,43 @@ describe('小件', () => {
     assert.equal(merged.uncertain[0].suggest, 0)
     assert.equal(merged.columns[0].confidence, 'low')
     assert.deepEqual(mergeSamples([base, base, base]).uncertain, [])
+  })
+
+  test('结构校验拦下真实模型常见的写法：人工格写成说明、资料类型写成节点名', () => {
+    const semantics = NODES.region_semantics.schema
+    const base = { region: R5, type: 'fixed_table', purpose: 'x', columns: [], uncertain: [] }
+    assert.deepEqual(validate(semantics, { ...base, manual: ['应收账款!E7', '应收账款!C7:C10', 'E8'] }), [])
+    const errors = validate(semantics, { ...base, manual: ['应收账款!A15=1 … A19=5', '审计说明正文由人工撰写'] })
+    assert.equal(errors.length, 2)
+    assert.match(errors[0], /^\$\.manual\[0\] 格式不对/)
+    assert.match(validate(NODES.field_semantics.schema, { kind: 'field_semantics', fields: [{ col: 'A', name: '日期', meaning: 'voucher_date', type: 'date', basis: 'data' }] })[0], /^\$\.kind 只能取/)
+  })
+
+  test('输出到上限被截断：说明截断，重做时给到模型的输出上限；区域编号由编排填上', async () => {
+    const seen = []
+    const llm = {
+      async *stream(options) {
+        seen.push(options.maxTokens)
+        if (seen.length === 1) {
+          yield { type: 'reasoning-delta', index: 0, text: '想'.repeat(50) }
+          yield { type: 'finish', reason: { kind: 'max-tokens' } }
+          return
+        }
+        yield { type: 'tool-call-delta', index: 0, id: 'c1', name: 'submit', argumentsDelta: JSON.stringify({ ok: true }) }
+        yield { type: 'finish', reason: { kind: 'tool-calls' } }
+      },
+    }
+    const records = []
+    const model = createModel({ llm, provider: 'p', model: 'm', maxOutput: 12000, store: { appendCall: (_task, record) => records.push(record) } })
+    const value = await model.call({ task: 'T', node: 'region_semantics', role: 'extractor', fixed: { region: 'W-001#R1' }, prompt: 'x', version: 'v', input: {}, schema: { type: 'object', required: ['ok'], properties: { ok: { type: 'boolean' } } } })
+    assert.deepEqual(value, { ok: true, region: 'W-001#R1' })
+    assert.deepEqual(seen, [8000, 12000])
+    assert.match(records[0].errors[0], /8000 tokens 上限被截断.*思考用了 50 字/)
+    assert.equal(records[0].finish, 'max-tokens')
+    // 配置的上限比角色设参小时不超过它
+    seen.length = 0
+    await createModel({ llm, provider: 'p', model: 'm', maxOutput: 4096 }).call({ task: 'T', node: 'basis', role: 'planner', prompt: 'x', version: 'v', input: {}, schema: { type: 'object' } })
+    assert.deepEqual(seen, [4096, 4096])
   })
 
   test('输入超预算时裁剪数组，固定锚点不动，并记录裁剪', () => {
