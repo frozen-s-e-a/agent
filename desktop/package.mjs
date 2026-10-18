@@ -2,7 +2,8 @@
 // 打包桌面版：Electron 外壳 + 应用宿主 + Harness（含依赖）+ 新前端 + 审计工具服务 + 内置 Python（含依赖）。
 //
 //   cd desktop && npm ci && npm run package            Windows x64：程序文件夹、安装包（有 makensis 时）
-//   node desktop/package.mjs --zip                      另出一个免安装 zip
+//   npm run package:zip                                 另出一个免安装 zip（等同 node desktop/package.mjs --zip）
+//   npm run package:folder                              只出程序文件夹和 zip，不出安装包
 //   node desktop/package.mjs --target linux-x64         Linux 版程序文件夹，只用来在 Linux 上验证打包内容（用系统的 python3）
 //
 // 在 Windows 和 Linux 上都能打 Windows 版：Electron、Python 从官方源下载（按 SHA256 / 版本固定，缓存在 desktop/.cache），
@@ -28,6 +29,16 @@ const { values: args } = parseArgs({
   },
   allowNegative: true,
 })
+// Windows PowerShell 里 `npm run package -- --zip` 的 `--` 会被 npm.ps1 吃掉，--zip 就成了 npm 自己的配置项（npm_config_zip），
+// 脚本收不到参数。这里把 npm 转来的这几项也认上，并且报出认不出的项，免得静默打出不想要的东西。
+for (const [name, value] of Object.entries(process.env)) {
+  const m = /^npm_config_(zip|installer|skip_frontend)$/.exec(name)
+  if (!m) continue
+  const key = m[1].replace('_', '-')
+  if (process.argv.slice(2).some(a => a.replace(/^--(no-)?/, '').split('=')[0] === key)) continue
+  args[key] = !['false', ''].includes(value)
+  console.log(`（从 npm 参数取 --${key}=${args[key]}）`)
+}
 
 const PYTHON_VERSION = '3.13.16' // nuget 包 python（完整布局，认 PYTHONPATH 和脚本目录）；和 requirements.txt 的 wheel 对应
 const PRODUCT = '审计助手'

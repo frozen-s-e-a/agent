@@ -25,8 +25,14 @@ cd desktop && npm ci && npm start          # 用系统的 python（AUDIT_PYTHON 
 ## 打包
 
 ```sh
-cd desktop && npm ci && npm run package    # 或 node desktop/package.mjs [--zip] [--no-installer] [--skip-frontend]
+cd desktop && npm ci
+npm run package           # 程序文件夹 + 安装包（有 NSIS 时）
+npm run package:zip       # 再加一个免安装 zip
+npm run package:folder    # 程序文件夹 + 免安装 zip，不出安装包
+node package.mjs --zip --no-installer --skip-frontend   # 直接传参数
 ```
+
+Windows PowerShell 里 `npm run package -- --zip` 的 `--` 会被吃掉；用上面的 `package:zip` / `package:folder`，或直接 `node package.mjs ...`（脚本也会认 npm 转来的 `--zip`、`--no-installer`）。
 
 在 Windows 或 Linux 上都能打 Windows x64 版：
 

@@ -8,7 +8,9 @@
   "main": "main.mjs",
   "scripts": {
     "start": "electron .",
-    "package": "node package.mjs"
+    "package": "node package.mjs",
+    "package:zip": "node package.mjs --zip",
+    "package:folder": "node package.mjs --zip --no-installer"
   },
   "devDependencies": {
     "electron": "44.5.1",
