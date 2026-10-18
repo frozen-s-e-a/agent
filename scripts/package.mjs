@@ -1,0 +1,47 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+import {bundleUiLicenses} from './bundle-ui-licenses.mjs';
+const version=JSON.parse(fs.readFileSync('package.json','utf8')).version;
+const output=path.resolve('artifacts/test/windows-x64',version,'AI助手');
+if(fs.existsSync(output))throw Error('程序包已存在；请更新版本，避免覆盖正在使用的程序');
+for(const file of ['build/client/index.html','build/python/python.exe','build/runtime/node.exe','build/python-packages/independent-dependencies.json','node_modules/electron/dist/electron.exe','src/audit-domain/task_worker.py','src/resources/verification.json'])if(!fs.existsSync(file))throw Error('缺少构建输入：'+file);
+const verified=JSON.parse(fs.readFileSync('src/resources/verification.json','utf8'));
+if(verified.localBusiness?.tasksCovered!==63||verified.localBusiness.passedCases!==verified.localBusiness.cases||verified.clientPipeline?.passed!==verified.clientPipeline.total)throw Error('独立任务验收未全部通过');
+const hash=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+const filter=p=>!p.split(path.sep).includes('__pycache__')&&!p.endsWith('.pyc');
+fs.mkdirSync(output,{recursive:true});fs.cpSync('node_modules/electron/dist',output,{recursive:true});
+fs.renameSync(path.join(output,'electron.exe'),path.join(output,'AI助手.exe'));
+const app=path.join(output,'resources/app');fs.mkdirSync(app,{recursive:true});
+fs.writeFileSync(path.join(app,'package.json'),JSON.stringify({name:'audit-assistant',version,main:'src/host/electron.cjs',type:'module'},null,2));
+for(const dir of ['host','file-ops','conversations','task-scheduler','harness-adapter','contracts','audit-worker','audit-domain','workflows','skills','agent'])fs.cpSync(path.join('src',dir),path.join(app,'src',dir),{recursive:true,filter});
+const mcp=path.join(app,'src/mcp');fs.mkdirSync(mcp,{recursive:true});
+for(const name of ['independent-client.mjs','arguments.mjs'])fs.copyFileSync(path.join('src/mcp',name),path.join(mcp,name));
+const resources=path.join(app,'src/resources');fs.mkdirSync(resources,{recursive:true});
+for(const name of ['tools.json','audit-task-tools.json','jet-rules.json','verification.json'])fs.copyFileSync(path.join('src/resources',name),path.join(resources,name));
+fs.cpSync('src/resources/templates',path.join(resources,'templates'),{recursive:true});
+fs.cpSync('build/client',path.join(app,'build/client'),{recursive:true});
+fs.cpSync('build/python',path.join(app,'runtime/python'),{recursive:true,dereference:true,filter});
+fs.cpSync('build/python-packages',path.join(app,'runtime/python-packages'),{recursive:true,dereference:true,filter});
+for(const name of ['node.exe','NODE_LICENSE'])fs.copyFileSync(path.join('build/runtime',name),path.join(app,'runtime',name));
+const notices=path.join(app,'runtime/ui-licenses');fs.mkdirSync(notices,{recursive:true});bundleUiLicenses(notices);
+for(const dep of ['react','react-dom','lucide-react'])for(const name of ['LICENSE','LICENSE.txt'])if(fs.existsSync(path.join('node_modules',dep,name)))fs.copyFileSync(path.join('node_modules',dep,name),path.join(notices,dep+'-'+name));
+for(const name of ['使用说明.md','THIRD_PARTY_NOTICES.md','独立客户端验收与使用-20261010.md','任务与文件格式对照-20261010.md'])fs.copyFileSync(path.join('docs',name),path.join(output,name));
+for(const name of ['requirements.txt','pnpm-lock.yaml'])fs.copyFileSync(name,path.join(output,name));
+fs.writeFileSync(path.join(output,'启动AI助手.cmd'),'@echo off\r\nchcp 65001 >nul\r\nstart "" "%~dp0AI助手.exe"\r\n');
+fs.mkdirSync(path.join(app,'scripts'),{recursive:true});fs.copyFileSync('scripts/offline-demo.mjs',path.join(app,'scripts/offline-demo.mjs'));
+fs.writeFileSync(path.join(output,'启动Agent离线体验.cmd'),fs.readFileSync('启动Agent离线体验.cmd','utf8').replace(/\r?\n/g,'\r\n'));fs.copyFileSync('启动Agent离线体验.ps1',path.join(output,'启动Agent离线体验.ps1'));
+if(fs.existsSync('docs/Agent方案/Agent测试版使用说明.md'))fs.copyFileSync('docs/Agent方案/Agent测试版使用说明.md',path.join(output,'Agent测试版使用说明.md'));
+const evidence=path.join(output,'验收记录');fs.mkdirSync(evidence,{recursive:true});
+for(const [name,entry] of Object.entries(verified.evidence||{}))if(entry.path&&fs.existsSync(entry.path))fs.copyFileSync(entry.path,path.join(evidence,name+path.extname(entry.path)));
+let revision='uncommitted';const git=process.env.AUDIT_GIT||'C:/Users/Install/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/git/cmd/git.exe';
+const gitArgs=['-c','safe.directory='+process.cwd().replaceAll('\\','/')];
+try{revision=execFileSync(git,[...gitArgs,'rev-parse','HEAD'],{encoding:'utf8',windowsHide:true}).trim();}catch{}
+const python=execFileSync('build/python/python.exe',['--version'],{encoding:'utf8',windowsHide:true}).trim();
+let uncommitted=true;try{uncommitted=!!execFileSync(git,[...gitArgs,'status','--porcelain'],{encoding:'utf8',windowsHide:true}).trim();}catch{}
+const metadata={version,createdAt:new Date().toISOString(),sourceRevision:revision,uncommitted,platform:'windows-x64',releaseStatus:'INTERNAL_AGENT_TEST',agent:{workflowVersion:'audit-workflows/1',stateVersion:'audit-agent-state/1',modelNetwork:'configured-service',auditNetwork:'local-only',validationLevel:'execution_and_file_integrity'},node:process.version,python,dependenciesLock:hash('pnpm-lock.yaml'),pythonLock:hash('requirements.txt'),entrySha256:hash(path.join(output,'AI助手.exe')),verification:verified,originalToolboxRequired:false};
+fs.writeFileSync(path.join(output,'build-manifest.json'),JSON.stringify(metadata,null,2));
+const files=[];function inventory(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory())inventory(p);else files.push({path:path.relative(output,p),size:fs.statSync(p).size,sha256:hash(p)});}}
+inventory(output);fs.writeFileSync(path.join(output,'package-files.json'),JSON.stringify(files,null,2));
+console.log(JSON.stringify({output,version,files:files.length,bytes:files.reduce((n,x)=>n+x.size,0)}));

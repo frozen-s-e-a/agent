@@ -1,0 +1,217 @@
+# 审计助手在 DeepSeek Harness sdk profile 之上的配置层。
+# 用法：dsh --profile sdk --patch harness/profile/audit.patch.yml（由 harness/launch.mjs 组装）。
+#
+# 宿主启动 Harness 时通过环境变量传入：
+#   AUDIT_LLM_BASE_URL   企业模型地址（OpenAI 兼容，已规范化到 .../v1）
+#   AUDIT_LLM_API_KEY    API Key（只在进程环境里，不写任何文件）
+#   AUDIT_LLM_MODEL      模型名
+#   AUDIT_LLM_CONTEXT_WINDOW / AUDIT_LLM_MAX_TOKENS   可选，默认 131072 / 8192
+#   AUDIT_PROJECT_ROOT   当前项目目录；一个 Harness 进程只服务一个项目
+#   AUDIT_PYTHON         内置 Python；AUDIT_APP_ROOT 应用根目录（找 src/audit-mcp/server.py）
+#   AUDIT_STATE_DIR      编排插件的状态目录（任务检查点），按项目区分
+#
+# 原则：只有模型请求和用户添加的外部 MCP 服务会外连；不给模型 shell、文件读写和联网工具。
+
+# ---------- 模型：企业网关，OpenAI Chat Completions 格式 ----------
+- id: llm-pi-ai
+  config:
+    providers:
+      enterprise:
+        displayName: 企业模型
+        apiKeyEnv: AUDIT_LLM_API_KEY
+        api: openai-completions
+        baseURL: !!js process.env.AUDIT_LLM_BASE_URL
+        # 企业网关的能力未知，先按最保守的方式发请求；实测后按 harness/README.md 调整。
+        compat:
+          supportsStore: false
+          supportsDeveloperRole: false
+          supportsReasoningEffort: false
+          maxTokensField: max_tokens
+        defaultContextWindow: 131072
+        defaultMaxTokens: 8192
+        models:
+          - id: !!js process.env.AUDIT_LLM_MODEL
+            name: !!js process.env.AUDIT_LLM_MODEL
+            contextWindow: !!js Number(process.env.AUDIT_LLM_CONTEXT_WINDOW || 131072)
+            maxTokens: !!js Number(process.env.AUDIT_LLM_MAX_TOKENS || 8192)
+            reasoningEfforts: false
+        retryPolicy:
+          mode: normal
+          maxRetries: 3
+
+- id: agent-default-model
+  config:
+    provider: enterprise
+    model: !!js process.env.AUDIT_LLM_MODEL
+
+# DeepSeek 官方模型、账号和随请求上传会话日志：全部不用。
+- id: llm-deepseek
+  disabled: true
+- id: llm-deepseek-account
+  disabled: true
+- id: deepseek-account
+  disabled: true
+- id: deepseek-llm-api-extensions
+  disabled: true
+- id: session-log-deepseek
+  disabled: true
+- id: plugin-package-inventory-deepseek
+  disabled: true
+
+# ---------- 128K 窗口下的压缩 ----------
+# 默认余量 65,536 按 128K 算一半窗口就开始压缩；改为 12K。
+- id: compaction-basic
+  config:
+    thresholdRatio: 0.8
+    headroomTokens: 12288
+
+# ---------- 遥测、联网 ----------
+- id: otel
+  disabled: true
+- id: session-telemetry-otel
+  disabled: true
+- id: web
+  disabled: true
+- id: web-search-deepseek
+  disabled: true
+- id: web-deepseek-api
+  disabled: true
+- id: web-fetch-http
+  disabled: true
+- id: tool-web
+  disabled: true
+- id: plugin-manager
+  disabled: true
+
+# ---------- 不给模型的工具：shell、文件读写、改目录、后台任务、代码执行、自由派生子 Agent ----------
+- id: bash-sandbox
+  disabled: true
+- id: pwsh-sandbox
+  disabled: true
+- id: tool-bash
+  disabled: true
+- id: tool-pwsh
+  disabled: true
+- id: shell-env
+  disabled: true
+# 权限预设只服务 shell，shell 关掉后它会一直等 shell 服务。
+- id: permission
+  disabled: true
+- id: tool-jobs
+  disabled: true
+- id: tool-fs
+  disabled: true
+- id: tool-fs-search
+  disabled: true
+- id: tool-working-directory
+  disabled: true
+- id: ptc-runtime
+  disabled: true
+- id: workflow-ptc
+  disabled: true
+- id: tool-workflow
+  disabled: true
+- id: tool-goal
+  disabled: true
+- id: command-goal
+  disabled: true
+- id: goal-round-driver
+  disabled: true
+- id: goal
+  disabled: true
+- id: plan-mode
+  disabled: true
+- id: tool-subagent
+  disabled: true
+- id: tool-subagent-fork
+  disabled: true
+- id: tool-subagent-control
+  disabled: true
+- id: tool-subagent-list-agents
+  disabled: true
+- id: mcp-resources
+  disabled: true
+# 项目目录里的 AGENTS.md、技能目录等是用户资料，不当作指令读；技能只从应用自带的 harness/skills 加载。
+- id: agent-instructions
+  disabled: true
+- id: skill-filesystem
+  config:
+    includeDefaultRoots: false
+    customSkillDirs:
+      - !!js process.getBuiltinModule('node:path').join(process.env.AUDIT_APP_ROOT || '.', 'harness', 'skills')
+    watch: false
+
+- id: sandbox-policy
+  config:
+    mode: read-only
+    workspaceRoot: !!js process.env.AUDIT_PROJECT_ROOT || process.cwd()
+
+# 审批一律交给宿主（动作确认卡），不自动放行。
+- id: approval
+  config:
+    policy: ask
+
+- id: system-prompt
+  config:
+    includeHarnessIdentity: false
+    personaPrefix: >-
+      你是审计助手，为审计人员处理底稿和资料，使用 {{model}} 模型。
+      只通过提供的审计工具读取和处理资料；数字以工具结果为准，不自行编造或心算；
+      不确定口径时向用户确认。用中文回答。
+
+# ---------- 宿主桥接：替换 sdk profile 自带的 JSON-RPC 服务 ----------
+- id: sdk-jsonrpc-server
+  disabled: true
+
+- insert:
+    - id: audit-host-bridge
+      name: ../plugins/host-bridge.mjs
+      inject: [sdkAppStartup, loader]
+      config:
+        maxTokensAsSuccess: true
+        # 需要用户逐次确认的工具（外部系统中会改数据的工具）。宿主按设置里的 sideEffect 生成，
+        # 内置审计工具只写新文件，不在这里。
+        confirmTools: !!js JSON.parse(process.env.AUDIT_CONFIRM_TOOLS || '[]')
+        # 用户在设置里停用的工具：对模型隐藏，调用也会被拦下
+        disabledTools: !!js JSON.parse(process.env.AUDIT_DISABLED_TOOLS || '[]')
+
+    - id: tool-ask-user
+      name: '@deepseek-ai/dsh-tool-ask-user'
+
+    # ---------- 编排插件：底稿任务的固定流程 ----------
+    - id: audit-orchestrator
+      name: ../plugins/orchestrator/index.mjs
+      config:
+        provider: enterprise
+        model: !!js process.env.AUDIT_LLM_MODEL
+        # 任务检查点、编号计数、编排的模型调用记录；一个项目一个目录（launch.mjs 生成）
+        stateDir: !!js process.env.AUDIT_STATE_DIR
+        # 区域语义的关键字段独立采样次数（设计 5.3）；双路复算（设计 7.6）
+        samples: !!js Number(process.env.AUDIT_SEMANTICS_SAMPLES || 3)
+        recompute: !!js process.env.AUDIT_RECOMPUTE !== 'off'
+        # 明显微小错报临界值，差异不超过它时记录后通过；项目档案没有时按 0
+        trivialThreshold: !!js process.env.AUDIT_TRIVIAL_THRESHOLD || '0'
+
+    # ---------- 内置审计工具服务 ----------
+    - id: mcp-audit
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: audit
+        transport: stdio
+        command: !!js process.env.AUDIT_PYTHON || 'python'
+        args:
+          - -X
+          - utf8
+          - -B
+          - !!js process.getBuiltinModule('node:path').join(process.env.AUDIT_APP_ROOT || '.', 'src', 'audit-mcp', 'server.py')
+        cwd: !!js process.env.AUDIT_PROJECT_ROOT || process.cwd()
+        env:
+          AUDIT_PROJECT_ROOT: !!js process.env.AUDIT_PROJECT_ROOT || ''
+          AUDIT_LLM_BASE_URL: !!js process.env.AUDIT_LLM_BASE_URL || ''
+          AUDIT_LLM_API_KEY: !!js process.env.AUDIT_LLM_API_KEY || ''
+          AUDIT_LLM_MODEL: !!js process.env.AUDIT_LLM_MODEL || ''
+          PYTHONPATH: !!js process.env.AUDIT_PYTHONPATH || ''
+          # 新工具的编号、结构图和分析库存在这里（宿主按项目分目录），服务重启后仍然有效。
+          AUDIT_STATE_DIR: !!js process.env.AUDIT_STATE_DIR || ''
+        # 审计工具可能处理几十万行资料，单次调用放宽到 30 分钟。
+        toolCallTimeoutMs: 1800000

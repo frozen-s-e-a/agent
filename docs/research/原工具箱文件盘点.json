@@ -1,0 +1,1961 @@
+{
+  "schemaVersion": 1,
+  "recordedOn": "2026-09-09",
+  "sourceFolder": "C:/Users/Install/Desktop/SW审计工具箱",
+  "sourceVersionStatus": "not_verified",
+  "scope": "V1_all_existing_business_functions; previous_UI_account_changes_preserved",
+  "evidenceLevel": "file_paths_and_sizes_only; not_a_complete_feature_inventory",
+  "sourceHashesStatus": "not_collected_in_this_document_update",
+  "counts": {
+    "moduleFiles": 218,
+    "skillFiles": 8,
+    "templateFiles": 75
+  },
+  "workPackages": [
+    {
+      "id": "M01",
+      "title": "表格数据处理",
+      "roots": [
+        "headers_process",
+        "add_column",
+        "insert_column",
+        "select_column",
+        "merge_column",
+        "fill_column",
+        "dropsummary",
+        "pickup_value",
+        "data_field_check",
+        "schema_converter"
+      ],
+      "scope": "V1",
+      "behaviorStatus": "pending_inventory"
+    },
+    {
+      "id": "M02",
+      "title": "科目与辅助项目",
+      "roots": [
+        "subject_clean",
+        "subject_clean_after",
+        "subject_xinjiyuan",
+        "subject_allocation",
+        "asist_split",
+        "auxiliary_selection",
+        "currency"
+      ],
+      "scope": "V1",
+      "behaviorStatus": "pending_inventory"
+    },
+    {
+      "id": "M03",
+      "title": "凭证、账簿与数据查看",
+      "roots": [
+        "jet_test",
+        "voucher_check",
+        "ledger_check",
+        "finance_viewer"
+      ],
+      "scope": "V1",
+      "behaviorStatus": "pending_inventory"
+    },
+    {
+      "id": "M04",
+      "title": "分析测算",
+      "roots": [
+        "monthly_analysis",
+        "gross_margin_analysis",
+        "asset_analysis"
+      ],
+      "scope": "V1",
+      "behaviorStatus": "pending_inventory"
+    },
+    {
+      "id": "M05",
+      "title": "抽凭与抽样",
+      "roots": [
+        "vouching",
+        "batch_vouching_sampling",
+        "cutoff_sampling",
+        "general_selection"
+      ],
+      "scope": "V1",
+      "behaviorStatus": "pending_inventory"
+    },
+    {
+      "id": "M06",
+      "title": "银行业务",
+      "roots": [
+        "bank_confirmation_core",
+        "bank_digit2",
+        "bank_flow",
+        "bank_paper1",
+        "bank_paper2",
+        "bankflowmerge"
+      ],
+      "scope": "V1",
+      "behaviorStatus": "pending_inventory"
+    },
+    {
+      "id": "M07",
+      "title": "底稿与上期结转",
+      "roots": [
+        "detailed_table",
+        "tb_creator",
+        "xlsx_writer",
+        "transfer_previous_data"
+      ],
+      "scope": "V1",
+      "behaviorStatus": "pending_inventory"
+    },
+    {
+      "id": "M08",
+      "title": "披露与附注",
+      "roots": [
+        "report_note_checker",
+        "extract_disclosure_tables",
+        "extract_disclosure_scope",
+        "fill_disclosure_table",
+        "build_merged_footnotes",
+        "insert_footnote_comments",
+        "notes_penetration"
+      ],
+      "scope": "V1",
+      "behaviorStatus": "pending_inventory"
+    },
+    {
+      "id": "M09",
+      "title": "链接处理",
+      "roots": [
+        "link_extractor",
+        "link_ref_replace",
+        "link_replace_range",
+        "link_replace_simple_subject",
+        "link_replace_text",
+        "link_replace_workbook",
+        "link_replace",
+        "_link_replace_helpers"
+      ],
+      "scope": "V1",
+      "behaviorStatus": "pending_inventory"
+    },
+    {
+      "id": "M10",
+      "title": "信息提取与辅助工具",
+      "roots": [
+        "info_extract",
+        "info_extract_multi",
+        "excel_info_extract",
+        "text_match",
+        "id_card",
+        "paper_verify",
+        "flowchart"
+      ],
+      "scope": "V1",
+      "behaviorStatus": "pending_inventory"
+    },
+    {
+      "id": "M11",
+      "title": "关联方与地址",
+      "roots": [
+        "related_party",
+        "qcc_processor",
+        "address_verify",
+        "address_split"
+      ],
+      "scope": "V1",
+      "behaviorStatus": "pending_inventory"
+    },
+    {
+      "id": "M12",
+      "title": "外部查询下载",
+      "roots": [
+        "cicpa_query",
+        "ipo_bj",
+        "ipo_sh",
+        "ipo_sz",
+        "announcement"
+      ],
+      "scope": "V1",
+      "behaviorStatus": "pending_inventory"
+    },
+    {
+      "id": "M13",
+      "title": "文件与资料",
+      "roots": [
+        "file_classification",
+        "file_open",
+        "file_rename",
+        "photo_rename",
+        "multi_collect_file",
+        "multi_collect_folder",
+        "merge_files"
+      ],
+      "scope": "V1",
+      "behaviorStatus": "pending_inventory"
+    },
+    {
+      "id": "M14",
+      "title": "AI与技能",
+      "roots": [
+        "ai_assistant",
+        "nanobot_core",
+        "ai_utils",
+        "ai_formula_filler",
+        "mcp_context"
+      ],
+      "scope": "V1",
+      "behaviorStatus": "pending_inventory"
+    },
+    {
+      "id": "M15",
+      "title": "支撑组件与工程参考",
+      "roots": [
+        "__init__",
+        "base_window_module",
+        "xlwings_safe",
+        ".claude",
+        "common"
+      ],
+      "scope": "V1",
+      "behaviorStatus": "pending_inventory"
+    },
+    {
+      "id": "M16",
+      "title": "待识别入口",
+      "roots": [
+        "moduleZ",
+        "basic"
+      ],
+      "scope": "V1",
+      "behaviorStatus": "pending_inventory"
+    }
+  ],
+  "moduleFiles": [
+    {
+      "path": "modules/__init__.pyd",
+      "bytes": 17408,
+      "workPackage": "M15",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/_link_replace_helpers.pyd",
+      "bytes": 47104,
+      "workPackage": "M09",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/add_column.pyd",
+      "bytes": 108544,
+      "workPackage": "M01",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/address_split.pyd",
+      "bytes": 85504,
+      "workPackage": "M11",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/ai_formula_filler.pyd",
+      "bytes": 224256,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/ai_utils.pyd",
+      "bytes": 65024,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/announcement.pyd",
+      "bytes": 104448,
+      "workPackage": "M12",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/asist_split.pyd",
+      "bytes": 114176,
+      "workPackage": "M02",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/asset_analysis.pyd",
+      "bytes": 315392,
+      "workPackage": "M04",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/auxiliary_selection.pyd",
+      "bytes": 102400,
+      "workPackage": "M02",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/bank_confirmation_core.pyd",
+      "bytes": 111104,
+      "workPackage": "M06",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/bank_digit2.pyd",
+      "bytes": 46592,
+      "workPackage": "M06",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/bank_flow.pyd",
+      "bytes": 578048,
+      "workPackage": "M06",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/bank_paper1.pyd",
+      "bytes": 46592,
+      "workPackage": "M06",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/bank_paper2.pyd",
+      "bytes": 46592,
+      "workPackage": "M06",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/bankflowmerge.pyd",
+      "bytes": 315392,
+      "workPackage": "M06",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/base_window_module.pyd",
+      "bytes": 52736,
+      "workPackage": "M15",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/basic.pyd",
+      "bytes": 48128,
+      "workPackage": "M16",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/batch_vouching_sampling.pyd",
+      "bytes": 210944,
+      "workPackage": "M05",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/build_merged_footnotes.pyd",
+      "bytes": 173568,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/cicpa_query.pyd",
+      "bytes": 355328,
+      "workPackage": "M12",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/currency.pyd",
+      "bytes": 90112,
+      "workPackage": "M02",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/cutoff_sampling.pyd",
+      "bytes": 142336,
+      "workPackage": "M05",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/data_field_check.pyd",
+      "bytes": 148992,
+      "workPackage": "M01",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/dropsummary.pyd",
+      "bytes": 86016,
+      "workPackage": "M01",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/excel_info_extract.pyd",
+      "bytes": 151552,
+      "workPackage": "M10",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/extract_disclosure_scope.pyd",
+      "bytes": 105472,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/extract_disclosure_tables.pyd",
+      "bytes": 126464,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/file_classification.pyd",
+      "bytes": 159744,
+      "workPackage": "M13",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/file_open.pyd",
+      "bytes": 35840,
+      "workPackage": "M13",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/file_rename.pyd",
+      "bytes": 35840,
+      "workPackage": "M13",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/fill_column.pyd",
+      "bytes": 107520,
+      "workPackage": "M01",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/fill_disclosure_table.pyd",
+      "bytes": 169472,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/flowchart.pyd",
+      "bytes": 181248,
+      "workPackage": "M10",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/general_selection.pyd",
+      "bytes": 127488,
+      "workPackage": "M05",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/gross_margin_analysis.pyd",
+      "bytes": 491520,
+      "workPackage": "M04",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/headers_process.pyd",
+      "bytes": 102912,
+      "workPackage": "M01",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/id_card.pyd",
+      "bytes": 86528,
+      "workPackage": "M10",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/info_extract_multi.pyd",
+      "bytes": 234496,
+      "workPackage": "M10",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/info_extract.pyd",
+      "bytes": 362496,
+      "workPackage": "M10",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/insert_column.pyd",
+      "bytes": 105472,
+      "workPackage": "M01",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/insert_footnote_comments.pyd",
+      "bytes": 112640,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/ipo_bj.pyd",
+      "bytes": 122880,
+      "workPackage": "M12",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/ipo_sh.pyd",
+      "bytes": 124928,
+      "workPackage": "M12",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/ipo_sz.pyd",
+      "bytes": 112640,
+      "workPackage": "M12",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/ledger_check.pyd",
+      "bytes": 110592,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/link_extractor.pyd",
+      "bytes": 101888,
+      "workPackage": "M09",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/link_ref_replace.pyd",
+      "bytes": 133632,
+      "workPackage": "M09",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/link_replace_range.pyd",
+      "bytes": 133632,
+      "workPackage": "M09",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/link_replace_simple_subject.pyd",
+      "bytes": 35840,
+      "workPackage": "M09",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/link_replace_text.pyd",
+      "bytes": 100864,
+      "workPackage": "M09",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/link_replace_workbook.pyd",
+      "bytes": 114688,
+      "workPackage": "M09",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/link_replace.pyd",
+      "bytes": 35840,
+      "workPackage": "M09",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/mcp_context.pyd",
+      "bytes": 41472,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/merge_column.pyd",
+      "bytes": 116224,
+      "workPackage": "M01",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/merge_files.pyd",
+      "bytes": 565760,
+      "workPackage": "M13",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/moduleZ.pyd",
+      "bytes": 40960,
+      "workPackage": "M16",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/multi_collect_file.pyd",
+      "bytes": 128000,
+      "workPackage": "M13",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/multi_collect_folder.pyd",
+      "bytes": 131584,
+      "workPackage": "M13",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/notes_penetration.pyd",
+      "bytes": 137728,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/paper_verify.pyd",
+      "bytes": 302080,
+      "workPackage": "M10",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/photo_rename.pyd",
+      "bytes": 95232,
+      "workPackage": "M13",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/pickup_value.pyd",
+      "bytes": 103424,
+      "workPackage": "M01",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/qcc_processor.pyd",
+      "bytes": 102400,
+      "workPackage": "M11",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/related_party.pyd",
+      "bytes": 514048,
+      "workPackage": "M11",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/schema_converter.pyd",
+      "bytes": 45568,
+      "workPackage": "M01",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/select_column.pyd",
+      "bytes": 112640,
+      "workPackage": "M01",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/subject_allocation.pyd",
+      "bytes": 136192,
+      "workPackage": "M02",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/subject_clean_after.pyd",
+      "bytes": 121856,
+      "workPackage": "M02",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/subject_xinjiyuan.pyd",
+      "bytes": 277504,
+      "workPackage": "M02",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/tb_creator.pyd",
+      "bytes": 35840,
+      "workPackage": "M07",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/text_match.pyd",
+      "bytes": 124416,
+      "workPackage": "M10",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/transfer_previous_data.pyd",
+      "bytes": 161280,
+      "workPackage": "M07",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/voucher_check.pyd",
+      "bytes": 422400,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/vouching.pyd",
+      "bytes": 35840,
+      "workPackage": "M05",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/xlsx_writer.pyd",
+      "bytes": 154112,
+      "workPackage": "M07",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/xlwings_safe.pyd",
+      "bytes": 88064,
+      "workPackage": "M15",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/.claude/settings.local.json",
+      "bytes": 226,
+      "workPackage": "M15",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/address_verify/__init__.pyd",
+      "bytes": 275968,
+      "workPackage": "M11",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/address_verify/geocode.pyd",
+      "bytes": 116736,
+      "workPackage": "M11",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/ai_assistant/__init__.pyd",
+      "bytes": 17408,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/ai_assistant/backend.pyd",
+      "bytes": 117248,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/ai_assistant/chat_ui.pyd",
+      "bytes": 310784,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/detailed_table/__init__.pyd",
+      "bytes": 18944,
+      "workPackage": "M07",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/detailed_table/_core.pyd",
+      "bytes": 435712,
+      "workPackage": "M07",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/detailed_table/detailed_table_generate.pyd",
+      "bytes": 90624,
+      "workPackage": "M07",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/detailed_table/detailed_table_inspect_template.pyd",
+      "bytes": 58880,
+      "workPackage": "M07",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/detailed_table/detailed_table_inspect.pyd",
+      "bytes": 44032,
+      "workPackage": "M07",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/detailed_table/detailed_table_save_config.pyd",
+      "bytes": 54272,
+      "workPackage": "M07",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/detailed_table/detailed_table_validate.pyd",
+      "bytes": 47104,
+      "workPackage": "M07",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/detailed_table/run_legacy.pyd",
+      "bytes": 80896,
+      "workPackage": "M07",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/__init__.pyd",
+      "bytes": 35840,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/account_hierarchy.pyd",
+      "bytes": 56320,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/account_name_resolver.pyd",
+      "bytes": 72192,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/account_panel.pyd",
+      "bytes": 273920,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/account_summary_dialog.pyd",
+      "bytes": 168448,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/amount_converter.pyd",
+      "bytes": 48640,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/async_workers.pyd",
+      "bytes": 600576,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/auxiliary_parser.pyd",
+      "bytes": 158208,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/auxiliary_type_matcher.pyd",
+      "bytes": 56320,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/auxiliary_type_matching_dialog.pyd",
+      "bytes": 180736,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/balance_calculator.pyd",
+      "bytes": 116736,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/balance_summary_bar.pyd",
+      "bytes": 109056,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/base_transformer.pyd",
+      "bytes": 54784,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/batch_folder_scan_dialog.pyd",
+      "bytes": 104448,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/batch_result_dialog.pyd",
+      "bytes": 94720,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/cleaning_preview.pyd",
+      "bytes": 87552,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/column_mapping_rules.pyd",
+      "bytes": 94720,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/company_mapping_dialog.pyd",
+      "bytes": 111104,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/counterpart_calculator.pyd",
+      "bytes": 165376,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/counterpart_dialog.pyd",
+      "bytes": 156672,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/csv_preview_reader.pyd",
+      "bytes": 67072,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/data_cleaning.pyd",
+      "bytes": 313344,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/data_load_state.pyd",
+      "bytes": 78848,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/data_model.pyd",
+      "bytes": 206848,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/database.pyd",
+      "bytes": 663040,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/duckdb_csv_importer.pyd",
+      "bytes": 284160,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/excel_table_widget.pyd",
+      "bytes": 221696,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/file_scanner.pyd",
+      "bytes": 45568,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/file_type_matcher.pyd",
+      "bytes": 74240,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/fuzzy_matcher.pyd",
+      "bytes": 52736,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/hierarchical_balance_model.pyd",
+      "bytes": 108544,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/hierarchy_restore_dialog.pyd",
+      "bytes": 195584,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/hierarchy_restorer.pyd",
+      "bytes": 151040,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/import_dialog.pyd",
+      "bytes": 279552,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/lazy_imports.pyd",
+      "bytes": 41984,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/main_window.pyd",
+      "bytes": 1423360,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/module_registry.pyd",
+      "bytes": 97792,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/monthly_analysis_dialog.pyd",
+      "bytes": 246272,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/monthly_analysis_engine.pyd",
+      "bytes": 78848,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/multi_file_utils.pyd",
+      "bytes": 80896,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/navigation_state.pyd",
+      "bytes": 114688,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/navigation_toolbar.pyd",
+      "bytes": 54784,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/preload_thread.pyd",
+      "bytes": 65024,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/progress_reporter.pyd",
+      "bytes": 59904,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/staging_manager.pyd",
+      "bytes": 143872,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/summary_aggregator.pyd",
+      "bytes": 93696,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/third_party_import_dialog.pyd",
+      "bytes": 161792,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/third_party_import_worker.pyd",
+      "bytes": 52224,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/tianjian_oxt_transformer.pyd",
+      "bytes": 200192,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/transformer_registry.pyd",
+      "bytes": 48128,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/virtual_table_view.pyd",
+      "bytes": 431616,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/xinjiyuan_transformer.pyd",
+      "bytes": 242688,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/aud_import/__init__.pyd",
+      "bytes": 25600,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/aud_import/aud_extractor.pyd",
+      "bytes": 109056,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/aud_import/aud_transformer.pyd",
+      "bytes": 84992,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/aud_import/base_erp_adapter.pyd",
+      "bytes": 55296,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/aud_import/exceptions.pyd",
+      "bytes": 42496,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/aud_import/kingdee_cloud_adapter.pyd",
+      "bytes": 281600,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/aud_import/kingdee_k3_adapter.pyd",
+      "bytes": 249344,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/aud_import/yongyou_nc_adapter.pyd",
+      "bytes": 315904,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/aud_import/yongyou_nc_v35_adapter.pyd",
+      "bytes": 245760,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/finance_viewer/aud_import/yongyou_u8plus_adapter.pyd",
+      "bytes": 164864,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/jet_test/__init__.pyd",
+      "bytes": 18944,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/jet_test/_builtin.pyd",
+      "bytes": 36352,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/jet_test/_core.pyd",
+      "bytes": 193536,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/jet_test/jet_test_execute.pyd",
+      "bytes": 115200,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/jet_test/jet_test_inspect.pyd",
+      "bytes": 44544,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/jet_test/run_legacy.pyd",
+      "bytes": 76800,
+      "workPackage": "M03",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/monthly_analysis/__init__.pyd",
+      "bytes": 18944,
+      "workPackage": "M04",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/monthly_analysis/_core.pyd",
+      "bytes": 262144,
+      "workPackage": "M04",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/monthly_analysis/monthly_ai_analysis.pyd",
+      "bytes": 68608,
+      "workPackage": "M04",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/monthly_analysis/monthly_detect_structure.pyd",
+      "bytes": 96768,
+      "workPackage": "M04",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/monthly_analysis/monthly_execute.pyd",
+      "bytes": 104448,
+      "workPackage": "M04",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/monthly_analysis/monthly_preview.pyd",
+      "bytes": 78336,
+      "workPackage": "M04",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/monthly_analysis/run_legacy.pyd",
+      "bytes": 153088,
+      "workPackage": "M04",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/nanobot_core/__init__.pyd",
+      "bytes": 17408,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/nanobot_core/config.pyd",
+      "bytes": 74752,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/nanobot_core/memory.pyd",
+      "bytes": 51712,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/nanobot_core/runner.pyd",
+      "bytes": 85504,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/nanobot_core/skills.pyd",
+      "bytes": 112640,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/nanobot_core/tools/__init__.pyd",
+      "bytes": 17408,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/nanobot_core/tools/_helpers.pyd",
+      "bytes": 43520,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/nanobot_core/tools/_paths.pyd",
+      "bytes": 35840,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/nanobot_core/tools/base.pyd",
+      "bytes": 142336,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/nanobot_core/tools/file_state.pyd",
+      "bytes": 62464,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/nanobot_core/tools/filesystem.pyd",
+      "bytes": 306688,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/nanobot_core/tools/mcp.pyd",
+      "bytes": 210432,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/nanobot_core/tools/registry.pyd",
+      "bytes": 85504,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/nanobot_core/tools/schema.pyd",
+      "bytes": 90624,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/nanobot_core/tools/search.pyd",
+      "bytes": 193536,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/nanobot_core/tools/shell.pyd",
+      "bytes": 143360,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/nanobot_core/tools/web.pyd",
+      "bytes": 319488,
+      "workPackage": "M14",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/__init__.pyd",
+      "bytes": 51200,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/ai_helper.pyd",
+      "bytes": 93696,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/cache.pyd",
+      "bytes": 187904,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/debug_timing.pyd",
+      "bytes": 54272,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/default_rules.json",
+      "bytes": 91095,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/engine.pyd",
+      "bytes": 182272,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/models.pyd",
+      "bytes": 173056,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/preset_manager.pyd",
+      "bytes": 140288,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/report_exporter.pyd",
+      "bytes": 80896,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/checkers/__init__.pyd",
+      "bytes": 17408,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/checkers/auto_table_checker.pyd",
+      "bytes": 197120,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/checkers/data_checker.pyd",
+      "bytes": 172032,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/checkers/format_checker.pyd",
+      "bytes": 112128,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/checkers/text_checker.pyd",
+      "bytes": 83456,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/extractors/__init__.pyd",
+      "bytes": 17408,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/extractors/note_indexer.pyd",
+      "bytes": 161792,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/extractors/statement_extractor.pyd",
+      "bytes": 253952,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/readers/__init__.pyd",
+      "bytes": 18944,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/readers/base.pyd",
+      "bytes": 44544,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/readers/pdf_reader.pyd",
+      "bytes": 214016,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/ui/__init__.pyd",
+      "bytes": 17408,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/ui/main_window.pyd",
+      "bytes": 224768,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/ui/parse_viewer.pyd",
+      "bytes": 175104,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/ui/pdf_viewer.pyd",
+      "bytes": 144384,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/ui/result_panel.pyd",
+      "bytes": 164352,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/ui/rule_editor.pyd",
+      "bytes": 258048,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/utils/__init__.pyd",
+      "bytes": 19456,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/utils/concurrent_executor.pyd",
+      "bytes": 74240,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/utils/cross_page_merger.pyd",
+      "bytes": 75264,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/report_note_checker/utils/image_preprocessor.pyd",
+      "bytes": 46080,
+      "workPackage": "M08",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/subject_clean/__init__.pyd",
+      "bytes": 18944,
+      "workPackage": "M02",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/subject_clean/_core.pyd",
+      "bytes": 305152,
+      "workPackage": "M02",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/subject_clean/run_legacy.pyd",
+      "bytes": 78848,
+      "workPackage": "M02",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/subject_clean/tool_execute.pyd",
+      "bytes": 56832,
+      "workPackage": "M02",
+      "status": "file_observed_behavior_unverified"
+    },
+    {
+      "path": "modules/subject_clean/tool_preview.pyd",
+      "bytes": 65024,
+      "workPackage": "M02",
+      "status": "file_observed_behavior_unverified"
+    }
+  ],
+  "skillFiles": [
+    {
+      "path": "skills/cicpa-query/SKILL.md",
+      "bytes": 4518,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "skills/detailed-table-generation/SKILL.md",
+      "bytes": 18816,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "skills/find-skills/SKILL.md",
+      "bytes": 903,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "skills/jet-test/SKILL.md",
+      "bytes": 8433,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "skills/monthly-analysis-mcp/SKILL.md",
+      "bytes": 5832,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "skills/related-party-identification/SKILL.md",
+      "bytes": 4786,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "skills/skill-creator/SKILL.md",
+      "bytes": 973,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "skills/skill-vetter/SKILL.md",
+      "bytes": 1184,
+      "status": "pending_feature_mapping"
+    }
+  ],
+  "templateFiles": [
+    {
+      "path": "_template/北交所IPO披露下载.xlsx",
+      "bytes": 10623,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/表头处理配置表.xlsx",
+      "bytes": 10981,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/插附注批注配置表.xlsx",
+      "bytes": 14547,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/插入列.xlsx",
+      "bytes": 9904,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/抽凭模板3.7.xlsm",
+      "bytes": 1061883,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/单科目合并附注链接替换工具.xlsm",
+      "bytes": 1655684,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/地址拆分为省市区.xlsx",
+      "bytes": 9709,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/多表汇集-来源文件.xlsx",
+      "bytes": 12665,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/多表汇集-来源文件夹.xlsx",
+      "bytes": 1350458,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/多类型文件信息提取配置表.xlsx",
+      "bytes": 14433,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/多列合并.xlsx",
+      "bytes": 11524,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/辅助项拆分配置表.xlsx",
+      "bytes": 14286,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/辅助项选择配置表.xlsx",
+      "bytes": 18190,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/附注穿透配置表.xlsx",
+      "bytes": 15554,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/附注链接模板披露表配置表.xlsx",
+      "bytes": 14349,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/附注链接批量替换工具.xlsm",
+      "bytes": 189059,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/工商信息获取配置表.xlsx",
+      "bytes": 10448,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/公告下载.xlsx",
+      "bytes": 151486,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/公式填充配置表.xlsx",
+      "bytes": 18452,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/共享抽凭信息.xlsm",
+      "bytes": 21569,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/关联方核查配置表.xlsx",
+      "bytes": 11977,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/函证地址核查配置表.xlsx",
+      "bytes": 12171,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/合并附注搭建配置表.xlsx",
+      "bytes": 16282,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/截止测试配置表.xlsx",
+      "bytes": 15424,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/科目分配派工.xlsx",
+      "bytes": 71622,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/科目余额表后处理配置表.xlsx",
+      "bytes": 25843,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/链接提取配置表.xlsx",
+      "bytes": 13568,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/链接替换-参考替换配置表.xlsx",
+      "bytes": 13730,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/链接替换-单元格区域替换.xlsx",
+      "bytes": 409511,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/链接替换-文件夹路径替换.xlsx",
+      "bytes": 12237,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/链接替换-文件名替换.xlsx",
+      "bytes": 13549,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/流程图生成配置表.xlsx",
+      "bytes": 17519,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/毛利率分析配置表.xlsx",
+      "bytes": 16142,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/明细表配置表.xlsm",
+      "bytes": 660958,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/批量抽凭配置表.xlsx",
+      "bytes": 17992,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/批量生成小账套.xlsx",
+      "bytes": 454035,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/披露表提取配置表.xlsx",
+      "bytes": 13515,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/披露口径提取配置表.xlsx",
+      "bytes": 14200,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/凭证检查配置表.xlsx",
+      "bytes": 20281,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/删除合计行配置表.xlsx",
+      "bytes": 77766,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/上交所IPO披露下载.xlsx",
+      "bytes": 10626,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/上期数据搬运.xlsx",
+      "bytes": 17994,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/身份证号码.xlsx",
+      "bytes": 9500,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/深交所IPO披露下载.xlsx",
+      "bytes": 10626,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/数据处理配置表.xlsx",
+      "bytes": 721507,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/提取值配置表.xlsx",
+      "bytes": 11929,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/图片重命名配置表.xlsx",
+      "bytes": 572298,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/文本提取匹配配置表.xlsx",
+      "bytes": 18215,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/文件打开器.xlsm",
+      "bytes": 17888,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/文件分类配置表.xlsx",
+      "bytes": 13856,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/文件名批量替换.xlsm",
+      "bytes": 43989,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/文件信息提取配置表.xlsx",
+      "bytes": 2950118,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/相同名称列合并配置表.xlsx",
+      "bytes": 12018,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/向下填充空值.xlsx",
+      "bytes": 9638,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/小账套-模板.xlsm",
+      "bytes": 303343,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/新纪元数据处理.xlsx",
+      "bytes": 738213,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/选择列配置表.xlsx",
+      "bytes": 12270,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/询证函模板-电子格式二.xlsx",
+      "bytes": 165069,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/询证函模板-纸质格式二.xlsx",
+      "bytes": 139330,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/询证函模板-纸质格式一.xlsx",
+      "bytes": 139341,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/银行函证表格生成-电子格式二配置表.xlsx",
+      "bytes": 22250,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/银行函证表格生成-格式二.xlsx",
+      "bytes": 18781,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/银行函证表格生成-纸质格式二配置表.xlsx",
+      "bytes": 24286,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/银行函证表格生成-纸质格式一配置表.xlsx",
+      "bytes": 30210,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/银行流水合并.xlsx",
+      "bytes": 10997,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/银行流水核对配置表.xlsx",
+      "bytes": 18997,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/月间分析配置表.xlsx",
+      "bytes": 19854,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/长期资产测算配置表.xlsx",
+      "bytes": 12522,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/纸质信息核对配置表.xlsx",
+      "bytes": 14422,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/资料字段检查配置表.xlsx",
+      "bytes": 14360,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/总体选择配置表.xlsx",
+      "bytes": 15692,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/Excel文本信息提取配置表.xlsx",
+      "bytes": 11679,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/JET配置表.xlsx",
+      "bytes": 24651,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/TB批量搭建器.xlsm",
+      "bytes": 48510,
+      "status": "pending_feature_mapping"
+    },
+    {
+      "path": "_template/test.xlsx",
+      "bytes": 9339,
+      "status": "pending_feature_mapping"
+    }
+  ]
+}
