@@ -93,7 +93,7 @@ export const NODES = {
   },
 
   basis: {
-    role: 'planner', version: 'basis/3',
+    role: 'planner', version: 'basis/4',
     prompt: `${COMMON}\n\n任务：为一个待填区域定口径，并用受控查询表达计算。每个口径要素都要给出，并写明依据：数据来源、期间、范围（含排除条件和理由）、金额与方向、分组与对应、单位与精度、控制数。计算只写 SQL，不写任何数字结果；数字由代码执行查询得到。SQL 里的列名用资料表的列名原文（如 "科目编码"），meaning 只是说明，不能当列名。control.column 和 bindings 的列名照抄 SQL 结果里的列名（AS 后面的名字），不加说明。bindings 说明结果的哪一行哪一列写进底稿哪个单元格（行号从 1 起）。依据只能是推断、又会影响结果的要素，放进 inferred 作为要问用户的问题（最多 3 个）：每个选项写清含义，不是建议选项的另附该选项下的 steps。输入有 lastFailure 时，说明上次核对没通过，按原因修正。`,
     schema: {
       type: 'object',
@@ -113,7 +113,7 @@ export const NODES = {
         },
         steps: STEPS,
         bindings: { type: 'array', items: { type: 'object', required: ['cell', 'row', 'column'], properties: { cell: { type: 'string' }, row: { type: 'integer' }, column: { type: 'string' } } } },
-        manual: { type: 'array', items: { type: 'string' } },
+        manual: { type: 'array', items: { type: 'string', pattern: CELL_REF, description: '只写单元格坐标，如 应收账款!C7:C10；不填的原因写进 summary 或 scope' } },
         inferred: {
           type: 'array', maxItems: 3,
           items: {
