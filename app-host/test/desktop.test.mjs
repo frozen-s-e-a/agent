@@ -59,6 +59,14 @@ test('凭据：传入 secretBox 时加密保存，旧的明文 secrets.json 迁�
   await host.close()
 })
 
+test('凭据：还没填过 API Key 时不建 secrets.enc', async () => {
+  const dataDir = path.join(scratch, 'fresh')
+  const host = new AppHost({ dataDir, python: 'python3', secretBox: fakeBox(path.join(dataDir, 'secrets.enc')) })
+  assert.deepEqual(host.store.secrets, {})
+  assert.ok(!fs.existsSync(path.join(dataDir, 'secrets.enc')))
+  await host.close()
+})
+
 test('output.open 交给本机程序打开；打开失败时报错', async () => {
   const dataDir = path.join(scratch, 'open')
   const folder = path.join(scratch, '项目一')

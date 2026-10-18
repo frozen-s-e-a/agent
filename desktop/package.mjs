@@ -210,9 +210,15 @@ if (args.zip) {
   step('免安装 zip')
   const zipOut = path.join(outRoot, `${PRODUCT}-${version}-win-x64.zip`)
   fs.rmSync(zipOut, { force: true })
-  if (process.platform === 'win32') run('tar', ['-a', '-cf', zipOut, PRODUCT], { cwd: path.dirname(appDir) })
-  else run('zip', ['-qry', zipOut, PRODUCT], { cwd: path.dirname(appDir) })
-  console.log(zipOut)
+  if (process.platform === 'win32') {
+    // 系统自带的 tar 打这么多文件（超过 65535 个）、中文文件名的 zip 不可靠；用 .NET 的 ZipFile（支持 zip64 和 UTF-8 文件名），路径经环境变量传，避开命令行编码
+    const script = "Add-Type -AssemblyName System.IO.Compression.FileSystem; [IO.Compression.ZipFile]::CreateFromDirectory($env:ZIP_SRC, $env:ZIP_OUT, [IO.Compression.CompressionLevel]::Optimal, $true)"
+    run('powershell', ['-NoProfile', '-NonInteractive', '-Command', script], { env: { ...process.env, ZIP_SRC: appDir, ZIP_OUT: zipOut } })
+  } else {
+    run('zip', ['-qry', zipOut, PRODUCT], { cwd: path.dirname(appDir) })
+  }
+  if (!fs.existsSync(zipOut)) throw new Error(`没有生成 zip：${zipOut}`)
+  console.log(`\n免安装 zip：${zipOut}（${(fs.statSync(zipOut).size / 1e6).toFixed(0)} MB）`)
 }
 
 if (args.installer) {

@@ -47,7 +47,8 @@ export class Store {
       const plain = this.file('secrets.json')
       if (!this.secrets) {
         this.secrets = readJson(plain, {})
-        secretBox.save(this.secrets)
+        // 有旧的明文才迁移；还没填过的不建空的 secrets.enc
+        if (fs.existsSync(plain)) secretBox.save(this.secrets)
       }
       fs.rmSync(plain, { force: true })
     } else {

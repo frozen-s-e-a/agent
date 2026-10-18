@@ -12,6 +12,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
+import zlib from 'node:zlib'
 import { fakeModel } from '../../harness/test/fake-model.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -59,6 +60,18 @@ async function waitText(re, ms = 60000) {
     await page.waitForTimeout(200)
   }
   throw new Error(`等不到回复 ${re}：${await lastText().catch(() => '')}`)
+}
+/** 读宿主导出的 zip（app-host/logs.mjs 写的：本地文件头里带大小，deflate）：{ 文件名: Buffer }。Windows 没有 unzip，不用外部程序 */
+function readZip(buf) {
+  const out = {}
+  for (let i = 0; buf.readUInt32LE(i) === 0x04034b50;) {
+    const size = buf.readUInt32LE(i + 18)
+    const nameLen = buf.readUInt16LE(i + 26)
+    const start = i + 30 + nameLen + buf.readUInt16LE(i + 28)
+    out[buf.subarray(i + 30, i + 30 + nameLen).toString('utf8')] = zlib.inflateRawSync(buf.subarray(start, start + size))
+    i = start + size
+  }
+  return out
 }
 const check = (ok, what) => {
   if (!ok) throw new Error('不对：' + what)
@@ -135,11 +148,10 @@ try {
   const today = new Date().toISOString().slice(0, 10)
   const exported = await page.evaluate(d => window.auditDesktop.invoke('logs.export', { from: d, to: d, includeContent: true }), today)
   check(exported.ok && exported.result.file === zipPath && fs.statSync(zipPath).size === exported.result.sizeBytes, `导出了 ${(exported.result?.sizeBytes / 1024).toFixed(0)} KB`)
-  const listing = execFileSync('unzip', ['-l', zipPath], { encoding: 'utf8' })
-  check(/app-info\.json/.test(listing) && /events\//.test(listing) && /logs\/host-/.test(listing), 'zip 里有 app-info、事件和宿主日志')
-  const unpacked = path.join(scratch, 'logs')
-  execFileSync('unzip', ['-q', zipPath, '-d', unpacked])
-  const leaked = fs.readdirSync(unpacked, { recursive: true }).filter(f => fs.statSync(path.join(unpacked, f)).isFile() && fs.readFileSync(path.join(unpacked, f)).includes(KEY))
+  const entries = readZip(fs.readFileSync(zipPath))
+  const names = Object.keys(entries)
+  check(names.includes('app-info.json') && names.some(n => n.startsWith('events/')) && names.some(n => n.startsWith('logs/host-')), 'zip 里有 app-info、事件和宿主日志')
+  const leaked = names.filter(n => entries[n].includes(KEY))
   check(!leaked.length, `日志里没有 API Key 原文（含资料内容时也没有）${leaked.join('、')}`)
   const cancelled = await (async () => {
     await app.evaluate(({ dialog }) => {
