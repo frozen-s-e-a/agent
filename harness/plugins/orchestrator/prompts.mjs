@@ -106,7 +106,7 @@ export const NODES = {
         scope: { type: 'object', required: ['basis', 'include', 'exclude'], properties: { basis: BASIS, include: { type: 'string' }, exclude: { type: 'array', items: { type: 'object', required: ['condition', 'reason'], properties: { condition: { type: 'string' }, reason: { type: 'string' } } } } } },
         amount: { type: 'object', required: ['column', 'direction', 'basis'], properties: { column: { type: 'string' }, direction: { type: 'string' }, sign: { type: 'string' }, basis: BASIS } },
         grouping: { type: 'object', required: ['description', 'basis'], properties: { description: { type: 'string' }, basis: BASIS } },
-        unit: { type: 'object', required: ['scale', 'basis'], properties: { scale: { type: 'string' }, rounding: { type: 'string' }, basis: BASIS } },
+        unit: { type: 'object', required: ['scale', 'basis'], properties: { scale: { type: 'string', description: '写入前结果除以的倍数，写数字：元为 "1"，千元 "1000"，万元 "10000"' }, rounding: { type: 'string' }, basis: BASIS } },
         control: {
           type: 'object', required: ['label', 'column', 'right', 'basis'],
           properties: { label: { type: 'string' }, column: { type: 'string', description: '本区域结果中参与控制数核对的列' }, right: { type: 'object', description: '控制数来源，如 { kind: "balance", table: "D-001", account: "1122", field: "closing" }' }, rightLabel: { type: 'string' }, basis: BASIS },

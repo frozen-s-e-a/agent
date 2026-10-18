@@ -915,7 +915,7 @@ export class TaskRunner {
     const manual = [...new Set(Object.values(s.regions).flatMap(manualCells))]
     const bindings = regions.map(r => ({
       region: r.region,
-      cells: (r.basis.bindings ?? []).map(b => ({ cell: b.cell, from: { result: r.result, row: b.row, column: b.column }, scale: r.basis.unit?.scale ?? '1' })),
+      cells: (r.basis.bindings ?? []).map(b => ({ cell: b.cell, from: { result: r.result, row: b.row, column: b.column }, scale: scaleOf(r.basis.unit?.scale) })),
       manual: [...new Set(manualCells(r))],
     }))
     let plan = await this.step('fill_compile', { stage: 'fill' }, () => this.node('fill_compile', 'code', {}, async () => {
@@ -1219,6 +1219,14 @@ function manualCells(r) {
   return [...(r.semantics?.manual ?? []), ...(r.basis?.manual ?? [])]
     .map(item => String(item).match(/^\s*((?:[^!\s]+!)?\$?[A-Z]{1,3}\$?\d+(?::\$?[A-Z]{1,3}\$?\d+)?)/)?.[1])
     .filter(Boolean)
+}
+
+/** 写入时的换算倍数：模型常把 unit.scale 写成单位名（元、万元），写入工具要的是数。 */
+function scaleOf(scale) {
+  const text = String(scale ?? '1').trim()
+  if (/^\d+(\.\d+)?$/.test(text) && Number(text) > 0) return text
+  const units = { 元: '1', 千元: '1000', 万元: '10000', 百万元: '1000000', 亿元: '100000000' }
+  return units[text.replace(/^人民币/, '')] ?? '1'
 }
 
 function describeRight(right) {
