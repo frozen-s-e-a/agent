@@ -228,7 +228,9 @@ if (args.installer) {
     fs.writeFileSync(nsh, '\uFEFF!macro RemoveAppFiles\n' + lines.join('\n') + '\n!macroend\n')
     const setup = path.join(outRoot, `${PRODUCT}-${version}-安装.exe`)
     const size = Math.ceil(bytes / 1024)
-    run(makensis, ['-V2', '-INPUTCHARSET', 'UTF8', `-DVERSION=${version}`, `-DVERSION_NUM=${major}.${minor}.${patch}.${build}`, `-DSRC=${appDir}`, `-DOUTFILE=${setup}`, `-DREMOVE_NSH=${nsh}`, `-DICON=${path.join(here, 'icon.ico')}`, `-DSIZE_KB=${size}`, path.join(here, 'installer.nsi')])
+    // Linux 上的 makensis 按区域设置转换参数，路径里有中文时要 UTF-8
+    const nsisEnv = process.platform === 'win32' ? process.env : { ...process.env, LC_ALL: 'C.UTF-8', LANG: 'C.UTF-8' }
+    run(makensis, ['-V2', '-INPUTCHARSET', 'UTF8', `-DVERSION=${version}`, `-DVERSION_NUM=${major}.${minor}.${patch}.${build}`, `-DSRC=${appDir}`, `-DOUTFILE=${setup}`, `-DREMOVE_NSH=${nsh}`, `-DICON=${path.join(here, 'icon.ico')}`, `-DSIZE_KB=${size}`, path.join(here, 'installer.nsi')], { env: nsisEnv })
     console.log(`\n安装包：${setup}（${(fs.statSync(setup).size / 1e6).toFixed(0)} MB）`)
   }
 }
