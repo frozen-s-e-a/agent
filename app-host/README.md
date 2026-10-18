@@ -21,7 +21,7 @@ cd frontend && npm run dev:real        # 另开终端；浏览器打开 http://1
 ## 测试
 
 ```sh
-node --test --test-concurrency=1 app-host/test/*.test.mjs   # 真实 Harness + 假模型，12 项（底稿任务用假审计工具服务）
+node --test --test-concurrency=1 app-host/test/*.test.mjs   # 真实 Harness + 假模型，12 项（底稿任务用假审计工具服务）；desktop.test.mjs 4 项不起 Harness
 cd frontend && node scripts/walk-real.mjs screens/real          # 浏览器里从首次使用走到动作确认，各步截图
 cd frontend && node scripts/walk-task.mjs screens/task          # 浏览器里走底稿任务：三张卡、完成、重启后从检查点继续
 ```
@@ -37,6 +37,7 @@ cd frontend && node scripts/walk-task.mjs screens/task          # 浏览器里�
 | `sheets.mjs`、`py/sheet_worker.py` | 表格读取 |
 | `store.mjs` | 本地数据（数据目录下的 JSON / JSONL） |
 | `server.mjs`、`main.mjs` | 浏览器开发版的传输层：`POST /rpc`、`GET /events`（SSE）、`POST /upload`；只监听本机 |
+| `logs.mjs` | 宿主日志（`logs/host-日期.log`）和 `logs.export` 的 zip |
 
 ## 转换规则
 
@@ -67,9 +68,13 @@ cd frontend && node scripts/walk-task.mjs screens/task          # 浏览器里�
 - 外部服务的确认名单写成 `mcp__<服务>__*` 加只读工具的排除项（`!mcp__<服务>__<工具>`），服务端之后新出现的工具默认要确认；
 - 设置里停用的工具作为 `disabledTools` 传给 Harness，改动后重启 Harness。
 
+## 桌面版
+
+`desktop/` 是 Electron 外壳：宿主跑在 Electron 主进程里，界面走 IPC（不经过 `server.mjs`），凭据用 DPAPI 加密，产出用本机 Excel 打开，日志导出到用户选的位置。见 [desktop/README.md](../desktop/README.md)。
+
+宿主为桌面版留的选项（`AppHost` 构造参数）：`secretBox`（凭据加密存取）、`openPath`（用本机程序打开）、`chooseSavePath`（保存对话框）、`version` / `buildTime`、`harnessEnv`。浏览器开发版不传这些：凭据存明文 `secrets.json`（权限 600），`output.open` 只返回路径，`logs.export` 存到数据目录的 `exports/`。
+
 ## 还缺的
 
-- API Key 和令牌现在存在数据目录的 `secrets.json`（权限 600），Windows 版要换成 DPAPI 加密。
-- `output.open`（用本机 Excel 打开）、`logs.export`、Electron IPC 外壳。
 - 写入计划叠加时依赖格的重算（要本机 Excel）。
 - `sheet.view` 里主题色只按常见浅色近似。

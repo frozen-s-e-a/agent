@@ -4,7 +4,13 @@ Windows 桌面审计 Agent，当前版本 `0.1.0-internal.35`。用户在聊天�
 
 业务源码位于 `src/audit-domain/`，提供 63 项独立审计任务及 16 项通用操作。程序不依赖原 SW 审计工具箱 EXE 或业务 PYD，旧桥接文件不进入源码仓库或程序包。
 
-## 启动测试程序
+## 新版桌面程序
+
+新前端（`frontend/`）+ 应用宿主（`app-host/`）+ Harness（`harness/`）的 Windows 桌面程序在 `desktop/`：安装包双击安装，或解压免安装版双击 `审计助手.exe`。打包和开发运行见 [desktop/README.md](desktop/README.md)。
+
+下面是旧版程序的说明。
+
+## 启动测试程序（旧版）
 
 单文件测试程序：`artifacts/AI审计助手-0.1.0-internal.35.exe`，双击后配置模型服务和项目即可测试。
 

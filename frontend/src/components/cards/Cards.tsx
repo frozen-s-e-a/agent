@@ -6,7 +6,7 @@ import {
   UndoOutlined,
   WarningFilled,
 } from "@ant-design/icons";
-import { Button, Input, Popconfirm, Radio, Tag, Tooltip } from "antd";
+import { Button, Input, Modal, Popconfirm, Radio, Tag, Tooltip } from "antd";
 import { useMemo, useState } from "react";
 import type {
   ActionConfirmationBody,
@@ -539,7 +539,7 @@ function ResultCard({ c, body }: { c: CardState; body: ResultSummaryBody }) {
             <Button size="small" onClick={() => store.openSheet(o.output ?? o.file, { mode: o.kind === "workpaper" ? "filled" : "raw", task: c.task, title: o.file.split("/").pop() })}>
               在表上查看
             </Button>
-            <Button size="small" onClick={() => void store.host.request("output.open", { file: o.output ?? o.file })}>
+            <Button size="small" onClick={() => store.host.request("output.open", { file: o.output ?? o.file }).catch((e: Error) => Modal.error({ title: "打不开文件", content: e.message }))}>
               用 Excel 打开
             </Button>
           </div>

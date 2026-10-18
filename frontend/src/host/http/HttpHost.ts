@@ -1,5 +1,5 @@
 // 真实宿主（app-host）的浏览器连接：命令走 POST /rpc，事件走 Server-Sent Events（/events）。
-// 桌面版换成 Electron IPC 时，实现同一个 HostClient 接口即可。
+// 桌面版走 Electron IPC（../desktop/IpcHost.ts），实现同一个 HostClient 接口。
 import { HostError, type AuditEvent, type Method, type ParamsOf, type ProjectFile, type ResultOf } from "../../protocol/types";
 import type { HostClient } from "../client";
 

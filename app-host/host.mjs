@@ -1,5 +1,5 @@
 // 应用宿主：实现《接口约定》的前端命令（audit-app/1），把对话转给 Harness，把 Harness 的通知转成流程事件（audit-events/1）。
-// 传输层（HTTP + SSE，或以后的 Electron IPC）在 server.mjs，这里不关心。
+// 传输层在 server.mjs（浏览器开发版，HTTP + SSE）和 desktop/main.mjs（桌面版，Electron IPC），这里不关心。
 import crypto from 'node:crypto'
 import fs from 'node:fs'
 import os from 'node:os'
@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url'
 import { DSH_VERSION, normalizeBaseURL } from '../harness/launch.mjs'
 import { Conversation } from './conversation.mjs'
 import { HarnessProcess } from './harness.mjs'
+import { buildLogArchive, logArchiveName } from './logs.mjs'
 import { NAME_PATTERN, confirmTools, disabledTools, patchEnv, testServer, writePatch } from './mcp.mjs'
 import { SheetReader } from './sheets.mjs'
 import { Store, shortId } from './store.mjs'
@@ -54,11 +55,17 @@ export class AppHost {
    * @param {string} [options.pythonPath]
    * @param {string} [options.appRoot]
    * @param {string[]} [options.patches] 额外的 Harness 配置层（例如编排插件）
-   * @param {Record<string,string>} [options.harnessEnv] 额外给 Harness 进程的环境变量（测试用）
+   * @param {Record<string,string>} [options.harnessEnv] 额外给 Harness 进程的环境变量（测试用；桌面版用它让 Electron 按 Node 运行）
+   * 以下由桌面版提供，浏览器开发版没有：
+   * @param {ConstructorParameters<typeof Store>[1]['secretBox']} [options.secretBox] 凭据的加密存取
+   * @param {(file: string) => Promise<string>} [options.openPath] 用本机默认程序打开文件，失败时返回错误文字
+   * @param {(defaultName: string) => Promise<string | null>} [options.chooseSavePath] 系统保存对话框，取消时返回 null
+   * @param {string} [options.version] 应用版本
+   * @param {string} [options.buildTime] 构建时间
    */
   constructor(options) {
     this.options = options
-    this.store = new Store(options.dataDir)
+    this.store = new Store(options.dataDir, { secretBox: options.secretBox })
     this.python = options.python ?? (process.platform === 'win32' ? 'python.exe' : 'python3')
     this.appRoot = options.appRoot ?? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
     this.listeners = new Set()
@@ -554,10 +561,16 @@ export class AppHost {
     'outputs.list'(p) {
       return { outputs: [...this.store.state(p.project).outputs].sort((a, b) => b.at.localeCompare(a.at)) }
     },
-    'output.open'(p) {
-      // 桌面版用本机 Excel 打开；浏览器开发模式下宿主只返回路径
+    async 'output.open'(p) {
+      // 桌面版用本机默认程序（Excel）打开；浏览器开发版宿主只返回路径
       const project = this.projectOfFile(p.file)
-      return { opened: true, path: this.resolveFile(project, p.file) }
+      const file = this.resolveFile(project, p.file)
+      if (!fs.existsSync(file)) throw new HostError('IO_NOT_FOUND', `文件不在了：${path.basename(file)}`)
+      if (this.options.openPath) {
+        const error = await this.options.openPath(file)
+        if (error) throw new HostError('IO_OPEN', `打不开 ${path.basename(file)}：${error}`)
+      }
+      return { opened: true, path: file }
     },
 
     'session.list'(p) {
@@ -818,8 +831,8 @@ export class AppHost {
     },
     'app.info'() {
       return {
-        version: JSON.parse(fs.readFileSync(path.join(this.appRoot, 'package.json'), 'utf8')).version,
-        buildTime: '开发版',
+        version: this.options.version ?? JSON.parse(fs.readFileSync(path.join(this.appRoot, 'package.json'), 'utf8')).version,
+        buildTime: this.options.buildTime ?? '开发版',
         harness: `DeepSeek Harness ${DSH_VERSION}（固定版本）`,
         tools: '审计工具服务 0.1.0',
         interfaces: { tools: 'audit-tools/1', events: 'audit-events/1', app: 'audit-app/1', cards: 'audit-cards/1' },
@@ -827,8 +840,21 @@ export class AppHost {
         dataDir: this.store.dir,
       }
     },
-    'logs.export'() {
-      throw new HostError('ENV_NOT_READY', '导出日志还没做')
+    async 'logs.export'(p) {
+      const range = { from: p.from, to: p.to, includeContent: Boolean(p.includeContent) }
+      for (const d of [range.from, range.to]) if (d && !/^\d{4}-\d{2}-\d{2}$/.test(d)) throw new HostError('ARG_DATE', `日期格式不对：${d}`)
+      // 保存位置：桌面版弹系统保存对话框；浏览器开发版存到数据目录的 exports/
+      let file
+      if (this.options.chooseSavePath) {
+        file = await this.options.chooseSavePath(logArchiveName())
+        if (!file) throw new HostError('USER_CANCELLED', '已取消导出')
+      } else {
+        file = this.store.file('exports', logArchiveName())
+      }
+      const data = await buildLogArchive(this, range)
+      fs.mkdirSync(path.dirname(file), { recursive: true })
+      fs.writeFileSync(file, data)
+      return { file, sizeBytes: data.length }
     },
   }
 
