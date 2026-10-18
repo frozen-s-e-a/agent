@@ -148,9 +148,10 @@ export class TaskRunner {
 
   ask(node, region, input, check) {
     const spec = NODES[node]
+    const fixed = region && spec.schema?.properties?.region ? { region } : undefined
     return this.model.call({
       task: this.state.task, node, region, role: spec.role, prompt: spec.prompt, version: spec.version, schema: spec.schema,
-      input: { anchors: this.state.anchors, ...input }, check, signal: this.signal,
+      input: { anchors: this.state.anchors, ...input }, check, fixed, signal: this.signal,
     })
   }
 
@@ -718,6 +719,13 @@ export class TaskRunner {
       }
       const controlPassed = control.passed === true || (control.explainedBy?.length > 0 && control.passed !== false)
       this.check('control', controlPassed, { region: id, attempt, detail: controlDetail })
+      if (!controlPassed && control.left === undefined && control.message) {
+        // 没算出两边的数：控制数写法有误（列名、科目），带原因重新定口径
+        failure = `控制数核对出错：${control.message}`
+        last = { kind: 'basis', failure }
+        if (n < max) this.retry('basis', id, attempt + 1, failure)
+        continue
+      }
       if (!controlPassed) {
         failure = `控制数差额 ${control.diff}：${basis.control.label} ${formatAmount(control.left)}，${controlDetail.right.label} ${formatAmount(control.right)}`
         last = { kind: 'control', failure, detail: controlDetail, result: result.result }
@@ -745,7 +753,8 @@ export class TaskRunner {
   }
 
   checkFailure(error, where) {
-    if (error instanceof ToolError && /^CHECK_/.test(error.code)) return { passed: false, message: error.message, ...(error.envelope.error.detail ?? {}) }
+    // 核对的列名、科目、表都出自模型的口径；写错了（REF_/ARG_）按核对不通过重做本区域，不让整个任务失败
+    if (error instanceof ToolError && /^(CHECK_|REF_|ARG_)/.test(error.code)) return { passed: false, message: error.message, ...(error.envelope.error.detail ?? {}) }
     return this.blockOn(error, where)
   }
 
@@ -768,7 +777,7 @@ export class TaskRunner {
       for (const q of open) {
         out[q.id] = []
         for (const [index, option] of q.options.entries()) {
-          const steps = option.steps ?? (index === q.suggest ? basis.steps : undefined)
+          const steps = option.steps?.length ? option.steps : (index === q.suggest ? basis.steps : undefined)
           if (!steps) { out[q.id].push(null); continue }
           try { out[q.id].push(impactText(await this.runSteps(steps, id))) } catch (error) {
             if (error instanceof QueryError) out[q.id].push(null)
@@ -781,7 +790,8 @@ export class TaskRunner {
     const key = `card:basis:${id}:${attempt}`
     const pending = !this.state.steps[key]
     const opened = await this.card(key, { stage: 'basis', region: id }, {
-      kind: 'basis_confirmation', title: `${r.semantics?.purpose ?? id}的口径需要确认`, blocking: false,
+      // 用途是一整段说明，放标题里太长；标题用区域的标题或范围
+      kind: 'basis_confirmation', title: `${id.split('#').at(-1)} ${r.parsed?.caption ?? r.range ?? ''} 的口径需要确认`.replace(/\s+/g, ' '), blocking: false,
       body: { questions: open.map(q => ({ id: q.id, region: id, text: q.text, options: q.options.map((o, i) => ({ label: o.label, impact: impacts[q.id]?.[i] ?? null })), suggest: q.suggest, allowText: true })) },
       actions: ['confirm'], defaultAction: 'confirm',
     }, { wait: false })
@@ -795,7 +805,7 @@ export class TaskRunner {
       const option = typeof picked === 'number' ? q.options[picked] : undefined
       r.confirmed.push({ item: q.item ?? q.text, value: option ? option.label : String(picked), basis: 'user' })
       if (option && picked !== q.suggest) {
-        if (option.steps) next = { ...next, steps: option.steps }
+        if (option.steps?.length) next = { ...next, steps: option.steps }
         else replan = true
       }
       if (!option) replan = true
@@ -902,11 +912,11 @@ export class TaskRunner {
       return
     }
     this.setStage('fill')
-    const manual = [...new Set(Object.values(s.regions).flatMap(r => [...(r.semantics?.manual ?? []), ...(r.basis?.manual ?? [])]))]
+    const manual = [...new Set(Object.values(s.regions).flatMap(manualCells))]
     const bindings = regions.map(r => ({
       region: r.region,
-      cells: (r.basis.bindings ?? []).map(b => ({ cell: b.cell, from: { result: r.result, row: b.row, column: b.column }, scale: r.basis.unit?.scale ?? '1' })),
-      manual: [...new Set([...(r.semantics?.manual ?? []), ...(r.basis?.manual ?? [])])],
+      cells: (r.basis.bindings ?? []).map(b => ({ cell: b.cell, from: { result: r.result, row: b.row, column: b.column }, scale: scaleOf(r.basis.unit?.scale) })),
+      manual: [...new Set(manualCells(r))],
     }))
     let plan = await this.step('fill_compile', { stage: 'fill' }, () => this.node('fill_compile', 'code', {}, async () => {
       const env = await this.tool('fill_compile', { task: s.task, workpaper: s.workpaper.workpaper, bindings, overwrite: [] }).catch(e => this.blockOn(e, 'fill_compile'))
@@ -1160,7 +1170,7 @@ export class TaskRunner {
         region: r.region, range: r.range, type: r.type, purpose: r.semantics?.purpose ?? null,
         // 宿主画 sheet.view 的区域覆盖层要用（《接口约定》overlay.regions）：表头行、合计行行号、人工填写的格
         headerRows: r.parsed?.headerRows ?? [], totals: (r.parsed?.totals ?? []).map(t => t.row),
-        manual: [...new Set([...(r.semantics?.manual ?? []), ...(r.basis?.manual ?? [])])],
+        manual: [...new Set(manualCells(r))],
         state: r.state, attempt: r.attempt, refs: r.refs ?? [], card: r.card ?? null, ...(r.failure ? { reason: r.failure } : {}),
       })),
       openCards: [...s.openCards],
@@ -1199,6 +1209,24 @@ function impactText(data) {
   }
   const sums = Object.entries(data.sums ?? {})
   return sums.length ? sums.map(([k, v]) => `${k}合计 ${formatAmount(v)}`).join('；') : null
+}
+
+/**
+ * 区域的人工填写格（语义和口径两处合并），只留坐标。
+ * 模型偶尔在坐标后面接说明（“应收账款!C7:C10 —— 坏账准备本期不填”），整条传给写入工具会让写入失败。
+ */
+function manualCells(r) {
+  return [...(r.semantics?.manual ?? []), ...(r.basis?.manual ?? [])]
+    .map(item => String(item).match(/^\s*((?:[^!\s]+!)?\$?[A-Z]{1,3}\$?\d+(?::\$?[A-Z]{1,3}\$?\d+)?)/)?.[1])
+    .filter(Boolean)
+}
+
+/** 写入时的换算倍数：模型常把 unit.scale 写成单位名（元、万元），写入工具要的是数。 */
+function scaleOf(scale) {
+  const text = String(scale ?? '1').trim()
+  if (/^\d+(\.\d+)?$/.test(text) && Number(text) > 0) return text
+  const units = { 元: '1', 千元: '1000', 万元: '10000', 百万元: '1000000', 亿元: '100000000' }
+  return units[text.replace(/^人民币/, '')] ?? '1'
 }
 
 function describeRight(right) {

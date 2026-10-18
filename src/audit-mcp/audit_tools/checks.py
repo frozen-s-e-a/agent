@@ -166,6 +166,10 @@ def balance_value(ctx, right):
         rows = ctx.store.db.execute('SELECT %s, %s FROM %s WHERE TRIM(CAST(%s AS VARCHAR)) = ?' % (quoted(code), quoted(column), sql_name(table), quoted(code)), [account]).fetchall()
         if not rows and right.get('children'):
             rows = ctx.store.db.execute('SELECT %s, %s FROM %s WHERE CAST(%s AS VARCHAR) LIKE ?' % (quoted(code), quoted(column), sql_name(table), quoted(code)), [account + '_%']).fetchall()
+        # 模型常把科目写成名称（应收账款）而不是编码（1122）；编码对不上时按科目名称找
+        name = meaning_column(obj, 'account_name')
+        if not rows and name:
+            rows = ctx.store.db.execute('SELECT %s, %s FROM %s WHERE TRIM(CAST(%s AS VARCHAR)) = ?' % (quoted(code), quoted(column), sql_name(table), quoted(name)), [account]).fetchall()
     if not rows:
         raise ToolError('REF_NOT_FOUND', '资料表 %s 里没有科目 %s' % (table, account))
     if len(rows) > 1 and not right.get('children'):

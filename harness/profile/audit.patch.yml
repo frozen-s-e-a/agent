@@ -191,6 +191,8 @@
         recompute: !!js process.env.AUDIT_RECOMPUTE !== 'off'
         # 明显微小错报临界值，差异不超过它时记录后通过；项目档案没有时按 0
         trivialThreshold: !!js process.env.AUDIT_TRIVIAL_THRESHOLD || '0'
+        # 编排节点单次输出的上限，与模型配置一致；按角色的设参不超过它
+        maxOutput: !!js Number(process.env.AUDIT_LLM_MAX_TOKENS || 8192)
 
     # ---------- 内置审计工具服务 ----------
     - id: mcp-audit

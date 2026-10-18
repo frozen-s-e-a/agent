@@ -121,6 +121,9 @@ export class AppHost {
         baseURL: settings.baseUrl,
         apiKey: this.store.secrets.model,
         model: settings.model,
+        // 推理模型的思考也算输出，默认 8192 不够编排的口径节点用；settings.save 可改，界面还没有入口
+        maxTokens: settings.maxTokens,
+        contextWindow: settings.contextWindow,
         python: this.python,
         pythonPath: this.options.pythonPath,
         confirmTools: confirmTools(settings.mcp),
@@ -451,7 +454,7 @@ export class AppHost {
   commands = {
     'settings.get'() {
       const s = this.store.settings
-      return { baseUrl: s.baseUrl, model: s.model, models: s.models ?? [], hasKey: Boolean(this.store.secrets.model), connected: this.modelReady() }
+      return { baseUrl: s.baseUrl, model: s.model, models: s.models ?? [], maxTokens: s.maxTokens ?? null, contextWindow: s.contextWindow ?? null, hasKey: Boolean(this.store.secrets.model), connected: this.modelReady() }
     },
     async 'settings.save'(p) {
       const s = this.store.settings
@@ -460,6 +463,12 @@ export class AppHost {
         if (this.testedModels.has(s.baseUrl)) s.models = this.testedModels.get(s.baseUrl)
       }
       if (p.model !== undefined) s.model = p.model
+      for (const key of ['maxTokens', 'contextWindow']) {
+        if (p[key] === undefined) continue
+        if (p[key] !== null && !(Number.isInteger(p[key]) && p[key] > 0)) throw new HostError('ARG_INVALID', `${key} 应为正整数`)
+        if (p[key] === null) delete s[key]
+        else s[key] = p[key]
+      }
       this.store.saveSettings()
       await this.restartHarness()
       return this.commands['settings.get'].call(this)
