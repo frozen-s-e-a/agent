@@ -719,6 +719,13 @@ export class TaskRunner {
       }
       const controlPassed = control.passed === true || (control.explainedBy?.length > 0 && control.passed !== false)
       this.check('control', controlPassed, { region: id, attempt, detail: controlDetail })
+      if (!controlPassed && control.left === undefined && control.message) {
+        // 没算出两边的数：控制数写法有误（列名、科目），带原因重新定口径
+        failure = `控制数核对出错：${control.message}`
+        last = { kind: 'basis', failure }
+        if (n < max) this.retry('basis', id, attempt + 1, failure)
+        continue
+      }
       if (!controlPassed) {
         failure = `控制数差额 ${control.diff}：${basis.control.label} ${formatAmount(control.left)}，${controlDetail.right.label} ${formatAmount(control.right)}`
         last = { kind: 'control', failure, detail: controlDetail, result: result.result }
@@ -746,7 +753,8 @@ export class TaskRunner {
   }
 
   checkFailure(error, where) {
-    if (error instanceof ToolError && /^CHECK_/.test(error.code)) return { passed: false, message: error.message, ...(error.envelope.error.detail ?? {}) }
+    // 核对的列名、科目、表都出自模型的口径；写错了（REF_/ARG_）按核对不通过重做本区域，不让整个任务失败
+    if (error instanceof ToolError && /^(CHECK_|REF_|ARG_)/.test(error.code)) return { passed: false, message: error.message, ...(error.envelope.error.detail ?? {}) }
     return this.blockOn(error, where)
   }
 
