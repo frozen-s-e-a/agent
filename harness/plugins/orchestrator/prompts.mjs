@@ -1,11 +1,16 @@
 // 编排节点的提示词和输出 schema。改动任何一项都要升 version，并先跑评估集（设计 15.2）。
 // 输出 schema 同时作为 submit 工具的参数 schema，字段与《接口约定》第三、五节一致。
 
-const BASIS = { type: 'string', enum: ['user', 'confirmed', 'template', 'profile', 'data', 'inferred'] }
+// 漏写依据时按“推断”记（最保守），不为此重做；校验时补上（schema.mjs 的 default）
+const BASIS = { type: 'string', enum: ['user', 'confirmed', 'template', 'profile', 'data', 'inferred'], default: 'inferred' }
 // 底稿坐标：可带工作表名，单格或区域
 const CELL_REF = '^(?:[^!]+!)?\\$?[A-Z]{1,3}\\$?[0-9]+(?::\\$?[A-Z]{1,3}\\$?[0-9]+)?$'
 // 资料表类型，与审计工具 data_import 的 kind 一致
 const TABLE_KINDS = ['trial_balance', 'journal', 'bank_statement', 'ledger_detail', 'aging', 'contract', 'other']
+// 列含义，与审计工具 data.py 的 MEANINGS 一致；核对和导入按这些键找列（模型曾写成 closing_balance，控制数找不到期末列）
+const FIELD_MEANINGS = ['voucher_date', 'voucher_no', 'account_code', 'account_name', 'summary', 'debit', 'credit', 'opening', 'closing', 'direction',
+  'counterparty', 'customer', 'supplier', 'amount', 'balance', 'date', 'invoice_no', 'invoice_date', 'contract_no', 'quantity', 'price',
+  'inflow', 'outflow', 'currency', 'department', 'project', 'other']
 const STEP = {
   type: 'object',
   required: ['sql', 'inputs', 'purpose'],
@@ -72,8 +77,8 @@ export const NODES = {
   },
 
   field_semantics: {
-    role: 'extractor', version: 'field_semantics/2',
-    prompt: `${COMMON}\n\n任务：判断一张资料表每一列的含义和整张表的类型，表类型写在 kind（科目余额表 trial_balance、序时账 journal、银行流水 bank_statement、往来明细 ledger_detail、账龄表 aging、合同台账 contract、其他 other）。只根据表头、列统计和样例判断；fields 每项对应资料表里的一列，col 写列字母；meaning 用英文键（如 voucher_date、account_code、debit、credit、opening、closing、counterparty、summary），type 取 date、decimal、text、integer。`,
+    role: 'extractor', version: 'field_semantics/3',
+    prompt: `${COMMON}\n\n任务：判断一张资料表每一列的含义和整张表的类型，表类型写在 kind（科目余额表 trial_balance、序时账 journal、银行流水 bank_statement、往来明细 ledger_detail、账龄表 aging、合同台账 contract、其他 other）。只根据表头、列统计和样例判断；fields 每项对应资料表里的一列，col 写列字母；meaning 从 schema 列出的英文键里选（期初余额 opening、期末余额 closing，不要写成 opening_balance 之类），对不上的写 other；type 取 date、decimal、text、integer。`,
     schema: {
       type: 'object',
       required: ['kind', 'fields'],
@@ -81,14 +86,14 @@ export const NODES = {
         kind: { type: 'string', enum: TABLE_KINDS, description: '整张资料表的类型' },
         fields: {
           type: 'array', minItems: 1,
-          items: { type: 'object', required: ['col', 'name', 'meaning', 'type', 'basis'], properties: { col: { type: 'string' }, name: { type: 'string' }, meaning: { type: 'string' }, type: { type: 'string', enum: ['date', 'decimal', 'text', 'integer'] }, basis: BASIS } },
+          items: { type: 'object', required: ['col', 'name', 'meaning', 'type', 'basis'], properties: { col: { type: 'string' }, name: { type: 'string' }, meaning: { type: 'string', enum: FIELD_MEANINGS }, type: { type: 'string', enum: ['date', 'decimal', 'text', 'integer'] }, basis: BASIS } },
         },
       },
     },
   },
 
   basis: {
-    role: 'planner', version: 'basis/1',
+    role: 'planner', version: 'basis/2',
     prompt: `${COMMON}\n\n任务：为一个待填区域定口径，并用受控查询表达计算。每个口径要素都要给出，并写明依据：数据来源、期间、范围（含排除条件和理由）、金额与方向、分组与对应、单位与精度、控制数。计算只写 SQL，不写任何数字结果；数字由代码执行查询得到。bindings 说明结果的哪一行哪一列写进底稿哪个单元格（行号从 1 起，列名为结果列名）。依据只能是推断、又会影响结果的要素，放进 inferred 作为要问用户的问题（最多 3 个）：每个选项写清含义，不是建议选项的另附该选项下的 steps。输入有 lastFailure 时，说明上次核对没通过，按原因修正。`,
     schema: {
       type: 'object',
@@ -97,7 +102,8 @@ export const NODES = {
         region: { type: 'string' },
         sources: { type: 'array', minItems: 1, items: { type: 'object', required: ['table'], properties: { table: { type: 'string' }, columns: { type: 'array', items: { type: 'string' } } } } },
         period: { type: 'object', required: ['value', 'basis'], properties: { value: { type: 'string' }, basis: BASIS, basisRef: { type: 'string' } } },
-        scope: { type: 'object', required: ['include', 'exclude', 'basis'], properties: { include: { type: 'string' }, exclude: { type: 'array', items: { type: 'object', required: ['condition', 'reason'], properties: { condition: { type: 'string' }, reason: { type: 'string' } } } }, basis: BASIS } },
+        // basis 放在前面：排除条件一长，模型常把排在最后的 basis 漏掉
+        scope: { type: 'object', required: ['basis', 'include', 'exclude'], properties: { basis: BASIS, include: { type: 'string' }, exclude: { type: 'array', items: { type: 'object', required: ['condition', 'reason'], properties: { condition: { type: 'string' }, reason: { type: 'string' } } } } } },
         amount: { type: 'object', required: ['column', 'direction', 'basis'], properties: { column: { type: 'string' }, direction: { type: 'string' }, sign: { type: 'string' }, basis: BASIS } },
         grouping: { type: 'object', required: ['description', 'basis'], properties: { description: { type: 'string' }, basis: BASIS } },
         unit: { type: 'object', required: ['scale', 'basis'], properties: { scale: { type: 'string' }, rounding: { type: 'string' }, basis: BASIS } },

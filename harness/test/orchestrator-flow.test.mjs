@@ -336,6 +336,11 @@ describe('小件', () => {
     assert.equal(errors.length, 2)
     assert.match(errors[0], /^\$\.manual\[0\] 格式不对/)
     assert.match(validate(NODES.field_semantics.schema, { kind: 'field_semantics', fields: [{ col: 'A', name: '日期', meaning: 'voucher_date', type: 'date', basis: 'data' }] })[0], /^\$\.kind 只能取/)
+    assert.match(validate(NODES.field_semantics.schema, { kind: 'trial_balance', fields: [{ col: 'F', name: '期末余额', meaning: 'closing_balance', type: 'decimal', basis: 'data' }] })[0], /^\$\.fields\[0\]\.meaning 只能取/)
+    // 漏写的依据按推断补上，不为此重做
+    const scope = { include: '1122', exclude: [] }
+    assert.deepEqual(validate(NODES.basis.schema.properties.scope, scope), [])
+    assert.equal(scope.basis, 'inferred')
   })
 
   test('输出到上限被截断：说明截断，重做时给到模型的输出上限；区域编号由编排填上', async () => {

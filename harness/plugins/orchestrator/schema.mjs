@@ -1,4 +1,4 @@
-// 模型输出的结构校验：支持编排用到的 JSON Schema 子集（type、properties、required、items、enum、pattern、minItems、maxItems）。
+// 模型输出的结构校验：支持编排用到的 JSON Schema 子集（type、properties、required、items、enum、pattern、minItems、maxItems、default）。
 // 返回错误清单，每条带路径，直接回填给模型修正。
 
 const typeOf = value => value === null ? 'null' : Array.isArray(value) ? 'array' : Number.isInteger(value) ? 'integer' : typeof value
@@ -24,6 +24,8 @@ export function validate(schema, value, path = '$', errors = []) {
   }
   if (typeOf(value) === 'object') {
     for (const key of schema.required ?? []) {
+      // 带 default 的必填字段漏写时直接补上（会改动 value），不算错误
+      if (value[key] === undefined && schema.properties?.[key]?.default !== undefined) value[key] = structuredClone(schema.properties[key].default)
       if (value[key] === undefined) errors.push(`${path}.${key} 缺失`)
     }
     for (const [key, sub] of Object.entries(schema.properties ?? {})) {
