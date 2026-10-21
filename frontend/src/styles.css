@@ -945,6 +945,11 @@ button {
 .pending-stack > * {
   flex-shrink: 0;
 }
+/* 内容在卡片里滚，标题和提交按钮一直看得见 */
+.pending-stack .card-body {
+  max-height: 44vh;
+  overflow: auto;
+}
 .pending-stack .card {
   box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(15, 23, 42, 0.06);
 }

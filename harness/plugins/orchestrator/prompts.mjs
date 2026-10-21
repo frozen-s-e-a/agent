@@ -93,8 +93,8 @@ export const NODES = {
   },
 
   basis: {
-    role: 'planner', version: 'basis/4',
-    prompt: `${COMMON}\n\n任务：为一个待填区域定口径，并用受控查询表达计算。每个口径要素都要给出，并写明依据：数据来源、期间、范围（含排除条件和理由）、金额与方向、分组与对应、单位与精度、控制数。计算只写 SQL，不写任何数字结果；数字由代码执行查询得到。SQL 里的列名用资料表的列名原文（如 "科目编码"），meaning 只是说明，不能当列名。control.column 和 bindings 的列名照抄 SQL 结果里的列名（AS 后面的名字），不加说明。bindings 说明结果的哪一行哪一列写进底稿哪个单元格（行号从 1 起）。依据只能是推断、又会影响结果的要素，放进 inferred 作为要问用户的问题（最多 3 个）：每个选项写清含义，不是建议选项的另附该选项下的 steps。输入有 lastFailure 时，说明上次核对没通过，按原因修正。`,
+    role: 'planner', version: 'basis/6',
+    prompt: `${COMMON}\n\n任务：为一个待填区域定口径，并用受控查询表达计算。每个口径要素都要给出，并写明依据：数据来源、期间、范围（含排除条件和理由）、金额与方向、分组与对应、单位与精度、控制数。计算只写 SQL，不写任何数字结果；数字由代码执行查询得到。SQL 里的列名用资料表的列名原文（如 "科目编码"），meaning 只是说明，不能当列名。control.column 和 bindings 的列名照抄 SQL 结果里的列名（AS 后面的名字），不加说明。bindings 说明结果的哪一行哪一列写进底稿哪个单元格（行号从 1 起）。输入里字段的 range 是资料里的实际取值范围：账龄这类按发生日期分档的计算，要用序时账里所有日期的分录（包括本期以前的），不要先按本期过滤；序时账里已有以前年度分录时，不要再把余额表期初另算一层，否则会重复或把账龄算错。控制数要和本区域合计在口径上应当相等：前五名、抽样这类只列一部分的区域，合计本来就小于总额，不能拿余额表总额核对，改用 { kind: "query", sql, inputs } 用另一种写法独立算出同一批客户的合计（查询返回一行一列）。依据只能是推断、又会影响结果的要素，放进 inferred 作为要问用户的问题（最多 3 个）：每个选项写清含义，不是建议选项的另附该选项下的 steps。输入有 lastFailure 时，说明上次核对没通过，按原因修正。`,
     schema: {
       type: 'object',
       required: ['region', 'sources', 'period', 'scope', 'amount', 'grouping', 'unit', 'control', 'steps', 'bindings', 'inferred'],
@@ -109,7 +109,7 @@ export const NODES = {
         unit: { type: 'object', required: ['scale', 'basis'], properties: { scale: { type: 'string', description: '写入前结果除以的倍数，写数字：元为 "1"，千元 "1000"，万元 "10000"' }, rounding: { type: 'string' }, basis: BASIS } },
         control: {
           type: 'object', required: ['label', 'column', 'right', 'basis'],
-          properties: { label: { type: 'string' }, column: { type: 'string', description: '本区域结果中参与控制数核对的列' }, right: { type: 'object', description: '控制数来源，如 { kind: "balance", table: "D-001", account: "1122", field: "closing" }' }, rightLabel: { type: 'string' }, basis: BASIS },
+          properties: { label: { type: 'string' }, column: { type: 'string', description: '本区域结果中参与控制数核对的列' }, right: { type: 'object', description: '控制数来源，如 { kind: "balance", table: "D-001", account: "1122", field: "closing" }；只列一部分的区域用 { kind: "query", sql, inputs }，返回一行一列' }, rightLabel: { type: 'string' }, basis: BASIS },
         },
         steps: STEPS,
         bindings: { type: 'array', items: { type: 'object', required: ['cell', 'row', 'column'], properties: { cell: { type: 'string' }, row: { type: 'integer' }, column: { type: 'string' } } } },

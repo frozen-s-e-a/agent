@@ -100,7 +100,11 @@ function UnderstandingCard({ c, body }: { c: CardState; body: UnderstandingBody 
   const { answer, busy, err } = useAnswer(c);
   const [rejecting, setRejecting] = useState(false);
   const [note, setNote] = useState("");
+  const [showAll, setShowAll] = useState(false);
+  const names = (s: string) => store.withFileNames(s);
   const open = !c.answer;
+  const answeredUnc = (c.answer?.edits as { uncertain?: Record<string, number | string> } | undefined)?.uncertain;
+  const chosen = (key: string, suggest?: number) => answeredUnc?.[key] ?? draft?.uncertain[key] ?? suggest ?? 0;
   const changes = draftChanges(draft);
   const uncertainCount = body.regions.reduce((n, r) => n + (r.uncertain?.length ?? 0), 0);
 
@@ -174,7 +178,7 @@ function UnderstandingCard({ c, body }: { c: CardState; body: UnderstandingBody 
             <div className="region-row-head" onClick={() => store.focusRegion(r.region, c.task)}>
               <span className="region-swatch" style={{ background: t.regionState.awaiting_confirmation }} />
               <b>{regionShort(r.region)}</b>
-              <span>{r.purpose}</span>
+              <span>{names(r.purpose ?? "")}</span>
               <span className="mono faint">{(rd?.range ?? r.range.split("!")[1]) + (rd?.range ? "（已改）" : "")}</span>
               {r.type && <Tag style={{ marginInlineEnd: 0 }}>{TYPE_LABEL[r.type] ?? r.type}</Tag>}
               {skipped && <Tag color="default">不需要填写</Tag>}
@@ -194,10 +198,10 @@ function UnderstandingCard({ c, body }: { c: CardState; body: UnderstandingBody 
                   <tr key={col.col}>
                     <td className="mono">{col.col}</td>
                     <td>
-                      {col.measure}
-                      {col.direction && <span className="faint">（{col.direction === "debit" ? "借方" : "贷方"}）</span>}
+                      {names(col.measure ?? "")}
+                      {col.direction && <span className="faint">（{directionLabel(col.direction)}）</span>}
                     </td>
-                    <td className="mono">{col.period ?? "—"}</td>
+                    <td className="mono">{col.period ? names(col.period) : "—"}</td>
                     <td>{col.unit ?? "—"}</td>
                     <td>
                       <Tooltip title={col.basisRef ? `来自 ${col.basisRef}` : undefined}>
@@ -220,15 +224,22 @@ function UnderstandingCard({ c, body }: { c: CardState; body: UnderstandingBody 
               return (
                 <div key={u.item} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   <div>
-                    <ExclamationCircleFilled style={{ color: "var(--warning)" }} /> {u.item}
-                    {u.why && <span className="faint">（{u.why}）</span>}
+                    <ExclamationCircleFilled style={{ color: "var(--warning)" }} /> {names(u.item)}
+                    {u.why && open && <span className="faint">（{names(u.why)}）</span>}
                   </div>
-                  <Radio.Group
-                    disabled={!open}
-                    value={v}
-                    onChange={(e) => store.updateDraft(c.card.card, (d) => void (d.uncertain[key] = e.target.value))}
-                    options={u.options.map((o, i) => ({ value: i, label: `${o}${i === u.suggest ? "（建议）" : ""}` }))}
-                  />
+                  {open || showAll ? (
+                    <Radio.Group
+                      disabled={!open}
+                      value={v}
+                      onChange={(e) => store.updateDraft(c.card.card, (d) => void (d.uncertain[key] = e.target.value))}
+                      options={u.options.map((o, i) => ({ value: i, label: `${names(o)}${i === u.suggest ? "（建议）" : ""}` }))}
+                    />
+                  ) : (
+                    // 答完只留选中的一项
+                    <div className="option selected" style={{ cursor: "default" }}>
+                      {names(u.options[Number(chosen(key, u.suggest))] ?? String(chosen(key, u.suggest)))}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -245,15 +256,34 @@ function UnderstandingCard({ c, body }: { c: CardState; body: UnderstandingBody 
           </div>
         </div>
       ))}
+      {!open && uncertainCount > 0 && (
+        <Button size="small" type="link" style={{ alignSelf: "flex-start", padding: 0 }} onClick={() => setShowAll((x) => !x)}>
+          {showAll ? "只看选中的" : "展开全部选项"}
+        </Button>
+      )}
       {c.answer?.note && <div className="muted">退回说明：{c.answer.note}</div>}
       {err && <div className="danger-text">{err}</div>}
     </CardShell>
   );
 }
 
+/**
+ * 列的借贷方向。模型写的不一定是 debit/credit，常是“借方（资产正数列示）”这类说明；
+ * 原来不是 debit 一律显示“贷方”，把借方列也标成了贷方。
+ */
+function directionLabel(d: string) {
+  if (d === "debit") return "借方";
+  if (d === "credit") return "贷方";
+  if (/^借/.test(d)) return "借方";
+  if (/^贷/.test(d)) return "贷方";
+  return d;
+}
+
 // ---------- 5.3 口径确认卡 / 5.6 一般追问 ----------
 
 function QuestionsCard({ c, questions }: { c: CardState; questions: Question[] }) {
+  const store = useAppStore();
+  const names = (s: string) => store.withFileNames(s);
   const { answer, busy, err } = useAnswer(c);
   const answered = c.answer?.edits as Record<string, number | string> | undefined;
   const isBasis = c.card.kind === "basis_confirmation";
@@ -261,57 +291,73 @@ function QuestionsCard({ c, questions }: { c: CardState; questions: Question[] }
     Object.fromEntries(questions.map((q) => [q.id, q.options.length ? (q.suggest ?? 0) : ""])),
   );
   const [other, setOther] = useState<Record<string, string>>({});
+  // 一次只问一题：答完一题自动到下一题，最后一题上才提交
+  const [step, setStep] = useState(0);
+  const [showAll, setShowAll] = useState(false);
   const open = !c.answer;
-  const ready = questions.every((q) => (vals[q.id] === "other" ? !!other[q.id]?.trim() : vals[q.id] !== "" && vals[q.id] != null));
+  const answeredOf = (q: Question) => (vals[q.id] === "other" ? !!other[q.id]?.trim() : vals[q.id] !== "" && vals[q.id] != null);
+  const ready = questions.every(answeredOf);
+  const last = step >= questions.length - 1;
+  const shown = open ? [questions[Math.min(step, questions.length - 1)]] : questions;
+  const pick = (q: Question, i: number) => {
+    setVals((v) => ({ ...v, [q.id]: i }));
+    if (!last) setTimeout(() => setStep((s) => Math.min(s + 1, questions.length - 1)), 180);
+  };
+  const submit = () =>
+    void answer("confirm", Object.fromEntries(questions.map((q) => [q.id, vals[q.id] === "other" ? other[q.id] : vals[q.id]])));
 
   return (
     <CardShell
       c={c}
+      extraHead={open && questions.length > 1 ? <span className="faint" style={{ fontSize: 12 }}>第 {step + 1} / {questions.length} 题</span> : null}
       footer={
         <>
           <span className="faint" style={{ fontSize: 12 }}>
-            {isBasis ? "影响金额由代码算出；建议项已预选" : `${questions.length} 个问题`}
+            {isBasis ? "影响金额由代码算出；建议项已预选" : questions.length > 1 ? "选好一项会自动到下一题" : "建议项已预选"}
           </span>
           <span className="spacer" />
-          <Button
-            size="small"
-            type="primary"
-            disabled={!ready}
-            loading={!!busy}
-            onClick={() =>
-              void answer(
-                "confirm",
-                Object.fromEntries(questions.map((q) => [q.id, vals[q.id] === "other" ? other[q.id] : vals[q.id]])),
-              )
-            }
-          >
-            {isBasis ? "确认口径" : "提交回答"}
-          </Button>
+          {step > 0 && (
+            <Button size="small" onClick={() => setStep((s) => s - 1)}>
+              上一题
+            </Button>
+          )}
+          {last ? (
+            <Button size="small" type="primary" disabled={!ready} loading={!!busy} onClick={submit}>
+              {isBasis ? "确认口径" : "提交回答"}
+            </Button>
+          ) : (
+            <Button size="small" type="primary" disabled={!answeredOf(questions[step])} onClick={() => setStep((s) => s + 1)}>
+              下一题
+            </Button>
+          )}
         </>
       }
     >
-      {questions.map((q, qi) => {
+      {shown.map((q) => {
+        const qi = questions.indexOf(q);
         const cur = open ? vals[q.id] : answered?.[q.id];
+        // 答完以后只留选中的那一项，其余收起
+        const visible = q.options.map((o, i) => ({ o, i })).filter(({ i }) => open || showAll || cur === i);
         return (
           <div key={q.id} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               {questions.length > 1 && <span className="faint">{qi + 1}.</span>}
-              <b>{q.text}</b>
+              <b>{names(q.text)}</b>
               {q.region && <RegionLink region={q.region} task={c.task} />}
             </div>
             {q.options.length ? (
               <>
-                {q.options.map((o, i) => (
+                {visible.map(({ o, i }) => (
                   <div
                     key={i}
                     className={`option ${cur === i ? "selected" : ""}`}
-                    onClick={() => open && setVals((v) => ({ ...v, [q.id]: i }))}
+                    onClick={() => open && pick(q, i)}
                     style={!open ? { cursor: "default", opacity: cur === i ? 1 : 0.5 } : undefined}
                   >
                     <Radio checked={cur === i} disabled={!open} />
                     <div style={{ display: "flex", flexDirection: "column", gap: 2, flex: 1 }}>
                       <span>
-                        {o.label} {i === q.suggest && <span className="suggest">建议</span>}
+                        {names(o.label)} {i === q.suggest && <span className="suggest">建议</span>}
                       </span>
                       {o.impact && <span className="impact">{o.impact}</span>}
                     </div>
@@ -345,6 +391,11 @@ function QuestionsCard({ c, questions }: { c: CardState; questions: Question[] }
           </div>
         );
       })}
+      {!open && questions.some((q) => q.options.length > 1) && (
+        <Button size="small" type="link" style={{ alignSelf: "flex-start", padding: 0 }} onClick={() => setShowAll((x) => !x)}>
+          {showAll ? "只看选中的" : "展开全部选项"}
+        </Button>
+      )}
       {err && <div className="danger-text">{err}</div>}
     </CardShell>
   );
