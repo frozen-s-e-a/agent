@@ -94,6 +94,19 @@ const copy = (from, to, filter = skip) => fs.cpSync(path.join(repo, from), path.
 
 // ---------- 0. 清空输出 ----------
 step(`打包 ${PRODUCT} ${version}（${target}）`)
+/** 删掉上次的 zip / 安装包；删不掉（比如正被打开）就在开始前报错，不要等程序文件夹重打完才失败 */
+function removeOld(file) {
+  try {
+    fs.rmSync(file, { force: true })
+  } catch (error) {
+    throw new Error(`删不掉上次的 ${path.basename(file)}（是不是正打开着？）：${error.message}`)
+  }
+  if (fs.existsSync(file)) throw new Error(`删不掉上次的 ${path.basename(file)}`)
+}
+const zipOut = path.join(outRoot, `${PRODUCT}-${version}-win-x64.zip`)
+const setupOut = path.join(outRoot, `${PRODUCT}-${version}-安装.exe`)
+if (win && args.zip) removeOld(zipOut)
+if (win && args.installer) removeOld(setupOut)
 fs.rmSync(path.join(outRoot, target), { recursive: true, force: true })
 
 // ---------- 1. 前端 ----------
@@ -219,11 +232,10 @@ if (!win) process.exit(0)
 // ---------- 7. 免安装 zip、安装包 ----------
 if (args.zip) {
   step('免安装 zip')
-  const zipOut = path.join(outRoot, `${PRODUCT}-${version}-win-x64.zip`)
-  fs.rmSync(zipOut, { force: true })
+  removeOld(zipOut)
   if (process.platform === 'win32') {
     // 系统自带的 tar 打这么多文件（超过 65535 个）、中文文件名的 zip 不可靠；用 .NET 的 ZipFile（支持 zip64 和 UTF-8 文件名），路径经环境变量传，避开命令行编码
-    const script = "Add-Type -AssemblyName System.IO.Compression.FileSystem; [IO.Compression.ZipFile]::CreateFromDirectory($env:ZIP_SRC, $env:ZIP_OUT, [IO.Compression.CompressionLevel]::Optimal, $true)"
+    const script = "if (Test-Path -LiteralPath $env:ZIP_OUT) { Remove-Item -LiteralPath $env:ZIP_OUT -Force }; Add-Type -AssemblyName System.IO.Compression.FileSystem; [IO.Compression.ZipFile]::CreateFromDirectory($env:ZIP_SRC, $env:ZIP_OUT, [IO.Compression.CompressionLevel]::Optimal, $true)"
     run('powershell', ['-NoProfile', '-NonInteractive', '-Command', script], { env: { ...process.env, ZIP_SRC: appDir, ZIP_OUT: zipOut } })
   } else {
     run('zip', ['-qry', zipOut, PRODUCT], { cwd: path.dirname(appDir) })
@@ -243,7 +255,7 @@ if (args.installer) {
     const lines = top.map(e => (e.isDirectory() ? `  RMDir /r "$INSTDIR\\${e.name}"` : `  Delete "$INSTDIR\\${e.name}"`))
     const nsh = path.join(outRoot, 'remove-files.nsh')
     fs.writeFileSync(nsh, '\uFEFF!macro RemoveAppFiles\n' + lines.join('\n') + '\n!macroend\n')
-    const setup = path.join(outRoot, `${PRODUCT}-${version}-安装.exe`)
+    const setup = setupOut
     const size = Math.ceil(bytes / 1024)
     // Linux 上的 makensis 按区域设置转换参数，路径里有中文时要 UTF-8
     const nsisEnv = process.platform === 'win32' ? process.env : { ...process.env, LC_ALL: 'C.UTF-8', LANG: 'C.UTF-8' }
