@@ -1,6 +1,7 @@
 import { CheckCircleFilled, ClockCircleFilled, StopOutlined } from "@ant-design/icons";
 import { Tag } from "antd";
-import type { ReactNode } from "react";
+import { createContext, useContext, type ReactNode } from "react";
+import { useAppStore } from "../../store/context";
 import type { CardState } from "../../store/reduce";
 
 export const KIND_LABEL: Record<string, string> = {
@@ -31,21 +32,29 @@ export function answerLabel(c: CardState): string {
   return ACTION_LABEL[c.answer.action] ?? c.answer.action;
 }
 
-export function CardShell(props: {
+/** 外层（等处理的卡片堆）给卡片的显示方式：收起成一行、点标题展开 */
+export const ShellOptions = createContext<{ compact?: boolean; onHeadClick?: () => void }>({});
+
+export function CardShell(own: {
   c: CardState;
   children: ReactNode;
   footer?: ReactNode;
   extraHead?: ReactNode;
+  /** 只显示标题行（等处理的卡片不止一张时，后面的先收起） */
   compact?: boolean;
+  onHeadClick?: () => void;
 }) {
+  const outer = useContext(ShellOptions);
+  const props = { ...outer, ...own };
   const { c } = props;
+  const store = useAppStore();
   const open = !c.answer && !c.withdrawn;
   const isResult = c.card.kind === "result_summary";
   return (
     <div className={`card ${open && !isResult ? "open" : ""} ${c.card.blocking ? "blocking" : ""}`} data-card={c.card.card}>
-      <div className="card-head">
+      <div className="card-head" onClick={props.onHeadClick} style={props.onHeadClick ? { cursor: "pointer" } : undefined}>
         <span className="card-kind">{KIND_LABEL[c.card.kind] ?? c.card.kind}</span>
-        <span className="card-title">{c.card.title}</span>
+        <span className="card-title">{store.withFileNames(c.card.title)}</span>
         {props.extraHead}
         {open && !isResult && (
           <Tag color="warning" icon={<ClockCircleFilled />} style={{ marginInlineEnd: 0 }}>
@@ -60,7 +69,7 @@ export function CardShell(props: {
         )}
       </div>
       {!props.compact && <div className="card-body">{props.children}</div>}
-      {open && props.footer && <div className="card-foot">{props.footer}</div>}
+      {open && !props.compact && props.footer && <div className="card-foot">{props.footer}</div>}
     </div>
   );
 }
