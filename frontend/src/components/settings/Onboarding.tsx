@@ -1,8 +1,9 @@
 // 首次使用：先接模型（测试通过才能往下），再新建项目（回放模式下也可以先看示例项目）。
-import { CheckCircleFilled, FolderOpenOutlined } from "@ant-design/icons";
+import { CheckCircleFilled } from "@ant-design/icons";
 import { Button, Input, Steps } from "antd";
 import { useState } from "react";
 import { useAppStore } from "../../store/context";
+import { FolderInput, folderName } from "../layout/NewProject";
 import { ModelForm } from "./Settings";
 
 export function Onboarding({ onDone, startAt = 0, sample = true }: { onDone: () => void; startAt?: number; sample?: boolean }) {
@@ -46,12 +47,7 @@ export function Onboarding({ onDone, startAt = 0, sample = true }: { onDone: () 
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <b>新建项目</b>
               <Input placeholder="项目名称，比如：华东示例制造 2025年报审计" value={name} onChange={(e) => setName(e.target.value)} />
-              <Input
-                placeholder="项目文件夹，底稿和资料放在这里"
-                prefix={<FolderOpenOutlined className="faint" />}
-                value={folder}
-                onChange={(e) => setFolder(e.target.value)}
-              />
+              <FolderInput value={folder} onChange={setFolder} onPicked={(f) => !name.trim() && setName(folderName(f))} />
               <div className="faint" style={{ fontSize: 12 }}>
                 原文件只读；产出写到这个文件夹下的「输出」。
               </div>

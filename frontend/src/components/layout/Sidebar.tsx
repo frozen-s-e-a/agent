@@ -14,12 +14,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { OutputFile, ProjectFile, SessionSummary } from "../../protocol/types";
 import { relTime } from "../../lib/format";
 import { useApp, useAppStore } from "../../store/context";
+import { NewProjectModal } from "./NewProject";
 
 export function Sidebar() {
   const store = useAppStore();
   const ui = useApp((s) => s.ui);
   const project = ui.projects.find((p) => p.project === ui.project);
   const [renaming, setRenaming] = useState<{ id: string; title: string } | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [renamingProject, setRenamingProject] = useState<string | null>(null);
 
   return (
     <aside className="sidebar">
@@ -42,7 +45,22 @@ export function Sidebar() {
             { key: "_remove", icon: <DeleteOutlined />, label: "从应用中移除（不删文件）", danger: true },
           ],
           onClick: ({ key }) => {
-            if (key === "_new") return store.setUi({ page: "main" }), Modal.info({ title: "新建项目", content: "选择一个本机文件夹作为项目目录（Electron 外壳里弹出系统选择框）。" });
+            if (key === "_new") return setCreating(true);
+            if (key === "_rename" && project) return setRenamingProject(project.name);
+            if (key === "_remove" && project)
+              return Modal.confirm({
+                title: `从应用中移除「${project.name}」？`,
+                content: "项目文件夹和里面的文件都不删，之后可以用同一个文件夹重新建项目。",
+                okText: "移除",
+                okButtonProps: { danger: true },
+                cancelText: "取消",
+                onOk: async () => {
+                  await store.host.request("project.remove", { project: project.project });
+                  const rest = store.get().ui.projects.filter((p) => p.project !== project.project);
+                  store.setUi({ projects: rest, project: null, session: null, sessions: [], tabs: [], activeTab: null });
+                  if (rest[0]) await store.switchProject(rest[0].project);
+                },
+              });
             if (key.startsWith("_")) return;
             void store.switchProject(key);
           },
@@ -89,6 +107,22 @@ export function Sidebar() {
         }}
       >
         <Input value={renaming?.title} onChange={(e) => setRenaming((r) => r && { ...r, title: e.target.value })} />
+      </Modal>
+      <NewProjectModal open={creating} onClose={() => setCreating(false)} />
+      <Modal
+        title="重命名项目"
+        open={renamingProject !== null}
+        onCancel={() => setRenamingProject(null)}
+        okButtonProps={{ disabled: !renamingProject?.trim() }}
+        onOk={async () => {
+          if (project && renamingProject?.trim()) {
+            const p = await store.host.request("project.rename", { project: project.project, name: renamingProject.trim() });
+            store.setUi((ui) => ({ projects: ui.projects.map((x) => (x.project === p.project ? p : x)) }));
+          }
+          setRenamingProject(null);
+        }}
+      >
+        <Input value={renamingProject ?? ""} onChange={(e) => setRenamingProject(e.target.value)} />
       </Modal>
     </aside>
   );
@@ -210,7 +244,7 @@ function FileList() {
           onClick={() =>
             store.host.addFiles
               ? picker.current?.click()
-              : Modal.info({ title: "添加资料", content: "在 Electron 外壳里弹出系统文件选择框，选中的文件用 files.add 加入项目。" })
+              : Modal.info({ title: "添加资料", content: "回放模式下不能添加资料。" })
           }
         >
           添加资料

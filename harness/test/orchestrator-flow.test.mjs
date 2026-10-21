@@ -5,10 +5,12 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { describe, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
-import { mergeSamples } from '../plugins/orchestrator/flow.mjs'
-import { fitInput } from '../plugins/orchestrator/model.mjs'
+import { impactText, mergeSamples, newTaskState } from '../plugins/orchestrator/flow.mjs'
+import { createModel, fitInput } from '../plugins/orchestrator/model.mjs'
+import { NODES } from '../plugins/orchestrator/prompts.mjs'
+import { validate } from '../plugins/orchestrator/schema.mjs'
 import { autoAnswer, makeKit } from './orchestrator-kit.mjs'
-import { R5, R6 } from './scenarios/receivables.mjs'
+import { FILES, R5, R6 } from './scenarios/receivables.mjs'
 
 const REPLAY = fileURLToPath(new URL('../../docs/实现设计/样例/事件回放-底稿填写.json', import.meta.url))
 const types = (events, type) => events.filter(e => e.type === type)
@@ -133,6 +135,17 @@ describe('检查点与续跑', () => {
 })
 
 describe('失败矩阵', () => {
+  test('只有底稿没有资料：不空跑定口径，任务挂起并说明', async () => {
+    const kit = makeKit()
+    autoAnswer(kit.cards)
+    const runner = kit.create({ files: [FILES.workpaper] })
+    await runner.start()
+    assert.equal(runner.state.status, 'blocked')
+    assert.equal(runner.state.blocked.where, 'data')
+    assert.match(runner.state.blocked.why, /没有可以取数的资料/)
+    assert.equal(kit.modelCalls.filter(c => c.node === 'basis').length, 0)
+  })
+
   test('区域语义校验不通过：带具体错误重新识别', async () => {
     const kit = makeKit({ options: { semanticsFailures: 1 } })
     autoAnswer(kit.cards)
@@ -295,6 +308,9 @@ describe('任务中补充与重跑', () => {
     assert.ok(runner.state.anchors.some(a => a.text === '账龄改从发票日期起算' && a.basis === 'user'))
     const last = kit.modelCalls.filter(c => c.node === 'basis').at(-1)
     assert.equal(last.input.region.id, R5)
+    // 重跑后另存的新成果里，没重跑的区域也要写上
+    const compiles = kit.toolCalls.filter(c => c.tool === 'fill_compile')
+    assert.deepEqual(compiles.at(-1).args.bindings.map(b => b.region).sort(), [R5, R6].sort())
     assert.throws(() => runner.rerun({ regions: ['W-999#R1'] }), /unknown region/)
   })
 
@@ -324,6 +340,76 @@ describe('小件', () => {
     assert.equal(merged.uncertain[0].suggest, 0)
     assert.equal(merged.columns[0].confidence, 'low')
     assert.deepEqual(mergeSamples([base, base, base]).uncertain, [])
+  })
+
+  test('对话前文作为推断的锚点放在用户原话前面', () => {
+    const s = newTaskState({ task: 'T-1', sessionId: 's', text: '需要', context: '把科目余额表的科目编码、名称、期末余额写进新 Excel', files: ['F-1'] })
+    assert.deepEqual(s.anchors.map(a => [a.text, a.basis]), [['把科目余额表的科目编码、名称、期末余额写进新 Excel', 'inferred'], ['需要', 'user']])
+    assert.equal(newTaskState({ task: 'T-2', sessionId: 's', text: '填底稿' }).anchors.length, 1)
+  })
+
+  test('口径卡影响金额取名称列和金额列，跳过序号', () => {
+    const data = { columns: [{ name: '序号' }, { name: '账龄' }, { name: '金额' }, { name: 'sort_key' }], head: [[1, '1年以内', '1200000.00', 1], [2, '1-2年', '435000.00', 2]] }
+    assert.equal(impactText(data, '金额'), '1年以内 1,200,000.00；1-2年 435,000.00')
+    assert.equal(impactText(data), '1年以内 1,200,000.00；1-2年 435,000.00')
+    // 控制数列每行都一样（前五名表每行带着应收总额）时改用随行变化的金额列
+    const top = { columns: [{ name: '客户' }, { name: '期末余额' }, { name: '应收合计' }], head: [['甲公司', '500000.00', '1835000.00'], ['乙公司', '400000.00', '1835000.00']] }
+    assert.equal(impactText(top, '应收合计'), '甲公司 500,000.00；乙公司 400,000.00')
+  })
+
+  test('多次采样只是措辞不同时不算不一致', () => {
+    const col = (measure, period, unit, direction) => ({ region: R5, type: 'fixed_table', purpose: 'x', manual: [], uncertain: [], columns: [{ col: 'B', measure, period, unit, direction, basis: 'template', confidence: 'high' }] })
+    const a = col('期末余额－账面余额（按账龄段划分）', '2025-12-31', '元', '借方（资产正数列示）')
+    const b = col('应收账款期末账面余额，按账龄档位归集', '2025年末', '元', 'debit')
+    const c = col('账面余额', '2025-12-31（2025年度期末）', null, '借')
+    assert.deepEqual(mergeSamples([a, b, c]).uncertain, [])
+    const d = col('期初余额', '2025-01-01', '元', '借方')
+    const merged = mergeSamples([a, b, d])
+    assert.equal(merged.uncertain.length, 1)
+    assert.equal(merged.uncertain[0].options.length, 2)
+    assert.match(merged.uncertain[0].why, /期间/)
+  })
+
+  test('结构校验拦下真实模型常见的写法：人工格写成说明、资料类型写成节点名', () => {
+    const semantics = NODES.region_semantics.schema
+    const base = { region: R5, type: 'fixed_table', purpose: 'x', columns: [], uncertain: [] }
+    assert.deepEqual(validate(semantics, { ...base, manual: ['应收账款!E7', '应收账款!C7:C10', 'E8'] }), [])
+    const errors = validate(semantics, { ...base, manual: ['应收账款!A15=1 … A19=5', '审计说明正文由人工撰写'] })
+    assert.equal(errors.length, 2)
+    assert.match(errors[0], /^\$\.manual\[0\] 格式不对/)
+    assert.match(validate(NODES.field_semantics.schema, { kind: 'field_semantics', fields: [{ col: 'A', name: '日期', meaning: 'voucher_date', type: 'date', basis: 'data' }] })[0], /^\$\.kind 只能取/)
+    assert.match(validate(NODES.field_semantics.schema, { kind: 'trial_balance', fields: [{ col: 'F', name: '期末余额', meaning: 'closing_balance', type: 'decimal', basis: 'data' }] })[0], /^\$\.fields\[0\]\.meaning 只能取/)
+    // 漏写的依据按推断补上，不为此重做
+    const scope = { include: '1122', exclude: [] }
+    assert.deepEqual(validate(NODES.basis.schema.properties.scope, scope), [])
+    assert.equal(scope.basis, 'inferred')
+  })
+
+  test('输出到上限被截断：说明截断，重做时给到模型的输出上限；区域编号由编排填上', async () => {
+    const seen = []
+    const llm = {
+      async *stream(options) {
+        seen.push(options.maxTokens)
+        if (seen.length === 1) {
+          yield { type: 'reasoning-delta', index: 0, text: '想'.repeat(50) }
+          yield { type: 'finish', reason: { kind: 'max-tokens' } }
+          return
+        }
+        yield { type: 'tool-call-delta', index: 0, id: 'c1', name: 'submit', argumentsDelta: JSON.stringify({ ok: true }) }
+        yield { type: 'finish', reason: { kind: 'tool-calls' } }
+      },
+    }
+    const records = []
+    const model = createModel({ llm, provider: 'p', model: 'm', maxOutput: 12000, store: { appendCall: (_task, record) => records.push(record) } })
+    const value = await model.call({ task: 'T', node: 'region_semantics', role: 'extractor', fixed: { region: 'W-001#R1' }, prompt: 'x', version: 'v', input: {}, schema: { type: 'object', required: ['ok'], properties: { ok: { type: 'boolean' } } } })
+    assert.deepEqual(value, { ok: true, region: 'W-001#R1' })
+    assert.deepEqual(seen, [8000, 12000])
+    assert.match(records[0].errors[0], /8000 tokens 上限被截断.*思考用了 50 字/)
+    assert.equal(records[0].finish, 'max-tokens')
+    // 配置的上限比角色设参小时不超过它
+    seen.length = 0
+    await createModel({ llm, provider: 'p', model: 'm', maxOutput: 4096 }).call({ task: 'T', node: 'basis', role: 'planner', prompt: 'x', version: 'v', input: {}, schema: { type: 'object' } })
+    assert.deepEqual(seen, [4096, 4096])
   })
 
   test('输入超预算时裁剪数组，固定锚点不动，并记录裁剪', () => {

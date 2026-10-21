@@ -1,10 +1,12 @@
 // 应用入口：主题、状态、宿主连接。
 // 宿主两种：真实宿主（app-host，接 Harness）和假宿主（回放样例事件，开发界面用）。界面代码不分。
+// 真实宿主在桌面版里走 Electron IPC，在浏览器开发版里走 HTTP。
 import { App as AntApp, ConfigProvider, theme as antTheme } from "antd";
 import zhCN from "antd/locale/zh_CN";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FakeHost } from "./host/fake/FakeHost";
 import { HttpHost } from "./host/http/HttpHost";
+import { IpcHost } from "./host/desktop/IpcHost";
 import type { HostClient } from "./host/client";
 import { cssVars, DARK, LIGHT } from "./lib/tokens";
 import { AppStore, useStore } from "./store/appStore";
@@ -20,7 +22,15 @@ const params = new URLSearchParams(location.search);
 const HOST_KIND = params.get("host") ?? (import.meta.env.MODE === "real" || import.meta.env.PROD ? "real" : "fake");
 
 export function App() {
-  const host = useMemo<HostClient>(() => (HOST_KIND === "real" ? new HttpHost() : new FakeHost({ connected: !params.has("onboarding") })), []);
+  const host = useMemo<HostClient>(
+    () =>
+      HOST_KIND !== "real"
+        ? new FakeHost({ connected: !params.has("onboarding") })
+        : window.auditDesktop
+          ? new IpcHost(window.auditDesktop)
+          : new HttpHost(),
+    [],
+  );
   const store = useMemo(() => new AppStore(host), [host]);
   if (import.meta.env.DEV) Object.assign(window, { __store: store, __host: host });
   const ui = useStore(store, (s) => s.ui);

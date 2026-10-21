@@ -50,6 +50,7 @@ export const Config = Schema.object({
   maxReidentify: Schema.natural().default(2),
   trivialThreshold: Schema.string().default('0'),
   inputBudget: Schema.natural().default(4000),
+  maxOutput: Schema.natural().default(8192),
   maxRows: Schema.natural().default(5000),
 })
 
@@ -59,7 +60,7 @@ function invalidParams(message) {
 
 export function apply(ctx, config) {
   const store = new Store(path.resolve(config.stateDir))
-  const model = createModel({ llm: ctx.llm, provider: config.provider, model: config.model, store, inputBudget: config.inputBudget })
+  const model = createModel({ llm: ctx.llm, provider: config.provider, model: config.model, store, inputBudget: config.inputBudget, maxOutput: config.maxOutput })
   const tools = createToolCaller({ tools: ctx.tools, server: config.server })
   const notify = (method, params) => ctx.auditBridge.notify(method, params)
   const runners = new Map()
@@ -85,12 +86,13 @@ export function apply(ctx, config) {
     return runner
   }
 
-  function createTask({ sessionId, text, files = [], message }) {
+  function createTask({ sessionId, text, context, files = [], message }) {
     if (typeof sessionId !== 'string' || !sessionId) throw invalidParams('sessionId is required')
     if (typeof text !== 'string' || !text.trim()) throw invalidParams('text is required')
     if (!Array.isArray(files)) throw invalidParams('files must be an array')
+    if (context !== undefined && typeof context !== 'string') throw invalidParams('context must be a string')
     const task = store.newTaskId()
-    const state = newTaskState({ task, sessionId, text, files, message })
+    const state = newTaskState({ task, sessionId, text, context, files, message })
     store.save(state)
     const runner = runnerOf(task)
     runner.emit('task.created', { ...(message ? { message } : {}), text, files: state.files })
@@ -101,11 +103,18 @@ export function apply(ctx, config) {
   // ---------- 模型可见的工具：在对话中登记底稿任务 ----------
   ctx.effect(() => ctx.tools.register({
     name: 'audit_task_start',
-    description: '登记一个底稿任务并在后台按固定流程完成：识别底稿、导入资料、定口径、计算核对、写入新文件。用户要求填写底稿、或要按底稿出结果时调用。text 原样抄录用户这一轮的原话，不改写；files 为相关的资料和底稿编号（F-…）。登记后任务在后台进行，进度和需要用户确认的卡片会显示在界面上，你只需告诉用户任务已开始。',
+    description: [
+      '登记一个底稿任务并在后台按固定流程完成：识别底稿、导入资料、定口径、计算核对、写入新文件。',
+      '只在用户要把数据填进一份现成的底稿（有表头、待填空格的审计工作底稿）时调用，而且要同时有底稿和取数用的资料（科目余额表、序时账等）。',
+      '只是提取列、筛选、汇总、把结果另存成新的 Excel，或者只给了一份资料、没有要填的底稿时，不要调用，直接用其他审计工具完成。',
+      'text 原样抄录用户这一轮的原话，不改写；用户这一轮只是答复（如“需要”“好的”“就这样”）时，在 context 里用一两句话写清用户要做什么、用哪些文件，取自前面的对话。',
+      'files 为相关的资料和底稿编号（F-…）。登记后任务在后台进行，进度和需要用户确认的卡片会显示在界面上，你只需告诉用户任务已开始。',
+    ].join(''),
     parameters: {
       type: 'object',
       properties: {
         text: { type: 'string', description: '用户原话' },
+        context: { type: 'string', description: '用户这一轮只是答复时，前面对话里用户要做的事；否则不填' },
         files: { type: 'array', items: { type: 'string' }, description: '资料和底稿的 F- 编号' },
       },
       required: ['text'],
@@ -116,7 +125,7 @@ export function apply(ctx, config) {
     },
     async execute(args, exec) {
       if (!exec.agent) throw new Error('audit_task_start 只能在对话中调用')
-      return createTask({ sessionId: String(exec.agent.session.id), text: args.text, files: args.files ?? [] })
+      return createTask({ sessionId: String(exec.agent.session.id), text: args.text, context: args.context, files: args.files ?? [] })
     },
   }), 'audit-orchestrator.tool')
 

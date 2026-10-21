@@ -14,7 +14,7 @@ import {
 } from "@ant-design/icons";
 import { Alert, Button, Checkbox, DatePicker, Drawer, Empty, Form, Input, Modal, Radio, Segmented, Select, Switch, Tag, Tooltip } from "antd";
 import { useEffect, useState } from "react";
-import type { AppInfo, ConnectionTestResult, McpServer, McpServerConfig, McpTestResult, McpTool, PrivacyStatus, Settings as SettingsT } from "../../protocol/types";
+import type { AppInfo, ConnectionTestResult, HostError, McpServer, McpServerConfig, McpTestResult, McpTool, PrivacyStatus, Settings as SettingsT } from "../../protocol/types";
 import { useApp, useAppStore } from "../../store/context";
 
 type Group = "model" | "mcp" | "privacy" | "about";
@@ -550,6 +550,8 @@ function AboutSettings() {
       try {
         const r = await store.host.request("logs.export", { from: range[0], to: range[1], includeContent: content });
         Modal.success({ title: "日志已导出", content: `${r.file}（${(r.sizeBytes / 1e6).toFixed(1)} MB）。API Key 和令牌不在日志里。` });
+      } catch (e) {
+        if ((e as HostError).code !== "USER_CANCELLED") Modal.error({ title: "导出失败", content: (e as Error).message });
       } finally {
         setBusy(false);
       }

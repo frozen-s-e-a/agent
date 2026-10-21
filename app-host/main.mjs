@@ -6,6 +6,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
 import { AppHost } from './host.mjs'
+import { installFileLog } from './logs.mjs'
 import { createServer } from './server.mjs'
 
 const { values } = parseArgs({
@@ -18,6 +19,7 @@ const { values } = parseArgs({
 })
 
 const here = path.dirname(fileURLToPath(import.meta.url))
+installFileLog(path.join(path.resolve(values.data), 'logs'))
 const host = new AppHost({ dataDir: values.data, python: values.python, pythonPath: values['python-path'] })
 const server = createServer(host, { staticDir: path.join(here, '..', 'frontend', 'dist') })
 server.listen(Number(values.port), '127.0.0.1', () => {

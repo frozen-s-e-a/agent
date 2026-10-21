@@ -231,6 +231,10 @@ class FillTests(unittest.TestCase):
         control = self.p.ok('check_control', {'region': self.W + '#R1', 'left': {'result': self.R1, 'column': '金额', 'op': 'sum'},
                                               'right': {'kind': 'balance', 'table': self.D1, 'account': '1122', 'field': 'closing'}, 'tolerance': '0'})
         self.assertEqual((control['passed'], control['left'], control['right']), (True, '1835000.00', '1835000.00'))
+        # 科目写成名称、field 写成中文列名时也认
+        by_name = self.p.ok('check_control', {'region': self.W + '#R1', 'left': {'result': self.R1, 'column': '金额', 'op': 'sum'},
+                                              'right': {'kind': 'balance', 'table': self.D1, 'account': '应收账款', 'field': '期末余额'}, 'tolerance': '0'})
+        self.assertEqual((by_name['passed'], by_name['right']), (True, '1835000.00'))
         conservation = self.p.ok('check_conservation', {'from': self.D2, 'result': self.R1, 'amount': '金额', 'excluded': None,
                                                         'sourceAmount': '"借方金额" - "贷方金额"', 'sourceFilter': "\"科目编码\" = '1122'"})
         self.assertTrue(conservation['passed'])

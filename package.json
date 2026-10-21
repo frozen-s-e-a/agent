@@ -11,8 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node --test tests/unit/*.test.mjs",
     "start": "electron .",
-    "demo:agent": "node scripts/offline-demo.mjs",
-    "package:test": "node scripts/package.mjs"
+    "demo:agent": "node scripts/offline-demo.mjs"
   },
   "dependencies": {
     "lucide-react": "0.468.0",

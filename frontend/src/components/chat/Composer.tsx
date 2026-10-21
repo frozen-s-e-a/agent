@@ -16,8 +16,9 @@ import { regionShort, since } from "../../lib/format";
 import { REGION_STATE_LABEL } from "../../lib/tokens";
 import type { ChatMode } from "../../store/appStore";
 import { useApp, useAppStore, useSession } from "../../store/context";
-import { isOpen, type ChatItem, type SessionState } from "../../store/reduce";
+import { isOpen, type CardState, type ChatItem, type SessionState } from "../../store/reduce";
 import { CardView } from "../cards/Cards";
+import { ShellOptions } from "../cards/CardShell";
 import { Item } from "./ChatThread";
 
 export const COMPOSER_RESERVE = 150; // 表格底部留白
@@ -36,14 +37,26 @@ export function ComposerZone({ sheetOpen }: { sheetOpen: boolean }) {
   return (
     <div className="composer-zone" style={dockStyle}>
       {floating && s && !ui.historyOpen && <FloatPanel s={s} hasPending={pending.length > 0} />}
-      {pending.length > 0 && (
-        <div className="pending-stack">
-          {pending.map((c) => (
-            <CardView key={c.card.card} c={c} />
-          ))}
-        </div>
-      )}
+      {pending.length > 0 && <PendingStack pending={pending} />}
       <Composer sheetOpen={sheetOpen} />
+    </div>
+  );
+}
+
+/** 等处理的卡片：一次只展开一张，其余收成一行标题，点标题换着处理，不把表盖住 */
+function PendingStack({ pending }: { pending: CardState[] }) {
+  const [active, setActive] = useState<string | null>(null);
+  const current = pending.find((c) => c.card.card === active) ?? pending[0];
+  return (
+    <div className="pending-stack">
+      {pending.map((c) => (
+        <ShellOptions.Provider
+          key={c.card.card}
+          value={c === current ? {} : { compact: true, onHeadClick: () => setActive(c.card.card) }}
+        >
+          <CardView c={c} />
+        </ShellOptions.Provider>
+      ))}
     </div>
   );
 }

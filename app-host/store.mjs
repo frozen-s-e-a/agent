@@ -2,7 +2,8 @@
 //
 // <数据目录>/
 //   settings.json            模型地址、模型名、外部 MCP 服务配置（不含令牌原文）
-//   secrets.json             API Key 和 MCP 令牌（只在本机，不回传前端；Windows 版换成 DPAPI 加密）
+//   secrets.json             API Key 和 MCP 令牌（只在本机，不回传前端）。浏览器开发版用明文（权限 600）；
+//                            桌面版传入 secretBox，存成 secrets.enc（Windows 上由 DPAPI 加密），旧的明文文件迁移后删除
 //   projects.json            项目列表
 //   projects/<P->/state.json 对话、资料、产出、计数器
 //   projects/<P->/events/<S->.jsonl  对话事件（audit-events/1），按 seq 追加
@@ -30,12 +31,29 @@ function writeJson(file, value, mode) {
 export const shortId = prefix => prefix + '-' + crypto.randomBytes(2).toString('hex')
 
 export class Store {
-  constructor(dataDir) {
+  /**
+   * @param {string} dataDir
+   * @param {object} [options]
+   * @param {{ load(): object | undefined, save(value: object): void }} [options.secretBox] 凭据的加密存取（桌面版）
+   */
+  constructor(dataDir, { secretBox } = {}) {
     this.dir = path.resolve(dataDir)
     fs.mkdirSync(this.dir, { recursive: true })
     this.settings = readJson(this.file('settings.json'), { baseUrl: '', model: '', models: [], mcp: [] })
     this.settings.mcp ??= []
-    this.secrets = readJson(this.file('secrets.json'), {})
+    this.secretBox = secretBox
+    if (secretBox) {
+      this.secrets = secretBox.load()
+      const plain = this.file('secrets.json')
+      if (!this.secrets) {
+        this.secrets = readJson(plain, {})
+        // 有旧的明文才迁移；还没填过的不建空的 secrets.enc
+        if (fs.existsSync(plain)) secretBox.save(this.secrets)
+      }
+      fs.rmSync(plain, { force: true })
+    } else {
+      this.secrets = readJson(this.file('secrets.json'), {})
+    }
     this.projects = readJson(this.file('projects.json'), [])
     this.states = new Map()
   }
@@ -49,7 +67,8 @@ export class Store {
   }
 
   saveSecrets() {
-    writeJson(this.file('secrets.json'), this.secrets, 0o600)
+    if (this.secretBox) this.secretBox.save(this.secrets)
+    else writeJson(this.file('secrets.json'), this.secrets, 0o600)
   }
 
   saveProjects() {

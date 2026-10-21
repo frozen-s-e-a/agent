@@ -1,0 +1,19 @@
+{
+  "name": "audit-agent-desktop",
+  "productName": "审计助手",
+  "version": "0.2.0-internal.1",
+  "private": true,
+  "type": "module",
+  "description": "审计助手桌面版：Electron 外壳 + 应用宿主 + Harness",
+  "main": "main.mjs",
+  "scripts": {
+    "start": "electron .",
+    "package": "node package.mjs",
+    "package:zip": "node package.mjs --zip",
+    "package:folder": "node package.mjs --zip --no-installer"
+  },
+  "devDependencies": {
+    "electron": "44.5.1",
+    "resedit": "3.0.2"
+  }
+}

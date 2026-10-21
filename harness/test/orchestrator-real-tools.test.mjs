@@ -17,7 +17,7 @@ import { createToolCaller } from '../plugins/orchestrator/tools.mjs'
 import { autoAnswer, stubCards, stubLlm } from './orchestrator-kit.mjs'
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
-const python = process.env.AUDIT_PYTHON || 'python3'
+const python = process.env.AUDIT_TEST_PYTHON || process.env.AUDIT_PYTHON || (process.platform === 'win32' ? 'python' : 'python3')
 const ready = spawnSync(python, ['-c', 'import duckdb, openpyxl'], { encoding: 'utf8' }).status === 0
 const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'audit-real-'))
 after(() => fs.rmSync(scratch, { recursive: true, force: true }))

@@ -263,7 +263,7 @@ export function SheetTab({ tab }: { tab: SheetTabState }) {
           </span>
         </div>
         {mode === "filled" && output && (
-          <Button size="small" icon={<ExportOutlined />} onClick={() => void store.host.request("output.open", { file: output })}>
+          <Button size="small" icon={<ExportOutlined />} onClick={() => store.host.request("output.open", { file: output }).catch((e: Error) => Modal.error({ title: "打不开文件", content: e.message }))}>
             用 Excel 打开
           </Button>
         )}
