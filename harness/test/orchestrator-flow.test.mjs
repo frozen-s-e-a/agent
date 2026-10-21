@@ -5,12 +5,12 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { describe, test } from 'node:test'
 import { fileURLToPath } from 'node:url'
-import { mergeSamples } from '../plugins/orchestrator/flow.mjs'
+import { impactText, mergeSamples, newTaskState } from '../plugins/orchestrator/flow.mjs'
 import { createModel, fitInput } from '../plugins/orchestrator/model.mjs'
 import { NODES } from '../plugins/orchestrator/prompts.mjs'
 import { validate } from '../plugins/orchestrator/schema.mjs'
 import { autoAnswer, makeKit } from './orchestrator-kit.mjs'
-import { R5, R6 } from './scenarios/receivables.mjs'
+import { FILES, R5, R6 } from './scenarios/receivables.mjs'
 
 const REPLAY = fileURLToPath(new URL('../../docs/实现设计/样例/事件回放-底稿填写.json', import.meta.url))
 const types = (events, type) => events.filter(e => e.type === type)
@@ -135,6 +135,17 @@ describe('检查点与续跑', () => {
 })
 
 describe('失败矩阵', () => {
+  test('只有底稿没有资料：不空跑定口径，任务挂起并说明', async () => {
+    const kit = makeKit()
+    autoAnswer(kit.cards)
+    const runner = kit.create({ files: [FILES.workpaper] })
+    await runner.start()
+    assert.equal(runner.state.status, 'blocked')
+    assert.equal(runner.state.blocked.where, 'data')
+    assert.match(runner.state.blocked.why, /没有可以取数的资料/)
+    assert.equal(kit.modelCalls.filter(c => c.node === 'basis').length, 0)
+  })
+
   test('区域语义校验不通过：带具体错误重新识别', async () => {
     const kit = makeKit({ options: { semanticsFailures: 1 } })
     autoAnswer(kit.cards)
@@ -326,6 +337,31 @@ describe('小件', () => {
     assert.equal(merged.uncertain[0].suggest, 0)
     assert.equal(merged.columns[0].confidence, 'low')
     assert.deepEqual(mergeSamples([base, base, base]).uncertain, [])
+  })
+
+  test('对话前文作为推断的锚点放在用户原话前面', () => {
+    const s = newTaskState({ task: 'T-1', sessionId: 's', text: '需要', context: '把科目余额表的科目编码、名称、期末余额写进新 Excel', files: ['F-1'] })
+    assert.deepEqual(s.anchors.map(a => [a.text, a.basis]), [['把科目余额表的科目编码、名称、期末余额写进新 Excel', 'inferred'], ['需要', 'user']])
+    assert.equal(newTaskState({ task: 'T-2', sessionId: 's', text: '填底稿' }).anchors.length, 1)
+  })
+
+  test('口径卡影响金额取名称列和金额列，跳过序号', () => {
+    const data = { columns: [{ name: '序号' }, { name: '账龄' }, { name: '金额' }, { name: 'sort_key' }], head: [[1, '1年以内', '1200000.00', 1], [2, '1-2年', '435000.00', 2]] }
+    assert.equal(impactText(data, '金额'), '1年以内 1,200,000.00；1-2年 435,000.00')
+    assert.equal(impactText(data), '1年以内 1,200,000.00；1-2年 435,000.00')
+  })
+
+  test('多次采样只是措辞不同时不算不一致', () => {
+    const col = (measure, period, unit, direction) => ({ region: R5, type: 'fixed_table', purpose: 'x', manual: [], uncertain: [], columns: [{ col: 'B', measure, period, unit, direction, basis: 'template', confidence: 'high' }] })
+    const a = col('期末余额－账面余额（按账龄段划分）', '2025-12-31', '元', '借方（资产正数列示）')
+    const b = col('应收账款期末账面余额，按账龄档位归集', '2025年末', '元', 'debit')
+    const c = col('账面余额', '2025-12-31（2025年度期末）', null, '借')
+    assert.deepEqual(mergeSamples([a, b, c]).uncertain, [])
+    const d = col('期初余额', '2025-01-01', '元', '借方')
+    const merged = mergeSamples([a, b, d])
+    assert.equal(merged.uncertain.length, 1)
+    assert.equal(merged.uncertain[0].options.length, 2)
+    assert.match(merged.uncertain[0].why, /期间/)
   })
 
   test('结构校验拦下真实模型常见的写法：人工格写成说明、资料类型写成节点名', () => {
