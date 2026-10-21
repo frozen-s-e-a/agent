@@ -308,6 +308,9 @@ describe('任务中补充与重跑', () => {
     assert.ok(runner.state.anchors.some(a => a.text === '账龄改从发票日期起算' && a.basis === 'user'))
     const last = kit.modelCalls.filter(c => c.node === 'basis').at(-1)
     assert.equal(last.input.region.id, R5)
+    // 重跑后另存的新成果里，没重跑的区域也要写上
+    const compiles = kit.toolCalls.filter(c => c.tool === 'fill_compile')
+    assert.deepEqual(compiles.at(-1).args.bindings.map(b => b.region).sort(), [R5, R6].sort())
     assert.throws(() => runner.rerun({ regions: ['W-999#R1'] }), /unknown region/)
   })
 

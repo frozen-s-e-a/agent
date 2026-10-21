@@ -922,7 +922,9 @@ export class TaskRunner {
 
   async fill() {
     const s = this.state
-    const regions = Object.values(s.regions).filter(r => r.state === 'checked' && r.basis)
+    // 已写入的区域也带上：每次写入都是从原底稿另存一份新文件，只重跑一个区域时，
+    // 只写这个区域会得到一份别的区域全空的成果（实测重跑前五名后账龄区变成空白）
+    const regions = Object.values(s.regions).filter(r => ['checked', 'written'].includes(r.state) && r.basis && r.result)
     const deliverable = s.deliverables.find(d => d.kind === 'workpaper')
     if (!regions.length) {
       if (deliverable && deliverable.status === 'in_progress') deliverable.status = 'failed'
