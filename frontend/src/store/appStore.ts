@@ -349,6 +349,14 @@ export class AppStore {
   }
   fileNames = new Map<string, string>();
 
+  /** 模型写的文字里常直接用资料编号（F-15b066d2364e），界面上换成文件名；不认识的编号原样保留 */
+  withFileNames(text: string): string {
+    return text.replace(/\bF-[0-9a-f]{12}\b/g, (id) => {
+      const name = this.fileName(id);
+      return name && name !== id ? `「${name}」` : id;
+    });
+  }
+
   /** 卡片或回复里引用的编号：在工作区打开并定位（切换规则第 2 条） */
   openRef(ref: string, ctx: { task?: string; session?: string } = {}) {
     const [id, row] = ref.split("#");

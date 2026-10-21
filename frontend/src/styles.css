@@ -941,6 +941,15 @@ button {
   overflow: auto;
   border-radius: 14px;
 }
+/* 不让卡片被压扁：flex 子项默认会收缩到容器高度，卡片自己 overflow: hidden，超出的选项和提交按钮就被裁掉、也滚不动 */
+.pending-stack > * {
+  flex-shrink: 0;
+}
+/* 内容在卡片里滚，标题和提交按钮一直看得见 */
+.pending-stack .card-body {
+  max-height: 44vh;
+  overflow: auto;
+}
 .pending-stack .card {
   box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(15, 23, 42, 0.06);
 }

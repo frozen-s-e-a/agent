@@ -49,12 +49,14 @@ function numbersIn(text) {
 }
 
 /** 新任务的初始状态。files 为 F- 编号或 { file, name }。 */
-export function newTaskState({ task, sessionId, text, files = [], message }) {
+export function newTaskState({ task, sessionId, text, context, files = [], message }) {
+  // 用户这一轮只答了“需要”之类时，对话模型从前文整理出的要求也作为锚点（标为推断，不当成用户原话）
+  const prior = typeof context === 'string' && context.trim() ? [{ text: context.trim(), basis: 'inferred', source: 'conversation' }] : []
   return {
     task, sessionId, text, message: message ?? null, createdAt: new Date().toISOString(),
     files: files.map(f => typeof f === 'string' ? { file: f } : { file: f.file, ...(f.name ? { name: f.name } : {}) }),
     status: 'running', stage: null, stageIndex: -1, deliverables: [],
-    anchors: [{ text, basis: 'user', ...(message ? { message } : {}) }],
+    anchors: [...prior, { text, basis: 'user', ...(message ? { message } : {}) }],
     regions: {}, tables: [], steps: {}, checks: [], openCards: [], outputs: [], notes: [],
   }
 }
@@ -148,9 +150,10 @@ export class TaskRunner {
 
   ask(node, region, input, check) {
     const spec = NODES[node]
+    const fixed = region && spec.schema?.properties?.region ? { region } : undefined
     return this.model.call({
       task: this.state.task, node, region, role: spec.role, prompt: spec.prompt, version: spec.version, schema: spec.schema,
-      input: { anchors: this.state.anchors, ...input }, check, signal: this.signal,
+      input: { anchors: this.state.anchors, ...input }, check, fixed, signal: this.signal,
     })
   }
 
@@ -333,6 +336,17 @@ export class TaskRunner {
       for (const file of dataFiles) await this.importFile(file)
     }
 
+    // 有要算的区域却没有一张资料表：定口径只会反复引用不存在的表（实测空跑 12 次），先停下来说清楚
+    const needsData = Object.values(s.regions).some(r => !['none', 'text'].includes(r.type) && !['skipped', 'manual'].includes(r.state))
+    if (workpaperFile && needsData && !s.tables.some(t => t.table)) {
+      const name = s.files.find(f => f.file === workpaperFile)?.name ?? workpaperFile
+      throw new TaskBlocked({
+        where: 'data',
+        why: dataFiles.length ? '资料都没能导入，没有可以取数的表' : `只有「${name}」一个文件，它被当成了要填的底稿，没有可以取数的资料`,
+        suggest: dataFiles.length ? '检查资料文件能否打开后继续任务' : '把科目余额表、序时账等资料一起加进来，重新说一遍要求',
+      })
+    }
+
     // ---------- 底稿理解确认（首次使用的模板） ----------
     if (workpaperFile && !template?.known) await this.confirmUnderstanding()
 
@@ -456,7 +470,12 @@ export class TaskRunner {
         return env.data
       })
       this.check('data_quality', quality?.passed !== false, { ...(quality?.passed === false ? { detail: quality } : {}) })
-      s.tables.push({ table: imported.table, candidate: key, file, sheet: candidate.sheet, kind: fields.kind, rows: imported.rows, fields: fields.fields, invalid: imported.invalid ?? [] })
+      // 字段的取值范围给定口径用：实测模型不知道序时账里有以前年度的分录，先按本期过滤，账龄全落进“1年以内”
+      const stats = await this.step(`data_profile:${imported.table}`, { stage: 'data' }, async () => {
+        const env = await this.tool('data_profile', { table: imported.table }).catch(() => null)
+        return Object.fromEntries((env?.data?.columns ?? []).map(c => [c.name, { min: c.min, max: c.max, distinct: c.distinct, ...(c.type === 'text' ? { samples: c.samples } : {}) }]))
+      })
+      s.tables.push({ table: imported.table, candidate: key, file, sheet: candidate.sheet, kind: fields.kind, rows: imported.rows, fields: fields.fields, invalid: imported.invalid ?? [], stats })
       this.save()
     }
   }
@@ -587,7 +606,7 @@ export class TaskRunner {
   tablesForModel() {
     return this.state.tables.map(t => ({
       table: t.table, sqlName: t.table.replace('-', ''), kind: t.kind, sheet: t.sheet, rows: t.rows,
-      fields: t.fields.map(f => ({ name: f.name, meaning: f.meaning, type: f.type })),
+      fields: t.fields.map(f => ({ name: f.name, meaning: f.meaning, type: f.type, ...fieldRange(t.stats?.[f.name], f.type) })),
       ...(t.invalid?.length ? { invalid: t.invalid.map(i => ({ col: i.col, count: i.count })) } : {}),
     }))
   }
@@ -718,6 +737,13 @@ export class TaskRunner {
       }
       const controlPassed = control.passed === true || (control.explainedBy?.length > 0 && control.passed !== false)
       this.check('control', controlPassed, { region: id, attempt, detail: controlDetail })
+      if (!controlPassed && control.left === undefined && control.message) {
+        // 没算出两边的数：控制数写法有误（列名、科目），带原因重新定口径
+        failure = `控制数核对出错：${control.message}`
+        last = { kind: 'basis', failure }
+        if (n < max) this.retry('basis', id, attempt + 1, failure)
+        continue
+      }
       if (!controlPassed) {
         failure = `控制数差额 ${control.diff}：${basis.control.label} ${formatAmount(control.left)}，${controlDetail.right.label} ${formatAmount(control.right)}`
         last = { kind: 'control', failure, detail: controlDetail, result: result.result }
@@ -745,7 +771,8 @@ export class TaskRunner {
   }
 
   checkFailure(error, where) {
-    if (error instanceof ToolError && /^CHECK_/.test(error.code)) return { passed: false, message: error.message, ...(error.envelope.error.detail ?? {}) }
+    // 核对的列名、科目、表都出自模型的口径；写错了（REF_/ARG_）按核对不通过重做本区域，不让整个任务失败
+    if (error instanceof ToolError && /^(CHECK_|REF_|ARG_)/.test(error.code)) return { passed: false, message: error.message, ...(error.envelope.error.detail ?? {}) }
     return this.blockOn(error, where)
   }
 
@@ -768,9 +795,9 @@ export class TaskRunner {
       for (const q of open) {
         out[q.id] = []
         for (const [index, option] of q.options.entries()) {
-          const steps = option.steps ?? (index === q.suggest ? basis.steps : undefined)
+          const steps = option.steps?.length ? option.steps : (index === q.suggest ? basis.steps : undefined)
           if (!steps) { out[q.id].push(null); continue }
-          try { out[q.id].push(impactText(await this.runSteps(steps, id))) } catch (error) {
+          try { out[q.id].push(impactText(await this.runSteps(steps, id), basis.control?.column)) } catch (error) {
             if (error instanceof QueryError) out[q.id].push(null)
             else throw error
           }
@@ -781,7 +808,8 @@ export class TaskRunner {
     const key = `card:basis:${id}:${attempt}`
     const pending = !this.state.steps[key]
     const opened = await this.card(key, { stage: 'basis', region: id }, {
-      kind: 'basis_confirmation', title: `${r.semantics?.purpose ?? id}的口径需要确认`, blocking: false,
+      // 用途是一整段说明，放标题里太长；标题用区域的标题或范围
+      kind: 'basis_confirmation', title: `${id.split('#').at(-1)} ${r.parsed?.caption ?? r.range ?? ''} 的口径需要确认`.replace(/\s+/g, ' '), blocking: false,
       body: { questions: open.map(q => ({ id: q.id, region: id, text: q.text, options: q.options.map((o, i) => ({ label: o.label, impact: impacts[q.id]?.[i] ?? null })), suggest: q.suggest, allowText: true })) },
       actions: ['confirm'], defaultAction: 'confirm',
     }, { wait: false })
@@ -795,7 +823,7 @@ export class TaskRunner {
       const option = typeof picked === 'number' ? q.options[picked] : undefined
       r.confirmed.push({ item: q.item ?? q.text, value: option ? option.label : String(picked), basis: 'user' })
       if (option && picked !== q.suggest) {
-        if (option.steps) next = { ...next, steps: option.steps }
+        if (option.steps?.length) next = { ...next, steps: option.steps }
         else replan = true
       }
       if (!option) replan = true
@@ -835,7 +863,7 @@ export class TaskRunner {
     // 判断不了：作为口径问题问用户，附两种算法和结果
     const answer = await this.card(`card:compare:${id}:${attempt}`, { stage: 'compute', region: id }, {
       kind: 'basis_confirmation', title: `${r.semantics?.purpose ?? id}两种算法结果不同`, blocking: false,
-      body: { questions: [{ id: 'q1', region: id, text: `两种算法结果不同，采用哪一种？${verdict.reason}`, options: [{ label: basis.summary ?? '第一种算法', impact: impactText(result) }, { label: second.plan.note ?? '第二种算法', impact: impactText(second.data) }], suggest: 0, allowText: true }] },
+      body: { questions: [{ id: 'q1', region: id, text: `两种算法结果不同，采用哪一种？${verdict.reason}`, options: [{ label: basis.summary ?? '第一种算法', impact: impactText(result, basis.control?.column) }, { label: second.plan.note ?? '第二种算法', impact: impactText(second.data, basis.control?.column) }], suggest: 0, allowText: true }] },
       actions: ['confirm'], defaultAction: 'confirm',
     })
     const picked = answer.edits?.q1 ?? 0
@@ -894,7 +922,9 @@ export class TaskRunner {
 
   async fill() {
     const s = this.state
-    const regions = Object.values(s.regions).filter(r => r.state === 'checked' && r.basis)
+    // 已写入的区域也带上：每次写入都是从原底稿另存一份新文件，只重跑一个区域时，
+    // 只写这个区域会得到一份别的区域全空的成果（实测重跑前五名后账龄区变成空白）
+    const regions = Object.values(s.regions).filter(r => ['checked', 'written'].includes(r.state) && r.basis && r.result)
     const deliverable = s.deliverables.find(d => d.kind === 'workpaper')
     if (!regions.length) {
       if (deliverable && deliverable.status === 'in_progress') deliverable.status = 'failed'
@@ -902,11 +932,11 @@ export class TaskRunner {
       return
     }
     this.setStage('fill')
-    const manual = [...new Set(Object.values(s.regions).flatMap(r => [...(r.semantics?.manual ?? []), ...(r.basis?.manual ?? [])]))]
+    const manual = [...new Set(Object.values(s.regions).flatMap(manualCells))]
     const bindings = regions.map(r => ({
       region: r.region,
-      cells: (r.basis.bindings ?? []).map(b => ({ cell: b.cell, from: { result: r.result, row: b.row, column: b.column }, scale: r.basis.unit?.scale ?? '1' })),
-      manual: [...new Set([...(r.semantics?.manual ?? []), ...(r.basis?.manual ?? [])])],
+      cells: (r.basis.bindings ?? []).map(b => ({ cell: b.cell, from: { result: r.result, row: b.row, column: b.column }, scale: scaleOf(r.basis.unit?.scale) })),
+      manual: [...new Set(manualCells(r))],
     }))
     let plan = await this.step('fill_compile', { stage: 'fill' }, () => this.node('fill_compile', 'code', {}, async () => {
       const env = await this.tool('fill_compile', { task: s.task, workpaper: s.workpaper.workpaper, bindings, overwrite: [] }).catch(e => this.blockOn(e, 'fill_compile'))
@@ -1160,7 +1190,7 @@ export class TaskRunner {
         region: r.region, range: r.range, type: r.type, purpose: r.semantics?.purpose ?? null,
         // 宿主画 sheet.view 的区域覆盖层要用（《接口约定》overlay.regions）：表头行、合计行行号、人工填写的格
         headerRows: r.parsed?.headerRows ?? [], totals: (r.parsed?.totals ?? []).map(t => t.row),
-        manual: [...new Set([...(r.semantics?.manual ?? []), ...(r.basis?.manual ?? [])])],
+        manual: [...new Set(manualCells(r))],
         state: r.state, attempt: r.attempt, refs: r.refs ?? [], card: r.card ?? null, ...(r.failure ? { reason: r.failure } : {}),
       })),
       openCards: [...s.openCards],
@@ -1173,32 +1203,115 @@ export class TaskRunner {
   static regionDone(state) { return DONE_REGION.has(state) }
 }
 
-/** 关键语义多次采样（5.3）：期间、指标、单位、方向不一致的列，列为待确认。 */
+/**
+ * 关键语义多次采样（5.3）：期间、指标、单位、方向不一致的列，列为待确认。
+ * 比的是归一后的关键字段，不比说明原文：真实模型每次措辞都不同（“2025-12-31” 和 “2025年末”），
+ * 逐字比较会把每一列都标成不一致。一边没写的字段不算冲突。
+ */
 export function mergeSamples(samples) {
   const [first, ...rest] = samples
   if (!rest.length) return first
   const merged = structuredClone(first)
   for (const column of merged.columns) {
-    const variants = samples.map(s => s.columns.find(c => c.col === column.col)).map(c => c ? `${c.measure}｜${c.period ?? ''}｜${c.unit ?? ''}｜${c.direction ?? ''}` : '（未识别）')
-    const distinct = [...new Set(variants)]
-    if (distinct.length > 1) {
-      const counts = distinct.map(v => variants.filter(x => x === v).length)
-      merged.uncertain.push({ item: `${column.col} 列`, options: distinct, suggest: counts.indexOf(Math.max(...counts)), why: `${samples.length} 次独立识别结果不一致` })
+    const found = samples.map(s => s.columns.find(c => c.col === column.col))
+    const keys = found.map(c => c ? semanticKey(c) : null)
+    // 按是否冲突分组：能和组里第一个对上的归一组
+    const groups = []
+    keys.forEach((key, i) => {
+      const group = groups.find(g => compatible(keys[g[0]], key))
+      if (group) group.push(i)
+      else groups.push([i])
+    })
+    if (groups.length > 1) {
+      const options = groups.map(g => { const c = found[g[0]]; return c ? `${c.measure}｜${c.period ?? ''}｜${c.unit ?? ''}｜${c.direction ?? ''}` : '（未识别）' })
+      const sizes = groups.map(g => g.length)
+      merged.uncertain.push({ item: `${column.col} 列`, options, suggest: sizes.indexOf(Math.max(...sizes)), why: `${samples.length} 次独立识别的${conflictFields(groups.map(g => keys[g[0]]))}不一致` })
       column.confidence = 'low'
     }
   }
   return merged
 }
 
-function impactText(data) {
+const FIELD_NAMES = { period: '期间', when: '期间', unit: '单位', direction: '方向' }
+
+/** 一列语义的关键字段，归一成可比较的值；空字符串表示没写（不参与比较）。 */
+export function semanticKey(c) {
+  const text = `${c.period ?? ''}`
+  const years = [...new Set(text.match(/(?:19|20)\d{2}/g) ?? [])].sort().join(',')
+  const marker = /12-31|12月31|年末|期末|末/.test(text) ? 'end' : /01-01|1月1日|年初|期初|初/.test(text) ? 'begin' : /年度|全年|本期|至|~|—/.test(text) ? 'span' : ''
+  // 指标里的期间词：期初余额和期末余额是两回事
+  const m = `${c.measure ?? ''}`
+  const when = /期初|年初/.test(m) ? 'begin' : /期末|年末|余额/.test(m) ? 'end' : /发生|本期|借方|贷方/.test(m) ? 'span' : ''
+  const u = `${c.unit ?? ''}`
+  const unit = /%|比例|百分/.test(u) ? '%' : /亿/.test(u) ? '亿元' : /百万/.test(u) ? '百万元' : /万/.test(u) ? '万元' : /千/.test(u) ? '千元' : /元/.test(u) ? '元' : ''
+  const d = `${c.direction ?? ''}`.trim()
+  const direction = d === 'debit' || /^借/.test(d) ? 'debit' : d === 'credit' || /^贷/.test(d) ? 'credit' : ''
+  return { period: years ? `${years}:${marker}` : marker, when, unit, direction }
+}
+
+function compatible(a, b) {
+  if (!a || !b) return a === b
+  return Object.keys(a).every(k => !a[k] || !b[k] || a[k] === b[k])
+}
+
+function conflictFields(keys) {
+  const names = new Set()
+  for (const a of keys) for (const b of keys) {
+    if (!a || !b) { names.add('识别结果'); continue }
+    for (const k of Object.keys(a)) if (a[k] && b[k] && a[k] !== b[k]) names.add(FIELD_NAMES[k])
+  }
+  return [...names].join('、') || '结果'
+}
+
+/**
+ * 口径卡上每个选项的“影响金额”：前几行的“名称 金额”。
+ * 名称取第一个文字列，金额取控制数列（没有就取最后一个数值列）；排序号、序号这类列跳过。
+ * 原来固定取第一列和最后一列，结果显示成“1 1,835,000”“1年以内 1”。
+ */
+export function impactText(data, amountColumn) {
   if (!data) return null
   const head = data.head ?? []
+  const names = (data.columns ?? []).map(c => (typeof c === 'string' ? c : c.name))
   if (head.length && head[0].length >= 2) {
-    const text = head.slice(0, 3).map(row => `${row[0]} ${formatAmount(row[row.length - 1])}`).join('；')
+    const isSeq = (name) => /^(序号|排名|名次|排序|rank|seq|no|row_?num|rn|sort.*|ord.*)$/i.test(String(name ?? ''))
+    const numeric = (i) => head.every(row => row[i] === null || row[i] === '' || !Number.isNaN(Number(row[i])))
+    const cols = head[0].map((_, i) => i)
+    // 每行都一样的列（比如每行都带上的应收总额）不能说明选项的影响，跳过
+    const varies = (i) => head.length < 2 || new Set(head.map(row => String(row[i]))).size > 1
+    const amountAt = names.indexOf(amountColumn)
+    const valueAt = cols.includes(amountAt) && varies(amountAt) ? amountAt
+      : cols.filter(i => numeric(i) && !isSeq(names[i]) && varies(i)).at(-1) ?? cols.filter(i => numeric(i) && !isSeq(names[i])).at(-1) ?? head[0].length - 1
+    const labelAt = cols.find(i => i !== valueAt && !numeric(i) && !isSeq(names[i])) ?? cols.find(i => i !== valueAt && !isSeq(names[i])) ?? 0
+    const text = head.slice(0, 3).map(row => `${row[labelAt]} ${formatAmount(row[valueAt])}`).join('；')
     return head.length > 3 ? `${text}；…` : text
   }
   const sums = Object.entries(data.sums ?? {})
   return sums.length ? sums.map(([k, v]) => `${k}合计 ${formatAmount(v)}`).join('；') : null
+}
+
+/**
+ * 区域的人工填写格（语义和口径两处合并），只留坐标。
+ * 模型偶尔在坐标后面接说明（“应收账款!C7:C10 —— 坏账准备本期不填”），整条传给写入工具会让写入失败。
+ */
+function manualCells(r) {
+  return [...(r.semantics?.manual ?? []), ...(r.basis?.manual ?? [])]
+    .map(item => String(item).match(/^\s*((?:[^!\s]+!)?\$?[A-Z]{1,3}\$?\d+(?::\$?[A-Z]{1,3}\$?\d+)?)/)?.[1])
+    .filter(Boolean)
+}
+
+/** 给模型看的字段取值：日期和数值给范围，文字给几个样例 */
+function fieldRange(stat, type) {
+  if (!stat) return {}
+  if (type === 'date' || type === 'integer' || type === 'decimal') return stat.min != null ? { range: [stat.min, stat.max] } : {}
+  return stat.samples?.length ? { samples: stat.samples } : {}
+}
+
+/** 写入时的换算倍数：模型常把 unit.scale 写成单位名（元、万元），写入工具要的是数。 */
+function scaleOf(scale) {
+  const text = String(scale ?? '1').trim()
+  if (/^\d+(\.\d+)?$/.test(text) && Number(text) > 0) return text
+  const units = { 元: '1', 千元: '1000', 万元: '10000', 百万元: '1000000', 亿元: '100000000' }
+  return units[text.replace(/^人民币/, '')] ?? '1'
 }
 
 function describeRight(right) {

@@ -38,9 +38,17 @@ export function startHarness(launchOptions, { nodeOptions } = {}) {
       }
     }
   })
-  const exited = new Promise(resolve => child.on('exit', (code, signal) => resolve({ code, signal })))
+  const exited = new Promise(resolve => child.on('exit', (code, signal) => {
+    // 进程退了还没回的请求直接失败，带上 stderr，免得测试一直等
+    for (const [id, request] of pending) {
+      pending.delete(id)
+      request.reject(new Error(`harness exited (code ${code}, signal ${signal})\n--- stderr ---\n${stderr.slice(-4000)}`))
+    }
+    resolve({ code, signal })
+  }))
 
   function request(method, params) {
+    if (child.exitCode !== null || child.signalCode !== null) return Promise.reject(new Error(`harness already exited\n--- stderr ---\n${stderr.slice(-4000)}`))
     const id = ++nextId
     child.stdin.write(JSON.stringify({ jsonrpc: '2.0', id, method, params }) + '\n')
     return new Promise((resolve, reject) => pending.set(id, { resolve, reject }))

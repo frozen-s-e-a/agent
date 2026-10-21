@@ -13,7 +13,10 @@ from .store import sql_name
 
 BASIS_TAGS = {'user', 'confirmed', 'template', 'profile', 'data', 'inferred'}
 ELEMENTS = [('sources', '数据来源'), ('period', '期间'), ('scope', '范围'), ('amount', '金额与方向'), ('grouping', '分组与对应'), ('unit', '单位与精度'), ('control', '控制数')]
-FIELDS = {'closing': 'closing', 'opening': 'opening', 'debit': 'debit', 'credit': 'credit', '期末': 'closing', '期初': 'opening'}
+# 控制数的 field：模型常直接写中文列名（期末余额、本期借方），一并认
+FIELDS = {'closing': 'closing', 'opening': 'opening', 'debit': 'debit', 'credit': 'credit', '期末': 'closing', '期初': 'opening',
+          '期末余额': 'closing', '期初余额': 'opening', '年末余额': 'closing', '年初余额': 'opening',
+          '借方': 'debit', '贷方': 'credit', '本期借方': 'debit', '本期贷方': 'credit', '借方发生额': 'debit', '贷方发生额': 'credit'}
 
 
 def record(ctx, check, region, result, passed, detail):
@@ -166,6 +169,10 @@ def balance_value(ctx, right):
         rows = ctx.store.db.execute('SELECT %s, %s FROM %s WHERE TRIM(CAST(%s AS VARCHAR)) = ?' % (quoted(code), quoted(column), sql_name(table), quoted(code)), [account]).fetchall()
         if not rows and right.get('children'):
             rows = ctx.store.db.execute('SELECT %s, %s FROM %s WHERE CAST(%s AS VARCHAR) LIKE ?' % (quoted(code), quoted(column), sql_name(table), quoted(code)), [account + '_%']).fetchall()
+        # 模型常把科目写成名称（应收账款）而不是编码（1122）；编码对不上时按科目名称找
+        name = meaning_column(obj, 'account_name')
+        if not rows and name:
+            rows = ctx.store.db.execute('SELECT %s, %s FROM %s WHERE TRIM(CAST(%s AS VARCHAR)) = ?' % (quoted(code), quoted(column), sql_name(table), quoted(name)), [account]).fetchall()
     if not rows:
         raise ToolError('REF_NOT_FOUND', '资料表 %s 里没有科目 %s' % (table, account))
     if len(rows) > 1 and not right.get('children'):
