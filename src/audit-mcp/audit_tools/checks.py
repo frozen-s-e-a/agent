@@ -13,7 +13,10 @@ from .store import sql_name
 
 BASIS_TAGS = {'user', 'confirmed', 'template', 'profile', 'data', 'inferred'}
 ELEMENTS = [('sources', '数据来源'), ('period', '期间'), ('scope', '范围'), ('amount', '金额与方向'), ('grouping', '分组与对应'), ('unit', '单位与精度'), ('control', '控制数')]
-FIELDS = {'closing': 'closing', 'opening': 'opening', 'debit': 'debit', 'credit': 'credit', '期末': 'closing', '期初': 'opening'}
+# 控制数的 field：模型常直接写中文列名（期末余额、本期借方），一并认
+FIELDS = {'closing': 'closing', 'opening': 'opening', 'debit': 'debit', 'credit': 'credit', '期末': 'closing', '期初': 'opening',
+          '期末余额': 'closing', '期初余额': 'opening', '年末余额': 'closing', '年初余额': 'opening',
+          '借方': 'debit', '贷方': 'credit', '本期借方': 'debit', '本期贷方': 'credit', '借方发生额': 'debit', '贷方发生额': 'credit'}
 
 
 def record(ctx, check, region, result, passed, detail):

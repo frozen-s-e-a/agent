@@ -1274,7 +1274,11 @@ export function impactText(data, amountColumn) {
     const isSeq = (name) => /^(序号|排名|名次|排序|rank|seq|no|row_?num|rn|sort.*|ord.*)$/i.test(String(name ?? ''))
     const numeric = (i) => head.every(row => row[i] === null || row[i] === '' || !Number.isNaN(Number(row[i])))
     const cols = head[0].map((_, i) => i)
-    const valueAt = cols.includes(names.indexOf(amountColumn)) ? names.indexOf(amountColumn) : cols.filter(i => numeric(i) && !isSeq(names[i])).at(-1) ?? head[0].length - 1
+    // 每行都一样的列（比如每行都带上的应收总额）不能说明选项的影响，跳过
+    const varies = (i) => head.length < 2 || new Set(head.map(row => String(row[i]))).size > 1
+    const amountAt = names.indexOf(amountColumn)
+    const valueAt = cols.includes(amountAt) && varies(amountAt) ? amountAt
+      : cols.filter(i => numeric(i) && !isSeq(names[i]) && varies(i)).at(-1) ?? cols.filter(i => numeric(i) && !isSeq(names[i])).at(-1) ?? head[0].length - 1
     const labelAt = cols.find(i => i !== valueAt && !numeric(i) && !isSeq(names[i])) ?? cols.find(i => i !== valueAt && !isSeq(names[i])) ?? 0
     const text = head.slice(0, 3).map(row => `${row[labelAt]} ${formatAmount(row[valueAt])}`).join('；')
     return head.length > 3 ? `${text}；…` : text
