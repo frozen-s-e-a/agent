@@ -1,12 +1,12 @@
-// 工作区里的一张表：工具栏（视图、显示公式、编辑栏）+ 表格 + 底部工作表标签 + 点格查来源 + 在表上改区域。
-import { ExportOutlined, FunctionOutlined } from "@ant-design/icons";
-import { Button, Dropdown, Modal, Select, Switch, Tooltip, type MenuProps } from "antd";
+// 工作区里的一张表：一行工具栏（视图和图例、编辑栏、显示公式）+ 表格 + 底部工作表标签 + 点格查来源 + 在表上改区域。
+import { DownOutlined, ExportOutlined, FunctionOutlined } from "@ant-design/icons";
+import { Button, Dropdown, Modal, Select, Tooltip, type MenuProps } from "antd";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { cellAddr, inBox, rangeAddr, type RangeBox } from "../../lib/address";
 import { regionShort } from "../../lib/format";
-import { alpha, REGION_STATE_LABEL } from "../../lib/tokens";
+import { alpha, REGION_STATE_LABEL, type Tokens } from "../../lib/tokens";
 import type { RegionState } from "../../protocol/types";
-import { draftChanges, type WorkspaceTab } from "../../store/appStore";
+import type { WorkspaceTab } from "../../store/appStore";
 import { useApp, useAppStore, useSession, useTokens } from "../../store/context";
 import { COMPOSER_RESERVE } from "../chat/Composer";
 import type { SheetMode } from "./paint";
@@ -242,33 +242,37 @@ export function SheetTab({ tab }: { tab: SheetTabState }) {
   return (
     <div className="ws-main">
       <div className="sheet-toolbar">
-        <Select
-          size="small"
-          value={mode}
-          style={{ width: 104 }}
-          onChange={(m) => store.updateTab(tab.id, { mode: m })}
-          options={(["raw", "regions", "plan", "filled"] as SheetMode[]).map((m) => ({ value: m, label: MODE_LABEL[m], disabled: !modes.includes(m) }))}
-        />
-        <Tooltip title="整张表显示公式本身">
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "var(--text-muted)" }}>
-            <FunctionOutlined /> 显示公式
-            <Switch size="small" checked={tab.showFormulas} onChange={(v) => store.updateTab(tab.id, { showFormulas: v })} />
-          </span>
-        </Tooltip>
+        <ViewMenu mode={mode} modes={modes} onChange={(m) => store.updateTab(tab.id, { mode: m })} />
         <div className="formula-bar">
-          <span className="addr">{sel ? cellAddr(sel.col, sel.row) : ""}</span>
-          <span className="fx">fx</span>
-          <span className={`content ${selCell?.formula ? "formula" : ""}`}>
-            {selCell?.formula ?? (selCell?.stale ? "待重算" : (selCell?.text ?? selCell?.value ?? ""))}
-          </span>
+          {sel ? (
+            <>
+              <span className="addr">{cellAddr(sel.col, sel.row)}</span>
+              <span className="fx">fx</span>
+              <span className={`content ${selCell?.formula ? "formula" : ""}`}>
+                {selCell?.formula ?? (selCell?.stale ? "待重算" : (selCell?.text ?? selCell?.value ?? ""))}
+              </span>
+            </>
+          ) : (
+            <span className="content faint">选中格子看内容和公式</span>
+          )}
         </div>
+        <Tooltip title="整张表显示公式本身">
+          <Button
+            size="small"
+            type={tab.showFormulas ? "primary" : "text"}
+            ghost={tab.showFormulas}
+            icon={<FunctionOutlined />}
+            onClick={() => store.updateTab(tab.id, { showFormulas: !tab.showFormulas })}
+          >
+            显示公式
+          </Button>
+        </Tooltip>
         {mode === "filled" && output && (
-          <Button size="small" icon={<ExportOutlined />} onClick={() => void store.host.request("output.open", { file: output })}>
+          <Button size="small" type="text" icon={<ExportOutlined />} onClick={() => void store.host.request("output.open", { file: output })}>
             用 Excel 打开
           </Button>
         )}
       </div>
-      <Legend mode={mode} editing={editing} changes={draftChanges(draft)} />
       <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
         {error && <div style={{ padding: 20, color: "var(--danger)" }}>{error}</div>}
         {model && (
@@ -343,53 +347,61 @@ function parseBox(a: string): RangeBox {
   return { c0: Math.min(A.col, B.col), r0: Math.min(A.row, B.row), c1: Math.max(A.col, B.col), r1: Math.max(A.row, B.row) };
 }
 
-function Legend({ mode, editing, changes }: { mode: SheetMode; editing: boolean; changes: number }) {
+const ALL_MODES: SheetMode[] = ["raw", "regions", "plan", "filled"];
+
+/** 视图切换；图例放在下拉里，不单占一行 */
+function ViewMenu({ mode, modes, onChange }: { mode: SheetMode; modes: SheetMode[]; onChange: (m: SheetMode) => void }) {
   const t = useTokens();
-  if (mode === "raw")
-    return (
-      <div className="sheet-toolbar" style={{ padding: "4px 10px", borderBottom: "1px solid var(--border)" }}>
-        <div className="legend" style={{ marginLeft: 0 }}>
-          <span><i style={{ background: t.formulaTint, border: `1px solid ${t.border}` }} />公式格（不用填）</span>
-          <span style={{ color: t.staleText, fontStyle: "italic" }}>待重算：文件里没有计算结果</span>
-        </div>
-      </div>
-    );
-  const items: [string, string][] =
-    mode === "regions"
-      ? [
-          [t.regionState.awaiting_confirmation, "等你确认"],
-          [t.regionState.computing, "计算中"],
-          [t.regionState.checked, "核对通过"],
-          [t.regionState.written, "已写入"],
-        ]
-      : mode === "plan"
-        ? [
-            [t.planFill, "拟写值"],
-            [t.overwriteFill, "覆盖原有内容"],
-            [alpha(t.planText, 0.05), "公式重算值（斜体）"],
-          ]
-        : [[t.writtenFill, "已写入，点格查来源"]];
   return (
-    <div className="sheet-toolbar" style={{ padding: "4px 10px" }}>
-      {editing && (
-        <span style={{ fontSize: 12, color: "var(--warning)" }}>
-          理解卡等你确认：拖区域边框调整范围，右键标人工格或新增区域{changes ? `，已修改 ${changes} 处` : ""}
-        </span>
+    <Dropdown
+      trigger={["click"]}
+      menu={{
+        selectable: true,
+        selectedKeys: [mode],
+        items: ALL_MODES.map((m) => ({ key: m, label: MODE_LABEL[m], disabled: !modes.includes(m) })),
+        onClick: ({ key }) => onChange(key as SheetMode),
+      }}
+      popupRender={(menu) => (
+        <div className="view-pop">
+          {menu}
+          <div className="view-legend">
+            <div className="faint" style={{ marginBottom: 4 }}>「{MODE_LABEL[mode]}」图例</div>
+            {legendItems(mode, t).map(([style, label]) => (
+              <div key={label}>
+                <i style={style} />
+                {label}
+              </div>
+            ))}
+          </div>
+        </div>
       )}
-      <div className="legend">
-        {items.map(([c, l]) => (
-          <span key={l}>
-            <i style={{ background: c, border: `1px solid ${t.border}` }} />
-            {l}
-          </span>
-        ))}
-        <span>
-          <i style={{ background: t.manualFill, backgroundImage: `repeating-linear-gradient(135deg, ${t.manualHatch} 0 1px, transparent 1px 5px)` }} />
-          人工填写
-        </span>
-      </div>
-    </div>
+    >
+      <Button size="small" type="text" className="view-btn">
+        {MODE_LABEL[mode]}
+        <DownOutlined style={{ fontSize: 10 }} />
+      </Button>
+    </Dropdown>
   );
+}
+
+function legendItems(mode: SheetMode, t: Tokens): [React.CSSProperties, string][] {
+  const fill = (c: string): React.CSSProperties => ({ background: c, border: `1px solid ${t.borderStrong}` });
+  const line = (c: string): React.CSSProperties => ({ background: "transparent", border: `2px solid ${c}` });
+  const manual: [React.CSSProperties, string] = [
+    { background: t.manualFill, backgroundImage: `repeating-linear-gradient(135deg, ${t.manualHatch} 0 1px, transparent 1px 5px)` },
+    "人工填写",
+  ];
+  if (mode === "raw") return [[fill(t.formulaTint), "公式格（不用填）"], [{ ...fill(t.panelAlt), borderColor: t.staleText }, "待重算：文件里没有计算结果"]];
+  if (mode === "regions")
+    return [
+      [line(t.regionState.awaiting_confirmation), "等你确认"],
+      [line(t.regionState.computing), "进行中（标签上转圈）"],
+      [line(t.regionState.written), "已核对、已写入"],
+      [line(t.regionState.failed), "失败"],
+      manual,
+    ];
+  if (mode === "plan") return [[fill(t.planFill), "拟写值"], [fill(t.overwriteFill), "覆盖原有内容"], [fill(alpha(t.planText, 0.05)), "公式重算值（斜体）"], manual];
+  return [[fill(t.writtenFill), "已写入，点格查来源"], manual];
 }
 
 function RegionDecor(p: {

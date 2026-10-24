@@ -51,10 +51,13 @@ export function App() {
   return (
     <ConfigProvider
       locale={zhCN}
+      button={{ autoInsertSpace: false }}
       theme={{
         algorithm: ui.theme === "dark" ? antTheme.darkAlgorithm : antTheme.defaultAlgorithm,
         token: {
           colorPrimary: t.accent,
+          colorPrimaryHover: t.accentHover,
+          colorPrimaryActive: t.accentActive,
           colorError: t.danger,
           colorWarning: t.warning,
           colorSuccess: t.success,

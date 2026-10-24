@@ -122,8 +122,15 @@ button {
 }
 .side-actions {
   display: flex;
-  gap: 6px;
-  padding: 0 10px 6px;
+  gap: 2px;
+  padding: 0 10px 4px;
+  min-height: 32px;
+  align-items: center;
+}
+.side-actions .new-btn {
+  flex: 1;
+  justify-content: flex-start;
+  color: var(--text-muted);
 }
 .side-list {
   flex: 1;
@@ -150,14 +157,23 @@ button {
 }
 .side-item.active {
   background: var(--panel);
-  box-shadow: inset 0 0 0 1px var(--border);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
 }
-.side-item .title {
+.side-item .title-wrap {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.side-item .title,
+.side-item .activity {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.side-item .activity {
+  font-size: 11px;
+  color: var(--text-faint);
 }
 .side-item .meta {
   font-size: 11px;
@@ -195,8 +211,7 @@ button {
   border: 1px solid var(--border-strong);
 }
 .side-foot {
-  border-top: 1px solid var(--border);
-  padding: 8px 10px 10px;
+  padding: 6px 10px 10px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -304,10 +319,42 @@ button {
 .sheet-toolbar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 10px;
+  gap: 6px;
+  padding: 5px 8px;
   border-bottom: 1px solid var(--border);
   flex: none;
+}
+.view-btn {
+  font-weight: 600;
+  gap: 4px;
+}
+.view-pop {
+  background: var(--panel);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14), 0 1px 3px rgba(15, 23, 42, 0.08);
+  min-width: 200px;
+}
+.view-pop .ant-dropdown-menu {
+  box-shadow: none !important;
+  background: transparent !important;
+}
+.view-legend {
+  border-top: 1px solid var(--border);
+  padding: 8px 12px 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.view-legend i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 8px;
+  vertical-align: -2px;
+  box-sizing: border-box;
 }
 .formula-bar {
   display: flex;
@@ -315,23 +362,19 @@ button {
   gap: 0;
   flex: 1;
   min-width: 0;
-  height: 28px;
-  border: 1px solid var(--border);
-  border-radius: 7px;
+  height: 26px;
+  border-radius: 6px;
   overflow: hidden;
-  background: var(--panel);
+  background: var(--panel-alt);
+  padding-left: 10px;
 }
 .formula-bar .addr {
-  width: 84px;
   flex: none;
-  text-align: center;
   font-family: "JetBrains Mono", Consolas, monospace;
   font-size: 12px;
+  font-weight: 600;
   color: var(--text-muted);
-  border-right: 1px solid var(--border);
-  height: 100%;
-  display: grid;
-  place-items: center;
+  min-width: 36px;
 }
 .formula-bar .fx {
   color: var(--text-faint);
@@ -364,11 +407,11 @@ button {
 .sheet-tab {
   border: 0;
   background: transparent;
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: 0 0 6px 6px;
   cursor: pointer;
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 12.5px;
 }
 .sheet-tab.active {
   background: var(--panel);
@@ -521,15 +564,15 @@ button {
   padding: 2px 8px;
   border-radius: 6px;
   font-size: 12px;
-  background: var(--panel);
-  border: 1px solid var(--border);
+  background: var(--bg);
+  border: 1px solid transparent;
   color: var(--text-muted);
   cursor: pointer;
   white-space: nowrap;
 }
 .chip:hover {
-  border-color: var(--accent);
   color: var(--accent);
+  background: var(--accent-soft);
 }
 .chip.ref {
   font-family: "JetBrains Mono", Consolas, monospace;
@@ -615,19 +658,11 @@ button {
   background: var(--panel);
   overflow: hidden;
 }
-.card.open {
-  border-color: color-mix(in srgb, var(--warning) 55%, var(--border));
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--warning) 10%, transparent);
-}
-.card.blocking.open {
-  border-color: color-mix(in srgb, var(--warning) 70%, var(--border));
-}
 .card-head {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
+  padding: 12px 14px 4px;
 }
 .card-kind {
   font-size: 11px;
@@ -654,9 +689,7 @@ button {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
-  border-top: 1px solid var(--border);
-  background: var(--panel-alt);
+  padding: 4px 14px 12px;
 }
 .card-foot .spacer {
   flex: 1;
@@ -678,15 +711,14 @@ button {
   color: var(--text-muted);
 }
 .region-row {
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
-.region-row:hover {
-  border-color: var(--border-strong);
+.region-row-head:hover b {
+  color: var(--accent);
 }
 .region-row-head {
   display: flex;
@@ -765,6 +797,50 @@ button {
 .option .suggest {
   font-size: 11px;
   color: var(--accent);
+}
+.summary-line {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.summary-line b {
+  color: var(--text);
+  font-size: 15px;
+  margin: 0 1px;
+}
+.summary-line .danger-text b {
+  color: var(--danger);
+}
+.summary-line .sep::before {
+  content: "·";
+  margin: 0 8px;
+  color: var(--text-faint);
+}
+.list {
+  display: flex;
+  flex-direction: column;
+}
+.list-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+.num-rows {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 6px 12px;
+  align-items: center;
+  font-size: 12.5px;
+}
+.num-rows .k {
+  color: var(--text-muted);
+}
+.num-rows .v {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }
 .big-number {
   font-size: 20px;
@@ -894,6 +970,22 @@ button {
   border-radius: 7px;
 }
 
+/* ---------- 表格右侧的卡片栏 ---------- */
+.review-pane {
+  flex: none;
+  border-left: 1px solid var(--border);
+  background: var(--panel-alt);
+  overflow: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.review-pane .card {
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
 /* ---------- 底部输入区 ---------- */
 .composer-zone {
   position: absolute;
@@ -906,6 +998,10 @@ button {
   flex-direction: column;
   gap: 8px;
   pointer-events: none;
+}
+/* 表格底部有工作表标签，输入区让开 */
+.composer-zone.over-sheet {
+  bottom: 44px;
 }
 .composer-zone > * {
   pointer-events: auto;
@@ -955,11 +1051,15 @@ button {
   box-shadow: none !important;
   background: transparent !important;
 }
-.composer-foot {
+.composer-head {
   display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0 8px 6px 8px;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 8px 10px 0;
+}
+.chip.to-task {
+  color: var(--accent);
+  background: var(--accent-soft);
 }
 .history-sheet {
   position: absolute;

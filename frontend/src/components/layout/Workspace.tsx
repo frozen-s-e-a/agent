@@ -1,10 +1,12 @@
 // 工作区：顶部文件标签 + 表格；对话按显示方式悬浮、停靠左右或铺满。没有打开文件时对话占满。
+// 要对照表格看的卡（理解、口径、写入确认、差异）放在表格右侧的窄栏，不盖在表上。
 import { CloseOutlined, FileExcelOutlined, InboxOutlined, TableOutlined } from "@ant-design/icons";
 import { Button, Empty, Spin } from "antd";
 import { useRef, useState } from "react";
 import { useApp, useAppStore, useSession } from "../../store/context";
 import { ChatThread } from "../chat/ChatThread";
-import { ComposerZone } from "../chat/Composer";
+import { ComposerZone, REVIEW_PANE_WIDTH, usePendingCards } from "../chat/Composer";
+import { CardView } from "../cards/Cards";
 import { SheetTab } from "../sheet/SheetTab";
 import { TableTab } from "../sheet/TableTab";
 
@@ -15,6 +17,7 @@ export function Workspace() {
   const active = ui.tabs.find((t) => t.id === ui.activeTab) ?? null;
   const sheetOpen = !!active && !ui.collapsed;
   const docked = sheetOpen && (ui.chatMode === "left" || ui.chatMode === "right");
+  const { side } = usePendingCards(sheetOpen);
   if (ui.switching)
     return (
       <section className="workspace" style={{ display: "grid", placeItems: "center" }}>
@@ -55,6 +58,13 @@ export function Workspace() {
           active!.kind === "sheet" ? <SheetTab key={active!.id} tab={active!} /> : <TableTab key={active!.id} tab={active!} />
         ) : (
           <FullChat />
+        )}
+        {side.length > 0 && (
+          <aside className="review-pane" style={{ width: REVIEW_PANE_WIDTH }}>
+            {side.map((c) => (
+              <CardView key={c.card.card} c={c} />
+            ))}
+          </aside>
         )}
         {docked && ui.chatMode === "right" && <DockedChat side="right" />}
         {sheetOpen && ui.chatMode === "float" && ui.historyOpen && s && (

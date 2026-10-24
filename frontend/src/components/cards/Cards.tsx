@@ -149,7 +149,7 @@ function UnderstandingCard({ c, body }: { c: CardState; body: UnderstandingBody 
               </span>
             ) : (
               <span className="faint" style={{ fontSize: 12 }}>
-                可以直接在表上拖动区域边框、右键标人工格
+                可在表上拖边框改范围、右键标人工格
               </span>
             )}
             <span className="spacer" />
@@ -164,7 +164,7 @@ function UnderstandingCard({ c, body }: { c: CardState; body: UnderstandingBody 
       }
     >
       <div className="muted" style={{ fontSize: 12.5 }}>
-        识别出 {body.regions.length} 个要填的区域{uncertainCount ? `，${uncertainCount} 处不确定需要你选` : "，没有不确定的地方"}。点区域名在表上查看。
+        识别出 {body.regions.length} 个要填的区域{uncertainCount ? `，${uncertainCount} 处不确定需要你选` : "，没有不确定的地方"}。列的依据都是底稿标示，例外的单独标出。
       </div>
       {body.regions.map((r) => {
         const rd = draft?.regions[r.region];
@@ -186,7 +186,6 @@ function UnderstandingCard({ c, body }: { c: CardState; body: UnderstandingBody 
                   <th>含义</th>
                   <th>期间</th>
                   <th>单位</th>
-                  <th>依据</th>
                 </tr>
               </thead>
               <tbody>
@@ -196,15 +195,18 @@ function UnderstandingCard({ c, body }: { c: CardState; body: UnderstandingBody 
                     <td>
                       {col.measure}
                       {col.direction && <span className="faint">（{col.direction === "debit" ? "借方" : "贷方"}）</span>}
-                    </td>
-                    <td className="mono">{col.period ?? "—"}</td>
-                    <td>{col.unit ?? "—"}</td>
-                    <td>
-                      <Tooltip title={col.basisRef ? `来自 ${col.basisRef}` : undefined}>
-                        <span className={`basis-tag ${col.basis === "inferred" ? "inferred" : ""}`}>{BASIS_LABEL[col.basis ?? ""] ?? col.basis}</span>
-                      </Tooltip>
+                      {/* 依据大多是"底稿标示"，只标出例外 */}
+                      {col.basis && col.basis !== "template" && (
+                        <Tooltip title={col.basisRef ? `来自 ${col.basisRef}` : undefined}>
+                          <span className={`basis-tag ${col.basis === "inferred" ? "inferred" : ""}`} style={{ marginLeft: 6 }}>
+                            {BASIS_LABEL[col.basis] ?? col.basis}
+                          </span>
+                        </Tooltip>
+                      )}
                       {col.confidence === "low" && <WarningFilled style={{ color: "var(--warning)", marginLeft: 4 }} />}
                     </td>
+                    <td className="mono">{col.period ?? <span className="faint">—</span>}</td>
+                    <td>{col.unit ?? <span className="faint">—</span>}</td>
                   </tr>
                 ))}
               </tbody>
@@ -385,21 +387,16 @@ function DiscrepancyCard({ c, body }: { c: CardState; body: DiscrepancyBody }) {
         <RegionLink region={body.region} task={c.task} />
         <span className="muted">{body.check === "control" ? "控制数核对不一致，自动重做后仍未解决" : "双路复算不一致"}</span>
       </div>
-      <div className="stat-row">
-        <div className="stat">
-          <div className="label">{body.left.label}</div>
-          <div className="big-number" style={{ fontSize: 16 }}>{amt(body.left.value)}</div>
-          {body.left.ref && <RefChip id={body.left.ref} task={c.task} />}
-        </div>
-        <div className="stat">
-          <div className="label">{body.right.label}</div>
-          <div className="big-number" style={{ fontSize: 16 }}>{amt(body.right.value)}</div>
-          {body.right.ref && <RefChip id={body.right.ref} task={c.task} />}
-        </div>
-        <div className="stat" style={{ borderColor: "color-mix(in srgb, var(--danger) 40%, var(--border))" }}>
-          <div className="label">差额{body.threshold ? `（阈值 ${amt(body.threshold)}）` : ""}</div>
-          <div className="big-number" style={{ fontSize: 16, color: "var(--danger)" }}>{amt(body.diff)}</div>
-        </div>
+      <div className="num-rows">
+        <span className="k">{body.left.label}</span>
+        <span className="v">{amt(body.left.value)}</span>
+        <span>{body.left.ref && <RefChip id={body.left.ref} task={c.task} />}</span>
+        <span className="k">{body.right.label}</span>
+        <span className="v">{amt(body.right.value)}</span>
+        <span>{body.right.ref && <RefChip id={body.right.ref} task={c.task} />}</span>
+        <span className="k">差额{body.threshold ? `（阈值 ${amt(body.threshold)}）` : ""}</span>
+        <span className="v danger-text">{amt(body.diff)}</span>
+        <span />
       </div>
       {!!body.candidates?.length && (
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -437,10 +434,11 @@ function WriteCard({ c, body }: { c: CardState; body: WriteConfirmationBody }) {
         <>
           <Button
             size="small"
-            icon={<TableOutlined />}
+            type="link"
+            style={{ paddingInline: 0 }}
             onClick={() => task?.workpaperFile && store.openSheet(task.workpaperFile, { mode: "plan", task: task.task })}
           >
-            在表上查看拟写值
+            在表上看拟写值
           </Button>
           <span className="spacer" />
           <Button size="small" loading={busy === "reject"} onClick={() => void answer("reject")}>
@@ -452,33 +450,29 @@ function WriteCard({ c, body }: { c: CardState; body: WriteConfirmationBody }) {
         </>
       }
     >
-      <div className="stat-row">
-        <div className="stat">
-          <div className="label">写入格数</div>
-          <div className="big-number">{total}</div>
-        </div>
-        <div className="stat" style={body.overwrites.length ? { borderColor: "color-mix(in srgb, var(--danger) 45%, var(--border))" } : undefined}>
-          <div className="label">覆盖原有内容</div>
-          <div className="big-number" style={body.overwrites.length ? { color: "var(--danger)" } : undefined}>
-            {body.overwrites.length}
-          </div>
-        </div>
-        <div className="stat">
-          <div className="label">留给人工</div>
-          <div className="big-number">{manualCells}</div>
-        </div>
+      <div className="summary-line">
+        写入 <b>{total}</b> 格<span className="sep" />
+        <span className={body.overwrites.length ? "danger-text" : undefined}>
+          覆盖原有内容 <b>{body.overwrites.length}</b> 格
+        </span>
+        <span className="sep" />
+        留给人工 <b>{manualCells}</b> 格
       </div>
-      {body.regions.map((r) => (
-        <div key={r.region} style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-          <RegionLink region={r.region} task={c.task} />
-          <span>{r.cells} 格</span>
-          <span className="muted">口径：{r.basis}</span>
-          <span className="faint">来源</span>
-          {r.sources.map((s) => (
-            <RefChip key={s} id={s} task={c.task} />
-          ))}
-        </div>
-      ))}
+      <div className="list">
+        {body.regions.map((r) => (
+          <div key={r.region} className="list-row">
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <RegionLink region={r.region} task={c.task} />
+              <span>{r.cells} 格</span>
+              <span style={{ flex: 1 }} />
+              {r.sources.map((s) => (
+                <RefChip key={s} id={s} task={c.task} />
+              ))}
+            </div>
+            <div className="muted" style={{ fontSize: 12 }}>口径：{r.basis}</div>
+          </div>
+        ))}
+      </div>
       <div className="kv">
         <span className="k">写到</span>
         <span className="mono">{body.output}</span>
@@ -513,23 +507,15 @@ function ResultCard({ c, body }: { c: CardState; body: ResultSummaryBody }) {
   const { answer } = useAnswer(c);
   return (
     <CardShell c={c}>
-      <div className="stat-row">
-        <div className="stat">
-          <div className="label">核对通过</div>
-          <div className="big-number" style={{ color: body.checks.failed ? undefined : "var(--success)" }}>
-            {body.checks.passed}
-            <span className="faint" style={{ fontSize: 12, fontWeight: 400 }}> / {body.checks.passed + body.checks.failed}</span>
-          </div>
-          {!!body.checks.retried && <div className="faint" style={{ fontSize: 11.5 }}>其中重做 {body.checks.retried} 次后通过</div>}
-        </div>
-        <div className="stat">
-          <div className="label">未通过</div>
-          <div className="big-number" style={{ color: body.checks.failed ? "var(--danger)" : undefined }}>{body.checks.failed}</div>
-        </div>
-        <div className="stat">
-          <div className="label">需人工填写</div>
-          <div className="big-number">{body.manual}</div>
-        </div>
+      <div className="summary-line">
+        核对通过 <b>{body.checks.passed}</b>/{body.checks.passed + body.checks.failed}
+        {!!body.checks.retried && <span className="faint">（重做 {body.checks.retried} 次后通过）</span>}
+        <span className="sep" />
+        <span className={body.checks.failed ? "danger-text" : undefined}>
+          未通过 <b>{body.checks.failed}</b>
+        </span>
+        <span className="sep" />
+        需人工填写 <b>{body.manual}</b> 格
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {body.outputs.map((o) => (

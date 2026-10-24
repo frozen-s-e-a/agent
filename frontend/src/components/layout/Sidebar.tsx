@@ -1,5 +1,6 @@
 // 左栏：项目切换器 → 对话 / 资料 / 成果三个标签 → 设置入口和连接状态。
 import {
+  CloseOutlined,
   DeleteOutlined,
   EditOutlined,
   EllipsisOutlined,
@@ -12,7 +13,8 @@ import {
 import { Button, Dropdown, Empty, Input, Modal, Tooltip } from "antd";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { OutputFile, ProjectFile, SessionSummary } from "../../protocol/types";
-import { relTime } from "../../lib/format";
+import { regionShort, relTime, since } from "../../lib/format";
+import { REGION_STATE_LABEL } from "../../lib/tokens";
 import { useApp, useAppStore } from "../../store/context";
 
 export function Sidebar() {
@@ -107,6 +109,7 @@ function SessionList({ onRename }: { onRename: (id: string, title: string) => vo
   const sessions = useApp((s) => s.ui.sessions);
   const current = useApp((s) => s.ui.session);
   const [q, setQ] = useState("");
+  const [searching, setSearching] = useState(false);
   const list = useMemo(() => sessions.filter((s) => !q || s.title.includes(q)), [sessions, q]);
   const today = new Date().toDateString();
   const groups = useMemo(() => {
@@ -121,12 +124,28 @@ function SessionList({ onRename }: { onRename: (id: string, title: string) => vo
   return (
     <>
       <div className="side-actions">
-        <Button block icon={<PlusOutlined />} onClick={() => void store.newSession()}>
-          新建对话
-        </Button>
-      </div>
-      <div style={{ padding: "0 10px 6px" }}>
-        <Input size="small" allowClear prefix={<SearchOutlined className="faint" />} placeholder="搜索对话" value={q} onChange={(e) => setQ(e.target.value)} variant="filled" />
+        {searching ? (
+          <Input
+            size="small"
+            autoFocus
+            prefix={<SearchOutlined className="faint" />}
+            suffix={<CloseOutlined className="faint" style={{ fontSize: 10 }} onClick={() => (setQ(""), setSearching(false))} />}
+            placeholder="搜索对话"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={(e) => e.key === "Escape" && (setQ(""), setSearching(false))}
+            variant="filled"
+          />
+        ) : (
+          <>
+            <Button className="new-btn" type="text" icon={<PlusOutlined />} onClick={() => void store.newSession()}>
+              新建对话
+            </Button>
+            <Tooltip title="搜索对话">
+              <Button type="text" icon={<SearchOutlined />} onClick={() => setSearching(true)} />
+            </Tooltip>
+          </>
+        )}
       </div>
       <div className="side-list">
         {groups.map((g) => (
@@ -139,7 +158,10 @@ function SessionList({ onRename }: { onRename: (id: string, title: string) => vo
                   <Tooltip title={st.label} placement="right">
                     <span className={`dot ${st.cls}`} />
                   </Tooltip>
-                  <span className="title">{s.title}</span>
+                  <div className="title-wrap">
+                    <span className="title">{s.title}</span>
+                    {current === s.session && <TaskActivity />}
+                  </div>
                   <span className="meta">{relTime(s.lastActive)}</span>
                   <Dropdown
                     trigger={["click"]}
@@ -275,6 +297,27 @@ function OutputList() {
   );
 }
 
+/** 当前对话里正在跑的底稿任务：哪个区域在做什么（原来在输入框里） */
+function TaskActivity() {
+  const task = useApp((x) => {
+    const ss = x.ui.session ? x.ev.sessions[x.ui.session] : undefined;
+    return ss ? Object.values(ss.tasks).find((t) => t.status === "running") : undefined;
+  });
+  const [, tick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => tick((n) => n + 1), 10000);
+    return () => clearInterval(id);
+  }, []);
+  if (!task) return null;
+  const active = Object.values(task.regions).find((r) => r.activity) ?? Object.values(task.regions).find((r) => r.state === "computing" || r.state === "checking");
+  return (
+    <span className="activity">
+      {active ? `${regionShort(active.region)} ${REGION_STATE_LABEL[active.state]}${active.activity ? `：${active.activity}` : ""}` : "底稿任务进行中"} · {since(task.createdAt)}
+    </span>
+  );
+}
+
+/** 底部只留一行：设置，加一个汇总连接状态的小圆点；断线时才单独提示 */
 function SideFoot() {
   const store = useAppStore();
   const mcp = useApp((s) => s.ev.mcp);
@@ -283,6 +326,7 @@ function SideFoot() {
   const list = Object.values(mcp);
   const online = list.filter((m) => m.state === "connected").length;
   const failed = list.filter((m) => m.state === "failed").length;
+  const level = !modelReady ? "failed" : failed ? "waiting" : "done";
   return (
     <div className="side-foot">
       {!connected && (
@@ -291,18 +335,23 @@ function SideFoot() {
           和后台的连接断开，正在重连…
         </div>
       )}
-      <div className="status-line" onClick={() => store.setUi({ page: "settings" })}>
-        <span className={`dot ${modelReady ? "done" : "failed"}`} />
-        模型{modelReady ? "已连接" : "未连接"}
-      </div>
-      <div className="status-line" onClick={() => store.setUi({ page: "settings" })}>
-        <span className={`dot ${failed ? "waiting" : online ? "done" : "idle"}`} />
-        MCP 服务 {online} 个在线{failed ? `，${failed} 个断开` : ""}
-      </div>
-      <div className="status-line" onClick={() => store.setUi({ page: "settings" })}>
-        <SettingOutlined />
-        设置
-      </div>
+      <Tooltip
+        placement="right"
+        title={
+          <div>
+            <div>模型{modelReady ? "已连接" : "未连接"}</div>
+            <div>MCP 服务 {online} 个在线{failed ? `，${failed} 个断开` : ""}</div>
+          </div>
+        }
+      >
+        <div className="status-line" onClick={() => store.setUi({ page: "settings" })}>
+          <SettingOutlined />
+          设置
+          <span style={{ flex: 1 }} />
+          {level !== "done" && <span className="faint" style={{ fontSize: 11 }}>{!modelReady ? "模型未连接" : `${failed} 个 MCP 断开`}</span>}
+          <span className={`dot ${level}`} />
+        </div>
+      </Tooltip>
     </div>
   );
 }

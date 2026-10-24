@@ -201,8 +201,9 @@ export class AppStore {
         this.setUi({ focusCard: c.card });
         if (document.hidden) notify(c.title);
         if (task?.workpaperFile) {
-          if (c.kind === "workpaper_understanding") this.patchSheetTab(task.workpaperFile, { mode: "regions" });
-          if (c.kind === "write_confirmation") this.patchSheetTab(task.workpaperFile, { mode: "plan" });
+          // 卡片在表格右侧，表格滚到卡片说的第一个区域
+          if (c.kind === "workpaper_understanding") this.patchSheetTab(task.workpaperFile, { mode: "regions", focusRegion: c.body.regions[0]?.region ?? null });
+          if (c.kind === "write_confirmation") this.patchSheetTab(task.workpaperFile, { mode: "plan", focusRegion: c.body.regions[0]?.region ?? null });
           if (c.kind === "basis_confirmation") {
             const region = c.body.questions[0]?.region;
             this.patchSheetTab(task.workpaperFile, { mode: "regions", focusRegion: region ?? null });
@@ -316,7 +317,8 @@ export class AppStore {
 
   patchSheetTab(file: string, patch: Partial<Extract<WorkspaceTab, { kind: "sheet" }>>) {
     const tab = this.findSheetTab(file);
-    if (tab) this.updateTab(tab.id, patch);
+    // 换了定位区域要带新的 nonce，表格才会滚过去
+    if (tab) this.updateTab(tab.id, patch.focusRegion ? { focusNonce: Date.now(), ...patch } : patch);
   }
 
   updateTab(id: string, patch: Partial<WorkspaceTab>) {

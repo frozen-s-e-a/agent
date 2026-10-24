@@ -16,6 +16,8 @@ export interface Tokens {
   textMuted: string;
   textFaint: string;
   accent: string;
+  accentHover: string; // 主按钮悬停、按下：比 accent 深，不要变浅（变浅像禁用）
+  accentActive: string;
   accentSoft: string;
   // 表格
   gridBg: string;
@@ -55,6 +57,8 @@ export const LIGHT: Tokens = {
   textMuted: "#5c6370",
   textFaint: "#9aa1ad",
   accent: "#3b6ff5",
+  accentHover: "#2c5ce0",
+  accentActive: "#234cc0",
   accentSoft: "#ebf0ff",
   gridBg: "#ffffff",
   gridLine: "#e8eaee",
@@ -71,17 +75,18 @@ export const LIGHT: Tokens = {
   staleText: "#c27a12",
   writtenFill: "#ecf7f0",
   selection: "#3b6ff5",
+  // 只有"等你确认"用强调色、失败用红；进行中和已完成都是灰，进行中靠转圈区分
   regionState: {
-    pending: "#9aa1ad",
-    understanding: "#7c5cf2",
+    pending: "#b4b9c2",
+    understanding: "#7a818d",
     awaiting_confirmation: "#e08a0b",
-    computing: "#3b6ff5",
-    checking: "#0e9bb0",
-    checked: "#2e9e62",
-    written: "#1f8a50",
-    manual: "#8a8f99",
+    computing: "#7a818d",
+    checking: "#7a818d",
+    checked: "#5c6370",
+    written: "#5c6370",
+    manual: "#9aa1ad",
     failed: "#d64545",
-    skipped: "#b4b9c2",
+    skipped: "#c9cdd4",
   },
   danger: "#d64545",
   warning: "#e08a0b",
@@ -100,6 +105,8 @@ export const DARK: Tokens = {
   textMuted: "#a3a9b5",
   textFaint: "#6c7280",
   accent: "#6b8fff",
+  accentHover: "#829fff",
+  accentActive: "#5a7ef0",
   accentSoft: "#26304d",
   gridBg: "#1b1d23",
   gridLine: "#2a2d35",
@@ -117,16 +124,16 @@ export const DARK: Tokens = {
   writtenFill: "#1c3127",
   selection: "#6b8fff",
   regionState: {
-    pending: "#6c7280",
-    understanding: "#9c84ff",
+    pending: "#555b66",
+    understanding: "#8a909c",
     awaiting_confirmation: "#f0a63a",
-    computing: "#6b8fff",
-    checking: "#38bdd0",
-    checked: "#4cc386",
-    written: "#3fb578",
-    manual: "#8a8f99",
+    computing: "#8a909c",
+    checking: "#8a909c",
+    checked: "#a3a9b5",
+    written: "#a3a9b5",
+    manual: "#6c7280",
     failed: "#ff6b6b",
-    skipped: "#555b66",
+    skipped: "#454a54",
   },
   danger: "#ff6b6b",
   warning: "#f0a63a",

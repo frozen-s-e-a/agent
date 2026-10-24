@@ -4,41 +4,57 @@ import {
   ExpandOutlined,
   HistoryOutlined,
   LayoutOutlined,
-  LoadingOutlined,
   PaperClipOutlined,
   PicCenterOutlined,
 } from "@ant-design/icons";
 import { Sender } from "@ant-design/x";
-import { Button, Checkbox, Popover, Segmented, Tooltip } from "antd";
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { Button, Checkbox, Dropdown, Popover, Tooltip } from "antd";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { ProjectFile } from "../../protocol/types";
-import { regionShort, since } from "../../lib/format";
-import { REGION_STATE_LABEL } from "../../lib/tokens";
 import type { ChatMode } from "../../store/appStore";
 import { useApp, useAppStore, useSession } from "../../store/context";
-import { isOpen, type ChatItem, type SessionState } from "../../store/reduce";
+import { isOpen, type CardState, type ChatItem, type SessionState } from "../../store/reduce";
 import { CardView } from "../cards/Cards";
 import { Item } from "./ChatThread";
 
 export const COMPOSER_RESERVE = 150; // 表格底部留白
+export const REVIEW_PANE_WIDTH = 400;
+
+/** 要对照表格看的卡：放到表格右侧的窄栏，不盖在表上 */
+const SHEET_CARD_KINDS = new Set(["workpaper_understanding", "basis_confirmation", "write_confirmation", "discrepancy"]);
+
+/** 等处理的卡分两拨：对照表格看的（右侧窄栏）和其余的（输入框上方） */
+export function usePendingCards(sheetOpen: boolean) {
+  const s = useSession();
+  const ui = useApp((x) => x.ui);
+  return useMemo(() => {
+    const all = s ? Object.values(s.cards).filter((c) => isOpen(c) && c.card.kind !== "result_summary") : [];
+    // 对话停在右侧时卡片本来就在表格旁边，不另开窄栏
+    const pane = sheetOpen && !ui.collapsed && (ui.chatMode === "float" || ui.chatMode === "left");
+    if (!pane) return { side: [] as CardState[], stack: all };
+    return { side: all.filter((c) => SHEET_CARD_KINDS.has(c.card.kind)), stack: all.filter((c) => !SHEET_CARD_KINDS.has(c.card.kind)) };
+  }, [s, sheetOpen, ui.collapsed, ui.chatMode]);
+}
 
 export function ComposerZone({ sheetOpen }: { sheetOpen: boolean }) {
   const s = useSession();
   const ui = useApp((x) => x.ui);
-  const pending = useMemo(() => (s ? Object.values(s.cards).filter((c) => isOpen(c) && c.card.kind !== "result_summary") : []), [s]);
+  const { side, stack } = usePendingCards(sheetOpen);
   const floating = sheetOpen && ui.chatMode === "float" && !ui.collapsed;
   const docked = sheetOpen && !ui.collapsed && (ui.chatMode === "left" || ui.chatMode === "right");
-  // 停靠时输入区跟着对话栏走，不盖在表上
+  // 停靠时输入区跟着对话栏走，不盖在表上；右侧开了卡片栏时，输入区在剩下的表格区域里居中
   const dockStyle: CSSProperties | undefined = docked
     ? { transform: "none", width: ui.dockWidth - 24, [ui.chatMode === "left" ? "left" : "right"]: 12, [ui.chatMode === "left" ? "right" : "left"]: "auto" }
-    : undefined;
+    : side.length
+      ? { left: `calc((100% - ${REVIEW_PANE_WIDTH}px) / 2)`, width: `min(680px, calc(100% - ${REVIEW_PANE_WIDTH + 32}px))` }
+      : undefined;
 
   return (
-    <div className="composer-zone" style={dockStyle}>
-      {floating && s && !ui.historyOpen && <FloatPanel s={s} hasPending={pending.length > 0} />}
-      {pending.length > 0 && (
+    <div className={`composer-zone ${floating ? "over-sheet" : ""}`} style={dockStyle}>
+      {floating && s && !ui.historyOpen && <FloatPanel s={s} hasPending={stack.length > 0} />}
+      {stack.length > 0 && (
         <div className="pending-stack">
-          {pending.map((c) => (
+          {stack.map((c) => (
             <CardView key={c.card.card} c={c} />
           ))}
         </div>
@@ -99,9 +115,11 @@ function Composer({ sheetOpen }: { sheetOpen: boolean }) {
   const s = useSession();
   const ui = useApp((x) => x.ui);
   const [text, setText] = useState("");
-  const [toTask, setToTask] = useState(false);
+  // 有底稿任务在跑时，默认补充给任务；点掉就是普通对话
+  const [detached, setDetached] = useState<string | null>(null);
   const streaming = !!s?.items.some((i) => i.kind === "assistant" && !i.done);
   const runningTask = s ? Object.values(s.tasks).find((t) => t.status === "running") : undefined;
+  const toTask = !!runningTask && detached !== runningTask.task;
   const disabled = !ui.session || ui.modelReady === false;
 
   const submit = async (v: string) => {
@@ -110,6 +128,21 @@ function Composer({ sheetOpen }: { sheetOpen: boolean }) {
     if (toTask && runningTask) await store.host.request("task.message", { task: runningTask.task, text: v });
     else await store.send(v);
   };
+
+  const header =
+    ui.attach.length || toTask ? (
+      <div className="composer-head">
+        {toTask && runningTask && (
+          <Tooltip title="这句话会补充给正在进行的底稿任务；点 × 改成普通对话">
+            <span className="chip to-task">
+              补充给{runningTask.workpaperFile ? `「${store.fileName(runningTask.workpaperFile).replace(/\.xlsx?$/, "")}」` : "底稿"}任务
+              <CloseOutlined style={{ fontSize: 10 }} onClick={() => setDetached(runningTask.task)} />
+            </span>
+          </Tooltip>
+        )}
+        <AttachRow />
+      </div>
+    ) : undefined;
 
   return (
     <div className="composer">
@@ -124,30 +157,17 @@ function Composer({ sheetOpen }: { sheetOpen: boolean }) {
         placeholder={
           ui.modelReady === false
             ? "模型还没连上，先到设置里连接模型"
-            : toTask && runningTask
+            : toTask
               ? "补充给正在进行的任务，例如：D 列用本年期初"
               : "说要做什么，或者问问题。Enter 发送，Shift+Enter 换行"
         }
-        header={ui.attach.length ? <AttachRow /> : undefined}
-        footer={() => (
-          <div className="composer-foot">
-            <AttachButton />
-            {runningTask && (
-              <Tooltip title="勾选后这句话直接补充给正在进行的底稿任务">
-                <Checkbox checked={toTask} onChange={(e) => setToTask(e.target.checked)} style={{ fontSize: 12, marginLeft: 4 }}>
-                  补充给任务
-                </Checkbox>
-              </Tooltip>
-            )}
-            {runningTask && <TaskPill taskId={runningTask.task} />}
-            <span style={{ flex: 1 }} />
-            {sheetOpen && ui.chatMode === "float" && (
-              <Tooltip title="查看完整对话">
-                <Button size="small" type="text" icon={<HistoryOutlined />} onClick={() => store.setUi({ historyOpen: !ui.historyOpen })} />
-              </Tooltip>
-            )}
-            {sheetOpen && <ModeSwitch mode={ui.chatMode} onChange={(m) => store.setUi({ chatMode: m, collapsed: m === "full", historyOpen: false })} />}
-          </div>
+        header={header}
+        prefix={<AttachButton />}
+        suffix={(ori) => (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+            {sheetOpen && <ChatLayoutMenu />}
+            {ori}
+          </span>
         )}
         styles={{ input: { fontSize: 13.5 } }}
       />
@@ -155,38 +175,38 @@ function Composer({ sheetOpen }: { sheetOpen: boolean }) {
   );
 }
 
-function ModeSwitch({ mode, onChange }: { mode: ChatMode; onChange: (m: ChatMode) => void }) {
-  return (
-    <Segmented
-      size="small"
-      value={mode}
-      onChange={(v) => onChange(v as ChatMode)}
-      options={[
-        { value: "float", icon: <Tooltip title="对话悬浮"><PicCenterOutlined /></Tooltip> },
-        { value: "left", icon: <Tooltip title="对话停在左侧"><LayoutOutlined /></Tooltip> },
-        { value: "right", icon: <Tooltip title="对话停在右侧"><LayoutOutlined style={{ transform: "scaleX(-1)" }} /></Tooltip> },
-        { value: "full", icon: <Tooltip title="对话铺满（底稿收起）"><ExpandOutlined /></Tooltip> },
-      ]}
-    />
-  );
-}
+const MODE_ITEMS: { key: ChatMode; label: string; icon: ReactNode }[] = [
+  { key: "float", label: "对话悬浮在表格上", icon: <PicCenterOutlined /> },
+  { key: "left", label: "对话停在左侧", icon: <LayoutOutlined /> },
+  { key: "right", label: "对话停在右侧", icon: <LayoutOutlined style={{ transform: "scaleX(-1)" }} /> },
+  { key: "full", label: "对话铺满（收起表格）", icon: <ExpandOutlined /> },
+];
 
-function TaskPill({ taskId }: { taskId: string }) {
+/** 对话的显示方式和完整历史收在一个按钮里 */
+function ChatLayoutMenu() {
   const store = useAppStore();
-  const task = useApp((x) => (x.ui.session ? x.ev.sessions[x.ui.session]?.tasks[taskId] : undefined));
-  const [, tick] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => tick((n) => n + 1), 10000);
-    return () => clearInterval(id);
-  }, []);
-  if (!task) return null;
-  const active = Object.values(task.regions).find((r) => r.activity) ?? Object.values(task.regions).find((r) => r.state === "computing" || r.state === "checking");
+  const ui = useApp((x) => x.ui);
   return (
-    <span className="chip" style={{ marginLeft: 4 }} onClick={() => store.setUi({ historyOpen: true })}>
-      <LoadingOutlined style={{ color: "var(--accent)" }} />
-      {active ? `${regionShort(active.region)} ${REGION_STATE_LABEL[active.state]}${active.activity ? `：${active.activity}` : ""}` : "底稿任务进行中"}
-      <span className="faint">· {since(task.createdAt)}</span>
-    </span>
+    <Dropdown
+      trigger={["click"]}
+      placement="topRight"
+      menu={{
+        selectable: true,
+        selectedKeys: [ui.chatMode],
+        items: [
+          ...(ui.chatMode === "float" ? [{ key: "history", icon: <HistoryOutlined />, label: "查看完整对话" }, { type: "divider" as const }] : []),
+          ...MODE_ITEMS,
+        ],
+        onClick: ({ key }) => {
+          if (key === "history") return store.setUi({ historyOpen: !ui.historyOpen });
+          store.setUi({ chatMode: key as ChatMode, collapsed: key === "full", historyOpen: false });
+        },
+      }}
+    >
+      <Tooltip title="对话显示方式">
+        <Button size="small" type="text" icon={MODE_ITEMS.find((m) => m.key === ui.chatMode)?.icon} />
+      </Tooltip>
+    </Dropdown>
   );
 }
 
@@ -194,14 +214,14 @@ function AttachRow() {
   const store = useAppStore();
   const attach = useApp((x) => x.ui.attach);
   return (
-    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "8px 10px 0" }}>
+    <>
       {attach.map((f) => (
         <span key={f} className="chip">
           {store.fileName(f)}
           <CloseOutlined style={{ fontSize: 10 }} onClick={() => store.setUi((u) => ({ attach: u.attach.filter((x) => x !== f) }))} />
         </span>
       ))}
-    </div>
+    </>
   );
 }
 
